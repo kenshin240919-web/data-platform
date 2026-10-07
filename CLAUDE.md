@@ -10,6 +10,7 @@
 - 유료 API(AI API 등) 호출이 필요하면 **사용 전에 비용을 알리고 승인**을 받습니다. 구독(Claude Pro, ChatGPT Plus, Genspark AI Plus) 범위 안에서 가능한 방법을 우선합니다.
 - API 키·ADMIN_TOKEN·DB 비밀번호는 `.env`에만 둡니다. 코드·커밋·채팅에 넣지 않습니다. (`.env`, `개방데이터/`, `runtime/`은 gitignore 대상)
 - 저장소는 공개(Public)여도 괜찮다고 사용자가 확인했습니다.
+- **애드센스: 설계보고서의 모든 하위 사이트(home·trip·traffic·academy·charge·weather)에 Google AdSense 광고를 넣습니다.** 게시자 ID `ca-pub-3087515825675332`(`packages/ui`의 `ADSENSE_CLIENT`/`AdSenseScript`), 각 사이트 `public/ads.txt` 필수. 기존 guidejung.com(WordPress)은 따로 운영 중이므로 연결·변경하지 않습니다.
 
 ## 구조
 - `apps/trip` — Next.js 정적 사이트(빌드 결과 `apps/trip/out`). Next.js 버전이 최신이라 API가 다를 수 있으니 `apps/trip/AGENTS.md` 참고.
@@ -36,6 +37,7 @@ GitHub `main`에 push → Cloudflare가 `wrangler.jsonc` 기준으로 `npm run b
 - 사이트 Cloudflare Workers 배포 완료, 검색 노출(SEO) 켜짐.
 - robots.txt 정적 제공, Daum 웹마스터 PIN·Naver 사이트 인증 메타태그 추가, RSS 피드 추가.
 - 사이트 제목 "여행정보", 탭 아이콘 자동차 아이콘.
+- Google AdSense 자동광고 코드·ads.txt 적용(광고 형식은 AdSense 관리 화면에서 켬).
 - 공개 데이터 200건(관광지 51·문화시설 49·레포츠 50·축제 50), 검수는 선택 사항(원천 자동 분류 표시).
 
 ## 다음 할 일 후보

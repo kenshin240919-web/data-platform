@@ -11,6 +11,11 @@ import type {Query} from './search';
 import {rssXml} from './rss';
 export {searchIndex} from './server';
 
+// Google AdSense publisher ID shared by every GuideJung subdomain site (not the separate guidejung.com WordPress account setup).
+export const ADSENSE_CLIENT='ca-pub-3087515825675332';
+// Auto ads loader; ad formats (anchor, side rail, vignette, in-page) are switched on in the AdSense dashboard, not here.
+export function AdSenseScript(){return <script async src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`} crossOrigin="anonymous"/>;}
+
 const services=[['trip','여행','축제 · 행사 · 가볼만한곳','✳'],['traffic','교통','도로 · CCTV · 교통상황','↗'],['academy','교육','학원 · 교습소 · 수강료','▤'],['charge','전기차','충전소 · 사용가능 충전기','ϟ'],['weather','날씨','지역 · 여행 · 생활날씨','◌']];
 function safeUrl(input:string){try{const u=new URL(input);return ['https:','http:'].includes(u.protocol)?u.href:'#';}catch{return '#';}}
 
@@ -56,7 +61,7 @@ export async function Page({service,segments=[]}:{service:Service;segments?:stri
   const route=segments[0];
   if(!route)return landing(service);
   if(['about','data-policy','privacy'].includes(route)&&segments.length===1){
-    const copy:Record<string,[string,string[]]>={about:['여행정보 서비스',['여행정보는 지역과 날짜를 중심으로 가볼만한곳과 축제·행사를 찾는 여행 서비스입니다.','한국관광공사 공식 관광정보를 바탕으로 여행지와 행사 정보를 제공합니다.']], 'data-policy':['데이터·출처 안내',['여행정보는 한국관광공사 TourAPI와 공식 공공데이터를 대상으로 수집·정규화·검증 후 제공합니다. 샘플 모드의 정보는 실제 방문정보로 사용하지 마세요.','무료·아이 동반·반려동물·실내 조건은 근거가 있는 경우에만 분류합니다. 근거는 검수자가 확인한 출처이거나, 한국관광공사 원천 정보의 요금·이용연령·반려동물 동반·시설 분류에서 자동으로 판단한 것(‘원천 자동 분류’로 표시)입니다. 무료는 기본 입장·이용요금 기준이며 주차·체험 비용은 별도일 수 있습니다. 확인되지 않은 값은 확인 필요로 표시합니다.','수집 시각과 내용 확인일을 구분합니다. 요금과 운영시간은 변경될 수 있으므로 방문 전 공식 제공기관의 안내를 확인하세요.','이미지는 사용권과 출처를 확인한 자료만 공개합니다.']],privacy:['개인정보 안내',['회원가입 없이 지역과 장소를 검색할 수 있습니다. 위치 기반 검색은 사용자가 버튼을 누르고 위치 권한을 허용한 경우에만 작동합니다.','위치는 주변 검색 요청을 처리하는 용도로 사용하며 이 버전에서는 별도 위치 이력이나 사용자 프로필을 저장하지 않습니다. 외부 지도 링크를 열면 해당 서비스의 정책이 적용됩니다.','이 버전에는 광고·Analytics 추적 코드를 넣지 않았습니다. 운영 서버의 접속 로그 보관기간과 담당자 정보는 실제 배포 전에 확정해 고지합니다.']]};const [title,paras]=copy[route];return <article className="section prose"><div className="eyebrow">GUIDEJUNG DATA</div><h1>{title}</h1>{paras.map(p=><p key={p}>{p}</p>)}</article>;
+    const copy:Record<string,[string,string[]]>={about:['여행정보 서비스',['여행정보는 지역과 날짜를 중심으로 가볼만한곳과 축제·행사를 찾는 여행 서비스입니다.','한국관광공사 공식 관광정보를 바탕으로 여행지와 행사 정보를 제공합니다.']], 'data-policy':['데이터·출처 안내',['여행정보는 한국관광공사 TourAPI와 공식 공공데이터를 대상으로 수집·정규화·검증 후 제공합니다. 샘플 모드의 정보는 실제 방문정보로 사용하지 마세요.','무료·아이 동반·반려동물·실내 조건은 근거가 있는 경우에만 분류합니다. 근거는 검수자가 확인한 출처이거나, 한국관광공사 원천 정보의 요금·이용연령·반려동물 동반·시설 분류에서 자동으로 판단한 것(‘원천 자동 분류’로 표시)입니다. 무료는 기본 입장·이용요금 기준이며 주차·체험 비용은 별도일 수 있습니다. 확인되지 않은 값은 확인 필요로 표시합니다.','수집 시각과 내용 확인일을 구분합니다. 요금과 운영시간은 변경될 수 있으므로 방문 전 공식 제공기관의 안내를 확인하세요.','이미지는 사용권과 출처를 확인한 자료만 공개합니다.']],privacy:['개인정보 안내',['회원가입 없이 지역과 장소를 검색할 수 있습니다. 위치 기반 검색은 사용자가 버튼을 누르고 위치 권한을 허용한 경우에만 작동합니다.','위치는 주변 검색 요청을 처리하는 용도로 사용하며 이 버전에서는 별도 위치 이력이나 사용자 프로필을 저장하지 않습니다. 외부 지도 링크를 열면 해당 서비스의 정책이 적용됩니다.','이 사이트는 Google AdSense 광고를 게재합니다. Google 등 제3자 광고 사업자는 쿠키를 사용해 이 사이트와 다른 사이트 방문 기록을 바탕으로 광고를 제공할 수 있습니다. 맞춤 광고는 Google 광고 설정(adssettings.google.com)에서 해제할 수 있습니다.','Analytics 추적 코드는 넣지 않았습니다. 운영 서버의 접속 로그 보관기간과 담당자 정보는 실제 배포 전에 확정해 고지합니다.']]};const [title,paras]=copy[route];return <article className="section prose"><div className="eyebrow">GUIDEJUNG DATA</div><h1>{title}</h1>{paras.map(p=><p key={p}>{p}</p>)}</article>;
   }
   if(service==='home'&&!['search','region'].includes(route))notFound();
   if(['place','festival'].includes(route)&&segments.length===2)return detail(service,segments);
