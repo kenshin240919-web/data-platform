@@ -44,6 +44,7 @@ GitHub `main`에 push → Cloudflare가 `wrangler.jsonc` 기준으로 `npm run b
 ## 다음 할 일 후보
 - 애드센스 보고서(광고 단위별)로 수동 광고 위치별 성과 확인 후 조정
 - 데이터 확대(`collect-trip.bat`, 하루 약 190건 한도)
+- **매일 자동 수집(컴퓨터에서 진행 예정)**: `collect-trip.bat`은 건수 입력·pause가 있어 무인 실행 불가. 무인 스크립트(수집 → export → trip.json 커밋·push) 작성 후 Windows 작업 스케줄러 등록. 실행 시각·하루 목표 건수는 사용자에게 확인.
 - Search Console: rss.xml 성공(197페이지). sitemap.xml은 10/7 제출 후 "가져올 수 없음" → 10/8 재제출, 구글이 읽을 때까지 대기 중. 며칠 뒤에도 실패면 원인 조사
 - 네이버 서치어드바이저 사이트맵 제출 확인
 - 공간 경계 실검증, 행사 회차 모델, 선택적 재검수(보고서 `reports/GuideJung-최종설계보고서-2026-10-07.md` 9장)
