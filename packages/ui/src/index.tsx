@@ -8,6 +8,7 @@ import {Nearby} from './controls';
 import {Cards,SearchForm,collections,detailPath,formatDate,labels} from './cards';
 import {ClientCards,EventNote,Listing} from './listing';
 import type {Query} from './search';
+import {rssXml} from './rss';
 export {searchIndex} from './server';
 
 const services=[['trip','여행','축제 · 행사 · 가볼만한곳','✳'],['traffic','교통','도로 · CCTV · 교통상황','↗'],['academy','교육','학원 · 교습소 · 수강료','▤'],['charge','전기차','충전소 · 사용가능 충전기','ϟ'],['weather','날씨','지역 · 여행 · 생활날씨','◌']];
@@ -67,7 +68,7 @@ export async function pageMetadata(service:Service,segments:string[]):Promise<Me
   const path='/'+segments.join('/');let title=service==='home'?'GuideJung | 지역 기반 생활정보':'여행정보 | 오늘과 이번 주말 가볼만한곳';let index=false;
   if(['place','festival'].includes(segments[0])&&segments[1]){try{const p=await api<Place>(`/v1/places/${encodeURIComponent(segments[1])}`);title=`${p.name} | 여행정보`;index=p.indexable&&!p.is_demo;}catch{}}
   else if(!segments.length)index=enabled();
-  return {title,description:'지역과 날짜로 가볼만한곳·축제·생활정보를 찾아보세요.',alternates:{canonical:origin(service)+path},robots:{index,follow:true},openGraph:{title,url:origin(service)+path,siteName:'여행정보',locale:'ko_KR',type:'website'}};
+  return {title,description:'지역과 날짜로 가볼만한곳·축제·생활정보를 찾아보세요.',alternates:{canonical:origin(service)+path,types:{'application/rss+xml':origin(service)+'/rss.xml'}},robots:{index,follow:true},openGraph:{title,url:origin(service)+path,siteName:'여행정보',locale:'ko_KR',type:'website'}};
 }
 export async function siteMap(service:Service){
   if(!enabled())return [];
@@ -76,6 +77,7 @@ export async function siteMap(service:Service){
   const rows=service==='trip'?(await api<{items:{path:string;lastmod:string}[]}>('/v1/sitemap')).items:[];
   return [{url:origin(service)+'/',lastModified:status.updated_at?new Date(status.updated_at):undefined},...rows.map(p=>({url:origin(service)+p.path,lastModified:new Date(p.lastmod)}))];
 }
+export const rss=(service:Service)=>rssXml(places(),origin(service));
 /** Every page the static build emits; other URLs get the 404 page. */
 export async function staticSegments(){
   const regions=(await api<{items:Region[]}>('/v1/regions')).items;
