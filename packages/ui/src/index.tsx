@@ -76,7 +76,13 @@ export async function siteMap(service:Service){
   const rows=service==='trip'?(await api<{items:{path:string;lastmod:string}[]}>('/v1/sitemap')).items:[];
   return [{url:origin(service)+'/',lastModified:status.updated_at?new Date(status.updated_at):undefined},...rows.map(p=>({url:origin(service)+p.path,lastModified:new Date(p.lastmod)}))];
 }
-export function robots(service:Service){return {rules:{userAgent:'*',allow:'/',disallow:['/api/','/admin']},sitemap:origin(service)+'/sitemap.xml'};}
+export function robotsTxt(service:Service){return `User-Agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin
+
+Sitemap: ${origin(service)}/sitemap.xml
+`;}
 /** Every page the static build emits; other URLs get the 404 page. */
 export async function staticSegments(){
   const regions=(await api<{items:Region[]}>('/v1/regions')).items;
