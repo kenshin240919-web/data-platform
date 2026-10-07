@@ -58,7 +58,8 @@ def view(profile, version, event=None):
     for key,fact in profile.evidence.items():
         try:valid=0<=(today()-date.fromisoformat(fact.get('verified_at',''))).days<=config.CONDITION_MAX_AGE_DAYS
         except (ValueError,TypeError):valid=False
-        if not valid:conditions[key]=None
+        # Source-derived facts are as current as the source data itself.
+        if not valid and not fact.get('auto'):conditions[key]=None
     data.update(description=profile.description,hours=profile.hours,fee=profile.fee,phone=profile.phone,conditions=conditions,evidence=profile.evidence,quality_score=profile.quality_score,indexable=profile.indexable and config.SEO_ENABLED and fresh,dataset_id=version.id,kind=profile.kind,updated_at=version.published_at.isoformat() if version.published_at else None)
     if event: data.update(start_date=event.start_date,end_date=event.end_date,event_status='ended' if event.status=='scheduled' and event.end_date<today().isoformat() else event.status)
     return data

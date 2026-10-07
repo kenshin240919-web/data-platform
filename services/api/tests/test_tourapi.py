@@ -30,7 +30,7 @@ class TourAPITest(unittest.TestCase):
     def test_type_specific_details(self):
         normalized=normalize({'contentid':'culture','title':'문화시설','usetimeculture':'09:00~18:00','restdateculture':'월요일','usefeeculture':'무료'})
         self.assertEqual(normalized['hours'],'09:00~18:00');self.assertEqual(normalized['closed_days'],'월요일')
-        self.assertEqual(normalized['fee'],'무료');self.assertIsNone(normalized['conditions']['free'])
+        self.assertEqual(normalized['fee'],'무료');self.assertTrue(normalized['conditions']['free']);self.assertTrue(normalized['evidence']['free']['auto'])
 
     def test_photo_rights_and_unsafe_urls(self):
         from app.validation import image_records,homepage
@@ -52,3 +52,13 @@ class TourAPITest(unittest.TestCase):
         finally:os.close(fd)
         # Closing (or the process dying) releases it; a leftover file never blocks.
         self.assertFalse(lock_busy())
+    def test_auto_conditions_from_source_fields(self):
+        row=normalize({'contentid':'1','title':'박물관','usefeeculture':'무료(일부 프로그램 유료)','lclsSystm3':'VE070100','agelimit':'전 연령','_pet':{'acmpyTypeCd':'일부구역 동반가능'},'modifiedtime':'20260901120000'})
+        self.assertEqual(row['conditions'],{'free':True,'kids':True,'pet':True,'indoor':True})
+        self.assertTrue(row['evidence']['free']['auto']);self.assertEqual(row['evidence']['free']['verified_at'],'2026-09-01')
+        # Paid, unclear, refused or outdoor/other stays unknown.
+        row=normalize({'contentid':'2','title':'공원','usefee':'공연별로 상이함','lclsSystm3':'VE120300','_pet':{'acmpyTypeCd':'동반불가'}})
+        self.assertEqual(set(row['conditions'].values()),{None})
+        # A reviewer's explicit decision wins over the source rule.
+        row=normalize({'contentid':'3','title':'박물관','usefee':'무료','condition_evidence':{'free':{'value':False,'source':'현장 확인','verified_at':'2026-10-01'}}})
+        self.assertIs(row['conditions']['free'],False);self.assertNotIn('auto',row['evidence']['free'])

@@ -9,7 +9,7 @@ from fastapi.testclient import TestClient
 from app.main import app
 from app.db import SessionLocal, engine
 from app.models import Profile
-from app.pipeline import active_dataset, ingest
+from app.pipeline import active_dataset, ingest, stable
 from app.validation import normalize
 from sqlalchemy import select
 
@@ -45,6 +45,30 @@ class PlatformTest(unittest.TestCase):
         rows=self.client.get('/v1/search?lat=37.5796&lon=126.977&radius_km=1').json()['items']
         self.assertTrue(rows)
         self.assertTrue(all(p['distance_km']<=1 for p in rows))
+    def test_growth_collection_skips_known_and_publishes_at_daily_limit(self):
+        from unittest.mock import patch
+        from app import trip100
+        from app.models import Region
+        def raw(ident,**extra):return {'contentid':ident,'contenttypeid':'12','title':'성장 '+ident,'addr1':'서울특별시 중구 시험로','lDongRegnCd':'11','lDongSignguCd':'140','mapy':'37.56','mapx':'126.99',**extra}
+        with SessionLocal() as db:
+            if not db.get(Region,'growth-region'):db.add(Region(id='growth-region',version_id='demo-regions-v1',code_system='MOIS_LEGAL',code='11140',name='서울특별시 중구',level='city'));db.commit()
+            self.assertEqual(ingest(db,[raw('g0',_images=[])]).status,'completed')
+        detail_ids=[]
+        class FakeAPI:
+            def __init__(self,*args,**kwargs):pass
+            def call(self,endpoint,**params):
+                if endpoint=='areaBasedList2':return {'items':[raw(i) for i in ('g1','g2','g3')] if params['contentTypeId']=='12' and params['pageNo']==1 else [],'total':3}
+                detail_ids.append(params['contentId'])
+                if params['contentId']=='g2':raise ValueError('일일 호출 예산 도달. 다음 날 checkpoint부터 재개하세요.')
+                return {'items':[],'total':0}
+        (Path(temp.name)/'runtime').mkdir(exist_ok=True)
+        with patch.object(trip100,'TourAPI',FakeAPI),patch.object(trip100,'ROOT',Path(temp.name)):trip100.run(100)
+        self.assertNotIn('g0',detail_ids)  # already enriched: no API calls
+        with SessionLocal() as db:
+            names={p.snapshot['name'] for p in db.scalars(select(Profile).where(Profile.dataset_id==active_dataset(db).id))}
+        self.assertIn('성장 g1',names);self.assertNotIn('성장 g2',names)
+        import json
+        self.assertEqual(json.loads((Path(temp.name)/'runtime'/'trip100'/'checkpoint.json').read_text(encoding='utf-8'))['status'],'paused_error_or_budget')
     def test_local_admin_page(self):
         from unittest.mock import patch
         from app import config
@@ -70,7 +94,7 @@ class PlatformTest(unittest.TestCase):
         raw={'contentid':'review-test','contenttypeid':'12','title':'검수 시험','addr1':'서울특별시 종로구','lDongRegnCd':'11','lDongSignguCd':'110','mapy':'37.57','mapx':'126.98','overview':'공식 내용 확인 시험입니다. '*20,'usetime':'09:00~18:00','usefee':'무료','modifiedtime':'20261001000000'}
         with SessionLocal() as db:
             db.add(Region(id='review-region',version_id='demo-regions-v1',code_system='MOIS_LEGAL',code='11110',name='서울특별시 종로구',level='city'));db.commit()
-            job=ingest(db,[raw]);profile=db.scalar(select(Profile).where(Profile.dataset_id==job.dataset_id));place_id=profile.place_id
+            job=ingest(db,[raw]);place_id=stable('tourapi','review-test')
         payload={'place_id':place_id,'action':'approve','reviewer':'검수 시험','note':'공식 홈페이지 대조','content_checked':True,'boundary_checked':False,'conditions':{'free':{'value':True,'source':'https://example.com/official'}}}
         with patch.object(config,'DATA_MODE','live'):
             self.assertEqual(self.client.post('/v1/admin/review',json=payload).status_code,401)
@@ -83,16 +107,19 @@ class PlatformTest(unittest.TestCase):
                 approved=raw_for(db,place_id);updated=reset_review(approved);updated['modifiedtime']='20261006000000'
                 self.assertTrue(changed(approved,updated));self.assertNotIn('condition_evidence',updated)
                 self.assertEqual(ingest(db,[updated]).status,'completed')
-            self.assertIsNone(self.client.get('/v1/places/'+place_id).json()['conditions']['free'])
+            # Reviewer evidence is reset; the source fee "무료" still classifies it automatically.
+            item=self.client.get('/v1/places/'+place_id).json()
+            self.assertTrue(item['conditions']['free']);self.assertTrue(item['evidence']['free']['auto'])
             with SessionLocal() as db:
                 hidden=reset_review(updated);hidden['showflag']='0';self.assertEqual(ingest(db,[hidden]).status,'completed')
             self.assertEqual(self.client.get('/v1/places/'+place_id).status_code,404)
             with SessionLocal() as db:
                 restored=reset_review(hidden);restored['showflag']='1';self.assertEqual(ingest(db,[restored]).status,'completed')
             self.assertEqual(self.client.get('/v1/places/'+place_id).status_code,200)
+            before=self.client.get('/v1/status').json()['place_count']
             payload['action']='reject';self.assertEqual(self.client.post('/v1/admin/review',headers=headers,json=payload).status_code,200)
             self.assertEqual(self.client.get('/v1/places/'+place_id).status_code,404)
-            self.assertEqual(self.client.get('/v1/status').json()['place_count'],0)
+            self.assertEqual(self.client.get('/v1/status').json()['place_count'],before-1)
 
     def test_region_ledger_marks_abolished_codes(self):
         from app.models import Region

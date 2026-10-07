@@ -1,4 +1,5 @@
-"""Collect/enrich at most 100 published source IDs; resume without repeating details."""
+"""Grow the published set to a target size (existing + new IDs); resume without repeating details."""
+MAX_TARGET=3000  # static site: search index and asset count grow with every item
 import json,os
 from datetime import datetime,timezone
 import httpx
@@ -28,7 +29,7 @@ def enrich(api,record,cache):
     return record
 
 def run(target=100):
-    if target not in {100,200}:raise ValueError('검증판 대상은 100 또는 200건입니다.')
+    if not 100<=target<=MAX_TARGET:raise ValueError(f'목표는 100~{MAX_TARGET}건입니다.')
     initialize();work=ROOT/'runtime'/f'trip{target}';work.mkdir(exist_ok=True)
     cache=work/'raw';cache.mkdir(exist_ok=True)
     statepath=work/'checkpoint.json';progress=work/'progress.json'
@@ -52,7 +53,8 @@ def run(target=100):
         with httpx.Client(timeout=30) as client:
             api=TourAPI(os.getenv('TOURAPI_SERVICE_KEY',''),ROOT/'runtime'/'tourapi-budget.json',int(os.getenv('TOURAPI_DAILY_LIMIT','1000')),client)
             if len(state['candidates'])<=len(state['known']):
-                for page in range(1,4 if target==200 else 2):
+                # Four types interleaved, 50 per page: enough pages to reach the target plus a buffer.
+                for page in range(1,target//200+3):
                     batches=[api.call('areaBasedList2',contentTypeId=code,numOfRows=50,pageNo=page,arrange='C')['items'] for code in ['12','14','28','15']]
                     for offset in range(50):
                         for batch in batches:
@@ -65,19 +67,29 @@ def run(target=100):
                 record=state['candidates'][state['cursor']]
                 new_count=sum(str(r['contentid']) not in known for r in state['records'])
                 if len(known)+new_count>=target and str(record['contentid']) not in known:break
-                raw=enrich(api,record,cache)
+                # Already-published records were enriched earlier; the monthly sync keeps them current.
+                raw=record if str(record['contentid']) in known and '_images' in record else enrich(api,record,cache)
                 if valid_record(raw,regions):state['records'].append(raw)
                 else:state['rejected'].append(raw)
-                state['cursor']+=1;save(current=raw.get('title',''))
+                # enrich() caches per item, so a sparser checkpoint costs no extra API calls on resume.
+                state['cursor']+=1
+                if state['cursor']%10==0:save(current=raw.get('title',''))
             with SessionLocal() as db:
                 if state['rejected']:ingest(db,state['rejected'],publish=False)
                 job=ingest(db,state['records'])
                 if job.status!='completed':raise RuntimeError('공개 버전 검증 실패')
             save('completed');print(f'사진/시설 보강 {len(state["records"])}건, 검수 대기 {len(state["rejected"])}건. 공개 총량 최대 {target}건.')
-    except ValueError:
-        save('paused_error_or_budget');raise
+    except ValueError as error:
+        save('paused_error_or_budget')
+        if '예산' not in str(error):raise
+        # Daily API limit: publish what is ready so each day's work shows up, then resume tomorrow.
+        known=set(state['known']);new=sum(str(r['contentid']) not in known for r in state['records'])
+        if new:
+            with SessionLocal() as db:job=ingest(db,state['records'])
+            if job.status!='completed':raise RuntimeError('공개 버전 검증 실패') from error
+        print(f'오늘 호출 한도에 도달했습니다. 지금까지 새로 {new}건을 공개 데이터에 넣었습니다. 내일 같은 목표로 다시 실행하면 이어서 수집합니다.')
     finally:os.close(fd)
 
 if __name__=='__main__':
     import argparse
-    parser=argparse.ArgumentParser();parser.add_argument('--target',type=int,default=100,choices=[100,200]);args=parser.parse_args();run(args.target)
+    parser=argparse.ArgumentParser();parser.add_argument('--target',type=int,default=200);args=parser.parse_args();run(args.target)

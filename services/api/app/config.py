@@ -8,7 +8,7 @@ load_dotenv(ROOT / '.env')
 ENV = os.getenv('APP_ENV', 'development')
 DATA_MODE = os.getenv('DATA_MODE', 'demo')
 COLLECTION_TARGET=int(os.getenv('TRIP_COLLECTION_TARGET','200'))
-if COLLECTION_TARGET not in {100,200}:raise RuntimeError('검증판 수집 목표는 100 또는 200입니다.')
+if not 100<=COLLECTION_TARGET<=3000:raise RuntimeError('수집 목표는 100~3000건입니다.')
 DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///runtime/guidejung.db')
 if DATABASE_URL.startswith('sqlite:///'):
     location = Path(DATABASE_URL.removeprefix('sqlite:///'))

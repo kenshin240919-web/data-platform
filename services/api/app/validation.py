@@ -51,7 +51,7 @@ def normalize(raw):
         return next((clean(raw.get(key)) for key in keys if clean(raw.get(key))),None)
     def facility_value(*names):
         return next((clean(r.get('infotext')) for r in raw.get('_facilities',[]) if clean(r.get('infoname')) in names and clean(r.get('infotext'))),None)
-    return {'external_id':str(raw.get('contentid') or ''), 'name':clean(raw.get('title')),
+    item = {'external_id':str(raw.get('contentid') or ''), 'name':clean(raw.get('title')),
         'address_raw':str(raw.get('addr1') or ''), 'address':clean(raw.get('addr1')),
         'latitude':number(raw.get('mapy')), 'longitude':number(raw.get('mapx')),
         'legal_province':str(raw.get('lDongRegnCd') or raw.get('ldongregncd') or ''),
@@ -68,6 +68,28 @@ def normalize(raw):
         'review_status':raw.get('review_status','pending'),'review_note':clean(raw.get('review_note')),'source_hidden':raw.get('showflag')=='0',
         'start_date':str(raw.get('eventstartdate') or ''), 'end_date':str(raw.get('eventenddate') or ''),
         'source_modified_at':str(raw.get('modifiedtime') or '')}
+    # Source-derived conditions fill only what a reviewer has not decided.
+    modified=item['source_modified_at']
+    as_of=f'{modified[:4]}-{modified[4:6]}-{modified[6:8]}' if len(modified)>=8 and modified[:8].isdigit() else date.today().isoformat()
+    for key,source in auto_conditions(raw,item['fee']).items():
+        if key not in evidence:
+            conditions[key]=True
+            evidence[key]={'value':True,'source':'원천 자동 분류 · '+source,'verified_at':as_of,'auto':True}
+    return item
+
+# lclsSystm3 culture categories that are indoor by nature (manual: 신분류체계 관광타입 연계 정의서).
+INDOOR={'VE060100':'공연장','VE060200':'영화관','VE070100':'박물관','VE070200':'기념관','VE070300':'전시관','VE070400':'컨벤션센터','VE070500':'과학관','VE070600':'미술관/화랑','VE090300':'도서관','VE120100':'서점'}
+
+def auto_conditions(raw,fee):
+    """True-only, conservative classification from source fields; unclear text stays unknown."""
+    found={}
+    if fee and re.match(r'(입장료\s*)?무료',fee):found['free']=f'요금 "{fee[:40]}"'
+    pet=clean((raw.get('_pet') or {}).get('acmpyTypeCd'))
+    if '동반가능' in pet.replace(' ','') and '불가' not in pet:found['pet']=f'반려동물 동반 "{pet}"'
+    age=next((clean(raw.get(k)) for k in ('agelimit','expagerange','expagerangeleports') if '전연령' in clean(raw.get(k)).replace(' ','')),None)
+    if age:found['kids']=f'이용연령 "{age[:40]}"'
+    if raw.get('lclsSystm3') in INDOOR:found['indoor']=f'시설 분류 "{INDOOR[raw["lclsSystm3"]]}"'
+    return found
 
 def checks(item, region):
     flags = [('identity', bool(item['external_id'] and item['name']), '원천 ID와 이름'),
