@@ -4,10 +4,10 @@ from typing import Literal
 from fastapi import APIRouter,Depends,HTTPException
 from pydantic import BaseModel,Field
 from sqlalchemy import select
-from .config import ROOT
 from .db import get_db
 from .models import Profile,PlaceSource,RawRecord
 from .pipeline import active_dataset,ingest
+from .tourapi import lock_busy
 
 router=APIRouter()
 
@@ -40,7 +40,7 @@ def queue(db=Depends(get_db)):
 
 @router.post('/review')
 def review(payload:Review,db=Depends(get_db)):
-    if (ROOT/'runtime'/'tourapi-budget.lock').exists():raise HTTPException(409,'수집 중입니다. 완료 후 검수 결과를 저장하세요.')
+    if lock_busy():raise HTTPException(409,'수집 중입니다. 완료 후 검수 결과를 저장하세요.')
     current=active_dataset(db)
     profile=db.scalar(select(Profile).where(Profile.dataset_id==current.id,Profile.place_id==payload.place_id)) if current else None
     if not profile:raise HTTPException(404,'현재 버전의 장소를 찾을 수 없습니다.')

@@ -8,6 +8,24 @@ from .validation import digest
 
 KST=timezone(timedelta(hours=9))
 BASE='https://apis.data.go.kr/B551011/KorService2/'
+LOCK=ROOT/'runtime'/'tourapi-budget.lock'
+
+def acquire_lock():
+    """OS-level lock: released automatically even if the process is killed (e.g. console closed)."""
+    LOCK.parent.mkdir(exist_ok=True)
+    fd=os.open(LOCK,os.O_RDWR|os.O_CREAT)
+    try:
+        if os.name=='nt':
+            import msvcrt;msvcrt.locking(fd,msvcrt.LK_NBLCK,1)
+        else:
+            import fcntl;fcntl.flock(fd,fcntl.LOCK_EX|fcntl.LOCK_NB)
+    except OSError:
+        os.close(fd);raise RuntimeError('수집 또는 동기화가 이미 실행 중입니다.') from None
+    return fd
+
+def lock_busy():
+    try:os.close(acquire_lock());return False
+    except RuntimeError:return True
 
 class TourAPI:
     def __init__(self,key,budget_path,limit=1000,client=None,sleep=time.sleep):
@@ -38,7 +56,7 @@ class TourAPI:
 
 def collect(args):
     work=ROOT/'runtime';work.mkdir(exist_ok=True)
-    ledger=work/'tourapi-budget.json';lock=work/'tourapi-budget.lock'
+    ledger=work/'tourapi-budget.json'
     key=os.getenv('TOURAPI_SERVICE_KEY','')
     if not key:raise ValueError('먼저 .env의 TOURAPI_SERVICE_KEY를 입력하세요.')
     endpoint='searchFestival2' if args.festivals else 'areaBasedList2'
@@ -50,7 +68,7 @@ def collect(args):
     checkpoint=work/'tourapi-checkpoint.json'
     state=json.loads(checkpoint.read_text()) if args.resume and checkpoint.exists() else {'fingerprint':fingerprint,'page':1,'item':0,'records':[],'total':0,'complete':False}
     if state['fingerprint']!=fingerprint:raise ValueError('기존 checkpoint의 조회조건과 다릅니다. --resume을 빼거나 동일 조건을 사용하세요.')
-    fd=os.open(lock,os.O_CREAT|os.O_EXCL|os.O_WRONLY)
+    fd=acquire_lock()
     def save():
         checkpoint.write_text(json.dumps(state,ensure_ascii=False),encoding='utf-8')
         (work/'tourapi-progress.json').write_text(json.dumps({'status':'completed' if state['complete'] else 'collecting','page':state['page'],'completed':len(state['records']),'total':state['total'],'current_item':state.get('current','')},ensure_ascii=False),encoding='utf-8')
@@ -73,4 +91,4 @@ def collect(args):
                 save()
         output=work/'tourapi-sample.json';output.write_text(json.dumps(state['records'],ensure_ascii=False,indent=2),encoding='utf-8')
         print(f"RAW {len(state['records'])}건 / 원천 목록 {state['total']}건. 자동 검수 완료로 간주하지 않습니다.")
-    finally:os.close(fd);lock.unlink()
+    finally:os.close(fd)

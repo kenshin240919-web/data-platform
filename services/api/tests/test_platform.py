@@ -66,7 +66,7 @@ class PlatformTest(unittest.TestCase):
             db.add(Region(id='review-region',version_id='demo-regions-v1',code_system='MOIS_LEGAL',code='11110',name='서울특별시 종로구',level='city'));db.commit()
             job=ingest(db,[raw]);profile=db.scalar(select(Profile).where(Profile.dataset_id==job.dataset_id));place_id=profile.place_id
         payload={'place_id':place_id,'action':'approve','reviewer':'검수 시험','note':'공식 홈페이지 대조','content_checked':True,'boundary_checked':False,'conditions':{'free':{'value':True,'source':'https://example.com/official'}}}
-        with patch.object(config,'DATA_MODE','live'),patch('app.review.ROOT',Path(temp.name)):
+        with patch.object(config,'DATA_MODE','live'):
             self.assertEqual(self.client.post('/v1/admin/review',json=payload).status_code,401)
             payload['conditions']['free']['source']=''
             self.assertEqual(self.client.post('/v1/admin/review',headers=headers,json=payload).status_code,422)

@@ -9,6 +9,7 @@ from . import config
 from .db import SessionLocal, get_db, initialize
 from .models import Dataset, Event, Profile, Region, SyncLog, Validation
 from .pipeline import active_dataset
+from .tourapi import lock_busy
 
 KST=timezone(timedelta(hours=9))
 def today(): return datetime.now(KST).date()
@@ -33,7 +34,7 @@ app.include_router(review_router,prefix='/v1/admin',dependencies=[Depends(admin)
 
 @app.post('/v1/admin/sync',dependencies=[Depends(admin)],status_code=202)
 def start_sync(tasks:BackgroundTasks):
-    if (config.ROOT/'runtime'/'tourapi-budget.lock').exists():raise HTTPException(409,'수집 또는 동기화가 이미 실행 중입니다.')
+    if lock_busy():raise HTTPException(409,'수집 또는 동기화가 이미 실행 중입니다.')
     from .sync_trip import run
     from .full_trip import write_json
     path=config.ROOT/'runtime'/'trip-sync';path.mkdir(exist_ok=True)
@@ -53,7 +54,7 @@ def view(profile, version, event=None):
     except (ValueError,TypeError):fresh=False
     conditions=dict(profile.conditions)
     for key,fact in profile.evidence.items():
-        try:valid=0<=(today()-date.fromisoformat(fact.get('verified_at',''))).days<=30
+        try:valid=0<=(today()-date.fromisoformat(fact.get('verified_at',''))).days<=config.CONDITION_MAX_AGE_DAYS
         except (ValueError,TypeError):valid=False
         if not valid:conditions[key]=None
     data.update(description=profile.description,hours=profile.hours,fee=profile.fee,phone=profile.phone,conditions=conditions,evidence=profile.evidence,quality_score=profile.quality_score,indexable=profile.indexable and config.SEO_ENABLED and fresh,dataset_id=version.id,kind=profile.kind,updated_at=version.published_at.isoformat() if version.published_at else None)

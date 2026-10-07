@@ -7,7 +7,7 @@ from .config import ROOT
 from .db import SessionLocal,initialize
 from .models import Profile,RawRecord,PlaceSource,Region
 from .pipeline import active_dataset,ingest
-from .tourapi import TourAPI
+from .tourapi import TourAPI,acquire_lock
 from .full_trip import write_json,valid_record
 
 def enrich(api,record,cache):
@@ -34,7 +34,7 @@ def run(target=100):
     statepath=work/'checkpoint.json';progress=work/'progress.json'
     state=json.loads(statepath.read_text(encoding='utf-8')) if statepath.exists() else {'candidates':[],'cursor':0,'records':[],'known':[],'rejected':[]}
     if state.get('status')=='completed':print(f'{target}건 수집 완료. 변경 확인은 sync_trip을 사용하세요.');return
-    lock=ROOT/'runtime'/'tourapi-budget.lock';fd=os.open(lock,os.O_CREAT|os.O_EXCL|os.O_WRONLY)
+    fd=acquire_lock()
     def save(status='running',current=''):
         state['status']=status
         write_json(statepath,state)
@@ -75,7 +75,7 @@ def run(target=100):
             save('completed');print(f'사진/시설 보강 {len(state["records"])}건, 검수 대기 {len(state["rejected"])}건. 공개 총량 최대 {target}건.')
     except ValueError:
         save('paused_error_or_budget');raise
-    finally:os.close(fd);lock.unlink(missing_ok=True)
+    finally:os.close(fd)
 
 if __name__=='__main__':
     import argparse

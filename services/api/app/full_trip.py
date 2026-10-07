@@ -8,7 +8,7 @@ from .config import ROOT
 from .db import SessionLocal,initialize
 from .models import Region
 from .pipeline import ingest
-from .tourapi import TourAPI
+from .tourapi import TourAPI,acquire_lock
 from .validation import normalize,checks
 
 TYPES=('12','14','28','15')
@@ -34,8 +34,7 @@ def collect_all():
     rawdir=work/'raw';rawdir.mkdir(exist_ok=True)
     checkpoint=work/'checkpoint.json';progress=work/'progress.json'
     state=json.loads(checkpoint.read_text(encoding='utf-8')) if checkpoint.exists() else {'phase':'listing','types':{code:{'page':1,'total':0,'listing_done':False,'cursor':0} for code in TYPES},'pending':[],'accepted':0,'rejected':0,'completed':0}
-    lock=ROOT/'runtime'/'tourapi-budget.lock'
-    fd=os.open(lock,os.O_CREAT|os.O_EXCL|os.O_WRONLY)
+    fd=acquire_lock()
     started=time.monotonic();initial=state['completed']
     lists={code:json.loads((work/f'list-{code}.json').read_text(encoding='utf-8')) if (work/f'list-{code}.json').exists() else [] for code in TYPES}
     def save(status='running',current=''):
@@ -105,6 +104,6 @@ def collect_all():
     except Exception:
         save('paused_error')
         raise
-    finally:os.close(fd);lock.unlink(missing_ok=True)
+    finally:os.close(fd)
 
 if __name__=='__main__':collect_all()

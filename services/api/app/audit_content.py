@@ -10,7 +10,7 @@ from .db import SessionLocal
 from .models import Profile,Region
 from .pipeline import active_dataset,ingest
 from .review import raw_for
-from .tourapi import TourAPI,KST
+from .tourapi import TourAPI,KST,acquire_lock
 from .validation import normalize,clean,digest
 from .full_trip import write_json,valid_record
 
@@ -57,7 +57,7 @@ def prepare():
         if len(profiles)!=200:raise ValueError('공개 대상 200건 수집 후 검수를 시작하세요.')
         records=[raw_for(db,p.place_id) for p in profiles]
         regions={r.code:r for r in db.scalars(select(Region).where(Region.level=='city',Region.code_system=='MOIS_LEGAL',Region.status=='active')).all()}
-    lock=ROOT/'runtime'/'tourapi-budget.lock';fd=os.open(lock,os.O_CREAT|os.O_EXCL|os.O_WRONLY)
+    fd=acquire_lock()
     rows=[]
     try:
         with httpx.Client(timeout=30) as client:
@@ -84,7 +84,7 @@ def prepare():
         write_json(WORK/'summary.json',[{'id':r['id'],'name':r['item']['name'],'address':r['item']['address'],'fee':r['item']['fee'],'hours':r['item']['hours'],'closed_days':r['item']['closed_days'],'dates':[r['item']['start_date'],r['item']['end_date']],'description':r['item']['description'],'pet':r['item']['pet_policy'],'source_ok':r['source_ok'],'homepage_status':r['homepage_check']['status'],'official_url':r['item']['official_url']} for r in rows])
         write_json(WORK/'progress.json',{'status':'awaiting_reviewer_decisions','completed':200,'total':200})
         print(f'공식 원천 대조 {len(rows)}건. 검수자 결정 파일을 확인한 뒤 승인합니다.')
-    finally:os.close(fd);lock.unlink(missing_ok=True)
+    finally:os.close(fd)
 
 def publish():
     decisions=json.loads((WORK/'decisions.json').read_text(encoding='utf-8'))

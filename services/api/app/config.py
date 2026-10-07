@@ -19,6 +19,8 @@ if DATABASE_URL.startswith('sqlite:///'):
 if DATABASE_URL.startswith('postgresql://'):
     DATABASE_URL = DATABASE_URL.replace('postgresql://', 'postgresql+psycopg://', 1)
 ADMIN_TOKEN = os.getenv('ADMIN_TOKEN', '')
+# Condition evidence (free/kids/pet/indoor) stays usable this long; SEO freshness stays 30 days.
+CONDITION_MAX_AGE_DAYS = int(os.getenv('CONDITION_MAX_AGE_DAYS', '365'))
 SEO_ENABLED = os.getenv('SEO_ENABLED', 'false').lower() == 'true'
 URLS = {'home': os.getenv('HOME_PUBLIC_URL', 'http://localhost:3100'), 'trip': os.getenv('TRIP_PUBLIC_URL', 'http://localhost:3101')}
 for service, url in URLS.items():

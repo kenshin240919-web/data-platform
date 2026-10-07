@@ -42,3 +42,13 @@ class TourAPITest(unittest.TestCase):
     def test_tourism_admission_from_repeated_details(self):
         row=normalize({'contentid':'1','title':'관광지','_facilities':[{'infoname':'입장료','infotext':'성인 2,000원 / 어린이 무료'},{'infoname':'주차요금','infotext':'3,000원'}]})
         self.assertEqual(row['fee'],'성인 2,000원 / 어린이 무료');self.assertEqual(row['parking_fee'],'3,000원');self.assertIsNone(row['conditions']['free'])
+    def test_budget_lock_is_exclusive_and_released(self):
+        from app.tourapi import acquire_lock,lock_busy
+        import os
+        fd=acquire_lock()
+        try:
+            self.assertTrue(lock_busy())
+            with self.assertRaises(RuntimeError):acquire_lock()
+        finally:os.close(fd)
+        # Closing (or the process dying) releases it; a leftover file never blocks.
+        self.assertFalse(lock_busy())

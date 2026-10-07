@@ -4,6 +4,7 @@ from uuid import NAMESPACE_URL, uuid5
 from sqlalchemy import select
 from .models import Dataset, Event, PagePolicy, Place, PlaceSource, Profile, RawRecord, Region, Source, SyncLog, Validation, now
 from .validation import checks, digest, normalize
+from .tourapi import KST
 
 def stable(source, external): return str(uuid5(NAMESPACE_URL, f'guidejung-data:{source}:{external}'))
 
@@ -73,7 +74,7 @@ def ingest(session, records, source_id='tourapi', demo=False, publish=True):
             if verified_at and raw.get('reviewer') and raw.get('review_status','approved')=='approved':
                 try:
                     verified=date.fromisoformat(verified_at)
-                    age=(date.today()-verified).days
+                    age=(datetime.now(KST).date()-verified).days
                     content_verified=0<=age<=30
                     reviewed=content_verified and raw.get('boundary_verified') is True
                 except (ValueError,TypeError): pass
