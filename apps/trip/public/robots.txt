@@ -1,0 +1,9 @@
+User-Agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin
+
+Sitemap: https://trip.guidejung.com/sitemap.xml
+
+# Daum webmaster ownership PIN: must stay as the last line.
+#DaumWebMasterTool:8537a40484e44808deb5a73be60c65c136d48b8a1ef94808378c2f5b0e83ed88:opNCLOBne+BRvOIi5xReOg==
