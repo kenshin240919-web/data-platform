@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from uuid import NAMESPACE_URL, uuid5
 import httpx
-from sqlalchemy import select
+from sqlalchemy import select, update
 from .config import ROOT
 from .db import SessionLocal, initialize
 from .models import Region, RegionVersion
@@ -27,7 +27,9 @@ def import_regions(path):
             if r['법정동코드'][5:]=='00000':provinces.setdefault(r['법정동코드'][:2],r['법정동명'].strip().split()[0])
         for code,name in provinces.items():
             rid=str(uuid5(NAMESPACE_URL,'MOIS_LEGAL:'+code))
-            if not db.get(Region,rid):db.add(Region(id=rid,version_id=version_id,code_system='MOIS_LEGAL',code=code,name=name,level='province',parent_id=None))
+            region=db.get(Region,rid)
+            if region:region.version_id=version_id;region.status='active'
+            else:db.add(Region(id=rid,version_id=version_id,code_system='MOIS_LEGAL',code=code,name=name,level='province',parent_id=None))
         db.flush()
         for row in rows:
             code=(row.get('법정동코드') or '').strip();name=(row.get('법정동명') or '').strip()
@@ -40,6 +42,8 @@ def import_regions(path):
             if region:region.version_id=version_id;region.name=name;region.status='active'
             else:db.add(Region(id=rid,version_id=version_id,code_system='MOIS_LEGAL',code=short,name=name,level=level,parent_id=parent))
             db.flush()
+        # Codes abolished or absent in this official version are no longer current.
+        db.execute(update(Region).where(Region.code_system=='MOIS_LEGAL',Region.version_id!=version_id).values(status='abolished'))
         db.commit()
     print('공식 지역 원장 가져오기 완료')
 

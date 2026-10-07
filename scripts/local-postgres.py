@@ -5,7 +5,9 @@ from dotenv import dotenv_values
 import psycopg
 
 ROOT=Path(__file__).resolve().parents[1]
-RUNTIME=Path('C:/Users/Public/Documents/ESTsoft/CreatorTemp/guidejung-data-postgres')
+# ASCII path outside OneDrive: PostgreSQL on Windows breaks on non-ASCII paths (e.g. '문서').
+RUNTIME=Path(os.environ.get('GUIDEJUNG_PG_HOME') or Path(os.environ.get('LOCALAPPDATA',Path.home()))/'guidejung-data-postgres')
+LEGACY=Path('C:/Users/Public/Documents/ESTsoft/CreatorTemp/guidejung-data-postgres')
 BIN=RUNTIME/'pgsql'/'bin'
 DATA=RUNTIME/'postgres-data'
 ENV_FILE=ROOT/'.env.postgres-local'
@@ -18,7 +20,18 @@ def run(name,*args,env=None):
         message=(RUNTIME/'command.log').read_text(encoding='utf-8',errors='replace')
         raise RuntimeError(f'{name} 실패: {message[:600]}')
 
+def migrate_legacy():
+    """Move the old temp-folder cluster once; only while that server is stopped."""
+    if RUNTIME.exists() or not (LEGACY/'postgres-data').exists():return
+    legacy_ctl=LEGACY/'pgsql'/'bin'/'pg_ctl.exe'
+    if subprocess.run([str(legacy_ctl),'-D',str(LEGACY/'postgres-data'),'status'],capture_output=True).returncode==0:
+        raise RuntimeError(f'기존 DB가 실행 중입니다. 먼저 중지한 뒤 다시 실행하세요: "{legacy_ctl}" -D "{LEGACY/"postgres-data"}" -m fast stop')
+    RUNTIME.parent.mkdir(parents=True,exist_ok=True)
+    shutil.move(str(LEGACY),str(RUNTIME))
+    print(f'로컬 DB를 {RUNTIME}로 옮겼습니다.')
+
 def setup():
+    migrate_legacy()
     RUNTIME.mkdir(exist_ok=True)
     if not (BIN/'initdb.exe').exists():
         shutil.copytree(ROOT/'runtime'/'postgres-bin'/'pgsql',RUNTIME/'pgsql',dirs_exist_ok=True)

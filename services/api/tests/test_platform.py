@@ -88,4 +88,15 @@ class PlatformTest(unittest.TestCase):
             self.assertEqual(self.client.get('/v1/places/'+place_id).status_code,404)
             self.assertEqual(self.client.get('/v1/status').json()['place_count'],0)
 
+    def test_region_ledger_marks_abolished_codes(self):
+        from app.models import Region
+        from app.worker import import_regions
+        ledger=Path(temp.name)/'ledger.csv'
+        def load(rows):
+            ledger.write_text('법정동코드,법정동명,폐지여부\n'+''.join(f'{c},{n},{f}\n' for c,n,f in rows),encoding='utf-8');import_regions(ledger)
+        load([('9900000000','시험도','존재'),('9911000000','시험도 갑시','존재'),('9912000000','시험도 을군','존재')])
+        load([('9900000000','시험도','존재'),('9911000000','시험도 갑시','존재'),('9912000000','시험도 을군','폐지')])
+        with SessionLocal() as db:
+            status={r.code:r.status for r in db.scalars(select(Region).where(Region.code.in_(['99','99110','99120'])))}
+        self.assertEqual(status,{'99':'active','99110':'active','99120':'abolished'})
 if __name__=='__main__':unittest.main()

@@ -44,6 +44,7 @@ def run(target=100):
             regions={r.code:r for r in db.scalars(select(Region).where(Region.level=='city',Region.code_system=='MOIS_LEGAL',Region.status=='active')).all()}
             if not state['candidates']:
                 dataset=active_dataset(db)
+                if not dataset:raise SystemExit('공개 데이터가 없습니다. README의 "공식 데이터 연결" 순서(regions → collect → import)를 먼저 실행하세요.')
                 for p in db.scalars(select(Profile).where(Profile.dataset_id==dataset.id)).all():
                     source=db.scalar(select(PlaceSource).where(PlaceSource.place_id==p.place_id,PlaceSource.source_id=='tourapi'))
                     raw=db.scalar(select(RawRecord).where(RawRecord.external_id==source.external_id).order_by(RawRecord.fetched_at.desc()).limit(1))
