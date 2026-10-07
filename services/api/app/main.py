@@ -49,18 +49,20 @@ def start_sync(tasks:BackgroundTasks):
 
 def dataset(session): return active_dataset(session,config.DATA_MODE=='demo')
 
+def seo_indexable(profile,version):
+    # Search engines get public, non-sample pages with a real description; review is optional.
+    return config.SEO_ENABLED and not version.is_demo and len(profile.description or '')>=80 and profile.snapshot.get('review_status')!='rejected' and not profile.snapshot.get('source_hidden')
+
 def view(profile, version, event=None):
     data=dict(profile.snapshot)
     from datetime import date
-    try:fresh=0<=(today()-date.fromisoformat(data.get('verified_at') or '')).days<=30
-    except (ValueError,TypeError):fresh=False
     conditions=dict(profile.conditions)
     for key,fact in profile.evidence.items():
         try:valid=0<=(today()-date.fromisoformat(fact.get('verified_at',''))).days<=config.CONDITION_MAX_AGE_DAYS
         except (ValueError,TypeError):valid=False
         # Source-derived facts are as current as the source data itself.
         if not valid and not fact.get('auto'):conditions[key]=None
-    data.update(description=profile.description,hours=profile.hours,fee=profile.fee,phone=profile.phone,conditions=conditions,evidence=profile.evidence,quality_score=profile.quality_score,indexable=profile.indexable and config.SEO_ENABLED and fresh,dataset_id=version.id,kind=profile.kind,updated_at=version.published_at.isoformat() if version.published_at else None)
+    data.update(description=profile.description,hours=profile.hours,fee=profile.fee,phone=profile.phone,conditions=conditions,evidence=profile.evidence,quality_score=profile.quality_score,indexable=seo_indexable(profile,version),dataset_id=version.id,kind=profile.kind,updated_at=version.published_at.isoformat() if version.published_at else None)
     if event: data.update(start_date=event.start_date,end_date=event.end_date,event_status='ended' if event.status=='scheduled' and event.end_date<today().isoformat() else event.status)
     return data
 
@@ -80,7 +82,7 @@ def status(db:Session=Depends(get_db)):
     current=dataset(db)
     profiles=db.scalars(select(Profile).where(Profile.dataset_id==current.id)).all() if current else []
     profiles=[p for p in profiles if p.snapshot.get('review_status')!='rejected' and not p.snapshot.get('source_hidden')]
-    return {'mode':config.DATA_MODE,'available':current is not None,'dataset_id':current.id if current else None,'updated_at':current.published_at.isoformat() if current else None,'place_count':sum(p.kind=='place' for p in profiles),'festival_count':sum(p.kind=='festival' for p in profiles),'indexable_count':sum(p.indexable for p in profiles) if config.SEO_ENABLED else 0,'seo_enabled':config.SEO_ENABLED,'services':[{'id':'trip','available':True},{'id':'traffic','available':False},{'id':'academy','available':False},{'id':'charge','available':False},{'id':'weather','available':False}]}
+    return {'mode':config.DATA_MODE,'available':current is not None,'dataset_id':current.id if current else None,'updated_at':current.published_at.isoformat() if current else None,'place_count':sum(p.kind=='place' for p in profiles),'festival_count':sum(p.kind=='festival' for p in profiles),'indexable_count':sum(seo_indexable(p,current) for p in profiles),'seo_enabled':config.SEO_ENABLED,'services':[{'id':'trip','available':True},{'id':'traffic','available':False},{'id':'academy','available':False},{'id':'charge','available':False},{'id':'weather','available':False}]}
 
 @app.get('/v1/regions')
 def regions(db:Session=Depends(get_db)):
@@ -152,8 +154,8 @@ def detail(place_id:str,db:Session=Depends(get_db)):
 def sitemap(db:Session=Depends(get_db)):
     current=dataset(db)
     if not current or current.is_demo or not config.SEO_ENABLED:return {'items':[]}
-    profiles=db.scalars(select(Profile).where(Profile.dataset_id==current.id,Profile.indexable==True)).all()
-    return {'items':[{'path':('/festival/' if p.kind=='festival' else '/place/')+p.place_id,'lastmod':current.published_at.isoformat()} for p in profiles if view(p,current)['indexable']]}
+    profiles=db.scalars(select(Profile).where(Profile.dataset_id==current.id)).all()
+    return {'items':[{'path':('/festival/' if p.kind=='festival' else '/place/')+p.place_id,'lastmod':current.published_at.isoformat()} for p in profiles if seo_indexable(p,current)]}
 
 @app.get('/v1/admin/overview',dependencies=[Depends(admin)])
 def overview(db:Session=Depends(get_db)):

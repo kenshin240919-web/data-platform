@@ -29,4 +29,5 @@ export const places=()=>site.items;
 export function searchIndex(){
   return site.items.map(({id,name,kind,address,region_id,region_name,description,latitude,longitude,conditions,images,start_date,end_date,event_status,quality_score,is_demo,verified_at})=>({id,name,kind,address,region_id,region_name,description,latitude,longitude,conditions,images:images?.slice(0,1),start_date,end_date,event_status,quality_score,is_demo,verified_at}));
 }
-export const enabled=()=>process.env.SEO_ENABLED==='true' && site.status.mode==='live';
+// SEO switch comes from the exported data (SEO_ENABLED in .env at export time), not the build host.
+export const enabled=()=>site.status.seo_enabled && site.status.mode==='live';

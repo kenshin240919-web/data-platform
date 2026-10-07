@@ -69,6 +69,24 @@ class PlatformTest(unittest.TestCase):
         self.assertIn('성장 g1',names);self.assertNotIn('성장 g2',names)
         import json
         self.assertEqual(json.loads((Path(temp.name)/'runtime'/'trip100'/'checkpoint.json').read_text(encoding='utf-8'))['status'],'paused_error_or_budget')
+    def test_seo_indexes_described_public_pages_without_review(self):
+        from unittest.mock import patch
+        from app import config
+        from app.models import Region
+        def raw(ident,overview):return {'contentid':ident,'contenttypeid':'12','title':'검색 '+ident,'addr1':'서울특별시 중구 시험로','lDongRegnCd':'11','lDongSignguCd':'140','mapy':'37.56','mapx':'126.99','overview':overview}
+        with SessionLocal() as db:
+            region=db.get(Region,'growth-region') or Region(id='growth-region',version_id='demo-regions-v1',code_system='MOIS_LEGAL',code='11140',name='서울특별시 중구',level='city')
+            region.status='active';db.add(region);db.commit()  # the ledger test may have retired it
+            self.assertEqual(ingest(db,[raw('seo-long','충분히 긴 소개글입니다. '*8),raw('seo-short','짧음')]).status,'completed')
+        long_id,short_id=stable('tourapi','seo-long'),stable('tourapi','seo-short')
+        with patch.object(config,'DATA_MODE','live'):
+            self.assertFalse(self.client.get('/v1/places/'+long_id).json()['indexable'])  # SEO off
+            self.assertEqual(self.client.get('/v1/sitemap').json()['items'],[])
+            with patch.object(config,'SEO_ENABLED',True):
+                self.assertTrue(self.client.get('/v1/places/'+long_id).json()['indexable'])
+                self.assertFalse(self.client.get('/v1/places/'+short_id).json()['indexable'])
+                paths=[i['path'] for i in self.client.get('/v1/sitemap').json()['items']]
+                self.assertIn('/place/'+long_id,paths);self.assertNotIn('/place/'+short_id,paths)
     def test_local_admin_page(self):
         from unittest.mock import patch
         from app import config
