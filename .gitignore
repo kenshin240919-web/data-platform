@@ -1,0 +1,17 @@
+.firecrawl/
+node_modules/
+.next/
+.venv/
+.npm-cache/
+.env
+.env.*
+!.env.example
+runtime/
+__pycache__/
+*.pyc
+*.tsbuildinfo
+playwright-report/
+test-results/
+
+# 원천 API 인증키 (키는 .env에만 보관)
+개방데이터/인증키.txt

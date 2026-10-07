@@ -1,0 +1,18 @@
+FROM node:24-alpine AS build
+WORKDIR /workspace
+COPY package.json package-lock.json ./
+COPY apps ./apps
+COPY packages ./packages
+RUN npm ci
+ARG APP=trip
+RUN npm run build -w @guidejung/${APP}
+FROM node:24-alpine
+WORKDIR /workspace
+ENV NODE_ENV=production HOSTNAME=0.0.0.0 PORT=3000
+ARG APP=trip
+ENV APP_NAME=${APP}
+COPY --from=build --chown=node:node /workspace/apps/${APP}/.next/standalone ./
+COPY --from=build --chown=node:node /workspace/apps/${APP}/.next/static ./apps/${APP}/.next/static
+COPY --from=build --chown=node:node /workspace/apps/${APP}/public ./apps/${APP}/public
+USER node
+CMD ["sh","-c","node apps/$APP_NAME/server.js"]

@@ -1,0 +1,10 @@
+[Unit]
+Description=GuideJung trip synchronization once per month
+
+[Timer]
+OnCalendar=*-*-01 06:00:00 Asia/Seoul
+Persistent=true
+Unit=guidejung-trip-sync.service
+
+[Install]
+WantedBy=timers.target

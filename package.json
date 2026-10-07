@@ -1,0 +1,23 @@
+{
+  "name": "guidejung-data-platform",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "build": "npm run build -w @guidejung/trip",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test:ui": "playwright test",
+    "check": "npm run typecheck && npm run build"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.0",
+    "typescript": "^5.9.3",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0"
+  }
+}

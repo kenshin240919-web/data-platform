@@ -1,0 +1,11 @@
+.git
+.env
+.env.*
+node_modules
+**/.next
+.venv
+.npm-cache
+.firecrawl
+runtime
+reports
+**/__pycache__

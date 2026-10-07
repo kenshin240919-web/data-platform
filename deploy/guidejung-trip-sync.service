@@ -1,0 +1,10 @@
+[Unit]
+Description=GuideJung trip monthly source synchronization
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/srv/guidejung-data
+ExecStart=/usr/bin/docker compose exec -T api python -m app.sync_trip
+TimeoutStartSec=3600
