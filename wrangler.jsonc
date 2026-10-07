@@ -1,0 +1,10 @@
+// Cloudflare Workers: serves the static Next.js export (no server code).
+{
+  "name": "data-platform",
+  "compatibility_date": "2025-09-01",
+  "build": { "command": "npm run build" },
+  "assets": {
+    "directory": "./apps/trip/out",
+    "not_found_handling": "404-page"
+  }
+}

@@ -1,5 +1,0 @@
-# 기존 guidejung.com 호스트를 이 파일에 추가하지 않습니다.
-trip.guidejung.com {
-    encode gzip zstd
-    reverse_proxy trip:3000
-}

@@ -18,3 +18,7 @@ test-results/
 
 # GitHub 웹 업로드용 복사본
 site/
+
+# Static site build output / wrangler local state
+apps/trip/out/
+.wrangler/

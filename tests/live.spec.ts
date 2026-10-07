@@ -27,7 +27,7 @@ test('live API, search, details and mobile layout',async({page,request})=>{
   await page.screenshot({path:'runtime/trip-live-mobile.png',fullPage:true});
 });
 
-test('photos, facility fields and administrator review controls',async({page,request})=>{
+test('photos and facility fields',async({page,request})=>{
   const response=await request.get('http://127.0.0.1:8100/v1/search?limit=50');
   const result=await response.json();test.skip(result.mode!=='live','실제 데이터 검사');
   expect(result.total).toBe(200);
@@ -39,9 +39,4 @@ test('photos, facility fields and administrator review controls',async({page,req
   await page.locator('.photo-gallery img').evaluateAll(async nodes=>{await Promise.all(nodes.map(async node=>{const img=node as HTMLImageElement;img.loading='eager';await img.decode();}));});
   await expect(page.getByText('휴무일',{exact:true})).toBeVisible();await expect(page.getByText('주차',{exact:true})).toBeVisible();
   await page.screenshot({path:'runtime/trip-enriched-detail.png',fullPage:true});
-  process.loadEnvFile('.env');const token=process.env.ADMIN_TOKEN;if(!token)return;
-  await page.goto('/admin');await page.getByLabel('관리자 토큰').fill(token);await page.getByRole('button',{name:'현황 조회',exact:true}).click();
-  await expect(page.getByRole('heading',{name:'원천 변경 동기화'})).toBeVisible();
-  await page.getByRole('button',{name:'검수 목록 조회'}).click();await expect(page.getByRole('button',{name:'검수하기'})).toHaveCount(200);
-  await page.getByRole('button',{name:'검수하기'}).first().click();await expect(page.getByLabel('검수자',{exact:true})).toBeVisible();await expect(page.getByRole('button',{name:'승인',exact:true})).toBeVisible();
 });

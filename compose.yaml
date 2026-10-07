@@ -16,27 +16,6 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
-  trip:
-    build:
-      context: .
-      dockerfile: deploy/Dockerfile.web
-      args:
-        APP: trip
-    environment:
-      INTERNAL_API_URL: http://api:8100
-      TRIP_PUBLIC_URL: https://trip.guidejung.com
-      SEO_ENABLED: ${SEO_ENABLED:-false}
-      DATA_MODE: live
-    depends_on:
-      api:
-        condition: service_healthy
-    restart: unless-stopped
-  gateway:
-    image: caddy:2-alpine
-    ports: ["80:80", "443:443"]
-    volumes: ["./deploy/Caddyfile:/etc/caddy/Caddyfile:ro", "guidejung_tls:/data"]
-    depends_on: [trip]
-    restart: unless-stopped
+# The trip website is a static export served by Cloudflare Workers (wrangler.jsonc), not a container.
 volumes:
-  guidejung_tls:
   guidejung_runtime:
