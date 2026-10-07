@@ -13,8 +13,8 @@ __pycache__/
 playwright-report/
 test-results/
 
-# 원천 API 인증키 (키는 .env에만 보관)
-개방데이터/인증키.txt
+# 원천 API 인증키·공사 매뉴얼 (공개 저장소에 올리지 않음, 키는 .env에만 보관)
+개방데이터/
 
 # GitHub 웹 업로드용 복사본
 site/
