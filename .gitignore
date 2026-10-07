@@ -15,3 +15,6 @@ test-results/
 
 # 원천 API 인증키 (키는 .env에만 보관)
 개방데이터/인증키.txt
+
+# GitHub 웹 업로드용 복사본
+site/
