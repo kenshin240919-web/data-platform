@@ -1,8 +1,12 @@
 @echo off
 cd /d "%~dp0"
 if not exist .venv\Scripts\python.exe (
-  echo README.mdì˜ ìµœì´ˆ ì„¤ì¹˜ ë‹¨ê³„ë¥¼ ì‹¤í–‰í•˜ì„¸ìš”.
+  echo README.mdÀÇ ÃÖÃÊ ¼³Ä¡ ´Ü°è¸¦ ½ÇÇàÇÏ¼¼¿ä.
   pause
   exit /b 1
+)
+rem ·ÎÄÃ PostgreSQLÀ» ¾²´Â °æ¿ì APIº¸´Ù ¸ÕÀú ÄÕ´Ï´Ù (²¨Á® ÀÖÀ¸¸é API°¡ ½ÃÀÛµÇÁö ¾ÊÀ½).
+if exist .env.postgres-local (
+  ".venv\Scripts\python.exe" scripts\local-postgres.py setup || (echo ·ÎÄÃ DB¸¦ ½ÃÀÛÇÏÁö ¸øÇß½À´Ï´Ù. & pause & exit /b 1)
 )
 npm run dev

@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>로컬 검수</title>
+<style>
+  :root { --bg:#f6f7f9; --card:#fff; --text:#1d2433; --muted:#667085; --line:#d9dee7; --accent:#1f5eff; --ok:#147a3d; --bad:#b42318; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#12151b; --card:#1b2029; --text:#e8ecf3; --muted:#9aa4b2; --line:#2e3644; --accent:#7aa2ff; --ok:#5fcf8b; --bad:#ff8a80; } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:15px/1.5 system-ui,"Malgun Gothic",sans-serif; }
+  main { max-width:960px; margin:0 auto; padding:24px 16px 64px; }
+  h1 { margin:0 0 4px; font-size:24px; } h2 { font-size:18px; margin:28px 0 8px; }
+  .muted { color:var(--muted); font-size:13px; }
+  .box { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:16px; margin:12px 0; }
+  .row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  input, select, textarea, button { font:inherit; color:inherit; }
+  input, select, textarea { background:var(--bg); border:1px solid var(--line); border-radius:6px; padding:7px 9px; }
+  textarea { width:100%; min-height:70px; }
+  button { background:var(--accent); color:#fff; border:0; border-radius:6px; padding:8px 14px; cursor:pointer; }
+  button.secondary { background:transparent; color:var(--text); border:1px solid var(--line); }
+  button.reject { background:var(--bad); }
+  button:disabled { opacity:.5; cursor:default; }
+  label { display:block; margin:10px 0 4px; font-weight:600; }
+  label.check { font-weight:400; display:flex; gap:8px; align-items:center; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:10px; }
+  .item { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:12px; }
+  .item strong { display:block; }
+  .status-approved { color:var(--ok); } .status-rejected { color:var(--bad); }
+  .cond { display:grid; grid-template-columns:140px 1fr; gap:8px; align-items:center; margin:6px 0; }
+  .msg { padding:10px 12px; border-radius:6px; background:var(--card); border:1px solid var(--line); margin:12px 0; }
+  .msg.error { border-color:var(--bad); color:var(--bad); }
+  a { color:var(--accent); }
+  @media (max-width:560px) { .cond { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>로컬 검수</h1>
+  <p class="muted">이 컴퓨터에서만 열리는 검수 화면입니다. 검수 결과를 웹사이트에 반영하려면 마지막에 <b>export-site.bat</b>을 실행하세요.</p>
+
+  <div class="box">
+    <form id="login" class="row">
+      <label for="token" style="margin:0">관리자 토큰</label>
+      <input id="token" type="password" autocomplete="off" required placeholder=".env의 ADMIN_TOKEN" style="flex:1;min-width:200px">
+      <button>검수 목록 불러오기</button>
+    </form>
+    <p class="muted">토큰은 이 화면의 메모리에만 두고 저장하지 않습니다.</p>
+  </div>
+
+  <div id="message" role="status"></div>
+
+  <section id="work" hidden>
+    <div class="row">
+      <input id="filter" type="search" placeholder="이름·주소 검색" style="flex:1;min-width:200px">
+      <select id="statusFilter">
+        <option value="">전체 상태</option><option value="pending">검수 대기</option><option value="approved">승인</option><option value="rejected">반려</option>
+      </select>
+      <span id="count" class="muted"></span>
+    </div>
+    <div id="editor"></div>
+    <div id="list" class="grid" style="margin-top:12px"></div>
+
+    <h2>원천 변경 동기화</h2>
+    <div class="box">
+      <p class="muted">현재 대상의 원천 변경만 확인합니다. 내용이 바뀐 항목은 검수 대기로 돌아갑니다.</p>
+      <div class="row"><button id="sync" class="secondary" type="button">변경 확인 시작</button><button id="refresh" class="secondary" type="button">현황 새로고침</button></div>
+      <p id="syncStatus" class="muted"></p>
+    </div>
+  </section>
+</main>
+<script>
+const SITE = 'http://127.0.0.1:3101';
+const labels = {free:'무료', kids:'아이와 함께', pet:'반려동물 동반', indoor:'실내'};
+const statusText = {pending:'검수 대기', approved:'승인', rejected:'반려'};
+let token = '', items = [], busy = false;
+const $ = id => document.getElementById(id);
+
+// Builds DOM nodes; text always goes through textContent (source data is untrusted).
+function h(tag, props = {}, ...children) {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(props)) {
+    if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+    else if (k === 'text') el.textContent = v;
+    else if (v !== false && v != null) el.setAttribute(k, v === true ? '' : v);
+  }
+  for (const c of children.flat()) if (c != null) el.append(c);
+  return el;
+}
+function say(text, error = false) { $('message').replaceChildren(text ? h('p', {class: 'msg' + (error ? ' error' : ''), text}) : ''); }
+
+async function call(path, options = {}) {
+  const res = await fetch(path, {...options, headers: {'x-admin-token': token, 'Content-Type': 'application/json', ...(options.headers || {})}});
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : '요청 실패 (' + res.status + ')');
+  return data;
+}
+
+async function loadQueue() {
+  items = (await call('/v1/admin/queue')).items;
+  $('work').hidden = false;
+  renderList();
+}
+
+function renderList() {
+  const q = $('filter').value.trim().toLowerCase(), st = $('statusFilter').value;
+  const shown = items.filter(i => (!st || (i.status || 'pending') === st) && (!q || (i.name + ' ' + i.address).toLowerCase().includes(q)));
+  $('count').textContent = shown.length + ' / ' + items.length + '건';
+  $('list').replaceChildren(...shown.map(item => {
+    const st = item.status || 'pending';
+    return h('article', {class: 'item'},
+      h('strong', {text: item.name}),
+      h('div', {class: 'muted', text: item.address}),
+      h('div', {class: 'status-' + st, text: (statusText[st] || st) + ' · 품질 ' + item.quality_score + (item.source_hidden ? ' · 원천 비공개' : '')}),
+      h('button', {type: 'button', class: 'secondary', style: 'margin-top:8px', onclick: () => edit(item)}, '검수하기'));
+  }));
+}
+
+function edit(item) {
+  const conds = Object.entries(labels).map(([key, label]) => {
+    const v = item.conditions[key];
+    const select = h('select', {name: key},
+      h('option', {value: 'unknown', text: '미확인'}), h('option', {value: 'true', text: '해당'}), h('option', {value: 'false', text: '해당하지 않음'}));
+    select.value = v === true ? 'true' : v === false ? 'false' : 'unknown';
+    const source = h('input', {name: key + '_source', maxlength: 2000, placeholder: '확인 근거 URL·공식 안내'});
+    source.value = item.evidence[key]?.source || '';
+    return h('div', {class: 'cond'}, h('span', {text: label}), h('div', {class: 'row'}, select, h('span', {style: 'flex:1;display:flex'}, source)));
+  });
+  const form = h('form', {class: 'box', onsubmit: e => save(e, item)},
+    h('h2', {style: 'margin-top:0', text: item.name}),
+    h('div', {class: 'muted', text: item.address}),
+    h('a', {href: SITE + '/' + item.kind + '/' + item.id, target: '_blank', rel: 'noopener noreferrer', text: '상세 정보 확인 ↗'}),
+    h('label', {text: '검수자'}), h('input', {name: 'reviewer', required: true, maxlength: 100}),
+    h('label', {text: '확인한 출처·수정 또는 반려 사유'}), h('textarea', {name: 'note', required: true, maxlength: 2000}),
+    h('label', {class: 'check'}, h('input', {type: 'checkbox', name: 'content_checked'}), '운영시간·요금·주소 등 내용을 확인했습니다'),
+    h('label', {class: 'check'}, h('input', {type: 'checkbox', name: 'boundary_checked'}), '공식 행정구역 경계와 좌표의 일치를 확인했습니다'),
+    h('label', {text: '여행 조건 (확정하려면 근거 필요)'}), conds,
+    h('div', {class: 'row', style: 'margin-top:12px'},
+      h('button', {value: 'approve', text: '승인'}),
+      h('button', {value: 'reject', class: 'reject', text: '반려·공개 제외'}),
+      h('button', {type: 'button', class: 'secondary', text: '닫기', onclick: () => $('editor').replaceChildren()})));
+  $('editor').replaceChildren(form);
+  form.scrollIntoView({behavior: 'smooth'});
+  form.reviewer.focus();
+}
+
+async function save(event, item) {
+  event.preventDefault();
+  if (busy) return;
+  const form = event.currentTarget, action = event.submitter?.value || 'approve';
+  const conditions = Object.fromEntries(Object.keys(labels).map(key => [key, {
+    value: form[key].value === 'unknown' ? null : form[key].value === 'true',
+    source: form[key + '_source'].value.trim()}]));
+  busy = true; say('저장 중입니다...');
+  try {
+    await call('/v1/admin/review', {method: 'POST', body: JSON.stringify({
+      place_id: item.id, action, reviewer: form.reviewer.value.trim(), note: form.note.value.trim(),
+      content_checked: form.content_checked.checked, boundary_checked: form.boundary_checked.checked, conditions})});
+    $('editor').replaceChildren();
+    say('저장했습니다: ' + item.name + ' (' + (action === 'approve' ? '승인' : '반려') + '). 웹사이트 반영은 export-site.bat으로 합니다.');
+    await loadQueue();
+  } catch (e) { say(e.message, true); }
+  finally { busy = false; }
+}
+
+async function showSync() {
+  const data = await call('/v1/admin/overview');
+  const s = data.sync;
+  $('syncStatus').textContent = s ? '최근 동기화: ' + s.status + ' · 변경 ' + s.changed + '건' + (s.error ? ' · ' + s.error : '') : '동기화 기록이 없습니다.';
+}
+
+$('login').addEventListener('submit', async e => {
+  e.preventDefault(); token = $('token').value; say('불러오는 중입니다...');
+  try { await loadQueue(); await showSync(); say(''); } catch (err) { $('work').hidden = true; say(err.message, true); }
+});
+$('filter').addEventListener('input', renderList);
+$('statusFilter').addEventListener('change', renderList);
+$('refresh').addEventListener('click', () => showSync().catch(err => say(err.message, true)));
+$('sync').addEventListener('click', async () => {
+  try { await call('/v1/admin/sync', {method: 'POST'}); say('변경 확인을 시작했습니다. 잠시 뒤 "현황 새로고침"을 누르세요.'); await showSync(); }
+  catch (err) { say(err.message, true); }
+});
+</script>
+</body>
+</html>

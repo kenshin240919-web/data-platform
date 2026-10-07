@@ -45,6 +45,12 @@ class PlatformTest(unittest.TestCase):
         rows=self.client.get('/v1/search?lat=37.5796&lon=126.977&radius_km=1').json()['items']
         self.assertTrue(rows)
         self.assertTrue(all(p['distance_km']<=1 for p in rows))
+    def test_local_admin_page(self):
+        from unittest.mock import patch
+        from app import config
+        page=self.client.get('/admin')
+        self.assertEqual(page.status_code,200);self.assertIn('로컬 검수',page.text)
+        with patch.object(config,'ENV','production'):self.assertEqual(self.client.get('/admin').status_code,404)
     def test_admin_auth(self):
         self.assertEqual(self.client.get('/v1/admin/overview').status_code,401)
         self.assertEqual(self.client.get('/v1/admin/overview',headers={'x-admin-token':'test-only-token'}).status_code,200)

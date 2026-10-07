@@ -1,19 +1,18 @@
 @echo off
-chcp 65001 >nul
 cd /d "%~dp0"
-rem ê³µê°œ ë°ì´í„°ë¥¼ ì •ì  ì‚¬ì´íŠ¸ìš©ìœ¼ë¡œ ë‚´ë³´ë‚´ê³  GitHubì— ì˜¬ë¦½ë‹ˆë‹¤ (Cloudflareê°€ ìë™ ë°°í¬).
+rem °ø°³ µ¥ÀÌÅÍ¸¦ Á¤Àû »çÀÌÆ®¿ëÀ¸·Î ³»º¸³»°í GitHub¿¡ ¿Ã¸³´Ï´Ù (Cloudflare°¡ ÀÚµ¿ ¹èÆ÷).
 ".venv\Scripts\python.exe" scripts\local-postgres.py setup || goto :fail
 pushd services\api
 "..\..\.venv\Scripts\python.exe" -m app.export_static || (popd & goto :fail)
 popd
 git add apps/trip/data/trip.json
-git diff --cached --quiet && (echo ë°”ë€ ë°ì´í„°ê°€ ì—†ìŠµë‹ˆë‹¤. & pause & exit /b 0)
+git diff --cached --quiet && (echo ¹Ù²ï µ¥ÀÌÅÍ°¡ ¾ø½À´Ï´Ù. & pause & exit /b 0)
 git commit -m "Update trip site data" || goto :fail
 git push || goto :fail
-echo ì™„ë£Œ: Cloudflareê°€ ëª‡ ë¶„ ì•ˆì— ìƒˆ ë°ì´í„°ë¡œ ë°°í¬í•©ë‹ˆë‹¤.
+echo ¿Ï·á: Cloudflare°¡ ¸î ºĞ ¾È¿¡ »õ µ¥ÀÌÅÍ·Î ¹èÆ÷ÇÕ´Ï´Ù.
 pause
 exit /b 0
 :fail
-echo ì‹¤íŒ¨í–ˆìŠµë‹ˆë‹¤. ìœ„ ë©”ì‹œì§€ë¥¼ í™•ì¸í•˜ì„¸ìš”.
+echo ½ÇÆĞÇß½À´Ï´Ù. À§ ¸Ş½ÃÁö¸¦ È®ÀÎÇÏ¼¼¿ä.
 pause
 exit /b 1

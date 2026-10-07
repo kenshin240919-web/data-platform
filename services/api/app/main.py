@@ -2,7 +2,9 @@ from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
 import hmac
 import math
+from pathlib import Path
 from fastapi import BackgroundTasks, Depends, FastAPI, Header, HTTPException, Query
+from fastapi.responses import HTMLResponse
 from sqlalchemy import select, text
 from sqlalchemy.orm import Session
 from . import config
@@ -60,6 +62,12 @@ def view(profile, version, event=None):
     data.update(description=profile.description,hours=profile.hours,fee=profile.fee,phone=profile.phone,conditions=conditions,evidence=profile.evidence,quality_score=profile.quality_score,indexable=profile.indexable and config.SEO_ENABLED and fresh,dataset_id=version.id,kind=profile.kind,updated_at=version.published_at.isoformat() if version.published_at else None)
     if event: data.update(start_date=event.start_date,end_date=event.end_date,event_status='ended' if event.status=='scheduled' and event.end_date<today().isoformat() else event.status)
     return data
+
+@app.get('/admin',include_in_schema=False)
+def admin_page():
+    # Local review screen only; the public site is a static export without admin.
+    if config.ENV=='production':raise HTTPException(404)
+    return HTMLResponse((Path(__file__).parent/'admin.html').read_text(encoding='utf-8'),headers={'Cache-Control':'no-store'})
 
 @app.get('/health')
 def health(db:Session=Depends(get_db)):
