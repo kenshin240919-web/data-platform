@@ -64,10 +64,10 @@ export async function Page({service,segments=[]}:{service:Service;segments?:stri
 }
 
 export async function pageMetadata(service:Service,segments:string[]):Promise<Metadata>{
-  const path='/'+segments.join('/');let title=service==='home'?'GuideJung | 지역 기반 생활정보':'GuideJung 여행 | 오늘과 이번 주말 가볼만한곳';let index=false;
-  if(['place','festival'].includes(segments[0])&&segments[1]){try{const p=await api<Place>(`/v1/places/${encodeURIComponent(segments[1])}`);title=`${p.name} | GuideJung 여행`;index=p.indexable&&!p.is_demo;}catch{}}
+  const path='/'+segments.join('/');let title=service==='home'?'GuideJung | 지역 기반 생활정보':'여행정보 | 오늘과 이번 주말 가볼만한곳';let index=false;
+  if(['place','festival'].includes(segments[0])&&segments[1]){try{const p=await api<Place>(`/v1/places/${encodeURIComponent(segments[1])}`);title=`${p.name} | 여행정보`;index=p.indexable&&!p.is_demo;}catch{}}
   else if(!segments.length)index=enabled();
-  return {title,description:'지역과 날짜로 가볼만한곳·축제·생활정보를 찾아보세요.',alternates:{canonical:origin(service)+path},robots:{index,follow:true},openGraph:{title,url:origin(service)+path,siteName:'GuideJung',locale:'ko_KR',type:'website'}};
+  return {title,description:'지역과 날짜로 가볼만한곳·축제·생활정보를 찾아보세요.',alternates:{canonical:origin(service)+path},robots:{index,follow:true},openGraph:{title,url:origin(service)+path,siteName:'여행정보',locale:'ko_KR',type:'website'}};
 }
 export async function siteMap(service:Service){
   if(!enabled())return [];
