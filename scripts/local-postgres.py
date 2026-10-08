@@ -81,7 +81,12 @@ def verify_backup(url):
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser();parser.add_argument('command',choices=['setup','backup','verify-backup','stop']);args=parser.parse_args()
-    if args.command=='stop':run('pg_ctl','-D',DATA,'-m','fast','-w','stop')
+    if args.command=='stop':
+        # A collection/sync in another window still needs the DB (e.g. the .bat was started twice).
+        import sys;sys.path.insert(0,str(ROOT/'services'/'api'))
+        from app.tourapi import lock_busy
+        if lock_busy():print('다른 창에서 수집·동기화가 진행 중이라 DB를 끄지 않습니다.')
+        else:run('pg_ctl','-D',DATA,'-m','fast','-w','stop')
     else:
         url=setup()
         if args.command=='backup':backup(url)

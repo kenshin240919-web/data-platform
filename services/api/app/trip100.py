@@ -52,7 +52,15 @@ def run(target=100):
                     state['candidates'].append(raw.payload);state['known'].append(source.external_id)
         with httpx.Client(timeout=30) as client:
             api=TourAPI(os.getenv('TOURAPI_SERVICE_KEY',''),ROOT/'runtime'/'tourapi-budget.json',int(os.getenv('TOURAPI_DAILY_LIMIT','1000')),client)
+            limit=int(os.getenv('TOURAPI_DAILY_LIMIT','1000'))
+            def show(name=''):
+                # One live status line so the console never looks frozen.
+                try:calls=json.loads((ROOT/'runtime'/'tourapi-budget.json').read_text()).get('calls',0)
+                except (OSError,ValueError):calls='?'
+                new=sum(str(r['contentid']) not in set(state['known']) for r in state['records'])
+                print(f"\r진행 {len(state['known'])+new}/{target}건 · 오늘 새로 {new}건 · 오늘 API 호출 {calls}/{limit} · {name[:18]:<18}",end='',flush=True)
             if len(state['candidates'])<=len(state['known']):
+                print('원천 목록을 확인하는 중입니다...',flush=True)
                 # Four types interleaved, 50 per page: enough pages to reach the target plus a buffer.
                 for page in range(1,target//200+3):
                     batches=[api.call('areaBasedList2',contentTypeId=code,numOfRows=50,pageNo=page,arrange='C')['items'] for code in ['12','14','28','15']]
@@ -72,8 +80,9 @@ def run(target=100):
                 if valid_record(raw,regions):state['records'].append(raw)
                 else:state['rejected'].append(raw)
                 # enrich() caches per item, so a sparser checkpoint costs no extra API calls on resume.
-                state['cursor']+=1
+                state['cursor']+=1;show(raw.get('title',''))
                 if state['cursor']%10==0:save(current=raw.get('title',''))
+            print('\n수집한 내용을 저장하는 중입니다...',flush=True)
             with SessionLocal() as db:
                 if state['rejected']:ingest(db,state['rejected'],publish=False)
                 job=ingest(db,state['records'])
@@ -84,6 +93,7 @@ def run(target=100):
         if '예산' not in str(error):raise
         # Daily API limit: publish what is ready so each day's work shows up, then resume tomorrow.
         known=set(state['known']);new=sum(str(r['contentid']) not in known for r in state['records'])
+        print('\n오늘 호출 한도에 도달해 지금까지 모은 내용을 저장하는 중입니다...',flush=True)
         if new:
             with SessionLocal() as db:job=ingest(db,state['records'])
             if job.status!='completed':raise RuntimeError('공개 버전 검증 실패') from error
