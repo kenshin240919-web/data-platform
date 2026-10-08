@@ -4,6 +4,7 @@ temp=tempfile.TemporaryDirectory()
 os.environ['DATABASE_URL']='sqlite:///'+str(Path(temp.name)/'test.db')
 os.environ['DATA_MODE']='demo'
 os.environ['ADMIN_TOKEN']='test-only-token'
+os.environ['SEO_ENABLED']='false'  # tests must not depend on the local .env
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from fastapi.testclient import TestClient
 from app.main import app
