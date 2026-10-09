@@ -43,6 +43,7 @@ GitHub `main`에 push → Cloudflare가 `wrangler.jsonc` 기준으로 `npm run b
 - 10/8 컴퓨터 작업: 로컬 DB 위치를 `~/guidejung-data-postgres`로 고정, 내보내기 시 건수가 10% 넘게 줄면 중단(`--force`로 무시), 수집 진행률 표시, 수집 중 DB 중지 방지, `export-site.bat`이 push 전에 원격 커밋을 먼저 받아옴.
 
 ## 다음 할 일 후보
+- **서비스 구축 순서(사용자 결정)**: trip → weather·charge → traffic·academy → **home은 맨 마지막**(최종설계보고서에서도 home은 범위 제외·추후 별도 설계).
 - 애드센스 보고서(광고 단위별)로 수동 광고 위치별 성과 확인 후 조정
 - 데이터 확대(`collect-trip.bat`, 하루 약 190건 한도)
 - **TourAPI 운영계정 신청 완료(2026-10-09, 승인 대기)**: 공공데이터포털 "한국관광공사_국문 관광정보 서비스_GW"(data.go.kr/data/15101578) 개발계정(하루 1,000회) → 운영계정 전환 신청. 활용사례: 서비스 URL `https://trip.guidejung.com`, 서비스 설명·기능 설명, 공유 데이터 CSV(389건), 대표 이미지(248x93) 제출. 승인 기간은 미확인 → 마이페이지 활용신청 현황에서 확인. **승인되면 컴퓨터 `.env`의 `TOURAPI_DAILY_LIMIT`를 승인 한도로 변경**해야 수집량이 늘어남(README·CLAUDE.md의 "하루 약 190건" 문구도 갱신).
