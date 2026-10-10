@@ -1,1 +1,1 @@
-{"name":"@guidejung/ui","version":"0.1.0","private":true,"exports":{".":"./src/index.tsx","./styles":"./src/styles.css"},"peerDependencies":{"next":"^16.3.8","react":"^19.0.0","react-dom":"^19.0.0"}}
+{"name":"@guidejung/ui","version":"0.1.0","private":true,"exports":{".":"./src/index.tsx","./styles":"./src/styles.css","./ads":"./src/ads.tsx","./adsense-script":"./src/adsense-script.tsx"},"peerDependencies":{"next":"^16.3.8","react":"^19.0.0","react-dom":"^19.0.0"}}

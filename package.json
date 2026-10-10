@@ -11,7 +11,8 @@
     "build": "npm run build -w @guidejung/trip",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test:ui": "playwright test",
-    "check": "npm run typecheck && node tests/search.check.ts && node tests/rss.check.ts && npm run build"
+    "check": "npm run typecheck && node tests/search.check.ts && node tests/rss.check.ts && npm run build && npm run build:weather",
+    "build:weather": "npm run build -w @guidejung/weather"
   },
   "devDependencies": {
     "@playwright/test": "^1.56.0",

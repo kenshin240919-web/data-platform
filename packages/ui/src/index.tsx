@@ -12,10 +12,9 @@ import {rssXml} from './rss';
 import {ADSENSE_CLIENT} from './adsense';
 import {AdSlot} from './ads';
 export {ADSENSE_CLIENT};
+export {AdSenseScript} from './adsense-script';
 export {searchIndex} from './server';
 
-// Auto ads loader; ad formats (anchor, side rail, vignette, in-page) are switched on in the AdSense dashboard, not here.
-export function AdSenseScript(){return <script async src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`} crossOrigin="anonymous"/>;}
 
 const services=[['trip','여행','축제 · 행사 · 가볼만한곳','✳'],['traffic','교통','도로 · CCTV · 교통상황','↗'],['academy','교육','학원 · 교습소 · 수강료','▤'],['charge','전기차','충전소 · 사용가능 충전기','ϟ'],['weather','날씨','지역 · 여행 · 생활날씨','◌']];
 function safeUrl(input:string){try{const u=new URL(input);return ['https:','http:'].includes(u.protocol)?u.href:'#';}catch{return '#';}}
