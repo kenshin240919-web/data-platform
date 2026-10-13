@@ -7,5 +7,5 @@ export function Nearby({base}:{base:string}){
     setState('위치를 확인하고 있습니다.');
     navigator.geolocation.getCurrentPosition(p=>{location.href=`${base}/search?lat=${p.coords.latitude}&lon=${p.coords.longitude}&radius_km=20`;},()=>setState('위치 권한을 확인하거나 지역을 직접 선택하세요.'),{timeout:10000,maximumAge:60000});
   }
-  return <div><button type="button" className="nearby" onClick={find}>◎ 내 주변 20km</button>{state&&<p role="status" className="muted small">{state}</p>}</div>;
+  return <div className="nearby-wrap"><button type="button" className="nearby" onClick={find}><span className="nearby-icon" aria-hidden="true">📍</span><span className="nearby-text"><strong>내 주변 20km 가볼만한곳</strong><small>가까운 순으로 바로 보여 드려요</small></span><span className="nearby-arrow" aria-hidden="true">→</span></button>{state&&<p role="status" className="muted small">{state}</p>}</div>;
 }
