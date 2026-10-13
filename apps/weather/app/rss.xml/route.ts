@@ -7,6 +7,7 @@ export function GET(){
   const pages:[string,string,string,string][]=[
     ['/weekend','이번 주말 전국 날씨','이번 주말 토요일·일요일 전국 날씨와 비 올 확률이 낮은 지역 순위','주말 날씨'],
     ['/air','오늘 전국 미세먼지','전국 미세먼지·초미세먼지 실시간 순위, 공기 깨끗한 곳과 나쁜 곳 TOP 10','미세먼지'],
+    ['/warnings','기상특보 현황','지금 발효 중인 기상특보와 예비특보','기상특보'],
     ['/wear','오늘 뭐 입지? 기온별 옷차림','오늘 기온에 맞는 옷차림 추천과 기온별 옷차림 표','옷차림'],
     ...sidos.map(s=>[`/region/${s.code}`,`${s.name} 날씨`,`${s.name} ${s.regions.length}개 시군구의 오늘·내일·주간 날씨와 미세먼지`,'시도 날씨'] as [string,string,string,string]),
     ...regions.map(r=>[`/region/${r.code}`,`${label(r)} 날씨`,`${r.sidoName} ${r.name}의 지금 날씨, 시간별·10일 예보, 미세먼지, 오늘 옷차림`,'지역 날씨'] as [string,string,string,string]),

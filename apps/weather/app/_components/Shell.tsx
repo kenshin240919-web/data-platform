@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import {TRIP} from '../../lib/regions';
+import {WarningBar} from './Warnings';
 
 export function Shell({children}:{children:React.ReactNode}){
   return <>
@@ -8,6 +9,7 @@ export function Shell({children}:{children:React.ReactNode}){
       <nav aria-label="주요 메뉴" className="wx-nav"><Link href="/">오늘 날씨</Link><Link href="/weekend">주말 날씨</Link><Link href="/air">미세먼지</Link><Link href="/wear">옷차림</Link><Link href="/region">전국 날씨</Link><a href={TRIP} className="wx-nav-out">여행정보 ↗</a></nav>
       <span className="header-note">기상청 공식 예보</span>
     </div></header>
+    <WarningBar/>
     <main>{children}</main>
     <footer>
       <div><Link href="/" className="footer-brand">🌤️ 날씨정보</Link><p>전국 시군구 날씨·미세먼지·주간 예보</p></div>

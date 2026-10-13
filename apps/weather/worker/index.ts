@@ -56,6 +56,17 @@ function nationalAir(env:Env){
     return (b?.response?.body?.items??[]) as Record<string,string>[];});
 }
 
+/** 기상특보: 전국(stnId=108) 최신 통보문의 발효 현황(t6)과 예비특보(t7). 10분 단위로 캐시한다. */
+function warnings(env:Env){
+  const t=kst();const slot=`${ymd(t.date)}${String(t.h).padStart(2,'0')}${Math.floor(t.min/10)}`;
+  return cached(`warn:${slot}`,600,async()=>{
+    const it=items(await upstream(`${API}/1360000/WthrWrnInfoService/getWthrWrnMsg?serviceKey=${env.DATA_GO_KR_KEY}&pageNo=1&numOfRows=1&dataType=JSON&stnId=108`))[0];
+    if(!it)return {time:null,title:'',active:[],preliminary:[]};
+    const lines=(v:unknown)=>String(v??'').split(/\r?\n/).map(l=>l.replace(/^\s*(o|\(\d+\))\s*/,'').trim()).filter(l=>l&&!/^없\s*음$/.test(l));
+    return {time:String(it.tmFc),title:String(it.t1??'').trim(),active:lines(it.t6),preliminary:lines(it.t7)};
+  });
+}
+
 async function weather(env:Env,r:Region):Promise<WeatherResponse>{
   const key=env.DATA_GO_KR_KEY;const q=`serviceKey=${key}&pageNo=1&dataType=JSON`;
   const nb=nowcastBase(),sb=shortBase(),mb=midBase(),t=kst();
@@ -105,6 +116,12 @@ export default {
       if(!r)return json({error:'unknown region'},404,3600);
       if(!env.DATA_GO_KR_KEY)return json({error:'service key missing'},503,0);
       try{return json(await weather(env,r));}catch(e){return json({error:'upstream unavailable'},502,0);}
+    }
+    if(url.pathname==='/api/warnings'){
+      if(!env.DATA_GO_KR_KEY)return json({error:'service key missing'},503,0);
+      const w=await warnings(env);
+      if(!w.value)return json({error:'upstream unavailable'},502,0);
+      return json({...w.value,stale:w.stale},200,300);
     }
     if(url.pathname==='/api/air'){
       if(!env.DATA_GO_KR_KEY)return json({error:'service key missing'},503,0);
