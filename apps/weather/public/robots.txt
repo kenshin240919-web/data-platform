@@ -3,3 +3,6 @@ Allow: /
 Disallow: /api/
 
 Sitemap: https://weather.guidejung.com/sitemap.xml
+
+# Daum webmaster ownership PIN: must stay as the last line.
+#DaumWebMasterTool:7b59b510f0cad90bf8dcddb2a4f303fdbdcaded3df0d544f798361ae25627b5a:UjR58tlt8ZMRZi79BVamzQ==
