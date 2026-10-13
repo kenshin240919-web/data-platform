@@ -38,9 +38,9 @@ GitHub `main`에 push → Cloudflare가 `wrangler.jsonc` 기준으로 `npm run b
 
 ## 현재 상태 (2026-10-13 기준)
 - **trip**(trip.guidejung.com): Cloudflare Workers 배포 완료, 검색 노출(SEO) 켜짐.
-- **weather**(weather.guidejung.com): 10/13 배포·도메인 연결·라이브 확인 완료. 메뉴 오늘 날씨·주말 날씨·미세먼지·옷차림·전국 날씨·여행정보↗, 시도 16·시군구 256 페이지, 애드센스·ads.txt·sitemap·rss.xml(275개 페이지)·네이버 인증 메타태그(10/13 라이브 확인)·Bing 인증 메타태그(msvalidate.01)·Daum PIN(robots.txt 마지막 줄) 적용, 10/13 Daum 웹마스터도구 인증 완료. 남은 일: 네이버 소유확인 후 사이트맵·RSS 제출, Search Console 제출 확인, 첫 호출 속도·무료 플랜 CPU 확인, 특보 띠 추가.
-- robots.txt 정적 제공, Daum 웹마스터 PIN·Naver 사이트 인증 메타태그 추가, RSS 피드 추가.
-- 사이트 제목 "여행정보", 탭 아이콘 자동차 아이콘.
+- **weather**(weather.guidejung.com): 10/13 배포·도메인 연결·라이브 확인 완료. 메뉴 오늘 날씨·주말 날씨·미세먼지·옷차림·전국 날씨·여행정보↗, 시도 16·시군구 256 페이지, 애드센스·ads.txt·sitemap·rss.xml(275개 페이지)·네이버 인증 메타태그(10/13 라이브 확인)·Bing 인증 메타태그(msvalidate.01)·Daum PIN(robots.txt 마지막 줄) 적용, 10/13 Daum 웹마스터도구 인증 완료. 남은 일: 네이버 소유확인(HTML 태그) 후 사이트맵·RSS 제출, Bing Verify 후 사이트맵 제출, Search Console에 weather sitemap.xml·rss.xml 제출, 첫 호출 속도·무료 플랜 CPU 확인, 특보 띠 추가.
+- trip: robots.txt 정적 제공, Daum 웹마스터 PIN·Naver 사이트 인증 메타태그 추가, RSS 피드 추가.
+- trip: 사이트 제목 "여행정보", 탭 아이콘 자동차 아이콘.
 - Google AdSense 적용: 자동광고 코드·ads.txt. 앵커·사이드레일·전면 등 자동광고 형식은 AdSense에서 trip만 따로 관리할 수 없어 guidejung.com 사이트 설정을 함께 따름.
 - 수동 디스플레이 광고 배치: 상세 페이지 2곳(소개글 아래, "주변에서 함께 둘러볼 곳" 위), 목록·검색 결과 아래 1곳, 홈 "이번 주말 행사" 아래 1곳. 안내 페이지(소개·출처·개인정보)에는 없음. 개인정보 안내에 광고·쿠키 고지 추가.
 - 공개 데이터 873건(장소 680·축제 193, 10/13 10:55 내보내기), 검수는 선택 사항(원천 자동 분류 표시).
@@ -59,7 +59,7 @@ GitHub `main`에 push → Cloudflare가 `wrangler.jsonc` 기준으로 `npm run b
 - **TourAPI 운영계정 신청 완료(2026-10-09, 승인 대기)**: 공공데이터포털 "한국관광공사_국문 관광정보 서비스_GW"(data.go.kr/data/15101578) 개발계정(하루 1,000회) → 운영계정 전환 신청. 활용사례: 서비스 URL `https://trip.guidejung.com`, 서비스 설명·기능 설명, 공유 데이터 CSV(389건), 대표 이미지(248x93) 제출. 승인 기간은 미확인 → 마이페이지 활용신청 현황에서 확인. **승인되면 컴퓨터 `.env`의 `TOURAPI_DAILY_LIMIT`를 승인 한도로 변경**해야 수집량이 늘어남(README·CLAUDE.md의 "하루 약 190건" 문구도 갱신).
 - **매일 자동 수집(컴퓨터에서 진행 예정)**: `collect-trip.bat`은 건수 입력·pause가 있어 무인 실행 불가. 무인 스크립트(수집 → export → trip.json 커밋·push) 작성 후 Windows 작업 스케줄러 등록. 실행 시각·하루 목표 건수는 사용자에게 확인.
 - Search Console: rss.xml 성공(197페이지). sitemap.xml은 10/7 제출 후 "가져올 수 없음" → 10/8 재제출, 구글이 읽을 때까지 대기 중. 며칠 뒤에도 실패면 원인 조사
-- 네이버 서치어드바이저 사이트맵 제출 확인
+- 네이버 서치어드바이저 사이트맵 제출 확인(trip·weather)
 - 공간 경계 실검증, 행사 회차 모델, 선택적 재검수(보고서 `reports/GuideJung-최종설계보고서-2026-10-07.md` 9장)
 
 ## 기기 전환 규칙
