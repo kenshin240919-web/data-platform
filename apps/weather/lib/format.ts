@@ -5,6 +5,12 @@ export function skyEmoji(text:string,night=false){
   if(/눈/.test(text))return '🌨️';if(/소나기/.test(text))return '🌦️';if(/비|빗방울/.test(text))return '🌧️';
   if(/흐림/.test(text))return '☁️';if(/구름/.test(text))return night?'☁️':'⛅';return night?'🌙':'☀️';
 }
+/** Sky right now: the observed precipitation (초단기실황) wins over the next forecast hour. */
+export function currentSky(w:WeatherResponse){
+  const first=w.hourly[0];if(!first)return '';
+  const pty=w.now&&w.now.pty!==null?w.now.pty:first.pty;
+  return hourSky({...first,pty});
+}
 export function hourSky(h:Hour){
   if(h.pty&&h.pty>0)return ({1:'비',2:'비/눈',3:'눈',4:'소나기'} as Record<number,string>)[h.pty]??'비';
   return ({1:'맑음',3:'구름많음',4:'흐림'} as Record<number,string>)[h.sky??0]??'';
@@ -46,7 +52,7 @@ export function summary(w:WeatherResponse){
   const day=w.daily.find(d=>d.date===today)??w.daily[0];
   const parts:string[]=[];
   if(wet){const kind=/눈/.test(hourSky(wet))?'눈':'비';const when=wet.time.slice(0,8)===today?`${hh(wet.time)}시`:`내일 ${hh(wet.time)}시`;
-    parts.push(wet===next24[0]&&(wet.pty??0)>0?`지금 ${kind}가 와요. 우산 꼭 챙기세요`:`${when}부터 ${kind} 소식, 우산 챙기세요`);}
+    parts.push((w.now?(w.now.pty??0)>0:wet===next24[0]&&(wet.pty??0)>0)?`지금 ${kind}가 와요. 우산 꼭 챙기세요`:`${when}부터 ${kind} 소식, 우산 챙기세요`);}
   else if(day&&day.max!==null&&day.min!==null&&day.max-day.min>=10)parts.push(`일교차가 ${Math.round(day.max-day.min)}도로 커요. 겉옷 챙기세요`);
   else{const s=next24[0]?hourSky(next24[0]):'';parts.push(s==='맑음'?'맑은 하루예요. 비 소식 없어요':s?`${s}, 비 소식은 없어요`:'오늘 날씨를 확인하세요');}
   const pm=pmGrade('pm25',w.air?.pm25??null);if(pm&&pm.level>=3)parts.push(`초미세먼지 ${pm.text}, 마스크 챙기세요`);

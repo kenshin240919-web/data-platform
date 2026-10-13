@@ -2,7 +2,7 @@
 import {useEffect,useState} from 'react';
 import {AdSlot} from '@guidejung/ui/ads';
 import type {Region,WeatherResponse} from '../../lib/types';
-import {clothes,dayLabel,feelsLike,hh,hourSky,pmGrade,rainStart,skyEmoji,summary,sunTimes,todayKST,uvGrade,weekendLine} from '../../lib/format';
+import {clothes,currentSky,dayLabel,feelsLike,hh,hourSky,pmGrade,rainStart,skyEmoji,summary,sunTimes,todayKST,uvGrade,weekendLine} from '../../lib/format';
 import {remember} from './Recent';
 
 const TRIP='https://trip.guidejung.com';
@@ -21,7 +21,7 @@ export function WeatherPanel({region,label}:{region:Region;label:string}){
   if(failed)return <p className="notice" role="alert">날씨 정보를 불러오지 못했습니다. 잠시 후 새로고침해 주세요.</p>;
   if(!w)return <div className="loading" role="status">{label} 날씨를 불러오고 있습니다.</div>;
 
-  const today=todayKST();const first=w.hourly[0];const sky=first?hourSky(first):'';
+  const today=todayKST();const first=w.hourly[0];const sky=currentSky(w);
   const temp=w.now?.temp??first?.temp??null;const day=w.daily.find(d=>d.date===today)??w.daily[0];
   const feel=feelsLike(temp,w.now?.wind??first?.wind??null);const rain=rainStart(w);
   const avg=day&&day.min!==null&&day.max!==null?(day.min+day.max)/2:temp;const wear=avg!==null?clothes(avg):null;
