@@ -37,7 +37,8 @@ GitHub `main`에 push → Cloudflare가 `wrangler.jsonc` 기준으로 `npm run b
 데이터 갱신 순서(컴퓨터): `collect-trip.bat` → (선택) 검수 → `export-site.bat` → `trip.json` 커밋·push → 자동 재배포.
 
 ## 현재 상태 (2026-10-13 기준)
-- 사이트 Cloudflare Workers 배포 완료, 검색 노출(SEO) 켜짐.
+- **trip**(trip.guidejung.com): Cloudflare Workers 배포 완료, 검색 노출(SEO) 켜짐.
+- **weather**(weather.guidejung.com): 10/13 배포·도메인 연결·라이브 확인 완료. 메뉴 오늘 날씨·주말 날씨·미세먼지·옷차림·전국 날씨·여행정보↗, 시도 16·시군구 256 페이지, 애드센스·ads.txt·sitemap 적용. 남은 일: Search Console·네이버 등록, 첫 호출 속도·무료 플랜 CPU 확인, 특보 띠 추가.
 - robots.txt 정적 제공, Daum 웹마스터 PIN·Naver 사이트 인증 메타태그 추가, RSS 피드 추가.
 - 사이트 제목 "여행정보", 탭 아이콘 자동차 아이콘.
 - Google AdSense 적용: 자동광고 코드·ads.txt. 앵커·사이드레일·전면 등 자동광고 형식은 AdSense에서 trip만 따로 관리할 수 없어 guidejung.com 사이트 설정을 함께 따름.
