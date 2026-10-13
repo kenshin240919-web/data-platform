@@ -38,7 +38,7 @@ GitHub `main`에 push → Cloudflare가 `wrangler.jsonc` 기준으로 `npm run b
 
 ## 현재 상태 (2026-10-13 기준)
 - **trip**(trip.guidejung.com): Cloudflare Workers 배포 완료, 검색 노출(SEO) 켜짐.
-- **weather**(weather.guidejung.com): 10/13 배포·도메인 연결·라이브 확인 완료. 메뉴 오늘 날씨·주말 날씨·미세먼지·옷차림·전국 날씨·여행정보↗, 시도 16·시군구 256 페이지, 애드센스·ads.txt·sitemap·rss.xml(275개 페이지)·네이버 인증 메타태그(10/13 라이브 확인)·Bing 인증 메타태그(msvalidate.01)·Daum PIN(robots.txt 마지막 줄) 적용, 10/13 Daum 웹마스터도구 인증 완료. 남은 일: 네이버 소유확인(HTML 태그) 후 사이트맵·RSS 제출, Bing Verify 후 사이트맵 제출, Search Console에 weather sitemap.xml·rss.xml 제출, 첫 호출 속도·무료 플랜 CPU 확인, 특보 띠 추가.
+- **weather**(weather.guidejung.com): 10/13 배포·도메인 연결·라이브 확인 완료. 메뉴 오늘 날씨·주말 날씨·미세먼지·옷차림·전국 날씨·여행정보↗, 시도 16·시군구 256 페이지, 애드센스·ads.txt·sitemap·rss.xml(275개 페이지)·네이버 인증 메타태그(10/13 라이브 확인)·Bing 인증 메타태그(msvalidate.01)·Daum PIN(robots.txt 마지막 줄) 적용, 10/13 Daum 웹마스터도구 인증·네이버 서치어드바이저 소유확인 완료. 남은 일: 네이버 사이트맵·RSS 제출, Bing Verify 후 사이트맵 제출, Search Console에 weather sitemap.xml·rss.xml 제출, 첫 호출 속도·무료 플랜 CPU 확인, 특보 띠 추가.
 - trip: robots.txt 정적 제공, Daum 웹마스터 PIN·Naver 사이트 인증 메타태그 추가, RSS 피드 추가.
 - trip: 사이트 제목 "여행정보", 탭 아이콘 자동차 아이콘.
 - Google AdSense 적용: 자동광고 코드·ads.txt. 앵커·사이드레일·전면 등 자동광고 형식은 AdSense에서 trip만 따로 관리할 수 없어 guidejung.com 사이트 설정을 함께 따름.
