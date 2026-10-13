@@ -5,7 +5,7 @@ export function Shell({children}:{children:React.ReactNode}){
   return <>
     <header className="header"><div className="header-inner">
       <Link href="/" className="brand"><span aria-hidden="true">🌤️</span><span>날씨정보</span></Link>
-      <nav aria-label="주요 메뉴"><Link href="/">오늘 날씨</Link><Link href="/region">지역별 날씨</Link><Link href="/region/11">서울</Link><Link href="/region/50">제주</Link><a href={TRIP}>여행정보</a></nav>
+      <nav aria-label="주요 메뉴" className="wx-nav"><Link href="/">오늘 날씨</Link><Link href="/weekend">주말 날씨</Link><Link href="/air">미세먼지</Link><Link href="/wear">옷차림</Link><Link href="/region">전국 날씨</Link><a href={TRIP} className="wx-nav-out">여행정보 ↗</a></nav>
       <span className="header-note">기상청 공식 예보</span>
     </div></header>
     <main>{children}</main>

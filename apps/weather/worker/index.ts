@@ -48,6 +48,14 @@ async function cached<T>(key:string,ttl:number,load:()=>Promise<T>):Promise<{val
 
 const items=(b:any)=>b?.response?.body?.items?.item??[];
 
+/** 에어코리아 전국 측정소(약 670곳)를 한 번에 받아 1시간 캐시한다. 하루 500회 한도 안에서 지역·순위 화면이 함께 쓴다. */
+function nationalAir(env:Env){
+  const t=kst();
+  return cached(`air:all:${ymd(t.date)}${String(t.h).padStart(2,'0')}`,3600,async()=>{
+    const b=await upstream(`${API}/B552584/ArpltnInforInqireSvc/getCtprvnRltmMesureDnsty?serviceKey=${env.DATA_GO_KR_KEY}&returnType=json&numOfRows=1000&pageNo=1&sidoName=%EC%A0%84%EA%B5%AD&ver=1.0`,3,15000);
+    return (b?.response?.body?.items??[]) as Record<string,string>[];});
+}
+
 async function weather(env:Env,r:Region):Promise<WeatherResponse>{
   const key=env.DATA_GO_KR_KEY;const q=`serviceKey=${key}&pageNo=1&dataType=JSON`;
   const nb=nowcastBase(),sb=shortBase(),mb=midBase(),t=kst();
@@ -59,9 +67,7 @@ async function weather(env:Env,r:Region):Promise<WeatherResponse>{
         upstream(`${API}/1360000/MidFcstInfoService/getMidLandFcst?${q}&numOfRows=10&regId=${r.midLand}&tmFc=${mb}`),
         upstream(`${API}/1360000/MidFcstInfoService/getMidTa?${q}&numOfRows=10&regId=${r.midTa}&tmFc=${mb}`)]);
       return parseMid(mb,items(land)[0],items(ta)[0]);}),
-    cached(`air:all:${ymd(t.date)}${String(t.h).padStart(2,'0')}`,3600,async()=>{
-      const b=await upstream(`${API}/B552584/ArpltnInforInqireSvc/getCtprvnRltmMesureDnsty?serviceKey=${key}&returnType=json&numOfRows=1000&pageNo=1&sidoName=%EC%A0%84%EA%B5%AD&ver=1.0`,3,15000);
-      return (b?.response?.body?.items??[]) as Record<string,string>[];}),
+    nationalAir(env),
     cached(`uv:${r.code}:${ymd(t.date)}${t.h<18?'06':'18'}`,6*3600,async()=>{
       // 생활기상지수는 시군구 행정코드로 조회하고, 코드가 없으면(행정구역 개편 직후 등) 시도 코드로 다시 조회한다.
       const time=`${ymd(t.date)}${t.h<18?'06':'18'}`;let it:Record<string,string>|undefined;
@@ -99,6 +105,14 @@ export default {
       if(!r)return json({error:'unknown region'},404,3600);
       if(!env.DATA_GO_KR_KEY)return json({error:'service key missing'},503,0);
       try{return json(await weather(env,r));}catch(e){return json({error:'upstream unavailable'},502,0);}
+    }
+    if(url.pathname==='/api/air'){
+      if(!env.DATA_GO_KR_KEY)return json({error:'service key missing'},503,0);
+      const air=await nationalAir(env);
+      if(!air.value)return json({error:'upstream unavailable'},502,0);
+      const n=(v:string|undefined)=>v===undefined||v===''||v==='-'?null:Number(v);
+      const stations=air.value.map(a=>({station:a.stationName,sido:a.sidoName,time:a.dataTime,pm10:n(a.pm10Value),pm25:n(a.pm25Value)})).filter(a=>a.pm10!==null||a.pm25!==null);
+      return json({time:stations[0]?.time??null,stale:air.stale,stations},200,600);
     }
     if(url.pathname.startsWith('/api/'))return json({error:'not found'},404,3600);
     return env.ASSETS.fetch(req);

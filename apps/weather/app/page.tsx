@@ -13,6 +13,11 @@ export default function Home(){
       <Recent/>
       <HomeWeather regions={slim} fallback="11140"/>
     </section>
+    <section className="section wx-shortcuts" aria-label="많이 보는 정보">
+      <Link href="/weekend"><span aria-hidden="true">🏖️</span><b>이번 주말 날씨</b><small>전국 맑은 곳 순위</small></Link>
+      <Link href="/air"><span aria-hidden="true">😷</span><b>오늘 미세먼지</b><small>깨끗한 곳·나쁜 곳 TOP 10</small></Link>
+      <Link href="/wear"><span aria-hidden="true">👕</span><b>오늘 뭐 입지?</b><small>기온별 옷차림</small></Link>
+    </section>
     <section className="section">
       <div className="section-heading"><div><div className="eyebrow">POPULAR</div><h2>많이 찾는 지역 날씨</h2></div></div>
       <div className="chips big">{popular.map(r=><Link key={r.code} href={`/region/${r.code}`}>{label(r)}</Link>)}</div>
