@@ -36,19 +36,20 @@ GitHub `main`에 push → Cloudflare가 `wrangler.jsonc` 기준으로 `npm run b
 
 데이터 갱신 순서(컴퓨터): `collect-trip.bat` → (선택) 검수 → `export-site.bat` → `trip.json` 커밋·push → 자동 재배포.
 
-## 현재 상태 (2026-10-08 오전 기준)
+## 현재 상태 (2026-10-13 기준)
 - 사이트 Cloudflare Workers 배포 완료, 검색 노출(SEO) 켜짐.
 - robots.txt 정적 제공, Daum 웹마스터 PIN·Naver 사이트 인증 메타태그 추가, RSS 피드 추가.
 - 사이트 제목 "여행정보", 탭 아이콘 자동차 아이콘.
 - Google AdSense 적용: 자동광고 코드·ads.txt. 앵커·사이드레일·전면 등 자동광고 형식은 AdSense에서 trip만 따로 관리할 수 없어 guidejung.com 사이트 설정을 함께 따름.
 - 수동 디스플레이 광고 배치: 상세 페이지 2곳(소개글 아래, "주변에서 함께 둘러볼 곳" 위), 목록·검색 결과 아래 1곳, 홈 "이번 주말 행사" 아래 1곳. 안내 페이지(소개·출처·개인정보)에는 없음. 개인정보 안내에 광고·쿠키 고지 추가.
-- 공개 데이터 389건(장소 302·축제 87, 10/8 09:47 내보내기), 검수는 선택 사항(원천 자동 분류 표시).
+- 공개 데이터 873건(장소 680·축제 193, 10/13 10:55 내보내기), 검수는 선택 사항(원천 자동 분류 표시).
+- 10/13 trip 메인: "지역별로 둘러보기" 옆 "📍 내 주변 20km 가볼만한곳" 버튼을 큰 파란 카드로 변경(모바일은 제목 아래 전체 폭), 지역 카드 번호 01~ 두 자리로 수정.
 - 10/8 컴퓨터 작업: 로컬 DB 위치를 `~/guidejung-data-postgres`로 고정, 내보내기 시 건수가 10% 넘게 줄면 중단(`--force`로 무시), 수집 진행률 표시, 수집 중 DB 중지 방지, `export-site.bat`이 push 전에 원격 커밋을 먼저 받아옴.
 
 ## 다음 할 일 후보
 - **서비스 구축 순서(사용자 결정)**: trip → weather·charge → traffic·academy → **home은 맨 마지막**(최종설계보고서에서도 home은 범위 제외·추후 별도 설계).
 - **weather 설계안 작성(10/9)**: `reports/weather-설계안-2026-10-09.md`. 같은 저장소 `apps/weather` + 별도 Cloudflare Worker, 기상청 API는 Worker에서 직접 호출·캐시. 다음: 사용자 활용신청(단기예보·중기예보·에어코리아, 특보 권장).
-- **weather MVP 코드 완성(10/10, 배포 전)**: 메인(최근 지역·내 위치)·시도 16·시군구 256 페이지, 지금 날씨+한 줄 요약, 생활 카드(옷차림·우산·미세먼지·자외선), 48시간·10일 예보, 미세먼지, 일출·일몰, trip 연결 카드, 주변·같은 시도 지역 링크, 애드센스 2곳, sitemap·robots·ads.txt. 실제 API로 Worker 응답 확인. **다음: 사용자가 Cloudflare에 `guidejung-weather` Worker 생성·키 Secret 등록·도메인 연결(`docs/weather-deploy.md`)**, 이후 무료 플랜 CPU 10ms 초과 여부 확인, Search Console·네이버 등록, 특보 띠·순위·주말 페이지 추가.
+- **weather MVP 코드 완성(10/10, 배포 전 — 10/13 현재 Cloudflare Worker 미생성)**: 메인(최근 지역·내 위치)·시도 16·시군구 256 페이지, 지금 날씨+한 줄 요약, 생활 카드(옷차림·우산·미세먼지·자외선), 48시간·10일 예보, 미세먼지, 일출·일몰, trip 연결 카드, 주변·같은 시도 지역 링크, 애드센스 2곳, sitemap·robots·ads.txt. 실제 API로 Worker 응답 확인. **다음: 사용자가 Cloudflare에 `guidejung-weather` Worker 생성·키 Secret 등록·도메인 연결(`docs/weather-deploy.md`)**, 이후 무료 플랜 CPU 10ms 초과 여부 확인, Search Console·네이버 등록, 특보 띠·순위·주말 페이지 추가.
 - **weather 활용신청 현황(10/10)**: 7개 모두 신청 완료 — 기상청 단기예보(15084084, 승인 확인)·중기예보·기상특보·생활기상지수, 에어코리아 대기오염정보·측정소정보(15073877), 천문연 출몰시각. 키는 공공데이터포털 계정 공통 키(저장소·채팅에 두지 않음 → Cloudflare Worker 비밀값과 컴퓨터 `.env`에만). 일일 한도: 에어코리아 2종 500, 나머지 10,000(호출 계획은 weather 설계안 3-1장). 10/10 클라우드 환경 허용 도메인에 `apis.data.go.kr` 추가 → 실호출 확인: 단기예보·중기예보·기상특보·출몰시각·에어코리아 측정소정보(672곳)·대기오염정보(sidoName=전국 1회로 672곳) 정상. 생활기상지수(4.0)는 End Point `1360000/LivingWthrIdxServiceV5` — `getUVIdxV5`(자외선)·`getAirDiffusionIdxV5`(대기정체) 정상, `getSenTaIdxV5`(체감온도)는 10월에 서비스 없음 오류(계절 제공으로 추정, 미확인). 에어코리아 응답이 가끔 connection reset → 재시도 필요.
 - 애드센스 보고서(광고 단위별)로 수동 광고 위치별 성과 확인 후 조정
 - 데이터 확대(`collect-trip.bat`, 하루 약 190건 한도)
