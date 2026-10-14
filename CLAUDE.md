@@ -52,6 +52,7 @@ GitHub `main`에 push → Cloudflare가 `wrangler.jsonc` 기준으로 `npm run b
 
 ## 다음 할 일 후보
 - **서비스 구축 순서(사용자 결정)**: trip → weather·charge → traffic·academy → **home은 맨 마지막**(최종설계보고서에서도 home은 범위 제외·추후 별도 설계).
+- **charge 설계안 작성(10/14)**: `reports/charge-설계안-2026-10-14.md`. 클릭·체류: 내 주변 지금 사용 가능한 충전기 3초 답·상태 색깔·충전 중 갈 만한 곳(trip)·날씨(weather) 연결. 구조: `apps/charge` + 별도 Worker(실시간 상태) + GitHub Actions 매일 정적 수집. API `apis.data.go.kr/B552584/EvCharger`(getChargerInfo·getChargerStatus) 존재 확인, **다음: 사용자 활용신청(한국환경공단_전기자동차 충전소 정보)**.
 - **weather 설계안 작성(10/9)**: `reports/weather-설계안-2026-10-09.md`. 같은 저장소 `apps/weather` + 별도 Cloudflare Worker, 기상청 API는 Worker에서 직접 호출·캐시. 다음: 사용자 활용신청(단기예보·중기예보·에어코리아, 특보 권장).
 - **weather 배포(10/13)**: Cloudflare Worker `guidejung-weather` 생성(배포 명령 `npx wrangler deploy -c apps/weather/wrangler.jsonc`, 빌드 명령 비움, 미리보기 빌드 끔), Secret `DATA_GO_KR_KEY` 등록, main 빌드 성공, 도메인 `weather.guidejung.com` 연결. Cloudflare의 "루트 wrangler.jsonc 이름 불일치" 경고·자동 PR은 무시(병합 시 trip 배포가 깨짐). 10/13 라이브 확인: 페이지·ads.txt·robots·sitemap 200, `/api/weather` 정상(errors 없음, 미세먼지·자외선·10일 예보 포함). 캐시 없는 첫 호출이 이 클라우드(해외 경유)에서 14~60초로 느림 → 국내 방문자 기준 속도 확인 필요, 느리면 응답 시간 개선(기상청 호출 타임아웃 단축·부분 응답) 검토. 클라우드 환경 허용 도메인에 weather·trip.guidejung.com 추가됨.
 - **weather 메뉴 개편(10/13)**: 상단 메뉴를 기능 중심으로 변경 — 오늘 날씨 · 주말 날씨(`/weekend`, 시도 16곳 주말 예보 맑은 순·trip 연결) · 미세먼지(`/air`, 전국 초미세먼지 TOP 10·시도 평균, `/api/air` 1회 호출 캐시) · 옷차림(`/wear`, 내 지역 오늘 옷차림+기온별 표) · 전국 날씨(`/region`) · 여행정보↗. 메인에 세 페이지 바로가기 카드.
