@@ -1,0 +1,30 @@
+'use client';
+import Link from 'next/link';
+import {dirLabel,roadName,type Route} from '../../lib/format';
+import {GRADE,fmtTime,useTraffic} from './live';
+
+/** 메인 3초 답(전국 정체 구간 수)과 지금 가장 막히는 구간 TOP 10. */
+export function HomeLive({routes}:{routes:Route[]}){
+  const {data,failed}=useTraffic();
+  const byNo=new Map(routes.map(r=>[r.no,r]));
+  if(failed)return <p className="notice" role="alert">실시간 소통 정보를 불러오지 못했습니다. 잠시 후 새로고침해 주세요.</p>;
+  if(!data)return <section className="tf-hero"><p className="tf-answer">전국 고속도로 <b>{routes.length}개 노선</b> 실시간 정체</p><p className="tf-sub" role="status">지금 막히는 구간을 찾고 있어요…</p></section>;
+  const all=routes.flatMap(r=>(['E','S'] as const).flatMap(d=>r[d].map(([id,name])=>({id,name,r,d,v:data.zones[id]}))));
+  const jam=all.filter(z=>z.v?.[1]===3),slow=all.filter(z=>z.v?.[1]===2);
+  const top=[...jam,...slow].filter(z=>z.v![0]>0).sort((a,b)=>b.v![1]-a.v![1]||a.v![0]-b.v![0]).slice(0,10);
+  // Routes ranked by how many 구간 are jammed or slow right now.
+  const worst=[...byNo.values()].map(r=>({r,n:all.filter(z=>z.r===r&&(z.v?.[1]??0)>=2).length})).filter(x=>x.n).sort((a,b)=>b.n-a.n).slice(0,6);
+  return <>
+    <section className={`tf-hero${jam.length?' jam':slow.length?' slow':''}`}>
+      <p className="tf-answer">지금 전국 고속도로 정체 <b>{jam.length}곳</b> · 서행 <b>{slow.length}곳</b></p>
+      <p className="tf-sub">{routes.length}개 노선 {all.length.toLocaleString()}개 구간 · {fmtTime(data.time)} 기준{data.refreshing?' · 최신 정보 확인 중':''}</p>
+    </section>
+    {worst.length>0&&<div className="chips big">{worst.map(({r,n})=><Link key={r.no} href={`/road/${r.no}`}>{roadName(r)} <span className="tf-badge">막힘 {n}</span></Link>)}</div>}
+    <section className="section"><div className="section-heading"><div><div className="eyebrow">TOP 10</div><h2>지금 가장 막히는 구간</h2></div><Link href="/road">고속도로별 보기</Link></div>
+      {top.length?<ol className="tf-top">{top.map((z,i)=><li key={z.id}><Link href={`/road/${z.r.no}#${z.id}`} className={`g${z.v![1]}`}>
+        <span className="tf-rank">{i+1}</span><span className="tf-zname"><b>{z.name.replace('-',' → ')}</b><small>{roadName(z.r)} · {dirLabel(z.r,z.d)}</small></span>
+        <span className="tf-speed"><b>{z.v![0]}</b>km/h<small>{GRADE[z.v![1]].text}</small></span></Link></li>)}</ol>
+      :<p className="notice">지금 막히는 구간이 없어요. 전국 고속도로가 원활합니다.</p>}
+    </section>
+  </>;
+}
