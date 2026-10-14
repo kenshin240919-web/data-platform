@@ -1,0 +1,36 @@
+name: Charge station snapshot
+# Daily list of every EV charging station for charge.guidejung.com (apps/charge/data/snapshot.json).
+# Needs the repository secret DATA_GO_KR_KEY (공공데이터포털 인증키). The commit to main makes Cloudflare redeploy.
+on:
+  schedule:
+    - cron: '17 19 * * *' # 04:17 KST
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: charge-snapshot
+  cancel-in-progress: false
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Collect
+        env:
+          DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
+        run: python scripts/collect-charge-snapshot.py
+      - name: Commit
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add apps/charge/data/snapshot.json
+          if git diff --cached --quiet; then echo 'no change'; exit 0; fi
+          git commit -m 'charge: 충전소 정적 스냅샷 갱신'
+          for i in 1 2 3; do git pull --rebase origin main && git push origin HEAD:main && exit 0; sleep 10; done
+          exit 1

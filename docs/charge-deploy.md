@@ -23,8 +23,8 @@ Worker(`guidejung-charge`) → **Settings → Variables and Secrets → Add**
 
 ## 3. 도메인 연결 (사용자)
 Worker → **Settings → Domains & Routes → Add → Custom domain** → `charge.guidejung.com`
-- 기상청 응답 캐시(Cache API)는 커스텀 도메인에서만 작동합니다. `*.workers.dev` 주소에서는 매 요청마다 기상청을 호출하므로 테스트용으로만 쓰세요.
-- 기존 guidejung.com의 DNS 레코드는 건드리지 않습니다. Custom domain 추가 시 Cloudflare가 `weather` 레코드만 새로 만듭니다.
+- 충전소 응답 캐시(Cache API)는 커스텀 도메인에서만 작동합니다. `*.workers.dev` 주소에서는 매 요청마다 충전 API를 호출하므로 테스트용으로만 쓰세요.
+- 기존 guidejung.com의 DNS 레코드는 건드리지 않습니다. Custom domain 추가 시 Cloudflare가 `charge` 레코드만 새로 만듭니다.
 
 ## 4. 확인
 - `https://charge.guidejung.com/api/stations?code=11620` → JSON에 `stations` 목록이 채워지면 정상
@@ -32,4 +32,13 @@ Worker → **Settings → Domains & Routes → Add → Custom domain** → `char
 - Search Console·네이버 서치어드바이저에 사이트 등록 후 사이트맵 제출
 
 ## 무료 플랜 주의
-- Workers 무료 플랜은 요청당 CPU 10ms 제한이 있습니다. 캐시가 없는 첫 요청은 기상청 응답(JSON)을 해석하느라 이 한도를 넘을 수 있습니다. 배포 후 Worker → Observability에서 `Exceeded CPU` 오류가 보이면 알려 주세요. 해결책은 (1) 응답 크기 줄이기, (2) Workers 유료 플랜(월 $5)이며, 유료 전환은 사용자 승인 후 진행합니다.
+- Workers 무료 플랜은 요청당 CPU 10ms 제한이 있습니다. 캐시가 없는 첫 요청은 충전 API 응답(JSON, 큰 시는 수 MB)을 해석하느라 이 한도를 넘을 수 있습니다. 배포 후 Worker → Observability에서 `Exceeded CPU` 오류가 보이면 알려 주세요. 해결책은 (1) 응답 크기 줄이기, (2) Workers 유료 플랜(월 $5)이며, 유료 전환은 사용자 승인 후 진행합니다.
+
+## 5. 매일 정적 스냅샷 (GitHub Actions)
+지역 페이지 HTML에 충전소 수와 충전기가 많은 충전소 30곳을 미리 넣어 검색 노출과 첫 화면 속도를 높입니다.
+- 수집: `scripts/collect-charge-snapshot.py` → `apps/charge/data/snapshot.json`(전국 getChargerInfo 약 53회 호출, 하루 1,000회 한도 중).
+- 자동 실행: `.github/workflows/charge-snapshot.yml`, 매일 04:17(KST). 결과를 main에 커밋 → Cloudflare 자동 재배포.
+- **사용자 1회 설정**: GitHub 저장소 → Settings → Secrets and variables → Actions → **New repository secret**
+  - Name `DATA_GO_KR_KEY`, Value = Cloudflare Worker에 넣은 것과 같은 공공데이터포털 인증키
+- 수동 실행: GitHub → Actions → "Charge station snapshot" → **Run workflow**.
+- 수집 결과가 전체의 90% 미만이면 파일을 바꾸지 않습니다(이전 스냅샷 유지).
