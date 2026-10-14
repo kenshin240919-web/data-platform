@@ -11,7 +11,7 @@
 - 유료 API(AI API 등) 호출이 필요하면 **사용 전에 비용을 알리고 승인**을 받습니다. 구독(Claude Pro, ChatGPT Plus, Genspark AI Plus) 범위 안에서 가능한 방법을 우선합니다.
 - API 키·ADMIN_TOKEN·DB 비밀번호는 `.env`에만 둡니다. 코드·커밋·채팅에 넣지 않습니다. (`.env`, `개방데이터/`, `runtime/`은 gitignore 대상)
 - 저장소는 공개(Public)여도 괜찮다고 사용자가 확인했습니다.
-- **Microsoft Clarity: 모든 하위 사이트에 설치**(사이트마다 Clarity 프로젝트 따로). 공통 컴포넌트 `packages/ui/src/clarity-script.tsx`의 `ClarityScript id=...`를 각 layout `<head>`에 넣고 개인정보 안내에 Clarity 고지. 프로젝트 ID: trip `yxgv6hkcoz`, weather `yxh23x6e9n`(10/14 둘 다 설치). 새 사이트는 사용자에게 ID 받기. guidejung.com(WordPress)은 건드리지 않음.
+- **Microsoft Clarity: 모든 하위 사이트에 설치**(사이트마다 Clarity 프로젝트 따로). 공통 컴포넌트 `packages/ui/src/clarity-script.tsx`의 `ClarityScript id=...`를 각 layout `<head>`에 넣고 개인정보 안내에 Clarity 고지. 프로젝트 ID: trip `yxgv6hkcoz`, weather `yxh23x6e9n`(10/14 둘 다 설치), charge `yxl5298cyt`(10/14 설치). 새 사이트는 사용자에게 ID 받기. guidejung.com(WordPress)은 건드리지 않음.
 - **애드센스: 설계보고서의 모든 하위 사이트(home·trip·traffic·academy·charge·weather)에 Google AdSense 광고를 넣습니다.** 게시자 ID `ca-pub-3087515825675332`, 수동 디스플레이 광고 슬롯 `6639512269`(`packages/ui/src/adsense.ts`, 자동광고 `AdSenseScript`, 수동광고 `AdSlot`), 각 사이트 `public/ads.txt` 필수. 기존 guidejung.com(WordPress)은 따로 운영 중이므로 연결·변경하지 않습니다.
 
 ## 구조
@@ -41,7 +41,7 @@ GitHub `main`에 push → Cloudflare가 `wrangler.jsonc` 기준으로 `npm run b
 ## 현재 상태 (2026-10-14 기준)
 - **trip**(trip.guidejung.com): Cloudflare Workers 배포 완료, 검색 노출(SEO) 켜짐.
 - **weather**(weather.guidejung.com): 10/13 배포·도메인 연결·라이브 확인 완료. 메뉴 오늘 날씨·주말 날씨·미세먼지·옷차림·전국 날씨·여행정보↗, 시도 16·시군구 256 페이지, 애드센스·ads.txt·sitemap·rss.xml(275개 페이지)·네이버 인증 메타태그(10/13 라이브 확인)·Bing 인증 메타태그(msvalidate.01)·Daum PIN(robots.txt 마지막 줄) 적용, 10/13 Daum 인증·네이버 소유확인 완료, 사이트맵·RSS 제출 완료(사용자 보고). 남은 일: 며칠 뒤 각 검색엔진에서 사이트맵 처리 상태(성공·수집 페이지 수) 확인, 첫 호출 속도·무료 플랜 CPU 확인.
-- **charge**(charge.guidejung.com): 10/14 MVP 코드 완성·main push, **아직 Cloudflare Worker 미생성(배포 전)**. 남은 일: Worker `guidejung-charge` 생성·Secret·도메인, Clarity ID, 검색엔진 등록.
+- **charge**(charge.guidejung.com): 10/14 MVP 코드 완성·main push, 배포 진행 중. Clarity 설치(10/14), Cloudflare Worker `guidejung-charge` 생성·Secret `DATA_GO_KR_KEY` 등록 완료(10/14, 사용자). 남은 일: 도메인 `charge.guidejung.com` 연결, 라이브 확인, 검색엔진 등록.
 - weather 기상특보(10/13): 모든 페이지 상단 띠(발효 중=빨강, 예비특보=노랑) → `/warnings` 상세. `/api/warnings`는 기상청 getWthrWrnMsg(stnId=108) 최신 통보문의 t6(발효 현황)·t7(예비특보)을 10분 캐시. 10/14 라이브 확인(강풍·풍랑주의보 발효 중 표시).
 - trip: robots.txt 정적 제공, Daum 웹마스터 PIN·Naver 사이트 인증 메타태그 추가, RSS 피드 추가.
 - trip: 사이트 제목 "여행정보", 탭 아이콘 자동차 아이콘.
