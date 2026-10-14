@@ -11,7 +11,7 @@
 - 유료 API(AI API 등) 호출이 필요하면 **사용 전에 비용을 알리고 승인**을 받습니다. 구독(Claude Pro, ChatGPT Plus, Genspark AI Plus) 범위 안에서 가능한 방법을 우선합니다.
 - API 키·ADMIN_TOKEN·DB 비밀번호는 `.env`에만 둡니다. 코드·커밋·채팅에 넣지 않습니다. (`.env`, `개방데이터/`, `runtime/`은 gitignore 대상)
 - 저장소는 공개(Public)여도 괜찮다고 사용자가 확인했습니다.
-- **Microsoft Clarity: 모든 하위 사이트에 설치**(사이트마다 Clarity 프로젝트 따로). 공통 컴포넌트 `packages/ui/src/clarity-script.tsx`의 `ClarityScript id=...`를 각 layout `<head>`에 넣고 개인정보 안내에 Clarity 고지. 프로젝트 ID: trip `yxgv6hkcoz`, weather 미정(사용자에게 받기). guidejung.com(WordPress)은 건드리지 않음.
+- **Microsoft Clarity: 모든 하위 사이트에 설치**(사이트마다 Clarity 프로젝트 따로). 공통 컴포넌트 `packages/ui/src/clarity-script.tsx`의 `ClarityScript id=...`를 각 layout `<head>`에 넣고 개인정보 안내에 Clarity 고지. 프로젝트 ID: trip `yxgv6hkcoz`, weather `yxh23x6e9n`(10/14 둘 다 설치). 새 사이트는 사용자에게 ID 받기. guidejung.com(WordPress)은 건드리지 않음.
 - **애드센스: 설계보고서의 모든 하위 사이트(home·trip·traffic·academy·charge·weather)에 Google AdSense 광고를 넣습니다.** 게시자 ID `ca-pub-3087515825675332`, 수동 디스플레이 광고 슬롯 `6639512269`(`packages/ui/src/adsense.ts`, 자동광고 `AdSenseScript`, 수동광고 `AdSlot`), 각 사이트 `public/ads.txt` 필수. 기존 guidejung.com(WordPress)은 따로 운영 중이므로 연결·변경하지 않습니다.
 
 ## 구조
