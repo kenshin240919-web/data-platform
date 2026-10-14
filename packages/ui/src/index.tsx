@@ -7,7 +7,7 @@ import {api,enabled,origin,places} from './server';
 import {Nearby} from './controls';
 import {Cards,SearchForm,collections,detailPath,formatDate,labels} from './cards';
 import {ClientCards,EventNote,Listing} from './listing';
-import type {Query} from './search';
+import {search,type Query} from './search';
 import {rssXml} from './rss';
 import {ADSENSE_CLIENT} from './adsense';
 import {AdSlot} from './ads';
@@ -45,7 +45,11 @@ async function listing(service:Service,segments:string[]){
   const region=regions.items.find(r=>r.id===fixed.region);
   const title=region?`${region.name} 여행`:collections[route]||(route==='festival'?'축제·행사 찾기':route==='place'?'가볼만한곳 찾기':'여행 검색');
   // Query-string filters (?q=, ?region=, ?page=) are applied in the browser: the site is static.
-  return <Suspense fallback={<div className="loading" role="status">정보를 불러오고 있습니다.</div>}><Listing fixed={fixed} regions={regions.items} title={title}/></Suspense>;
+  // Static HTML carries the first results so search engines (Naver Yeti renders little JS) see real content;
+  // the browser then swaps in the interactive list with query-string filters and paging.
+  const initial=search(places(),{...fixed,limit:24});
+  const fallback=<section className="section listing"><div className="eyebrow">FIND YOUR TRIP</div><h1>{title}</h1><div className="results-heading"><p><strong>{initial.total}</strong>개 정보</p></div><Cards items={initial.items}/></section>;
+  return <Suspense fallback={fallback}><Listing fixed={fixed} regions={regions.items} title={title}/></Suspense>;
 }
 
 async function detail(service:Service,segments:string[]){
@@ -69,18 +73,31 @@ export async function Page({service,segments=[]}:{service:Service;segments?:stri
   notFound();
 }
 
+const INDEXED_LISTS=['region','place','festival','free','kids','pet','indoor'];
 export async function pageMetadata(service:Service,segments:string[]):Promise<Metadata>{
-  const path='/'+segments.join('/');let title=service==='home'?'GuideJung | 지역 기반 생활정보':'여행정보 | 오늘과 이번 주말 가볼만한곳';let index=false;
+  const path='/'+segments.join('/');let description='지역과 날짜로 가볼만한곳·축제·생활정보를 찾아보세요.';let title=service==='home'?'GuideJung | 지역 기반 생활정보':'여행정보 | 오늘과 이번 주말 가볼만한곳';let index=false;
   if(['place','festival'].includes(segments[0])&&segments[1]){try{const p=await api<Place>(`/v1/places/${encodeURIComponent(segments[1])}`);title=`${p.name} | 여행정보`;index=p.indexable&&!p.is_demo;}catch{}}
   else if(!segments.length)index=enabled();
-  return {title,description:'지역과 날짜로 가볼만한곳·축제·생활정보를 찾아보세요.',alternates:{canonical:origin(service)+path,types:{'application/rss+xml':origin(service)+'/rss.xml'}},robots:{index,follow:true},openGraph:{title,url:origin(service)+path,siteName:'여행정보',locale:'ko_KR',type:'website'}};
+  else if(INDEXED_LISTS.includes(segments[0])&&segments.length<=2){
+    // 지역·조건별 목록은 검색 유입 입구라 노출한다. 결과가 매번 바뀌는 검색(/search)과 날짜 기반(오늘·이번 주말) 목록은 제외.
+    let name:string|undefined;
+    if(segments[0]==='region'&&segments[1]){try{name=(await api<{items:Region[]}>('/v1/regions')).items.find(r=>r.id===segments[1])?.name;}catch{}}
+    if(segments[0]!=='region'||!segments[1]||name){
+      const head=segments[0]==='region'?(name?`${name} 가볼만한곳·축제`:'지역별 여행지 찾기'):segments[0]==='place'?'전국 가볼만한곳':segments[0]==='festival'?'전국 축제·행사':collections[segments[0]];
+      title=`${head} | 여행정보`;index=enabled();
+      description=segments[0]==='region'&&name?`${name}의 가볼만한곳과 축제·행사를 한국관광공사 공식 정보로 확인하세요. 운영시간·요금·주차 정보 제공.`:`${head} 목록을 지역과 조건으로 찾아보세요. 한국관광공사 공식 관광정보 기반.`;
+    }
+  }
+  return {title,description,alternates:{canonical:origin(service)+path,types:{'application/rss+xml':origin(service)+'/rss.xml'}},robots:{index,follow:true},openGraph:{title,url:origin(service)+path,siteName:'여행정보',locale:'ko_KR',type:'website'}};
 }
 export async function siteMap(service:Service){
   if(!enabled())return [];
   let status:Status;try{status=await api<Status>('/v1/status');}catch{return [];}
   if(status.mode!=='live'||!status.available)return [];
   const rows=service==='trip'?(await api<{items:{path:string;lastmod:string}[]}>('/v1/sitemap')).items:[];
-  return [{url:origin(service)+'/',lastModified:status.updated_at?new Date(status.updated_at):undefined},...rows.map(p=>({url:origin(service)+p.path,lastModified:new Date(p.lastmod)}))];
+  const at=status.updated_at?new Date(status.updated_at):undefined;
+  const lists=service==='trip'?[...INDEXED_LISTS.map(k=>'/'+k),...(await api<{items:Region[]}>('/v1/regions')).items.map(r=>`/region/${r.id}`)]:[];
+  return [{url:origin(service)+'/',lastModified:at},...lists.map(path=>({url:origin(service)+path,lastModified:at})),...rows.map(p=>({url:origin(service)+p.path,lastModified:new Date(p.lastmod)}))];
 }
 export const rss=(service:Service)=>rssXml(places(),origin(service));
 /** Every page the static build emits; other URLs get the 404 page. */
