@@ -18,8 +18,12 @@ export function StationBoard({region,label,origin}:{region:ChargeRegion;label:st
   const [f,setF]=useState<Filters>({ok:false,fast:false,free:false,h24:false});const [limit,setLimit]=useState(30);const [open,setOpen]=useState<string|null>(null);const linked=useRef(false);
   useEffect(()=>{setData(null);setFailed(false);setLimit(30);linked.current=false;remember(region.code,label);
     const ctrl=new AbortController();
-    fetch(`/api/stations?code=${region.code}`,{signal:ctrl.signal}).then(r=>{if(!r.ok)throw new Error();return r.json();}).then(setData,e=>{if(e.name!=='AbortError')setFailed(true);});
-    return ()=>ctrl.abort();},[region.code,label]);
+    const get=()=>fetch(`/api/stations?code=${region.code}`,{signal:ctrl.signal,cache:'no-store'}).then(r=>{if(!r.ok)throw new Error();return r.json() as Promise<StationsResponse>;});
+    let timer:ReturnType<typeof setTimeout>|undefined;
+    // An older copy shows at once; the Worker refreshes it in the background, so ask again shortly for the new status.
+    const poll=(n:number)=>{timer=setTimeout(()=>get().then(d=>{if(!d.refreshing)setData(d);else if(n>1)poll(n-1);},()=>{}),6000);};
+    get().then(d=>{setData(d);if(d.refreshing)poll(5);},e=>{if(e.name!=='AbortError')setFailed(true);});
+    return ()=>{ctrl.abort();clearTimeout(timer);};},[region.code,label]);
 
   const rows=useMemo(()=>{
     if(!data)return [];
@@ -44,7 +48,7 @@ export function StationBoard({region,label,origin}:{region:ChargeRegion;label:st
   return <div className="ev">
     <section className="ev-hero">
       <p className="ev-answer">{near!==null?<>내 주변 1km 안에 지금 충전 가능한 급속 <b>{near}대</b></>:<>{label}에 지금 충전 가능한 급속 <b>{fastOk}대</b></>}</p>
-      <p className="ev-sub">충전소 {data.stations.length.toLocaleString()}곳 · 충전기 {chargers.toLocaleString()}대 중 지금 사용 가능 {ok.toLocaleString()}대 · {fmtTime(data.fetched)} 기준{data.stale?' (지연된 정보)':''}</p>
+      <p className="ev-sub">충전소 {data.stations.length.toLocaleString()}곳 · 충전기 {chargers.toLocaleString()}대 중 지금 사용 가능 {ok.toLocaleString()}대 · {fmtTime(data.fetched)} 기준{data.stale?' (지연된 정보)':data.refreshing?' · 최신 상태 확인 중':''}</p>
     </section>
     <div className="ev-chips">{chip('ok','지금 사용 가능')}{chip('fast','급속만')}{chip('free','무료 주차')}{chip('h24','24시간')}</div>
     <p className="muted small">{rows.length.toLocaleString()}곳 · {origin?'가까운 순':'사용 가능한 급속이 많은 순'}</p>
