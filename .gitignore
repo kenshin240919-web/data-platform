@@ -26,3 +26,4 @@ apps/trip/out/
 # weather Worker: build output and local secrets
 apps/weather/out/
 .dev.vars
+apps/charge/out/

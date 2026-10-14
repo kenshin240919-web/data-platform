@@ -1,0 +1,16 @@
+// Cloudflare Worker for charge.guidejung.com (separate from trip and weather).
+// Run from the repo root: npx wrangler deploy -c apps/charge/wrangler.jsonc (builds with npm run build:charge).
+// Static pages: ./out. /api/*: worker/index.ts. Secret: DATA_GO_KR_KEY (Cloudflare 대시보드 또는 wrangler secret put).
+{
+  "name": "guidejung-charge",
+  "main": "worker/index.ts",
+  "compatibility_date": "2025-09-01",
+  "build": { "command": "npm run build:charge" },
+  "assets": {
+    "directory": "./out",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    "run_worker_first": ["/api/*"]
+  },
+  "observability": { "enabled": true }
+}
