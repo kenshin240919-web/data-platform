@@ -3,3 +3,4 @@ Allow: /
 Disallow: /api/
 
 Sitemap: https://charge.guidejung.com/sitemap.xml
+#DaumWebMasterTool:aa45f8c51c64c09c51d3add9d6ae477283446493020a65f682d9db4c1903a4c8:98GztZ5EvdKnUPTh2E62HA==
