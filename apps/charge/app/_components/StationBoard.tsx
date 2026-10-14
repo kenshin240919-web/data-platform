@@ -89,7 +89,7 @@ function StaticList({snap,label,loading}:{snap:SnapRegion;label:string;loading?:
       <div className="ev-row">
         <span className="ev-name"><b>{s.name}</b><small>{s.addr}</small></span>
         <span className="ev-count"><b>{s.fast+s.slow}</b>대<small>충전기</small></span>
-        <span className="ev-meta">{s.fast>0&&<span className="tag fast">급속 {s.fast}</span>}{s.slow>0&&<span className="tag">완속 {s.slow}</span>}{s.maxKw>0&&<span className="tag">최대 {s.maxKw}kW</span>}{s.freeParking&&<span className="tag">무료 주차</span>}{/24/.test(s.useTime)&&<span className="tag">24시간</span>}</span>
+        <span className="ev-meta">{s.fast>0&&<span className="tag fast">급속 {s.fast}</span>}{s.slow>0&&<span className="tag">완속 {s.slow}</span>}{s.maxKw>0&&<span className="tag">최대 {s.maxKw}kW</span>}{s.freeParking&&<span className="tag">무료 주차</span>}{/24/.test(s.useTime)&&<span className="tag">24시간</span>}{s.limited&&<span className="tag">이용 제한</span>}</span>
       </div>
     </li>)}</ul>
   </div>;
