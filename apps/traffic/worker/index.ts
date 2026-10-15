@@ -5,7 +5,7 @@ import type {Incident,IncidentsResponse,TrafficResponse} from '../lib/types';
 import vds from '../data/vds.json';
 
 type Ctx={waitUntil:(p:Promise<unknown>)=>void};
-type Env={EX_API_KEY:string;ASSETS:{fetch:(r:Request)=>Promise<Response>}};
+type Env={EX_API_KEY:string;ITS_API_KEY?:string;ASSETS:{fetch:(r:Request)=>Promise<Response>}};
 const BASE='https://data.ex.co.kr/openapi/';
 // The API's firewall answers "Request Blocked" to clients without a browser-like User-Agent.
 const UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0 Safari/537.36';
@@ -96,6 +96,26 @@ async function get<T extends {stale:boolean}>(env:Env,job:Job<T>,ctx?:Ctx):Promi
   catch(e){if(old)return {...old,stale:true};throw e;}
 }
 
+/**
+ * Temporary check (10/15): can this Worker reach the ITS CCTV API? ITS seemed to drop connections from overseas IPs.
+ * Two small calls (cctvType 1·4, a box around 서울TG), result cached 6 hours because ITS allows only 1,000 calls a month.
+ */
+async function itsTest(env:Env):Promise<Response>{
+  const cache=(globalThis as any).caches?.default as Cache|undefined;const k=new Request('https://cache.traffic.internal/its-test/v1');
+  const hit=cache&&await cache.match(k);if(hit)return new Response(hit.body,{headers:{'content-type':'application/json; charset=utf-8','x-cache':'hit'}});
+  if(!env.ITS_API_KEY)return json({error:'ITS_API_KEY missing'},503,0);
+  const out:Record<string,unknown>={at:kst()};
+  for(const t of [1,4]){
+    const t0=Date.now();
+    try{const r=await fetch(`https://openapi.its.go.kr:9443/cctvInfo?apiKey=${env.ITS_API_KEY}&type=ex&cctvType=${t}&minX=127.00&maxX=127.15&minY=37.30&maxY=37.45&getType=json`,{headers:{'user-agent':UA},signal:AbortSignal.timeout(20000)});
+      const body=(await r.text()).replaceAll(env.ITS_API_KEY,'***');out[`type${t}`]={status:r.status,ms:Date.now()-t0,sample:body.slice(0,1500)};}
+    catch(e){out[`type${t}`]={error:String(e),ms:Date.now()-t0};}
+  }
+  const body=JSON.stringify(out);
+  if(cache)await cache.put(k,new Response(body,{headers:{'cache-control':'max-age=21600'}}));
+  return new Response(body,{headers:{'content-type':'application/json; charset=utf-8'}});
+}
+
 const json=(body:unknown,status=200,maxAge=60)=>new Response(JSON.stringify(body),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':`public, max-age=${maxAge}`}});
 
 export default {
@@ -106,6 +126,7 @@ export default {
       if(!env.EX_API_KEY)return json({error:'service key missing'},503,0);
       try{const v=await get(env,job as Job<any>,ctx);return json(v,200,v.refreshing?0:60);}catch{return json({error:'upstream unavailable'},502,0);}
     }
+    if(url.pathname==='/api/its-test')return itsTest(env);
     if(url.pathname.startsWith('/api/'))return json({error:'not found'},404,3600);
     return env.ASSETS.fetch(req);
   },
