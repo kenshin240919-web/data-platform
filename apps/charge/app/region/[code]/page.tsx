@@ -4,7 +4,7 @@ import type {Metadata} from 'next';
 import {StationBoard} from '../../_components/StationBoard';
 import {findRegion,findSido,label,nearby,regions,sidos,SITE,TRIP,WEATHER} from '../../../lib/regions';
 import {fmtDate,snapFetched,snapRegion,snapSum} from '../../../lib/snapshot';
-import {Connect,linksForCode} from '@guidejung/ui/network';
+import {Connect,linksForCode,nearRoad,TRAFFIC_URL} from '@guidejung/ui/network';
 
 export const dynamicParams=false;
 export function generateStaticParams(){return [...sidos.map(s=>({code:s.code})),...regions.map(r=>({code:r.code}))];}
@@ -32,7 +32,7 @@ export default async function RegionPage(props:Props){
     <nav className="breadcrumbs" aria-label="현재 위치"><Link href="/">충전소</Link><span>/</span><Link href={`/region/${r.sido}`}>{r.sidoName}</Link><span>/</span><span>{r.name}</span></nav>
     <h1>{name} 전기차 충전소</h1>
     <p className="muted small">{r.sidoName} {r.name}의 공공·민간 충전소와 충전기별 실시간 상태(한국환경공단 제공). 충전소를 누르면 충전기별 상태와 길찾기가 열립니다.</p>
-    <StationBoard region={r} label={name} snap={snapRegion(r.code)}/>
+    <StationBoard region={r} label={name} snap={snapRegion(r.code)} road={(rd=>rd&&rd.km<=30?`${TRAFFIC_URL}/road/${rd.no}`:undefined)(nearRoad(r.lat,r.lon))}/>
     <p className="muted small">충전소·충전기 수는 한국환경공단 자료 {fmtDate(snapFetched)} 기준이며, 사용 가능 여부는 실시간 상태입니다.</p>
     <Connect title={`${name}에서 충전하는 동안`} items={linksForCode(r.weather,'charge')}/>
     <div className="section-heading"><h2>{name} 주변 지역 충전소</h2></div>

@@ -6,15 +6,15 @@ import type {Station,StationsResponse} from '../../lib/types';
 import type {SnapRegion} from '../../lib/snapshot';
 import {STAT,TONE_LABEL,ago,distanceKm,fmtKm,is24h,isFast,summary,typeName} from '../../lib/format';
 
-const TRIP='https://trip.guidejung.com',WEATHER='https://weather.guidejung.com';
+const TRIP='https://trip.guidejung.com',WEATHER='https://weather.guidejung.com',TRAFFIC='https://traffic.guidejung.com';
 const KEY='charge.recent';
 export function remember(code:string,label:string){try{const list=JSON.parse(localStorage.getItem(KEY)??'[]') as {code:string;label:string}[];localStorage.setItem(KEY,JSON.stringify([{code,label},...list.filter(i=>i.code!==code)].slice(0,6)));}catch{}}
 export function recent():{code:string;label:string}[]{try{return (JSON.parse(localStorage.getItem(KEY)??'[]') as {code:string;label:string}[]).filter(r=>r.label!=='내 주변');}catch{return [];}}
 const fmtTime=(t:string)=>t?`${+t.slice(4,6)}.${+t.slice(6,8)} ${t.slice(8,10)}:${t.slice(10,12)}`:'';
 type Filters={ok:boolean;fast:boolean;free:boolean;h24:boolean};
 
-/** 지역 충전소: 3초 답(지금 사용 가능 급속 수) → 조건 칩 → 상태 색깔 목록 → 펼치면 충전기별 상태·길찾기·주변 여행지·날씨. */
-export function StationBoard({region,label,origin,snap}:{region:ChargeRegion;label:string;origin?:{lat:number;lon:number}|null;snap?:SnapRegion|null}){
+/** 지역 충전소: 3초 답(지금 사용 가능 급속 수) → 조건 칩 → 상태 색깔 목록 → 카드마다 늘 보이는 바로가기(길찾기·충전 중 갈 곳·날씨·고속도로) → 펼치면 충전기별 상태. */
+export function StationBoard({region,label,origin,snap,road}:{region:ChargeRegion;label:string;origin?:{lat:number;lon:number}|null;snap?:SnapRegion|null;road?:string}){
   const [data,setData]=useState<StationsResponse|null>(null);const [failed,setFailed]=useState(false);
   const [f,setF]=useState<Filters>({ok:false,fast:false,free:false,h24:false});const [limit,setLimit]=useState(30);const [open,setOpen]=useState<string|null>(null);const linked=useRef(false);
   useEffect(()=>{setData(null);setFailed(false);setLimit(30);linked.current=false;if(!origin)remember(region.code,label);
@@ -62,16 +62,16 @@ export function StationBoard({region,label,origin,snap}:{region:ChargeRegion;lab
           <span className="ev-count"><b>{sum.ok}</b>/{sum.total}<small>사용 가능</small></span>
           <span className="ev-meta">{sum.fast>0&&<span className="tag fast">급속 {sum.fastOk}/{sum.fast}</span>}{sum.maxKw>0&&<span className="tag">최대 {sum.maxKw}kW</span>}{s.freeParking&&<span className="tag">무료 주차</span>}{is24h(s)&&<span className="tag">24시간</span>}{km!==null&&<span className="tag dist">{fmtKm(km)}</span>}</span>
         </button>
+        <nav className="ev-quick" aria-label={`${s.name} 바로가기`}>
+          <a className="go" href={`https://map.kakao.com/link/to/${encodeURIComponent(s.name)},${s.lat},${s.lng}`} target="_blank" rel="noopener noreferrer"><span aria-hidden="true">🧭</span>길찾기</a>
+          <a href={`${TRIP}/search?lat=${s.lat}&lon=${s.lng}&radius_km=3`}><span aria-hidden="true">🚗</span>갈 만한 곳</a>
+          <a href={`${WEATHER}/region/${region.weather}`}><span aria-hidden="true">🌤️</span>날씨</a>
+          <a href={road??TRAFFIC}><span aria-hidden="true">🛣️</span>고속도로</a>
+        </nav>
         {isOpen&&<div className="ev-detail">
           <p className="small">{s.addr}</p>
           <ul className="ev-chargers">{s.chargers.map(c=>{const st=STAT[c.stat]??STAT[9];return <li key={c.id} className={`st-${st.tone}`}><span>{c.id}번</span><span>{typeName(c.type)}{c.kw?` · ${c.kw}kW`:''}{isFast(c)?' · 급속':''}</span><b>{st.text}</b><small>{ago(c.upd)}</small></li>;})}</ul>
           <dl className="ev-facts"><div><dt>이용시간</dt><dd>{s.useTime||'확인 필요'}</dd></div><div><dt>운영기관</dt><dd>{s.busi}{s.call&&<> · <a href={`tel:${s.call}`}>{s.call}</a></>}</dd></div><div><dt>주차</dt><dd>{s.freeParking?'무료 주차':'유료이거나 확인 필요'}</dd></div>{s.limited&&<div><dt>이용 제한</dt><dd>{s.limited}</dd></div>}</dl>
-          <div className="ev-actions">
-            <a className="button" href={`https://map.kakao.com/link/to/${encodeURIComponent(s.name)},${s.lat},${s.lng}`} target="_blank" rel="noopener noreferrer">🧭 길찾기</a>
-            <a className="ev-link" href={`${TRIP}/search?lat=${s.lat}&lon=${s.lng}&radius_km=3`}>🚗 충전하는 동안 갈 만한 곳</a>
-            <a className="ev-link" href={`${WEATHER}/region/${region.weather}`}>🌤️ {label} 날씨</a>
-            <a className="ev-link" href="https://traffic.guidejung.com">🛣️ 가는 길 고속도로 상황</a>
-          </div>
         </div>}
       </li></Fragment>;})}</ul>
     {rows.length>limit&&<button type="button" className="ev-more" onClick={()=>setLimit(limit+30)}>충전소 더 보기 ({(rows.length-limit).toLocaleString()}곳 남음)</button>}

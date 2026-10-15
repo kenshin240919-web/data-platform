@@ -18,3 +18,5 @@
 .ev-cross{display:flex;flex-wrap:wrap;gap:10px;margin:22px 0}.ev-cross a{padding:12px 16px;border-radius:14px;background:#172b4b;color:white;font-weight:700;font-size:14px}
 .ev-sido{margin-bottom:20px}.ev-sido h2{font-size:20px;margin-bottom:4px}
 @media(max-width:700px){.ev-nav{overflow-x:auto;white-space:nowrap;gap:18px!important;justify-content:flex-start!important}.ev-answer{font-size:18px}.ev-answer b{font-size:24px}.ev-select select{flex:1}.ev-chargers li{grid-template-columns:40px 1fr auto;}.ev-chargers small{display:none}}
+/* 카드마다 늘 보이는 바로가기(펼치지 않아도 클릭) */
+.ev-quick{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:0 16px 14px}.ev-quick a{display:flex;align-items:center;justify-content:center;gap:4px;padding:9px 2px;white-space:nowrap;border-radius:12px;background:#eef8f2;color:var(--ev);font-size:12.5px;font-weight:700;text-align:center;line-height:1.25;text-decoration:none}.ev-quick a span{font-size:15px}.ev-quick a.go{background:var(--ev);color:#fff}.ev-quick a:hover{filter:brightness(.96)}
