@@ -3,3 +3,4 @@ Allow: /
 Disallow: /api/
 
 Sitemap: https://traffic.guidejung.com/sitemap.xml
+#DaumWebMasterTool:1546a8efa4c7e1adeedda4000e795691bc7f8cac85a3826aab8e004ad886f1ed:n4Bdeh3er8dd+gRpPxKBoA==
