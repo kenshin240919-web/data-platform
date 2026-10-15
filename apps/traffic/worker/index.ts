@@ -1,11 +1,13 @@
 // Cloudflare Worker for traffic.guidejung.com: static pages from ./out, live data from the 한국도로공사 Open API.
 // /api/traffic: 전국 고속도로 구간 소통(1회 약 8,400건·2.3MB) → 구간별 [속도, 등급]으로 줄여 5분 캐시.
 // /api/incidents: 진행 중 돌발(작업·사고·통제 등) 10분 캐시. 오래된 사본은 바로 보여 주고 뒤에서 갱신한다.
+// KV(전 세계 공용): 5분마다 Cron이 미리 받아 KV에 넣어 두므로, 어느 도시의 첫 방문자도 API를 기다리지 않는다.
 import type {Cctv,CctvResponse,Incident,IncidentsResponse,TrafficResponse} from '../lib/types';
 import vds from '../data/vds.json';
 
 type Ctx={waitUntil:(p:Promise<unknown>)=>void};
-type Env={EX_API_KEY:string;ITS_API_KEY?:string;ASSETS:{fetch:(r:Request)=>Promise<Response>}};
+type KV={get:(k:string,o:{type:'json';cacheTtl?:number})=>Promise<any>;put:(k:string,v:string)=>Promise<void>};
+type Env={EX_API_KEY:string;ITS_API_KEY?:string;CACHE?:KV;ASSETS:{fetch:(r:Request)=>Promise<Response>}};
 const BASE='https://data.ex.co.kr/openapi/';
 // The API's firewall answers "Request Blocked" to clients without a browser-like User-Agent.
 const UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0 Safari/537.36';
@@ -85,6 +87,7 @@ function refresh<T>(env:Env,job:Job<T>):Promise<T>{
   let p=inflight.get(job.name) as Promise<T>|undefined;if(p)return p;
   p=(async()=>{
     const v=await job.load(env);memo.set(job.name,{until:Date.now()+job.ttl*1000,value:v});
+    if(env.CACHE)await env.CACHE.put(`job:${job.name}`,JSON.stringify({at:Date.now(),v}));
     const cache=(globalThis as any).caches?.default as Cache|undefined;
     if(cache){const body=JSON.stringify(v);
       await cache.put(key(job.name,'fresh'),new Response(body,{headers:{'cache-control':`max-age=${job.ttl}`}}));
@@ -99,7 +102,14 @@ async function get<T extends {stale:boolean}>(env:Env,job:Job<T>,ctx?:Ctx):Promi
   const hit=memo.get(job.name);if(hit&&hit.until>Date.now())return hit.value;
   const cache=(globalThis as any).caches?.default as Cache|undefined;
   if(cache){const c=await cache.match(key(job.name,'fresh'));if(c){const v=await c.json() as T;memo.set(job.name,{until:Date.now()+30e3,value:v});return v;}}
-  const old=cache?await cache.match(key(job.name,'last')).then(r=>r?r.json() as Promise<T>:undefined):undefined;
+  // Shared copy kept fresh by the Cron (any data center); its age decides whether it still counts as fresh.
+  const shared=env.CACHE?await env.CACHE.get(`job:${job.name}`,{type:'json',cacheTtl:60}).catch(()=>null) as {at:number;v:T}|null:null;
+  if(shared&&Date.now()-shared.at<=job.ttl*1000){
+    const left=Math.max(30,Math.round(job.ttl-(Date.now()-shared.at)/1000));memo.set(job.name,{until:Date.now()+Math.min(left,60)*1000,value:shared.v});
+    if(cache)ctx?.waitUntil(cache.put(key(job.name,'fresh'),new Response(JSON.stringify(shared.v),{headers:{'cache-control':`max-age=${left}`}})));
+    return shared.v;
+  }
+  const old=(cache?await cache.match(key(job.name,'last')).then(r=>r?r.json() as Promise<T>:undefined):undefined)??shared?.v;
   if(old&&Date.now()-at(job.time(old))<=STALE_OK*1000){
     const lock=key(job.name,'lock');
     if(!(cache&&await cache.match(lock))){
@@ -114,7 +124,16 @@ async function get<T extends {stale:boolean}>(env:Env,job:Job<T>,ctx?:Ctx):Promi
 
 const json=(body:unknown,status=200,maxAge=60)=>new Response(JSON.stringify(body),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':`public, max-age=${maxAge}`}});
 
+/** Cron (5분마다): refresh traffic every run, incidents every 10 minutes, CCTV hourly (ITS answers only from Korea; failures are ignored). */
+async function scheduled(env:Env,now:number){
+  const m=new Date(now).getUTCMinutes();const tasks:Promise<unknown>[]=[refresh(env,JOBS.traffic)];
+  if(m%10<5)tasks.push(refresh(env,JOBS.incidents));
+  if(env.ITS_API_KEY&&env.CACHE){const c=await env.CACHE.get('job:cctv',{type:'json'}).catch(()=>null) as {at:number}|null;if(!c||now-c.at>=3600e3)tasks.push(refresh(env,JOBS.cctv as Job<any>));}
+  await Promise.allSettled(tasks);
+}
+
 export default {
+  async scheduled(ev:{scheduledTime:number},env:Env,ctx:Ctx){ctx.waitUntil(scheduled(env,ev.scheduledTime));},
   async fetch(req:Request,env:Env,ctx?:Ctx):Promise<Response>{
     const url=new URL(req.url);
     const job=url.pathname==='/api/traffic'?JOBS.traffic:url.pathname==='/api/incidents'?JOBS.incidents:url.pathname==='/api/cctv'?JOBS.cctv:null;
