@@ -40,9 +40,9 @@ def fetch_page(key, page, cache):
 
 
 def region_codes():
-    # Same folding as apps/charge/lib/regions.ts: cities split into 구 use the city code (41117 -> 41110).
+    # Same folding as apps/charge/lib/regions.ts: only 일반구 of a city ("수원시 장안구" 41111) use the city code.
     data = json.loads((ROOT / 'apps/weather/data/regions.json').read_text(encoding='utf-8'))
-    return {r['code'] if r['code'][4] == '0' else r['code'][:4] + '0' for r in data}
+    return {r['code'][:4] + '0' if ' ' in r['name'] else r['code'] for r in data}
 
 
 def fold(code):
@@ -79,7 +79,9 @@ def main():
         if r.get('delYn') == 'Y' or (r.get('statId'), r.get('chgerId')) in seen:
             continue
         seen.add((r.get('statId'), r.get('chgerId')))
-        code = fold(r.get('zscode') or '')
+        code = r.get('zscode') or ''
+        if code not in codes:
+            code = fold(code)
         if code not in codes:
             unknown[code] = unknown.get(code, 0) + 1
             continue

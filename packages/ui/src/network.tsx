@@ -30,10 +30,10 @@ export function Connect({title='함께 보면 좋은 정보',items}:{title?:stri
 type WR={code:string;sido:string;sidoShort:string;name:string;lat:number;lon:number};
 const regions=weatherRegions as WR[];
 const dist=(aLat:number,aLon:number,bLat:number,bLon:number)=>{const x=(bLon-aLon)*Math.cos(aLat*Math.PI/180);return Math.sqrt((bLat-aLat)**2+x**2)*111;};
-/** Nearest 시군구 (weather code; charge folds 일반구 into the city code). */
+/** Nearest 시군구 (weather code; charge folds only 일반구 like "수원시 장안구" into the city code). */
 export function nearArea(lat:number,lon:number){
   const r=regions.reduce((a,b)=>dist(lat,lon,b.lat,b.lon)<dist(lat,lon,a.lat,a.lon)?b:a);
-  return {weather:r.code,charge:r.code[4]==='0'?r.code:r.code.slice(0,4)+'0',label:r.name.startsWith(r.sidoShort)?r.name:`${r.sidoShort} ${r.name}`,lat:r.lat,lon:r.lon,sidoShort:r.sidoShort};
+  return {weather:r.code,charge:r.name.includes(' ')?r.code.slice(0,4)+'0':r.code,label:r.name.startsWith(r.sidoShort)?r.name:`${r.sidoShort} ${r.name}`,lat:r.lat,lon:r.lon,sidoShort:r.sidoShort};
 }
 
 type Route={no:string;name:string;pts?:[number,number][]};type Rest={code:string;name:string;lat:number;lng:number;dir:string};

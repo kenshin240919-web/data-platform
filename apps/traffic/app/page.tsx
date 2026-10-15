@@ -14,7 +14,7 @@ export default function Home(){
   const major=MAJOR.map(findRoute).filter((r):r is NonNullable<typeof r>=>!!r);
   const lite=rests.map(r=>{const f=r.foods.find(x=>x.best)??r.foods[0];return {code:r.code,name:r.name,routeNo:r.routeNo,route:r.route,area:r.area,lat:r.lat,lng:r.lng,dir:r.dir,gas:r.gas?.gasoline??'',food:f?.name??'',foodCost:Number(f?.cost)?`${Number(f!.cost).toLocaleString()}원`:''};});
   // 시군구 중심 좌표: the IP-based guess is labelled with the nearest one (Cloudflare's city name is English).
-  const places=(regionData as {code:string;sidoShort:string;name:string;lat:number;lon:number}[]).map(r=>({code:r.code,label:r.name.startsWith(r.sidoShort)?r.name:`${r.sidoShort} ${r.name}`,lat:r.lat,lon:r.lon}));
+  const places=(regionData as {code:string;sidoShort:string;name:string;lat:number;lon:number}[]).map(r=>({code:r.code,charge:r.name.includes(' ')?r.code.slice(0,4)+'0':r.code,label:r.name.startsWith(r.sidoShort)?r.name:`${r.sidoShort} ${r.name}`,lat:r.lat,lon:r.lon}));
   const foods=rests.filter(r=>r.foods.some(f=>f.best)).slice(0,60).filter((_,i)=>i%6===0).slice(0,6).map(r=>r.code);
   return <>
     <section className="section tf-top-sec"><h1>고속도로 실시간 교통상황</h1></section>

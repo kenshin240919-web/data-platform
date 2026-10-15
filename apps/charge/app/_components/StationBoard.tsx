@@ -9,7 +9,7 @@ import {STAT,TONE_LABEL,ago,distanceKm,fmtKm,is24h,isFast,summary,typeName} from
 const TRIP='https://trip.guidejung.com',WEATHER='https://weather.guidejung.com';
 const KEY='charge.recent';
 export function remember(code:string,label:string){try{const list=JSON.parse(localStorage.getItem(KEY)??'[]') as {code:string;label:string}[];localStorage.setItem(KEY,JSON.stringify([{code,label},...list.filter(i=>i.code!==code)].slice(0,6)));}catch{}}
-export function recent():{code:string;label:string}[]{try{return JSON.parse(localStorage.getItem(KEY)??'[]');}catch{return [];}}
+export function recent():{code:string;label:string}[]{try{return (JSON.parse(localStorage.getItem(KEY)??'[]') as {code:string;label:string}[]).filter(r=>r.label!=='내 주변');}catch{return [];}}
 const fmtTime=(t:string)=>t?`${+t.slice(4,6)}.${+t.slice(6,8)} ${t.slice(8,10)}:${t.slice(10,12)}`:'';
 type Filters={ok:boolean;fast:boolean;free:boolean;h24:boolean};
 
@@ -17,7 +17,7 @@ type Filters={ok:boolean;fast:boolean;free:boolean;h24:boolean};
 export function StationBoard({region,label,origin,snap}:{region:ChargeRegion;label:string;origin?:{lat:number;lon:number}|null;snap?:SnapRegion|null}){
   const [data,setData]=useState<StationsResponse|null>(null);const [failed,setFailed]=useState(false);
   const [f,setF]=useState<Filters>({ok:false,fast:false,free:false,h24:false});const [limit,setLimit]=useState(30);const [open,setOpen]=useState<string|null>(null);const linked=useRef(false);
-  useEffect(()=>{setData(null);setFailed(false);setLimit(30);linked.current=false;remember(region.code,label);
+  useEffect(()=>{setData(null);setFailed(false);setLimit(30);linked.current=false;if(!origin)remember(region.code,label);
     const ctrl=new AbortController();
     const get=()=>fetch(`/api/stations?code=${region.code}`,{signal:ctrl.signal,cache:'no-store'}).then(r=>{if(!r.ok)throw new Error();return r.json() as Promise<StationsResponse>;});
     let timer:ReturnType<typeof setTimeout>|undefined;
@@ -43,12 +43,14 @@ export function StationBoard({region,label,origin,snap}:{region:ChargeRegion;lab
   if(failed)return <><p className="notice" role="alert">실시간 상태를 불러오지 못했습니다. 잠시 후 새로고침해 주세요.</p>{snap&&<StaticList snap={snap} label={label}/>}</>;
   if(!data)return snap?<StaticList snap={snap} label={label} loading/>:<div className="loading" role="status">{label} 충전소와 실시간 상태를 불러오고 있습니다.</div>;
   const all=data.stations.map(summary);const fastOk=all.reduce((n,s)=>n+s.fastOk,0),ok=all.reduce((n,s)=>n+s.ok,0),chargers=all.reduce((n,s)=>n+s.total,0);
-  const near=origin?rows.filter(r=>r.km!==null&&r.km<=1).reduce((n,r)=>n+r.sum.fastOk,0):null;
+  // 내 주변: 3km → 5km → 10km, the first radius with at least 3 fast chargers free now (else 10km).
+  const nearKm=origin?[3,5,10].find(k=>rows.filter(r=>r.km!==null&&r.km<=k).reduce((n,r)=>n+r.sum.fastOk,0)>=3)??10:0;
+  const near=origin?rows.filter(r=>r.km!==null&&r.km<=nearKm).reduce((n,r)=>n+r.sum.fastOk,0):null;
   const chip=(k:keyof Filters,text:string)=><button type="button" className={`chip${f[k]?' on':''}`} aria-pressed={f[k]} onClick={()=>{setF({...f,[k]:!f[k]});setLimit(30);}}>{text}</button>;
 
   return <div className="ev">
     <section className="ev-hero">
-      <p className="ev-answer">{near!==null?<>내 주변 1km 안에 지금 충전 가능한 급속 <b>{near}대</b></>:<>{label}에 지금 충전 가능한 급속 <b>{fastOk}대</b></>}</p>
+      <p className="ev-answer">{near!==null?<>내 주변 {nearKm}km 안에 지금 충전 가능한 급속 <b>{near}대</b></>:<>{label}에 지금 충전 가능한 급속 <b>{fastOk}대</b></>}</p>
       <p className="ev-sub">충전소 {data.stations.length.toLocaleString()}곳 · 충전기 {chargers.toLocaleString()}대 중 지금 사용 가능 {ok.toLocaleString()}대 · {fmtTime(data.fetched)} 기준{data.stale?' (지연된 정보)':data.refreshing?' · 최신 상태 확인 중':''}</p>
     </section>
     <div className="ev-chips">{chip('ok','지금 사용 가능')}{chip('fast','급속만')}{chip('free','무료 주차')}{chip('h24','24시간')}</div>
