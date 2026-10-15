@@ -1,7 +1,7 @@
 // Cloudflare Worker for traffic.guidejung.com: static pages from ./out, live data from the 한국도로공사 Open API.
 // /api/traffic: 전국 고속도로 구간 소통(1회 약 8,400건·2.3MB) → 구간별 [속도, 등급]으로 줄여 5분 캐시.
 // /api/incidents: 진행 중 돌발(작업·사고·통제 등) 10분 캐시. 오래된 사본은 바로 보여 주고 뒤에서 갱신한다.
-import type {Incident,IncidentsResponse,TrafficResponse} from '../lib/types';
+import type {Cctv,CctvResponse,Incident,IncidentsResponse,TrafficResponse} from '../lib/types';
 import vds from '../data/vds.json';
 
 type Ctx={waitUntil:(p:Promise<unknown>)=>void};
@@ -60,8 +60,24 @@ async function loadIncidents(env:Env):Promise<IncidentsResponse>{
   return {time:kst(),items,stale:false};
 }
 
+/**
+ * 고속도로 CCTV(국가교통정보센터 ITS, cctvType 4 = https HLS). One nationwide call per hour: ITS allows 1,000 calls a
+ * month. ITS refuses connections from overseas data centers (10/15 시험: 미국 522, 서울 정상), so this only works when the
+ * Worker runs in Korea, which is where Korean visitors are served from.
+ */
+async function loadCctv(env:Env):Promise<CctvResponse>{
+  if(!env.ITS_API_KEY)throw new Error('ITS_API_KEY missing');
+  const res=await fetch(`https://openapi.its.go.kr:9443/cctvInfo?apiKey=${env.ITS_API_KEY}&type=ex&cctvType=4&minX=124&maxX=132&minY=33&maxY=39&getType=json`,{headers:{'user-agent':UA},signal:AbortSignal.timeout(25000)});
+  const body=await res.json() as any;const rows:any[]=body?.response?.data??[];
+  const items:Cctv[]=rows.map(r=>({name:String(r.cctvname??'').trim(),lat:Number(r.coordy),lng:Number(r.coordx),url:String(r.cctvurl??'')}))
+    .filter(c=>c.url.startsWith('https://')&&Number.isFinite(c.lat)&&Number.isFinite(c.lng));
+  if(items.length<50)throw new Error('cctv feed too small');
+  return {time:kst(),items,stale:false};
+}
+
 type Job<T>={name:string;ttl:number;load:(env:Env)=>Promise<T>;time:(v:T)=>string};
-const JOBS={traffic:{name:'traffic',ttl:300,load:loadTraffic,time:(v:TrafficResponse)=>v.time},incidents:{name:'incidents',ttl:600,load:loadIncidents,time:(v:IncidentsResponse)=>v.time}};
+const JOBS={traffic:{name:'traffic',ttl:300,load:loadTraffic,time:(v:TrafficResponse)=>v.time},incidents:{name:'incidents',ttl:600,load:loadIncidents,time:(v:IncidentsResponse)=>v.time},
+  cctv:{name:'cctv',ttl:3600,load:loadCctv,time:(v:CctvResponse)=>v.time}};
 const memo=new Map<string,{until:number;value:any}>();const inflight=new Map<string,Promise<any>>();
 const key=(n:string,kind:string)=>new Request(`https://cache.traffic.internal/${kind}/${n}`);
 
@@ -96,37 +112,19 @@ async function get<T extends {stale:boolean}>(env:Env,job:Job<T>,ctx?:Ctx):Promi
   catch(e){if(old)return {...old,stale:true};throw e;}
 }
 
-/**
- * Temporary check (10/15): can this Worker reach the ITS CCTV API? ITS seemed to drop connections from overseas IPs.
- * Two small calls (cctvType 1·4, a box around 서울TG), result cached 6 hours because ITS allows only 1,000 calls a month.
- */
-async function itsTest(env:Env):Promise<Response>{
-  const cache=(globalThis as any).caches?.default as Cache|undefined;const k=new Request('https://cache.traffic.internal/its-test/v1');
-  const hit=cache&&await cache.match(k);if(hit)return new Response(hit.body,{headers:{'content-type':'application/json; charset=utf-8','x-cache':'hit'}});
-  if(!env.ITS_API_KEY)return json({error:'ITS_API_KEY missing'},503,0);
-  const out:Record<string,unknown>={at:kst()};
-  for(const t of [1,4]){
-    const t0=Date.now();
-    try{const r=await fetch(`https://openapi.its.go.kr:9443/cctvInfo?apiKey=${env.ITS_API_KEY}&type=ex&cctvType=${t}&minX=127.00&maxX=127.15&minY=37.30&maxY=37.45&getType=json`,{headers:{'user-agent':UA},signal:AbortSignal.timeout(20000)});
-      const body=(await r.text()).replaceAll(env.ITS_API_KEY,'***');out[`type${t}`]={status:r.status,ms:Date.now()-t0,sample:body.slice(0,1500)};}
-    catch(e){out[`type${t}`]={error:String(e),ms:Date.now()-t0};}
-  }
-  const body=JSON.stringify(out);
-  if(cache)await cache.put(k,new Response(body,{headers:{'cache-control':'max-age=21600'}}));
-  return new Response(body,{headers:{'content-type':'application/json; charset=utf-8'}});
-}
-
 const json=(body:unknown,status=200,maxAge=60)=>new Response(JSON.stringify(body),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':`public, max-age=${maxAge}`}});
 
 export default {
   async fetch(req:Request,env:Env,ctx?:Ctx):Promise<Response>{
     const url=new URL(req.url);
-    const job=url.pathname==='/api/traffic'?JOBS.traffic:url.pathname==='/api/incidents'?JOBS.incidents:null;
+    const job=url.pathname==='/api/traffic'?JOBS.traffic:url.pathname==='/api/incidents'?JOBS.incidents:url.pathname==='/api/cctv'?JOBS.cctv:null;
     if(job){
       if(!env.EX_API_KEY)return json({error:'service key missing'},503,0);
       try{const v=await get(env,job as Job<any>,ctx);return json(v,200,v.refreshing?0:60);}catch{return json({error:'upstream unavailable'},502,0);}
     }
-    if(url.pathname==='/api/its-test')return itsTest(env);
+    // Approximate visitor position from Cloudflare's IP geolocation, for the first screen before any location prompt.
+    if(url.pathname==='/api/where'){const cf=(req as any).cf??{};const lat=Number(cf.latitude),lon=Number(cf.longitude);
+      return new Response(JSON.stringify(Number.isFinite(lat)&&Number.isFinite(lon)&&cf.country==='KR'?{lat,lon,city:cf.city??''}:{}),{headers:{'content-type':'application/json; charset=utf-8','cache-control':'private, no-store'}});}
     if(url.pathname.startsWith('/api/'))return json({error:'not found'},404,3600);
     return env.ASSETS.fetch(req);
   },

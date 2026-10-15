@@ -15,6 +15,8 @@ Worker → **Settings → Variables and Secrets → Add** → Type **Secret**
 - Name `EX_API_KEY`, Value = 한국도로공사 고속도로 공공데이터 포털(data.ex.co.kr) 인증키
 - GitHub 저장소 → Settings → Secrets and variables → Actions → New repository secret에도 같은 이름·값 등록(매일 휴게소·기름값 갱신용)
 
+- (CCTV) Name `ITS_API_KEY`, Value = 국가교통정보센터(its.go.kr) 인증키 — 10/15 등록 완료. 월 1,000건 한도라 `/api/cctv`는 전국 1회 호출을 1시간 캐시(하루 약 24회). ITS는 해외 데이터센터 접속을 막아 Worker가 서울에서 실행될 때(국내 방문자)만 동작합니다.
+
 키는 저장소·채팅에 넣지 않습니다.
 
 ## 3. 도메인 연결 (사용자)

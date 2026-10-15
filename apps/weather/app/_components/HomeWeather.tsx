@@ -1,36 +1,33 @@
 'use client';
 import Link from 'next/link';
 import {useEffect,useState} from 'react';
+import {LocateCard,nearest,useMyPosition} from '@guidejung/ui/geo';
 import type {Region} from '../../lib/types';
 import {WeatherPanel} from './WeatherPanel';
 import {lastViewed} from './Recent';
 
 type Slim=Region&{label:string};
-/** Home: show the visitor's last region (or 내 위치 / default) right away, with one tap to switch. */
+/**
+ * Home: 내 위치(허용한 적 있으면 바로) → 최근 본 지역 → 접속 위치(IP) 부근 → 기본 지역 순으로 날씨를 바로 보여 준다.
+ * 위치를 아직 허용하지 않았으면 이유를 적은 카드로 한 번만 권한을 묻는다.
+ */
 export function HomeWeather({regions,fallback}:{regions:Slim[];fallback:string}){
-  const [code,setCode]=useState(fallback);const [locating,setLocating]=useState(false);const [msg,setMsg]=useState('');
-  useEffect(()=>{const last=lastViewed();if(last&&regions.some(r=>r.code===last.code))setCode(last.code);},[regions]);
+  const {pos,status,request}=useMyPosition();
+  const [code,setCode]=useState(fallback);const [picked,setPicked]=useState(false);const [fromLast,setFromLast]=useState(false);
+  useEffect(()=>{const last=lastViewed();if(last&&regions.some(r=>r.code===last.code)){setCode(last.code);setFromLast(true);}},[regions]);
+  useEffect(()=>{if(!pos||picked||(fromLast&&!pos.precise))return;setCode(nearest(regions,pos.lat,pos.lon).code);},[pos,picked,fromLast,regions]);
   const region=regions.find(r=>r.code===code)??regions[0];
-  function locate(){
-    if(!navigator.geolocation){setMsg('이 브라우저는 위치 확인을 지원하지 않습니다.');return;}
-    setLocating(true);setMsg('');
-    navigator.geolocation.getCurrentPosition(p=>{
-      const {latitude:lat,longitude:lon}=p.coords;
-      const best=regions.reduce((a,b)=>((b.lat-lat)**2+((b.lon-lon)*Math.cos(lat*Math.PI/180))**2)<((a.lat-lat)**2+((a.lon-lon)*Math.cos(lat*Math.PI/180))**2)?b:a);
-      setCode(best.code);setLocating(false);
-    },()=>{setLocating(false);setMsg('위치 권한이 없어 지역을 직접 골라 주세요.');},{timeout:10000,maximumAge:600000});
-  }
+  const mine=!!pos?.precise&&!picked;
   return <>
     <div className="wx-picker">
-      <h1>{region.label} 날씨</h1>
+      <h1>{mine?`내 위치(${region.label})`:region.label} 날씨</h1>
+      {!pos?.precise&&<LocateCard title="내 위치 날씨 바로 보기" desc="지금 있는 곳의 날씨·미세먼지·우산 필요 여부를 먼저 보여 드려요" status={status} onClick={()=>{setPicked(false);request();}} approxLabel={pos?.label}/>}
       <div className="wx-picker-actions">
-        <button type="button" onClick={locate} disabled={locating}>{locating?'위치 확인 중…':'📍 내 위치 날씨'}</button>
         <label className="sr-only" htmlFor="region-select">지역 선택</label>
-        <select id="region-select" value={region.code} onChange={e=>setCode(e.target.value)}>{regions.map(r=><option key={r.code} value={r.code}>{r.label}</option>)}</select>
+        <select id="region-select" value={region.code} onChange={e=>{setPicked(true);setCode(e.target.value);}}>{regions.map(r=><option key={r.code} value={r.code}>{r.label}</option>)}</select>
         <Link className="text-link" href={`/region/${region.code}`}>{region.label} 자세히 →</Link>
+        {pos?.precise&&picked&&<button type="button" className="text-link" onClick={()=>setPicked(false)}>📍 내 위치로</button>}
       </div>
-      {msg&&<p className="muted small">{msg}</p>}
-      <p className="muted small">위치는 가까운 지역을 고르는 데에만 쓰고 저장하거나 전송하지 않습니다.</p>
     </div>
     <WeatherPanel region={region} label={region.label}/>
   </>;

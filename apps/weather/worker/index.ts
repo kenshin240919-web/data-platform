@@ -131,6 +131,9 @@ export default {
       const stations=air.value.map(a=>({station:a.stationName,sido:a.sidoName,time:a.dataTime,pm10:n(a.pm10Value),pm25:n(a.pm25Value)})).filter(a=>a.pm10!==null||a.pm25!==null);
       return json({time:stations[0]?.time??null,stale:air.stale,stations},200,600);
     }
+    // Approximate visitor position from Cloudflare's IP geolocation, for the first screen before any location prompt.
+    if(url.pathname==='/api/where'){const cf=(req as any).cf??{};const lat=Number(cf.latitude),lon=Number(cf.longitude);
+      return new Response(JSON.stringify(Number.isFinite(lat)&&Number.isFinite(lon)&&cf.country==='KR'?{lat,lon,city:cf.city??''}:{}),{headers:{'content-type':'application/json; charset=utf-8','cache-control':'private, no-store'}});}
     if(url.pathname.startsWith('/api/'))return json({error:'not found'},404,3600);
     return env.ASSETS.fetch(req);
   },

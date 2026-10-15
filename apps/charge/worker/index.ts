@@ -94,6 +94,9 @@ export default {
       if(!env.DATA_GO_KR_KEY)return json({error:'service key missing'},503,0);
       try{const v=await stations(env,code,ctx);return json(v,200,v.refreshing?0:120);}catch{return json({error:'upstream unavailable'},502,0);}
     }
+    // Approximate visitor position from Cloudflare's IP geolocation, for the first screen before any location prompt.
+    if(url.pathname==='/api/where'){const cf=(req as any).cf??{};const lat=Number(cf.latitude),lon=Number(cf.longitude);
+      return new Response(JSON.stringify(Number.isFinite(lat)&&Number.isFinite(lon)&&cf.country==='KR'?{lat,lon,city:cf.city??''}:{}),{headers:{'content-type':'application/json; charset=utf-8','cache-control':'private, no-store'}});}
     if(url.pathname.startsWith('/api/'))return json({error:'not found'},404,3600);
     return env.ASSETS.fetch(req);
   },

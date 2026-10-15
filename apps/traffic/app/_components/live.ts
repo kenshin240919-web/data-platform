@@ -1,7 +1,7 @@
 'use client';
 // Shared live data hooks: one request per page for /api/traffic and /api/incidents, re-asked while the Worker refreshes.
 import {useEffect,useState} from 'react';
-import type {IncidentsResponse,TrafficResponse} from '../../lib/types';
+import type {CctvResponse,IncidentsResponse,TrafficResponse} from '../../lib/types';
 
 function shared<T extends {refreshing?:boolean}>(url:string){
   let p:Promise<T>|null=null;
@@ -18,6 +18,7 @@ function shared<T extends {refreshing?:boolean}>(url:string){
 }
 export const useTraffic=shared<TrafficResponse>('/api/traffic');
 export const useIncidents=shared<IncidentsResponse>('/api/incidents');
+export const useCctv=shared<CctvResponse>('/api/cctv');
 
 export const GRADE=[{text:'정보 없음',tone:'none'},{text:'원활',tone:'ok'},{text:'서행',tone:'slow'},{text:'정체',tone:'jam'}] as const;
 export const fmtTime=(t:string)=>t?`${+t.slice(4,6)}.${+t.slice(6,8)} ${t.slice(8,10)}:${t.slice(10,12)}`:'';

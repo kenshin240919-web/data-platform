@@ -2,6 +2,7 @@ import Link from 'next/link';
 import type {Metadata} from 'next';
 import {AdSlot} from '@guidejung/ui/ads';
 import {HomeLive} from './_components/HomeLive';
+import {NearMe} from './_components/NearMe';
 import {RouteCards} from './_components/RouteCards';
 import {MAJOR,SITE,cheapGas,findRoute,fmtDate,fetched,roadName,routes,rests} from '../lib/data';
 
@@ -9,9 +10,12 @@ export const metadata:Metadata={alternates:{canonical:SITE+'/'}};
 export default function Home(){
   const major=MAJOR.map(findRoute).filter((r):r is NonNullable<typeof r>=>!!r);
   const gas=cheapGas().slice(0,5);
+  const lite=rests.map(r=>({code:r.code,name:r.name,routeNo:r.routeNo,lat:r.lat,lng:r.lng,dir:r.dir,gas:r.gas?.gasoline??'',food:(r.foods.find(f=>f.best)??r.foods[0])?.name??''}));
   const foods=rests.filter(r=>r.foods.some(f=>f.best)).slice(0,60).filter((_,i)=>i%6===0).slice(0,6);
   return <>
-    <section className="section"><h1>고속도로 실시간 교통상황</h1><HomeLive routes={routes}/></section>
+    <section className="section tf-top-sec"><h1>고속도로 실시간 교통상황</h1></section>
+    <NearMe routes={routes} rests={lite}/>
+    <section className="section"><HomeLive routes={routes}/></section>
     <AdSlot/>
     <section className="section"><div className="section-heading"><div><div className="eyebrow">HIGHWAYS</div><h2>주요 고속도로</h2></div><Link href="/road">전체 {routes.length}개 노선</Link></div><RouteCards routes={major}/></section>
     <section className="section"><div className="section-heading"><div><div className="eyebrow">FUEL</div><h2>오늘 기름값 싼 휴게소</h2></div><Link href="/gas">기름값 순위 전체</Link></div>
