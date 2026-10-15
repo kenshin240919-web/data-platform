@@ -126,10 +126,12 @@ const json=(body:unknown,status=200,maxAge=60)=>new Response(JSON.stringify(body
 
 /** Cron (5분마다): refresh traffic every run, incidents every 10 minutes, CCTV hourly (ITS answers only from Korea; failures are ignored). */
 async function scheduled(env:Env,now:number){
-  const m=new Date(now).getUTCMinutes();const tasks:Promise<unknown>[]=[refresh(env,JOBS.traffic)];
-  if(m%10<5)tasks.push(refresh(env,JOBS.incidents));
-  if(env.ITS_API_KEY&&env.CACHE){const c=await env.CACHE.get('job:cctv',{type:'json'}).catch(()=>null) as {at:number}|null;if(!c||now-c.at>=3600e3)tasks.push(refresh(env,JOBS.cctv as Job<any>));}
-  await Promise.allSettled(tasks);
+  const m=new Date(now).getUTCMinutes();const jobs:Job<any>[]=[JOBS.traffic];
+  if(m%10<5)jobs.push(JOBS.incidents);
+  if(env.ITS_API_KEY&&env.CACHE){const c=await env.CACHE.get('job:cctv',{type:'json'}).catch(()=>null) as {at:number}|null;if(!c||now-c.at>=3600e3)jobs.push(JOBS.cctv);}
+  const res=await Promise.allSettled(jobs.map(j=>refresh(env,j)));
+  // Last run, for /api/status (errors are short messages, no keys).
+  await env.CACHE?.put('cron:last',JSON.stringify({at:now,done:Date.now(),jobs:res.map((r,i)=>({job:jobs[i].name,ok:r.status==='fulfilled',err:r.status==='rejected'?String((r.reason as Error)?.message??r.reason).slice(0,120):undefined}))}));
 }
 
 export default {
@@ -144,6 +146,11 @@ export default {
     // Approximate visitor position from Cloudflare's IP geolocation, for the first screen before any location prompt.
     if(url.pathname==='/api/where'){const cf=(req as any).cf??{};const lat=Number(cf.latitude),lon=Number(cf.longitude);
       return new Response(JSON.stringify(Number.isFinite(lat)&&Number.isFinite(lon)&&cf.country==='KR'?{lat,lon,city:cf.city??''}:{}),{headers:{'content-type':'application/json; charset=utf-8','cache-control':'private, no-store'}});}
+    // Health of the shared cache: when the Cron last ran and how old each KV copy is.
+    if(url.pathname==='/api/status'){const kv=env.CACHE;if(!kv)return json({kv:false},200,0);
+      const [cron,...jobs]=await Promise.all(['cron:last','job:traffic','job:incidents','job:cctv'].map(k=>kv.get(k,{type:'json'}).catch(()=>null)));
+      const age=(t?:number)=>t?Math.round((Date.now()-t)/1000):null;
+      return json({kv:true,cron:cron?{...cron,ageSec:age(cron.at)}:null,copies:Object.fromEntries(['traffic','incidents','cctv'].map((n,i)=>[n,age(jobs[i]?.at)]))},200,0);}
     if(url.pathname.startsWith('/api/'))return json({error:'not found'},404,3600);
     return env.ASSETS.fetch(req);
   },
