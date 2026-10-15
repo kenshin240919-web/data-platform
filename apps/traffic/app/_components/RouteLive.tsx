@@ -8,9 +8,9 @@ import type {Cctv,TrafficResponse} from '../../lib/types';
 import {CctvPlayer,cctvName,cctvRoad} from './CctvPlayer';
 import {GRADE,fmtTime,useCctv,useTraffic} from './live';
 
-type Seg={i:number;from:string;to:string;e?:string;s?:string;mid?:[number,number]};
+export type Seg={i:number;from:string;to:string;e?:string;s?:string;mid?:[number,number]};
 /** 구간 목록(IC 순서): E(종점 방향) 구간을 뼈대로, 이름이 거꾸로인 S 구간("B-A")을 같은 줄에 붙인다. */
-function segments(r:Route):Seg[]{
+export function segments(r:Route):Seg[]{
   const sByName=new Map(r.S.map(([id,n])=>[n,id]));const p=r.pts;
   const mid=(i:number):[number,number]|undefined=>p&&p[i]&&p[i+1]?[(p[i][0]+p[i+1][0])/2,(p[i][1]+p[i+1][1])/2]:undefined;
   if(r.E.length)return r.E.map(([id,n],i)=>{const [a,b]=n.split('-');return {i,from:a,to:b??'',e:id,s:sByName.get(`${b}-${a}`),mid:mid(i)};});
@@ -22,7 +22,7 @@ const z=(t:TrafficResponse|null,id?:string)=>id&&t?t.zones[id]:undefined;
 const fmtKm=(d:number)=>d<10?`${d.toFixed(1)}km`:`${Math.round(d)}km`;
 
 /** 속도 칸: 색깔 배경 + 숫자 + 원활/서행/정체. */
-function Speed({t,id,label}:{t:TrafficResponse|null;id?:string;label:string}){
+export function Speed({t,id,label}:{t:TrafficResponse|null;id?:string;label:string}){
   if(!id)return <span className="tf-pill g0"><small>{label}</small>-</span>;
   const v=z(t,id);const g=v?.[1]??0,sp=v?.[0]??-1;
   return <span className={`tf-pill g${g}`} id={id}><small>{label}</small>{t?(sp>0?<span className="tf-v"><b>{sp}</b><i> km/h</i> <em>{GRADE[g].text}</em></span>:'정보 없음'):'…'}</span>;
@@ -40,7 +40,9 @@ export function RouteLive({route}:{route:Route}){
   const camOf=useMemo(()=>segs.map(s=>{if(!s.mid||!cams.length)return -1;let best=-1,bd=3;cams.forEach((c,k)=>{const d=km(s.mid![0],s.mid![1],c.lat,c.lng);if(d<bd){bd=d;best=k;}});return best;}),[segs,cams]);
   const [play,setPlay]=useState<number|null>(null);const [all,setAll]=useState(false);
   useEffect(()=>{const id=decodeURIComponent(location.hash.slice(1));if(id)setTimeout(()=>document.getElementById(id)?.closest('tr,article')?.scrollIntoView({block:'center'}),200);},[]);
-  const L=dirLabel(route,'S'),R=dirLabel(route,'E');
+  // A loop (start = end, e.g. 수도권제1순환선) has no useful end name: say 시점·종점 instead.
+  const loop=!route.dirs&&route.start===route.end;
+  const L=loop?'시점 방향':dirLabel(route,'S'),R=loop?'종점 방향':dirLabel(route,'E');
   const jamE=segs.filter(s=>z(data,s.e)?.[1]===3).length,jamS=segs.filter(s=>z(data,s.s)?.[1]===3).length;
   const bad=segs.filter(s=>(z(data,s.e)?.[1]??0)>=2||(z(data,s.s)?.[1]??0)>=2)
     .sort((a,b)=>Math.min(...[z(data,a.e),z(data,a.s)].map(v=>v&&v[0]>0?v[0]:999))-Math.min(...[z(data,b.e),z(data,b.s)].map(v=>v&&v[0]>0?v[0]:999)));

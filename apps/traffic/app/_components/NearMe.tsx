@@ -3,39 +3,50 @@ import Link from 'next/link';
 import {useMemo,useState} from 'react';
 import {LocateCard,km,nearest,useMyPosition} from '@guidejung/ui/geo';
 import {dirLabel,roadName,type Route} from '../../lib/format';
+import type {Cctv} from '../../lib/types';
 import {CctvPlayer,cctvName} from './CctvPlayer';
-import {GRADE,useCctv,useTraffic} from './live';
+import {useCctv,useTraffic} from './live';
+import {Speed,routeCctvs,segments} from './RouteLive';
 
 export type RestLite={code:string;name:string;routeNo:string;route:string;area:string;lat:number;lng:number;dir:string;gas:string;food:string;foodCost:string};
 const fmtKm=(d:number)=>d<1?`${Math.round(d*1000)}m`:`${d.toFixed(d<10?1:0)}km`;
 
-/** 메인 첫 화면: 내 위치(허용 전에는 접속 위치 부근) 기준 가까운 고속도로 상황·휴게소·CCTV. */
+/**
+ * 메인 첫 화면: 내 위치(허용 전에는 접속 위치 부근) 기준 가까운 고속도로마다
+ * 미니 노선도(내 위치 앞뒤 구간·양방향 속도)와 그 도로의 가까운 CCTV를 한 카드에, 그 아래 가까운 휴게소.
+ */
 export function NearMe({routes,rests,places}:{routes:Route[];rests:RestLite[];places:{label:string;lat:number;lon:number}[]}){
   const {pos,status,request}=useMyPosition();const {data}=useTraffic();const cctv=useCctv();
-  const [play,setPlay]=useState<number|null>(null);
+  const [play,setPlay]=useState<{list:Cctv[];i:number}|null>(null);
   const near=useMemo(()=>pos?rests.map(r=>({r,d:km(pos.lat,pos.lon,r.lat,r.lng)})).sort((a,b)=>a.d-b.d):[],[pos,rests]);
-  const nearRoutes=useMemo(()=>{const seen:string[]=[];for(const {r} of near){if(!seen.includes(r.routeNo))seen.push(r.routeNo);if(seen.length===3)break;}
-    return seen.map(no=>routes.find(x=>x.no===no)).filter((r):r is Route=>!!r);},[near,routes]);
-  const cams=useMemo(()=>pos&&cctv.data?cctv.data.items.map(c=>({c,d:km(pos.lat,pos.lon,c.lat,c.lng)})).sort((a,b)=>a.d-b.d).slice(0,6):[],[pos,cctv.data]);
+  // Nearest roads by their own 구간 points (fallback: rest areas), each with the 구간 closest to me.
+  const roads=useMemo(()=>{
+    if(!pos)return [];
+    const list=routes.map(r=>{const segs=segments(r);let k=-1,d=Infinity;segs.forEach((s,i)=>{if(!s.mid)return;const x=km(pos.lat,pos.lon,s.mid[0],s.mid[1]);if(x<d){d=x;k=i;}});
+      if(k<0){const n=near.find(x=>x.r.routeNo===r.no);if(n)d=n.d+1;}return {r,segs,k,d};});
+    return list.filter(x=>Number.isFinite(x.d)).sort((a,b)=>a.d-b.d).slice(0,3);
+  },[pos,routes,near]);
   const place=pos?nearest(places,pos.lat,pos.lon).label:undefined;
   const where=pos?.precise?'내 근처':place?`${place} 부근`:'접속 위치 부근';
   return <section className="section tf-near">
-    {!pos?.precise&&<LocateCard title="내 근처 고속도로 상황 보기" desc="가까운 고속도로의 막히는 구간·휴게소·CCTV를 먼저 보여 드려요" status={status} onClick={request} approxLabel={place}/>}
+    {!pos?.precise&&<LocateCard title="내 근처 고속도로 상황 보기" desc="가까운 고속도로의 구간별 속도·CCTV·휴게소를 먼저 보여 드려요" status={status} onClick={request} approxLabel={place}/>}
     {pos&&<>
       <div className="section-heading"><div><div className="eyebrow">NEAR ME</div><h2>{where} 고속도로</h2></div></div>
-      <div className="tf-cards">{nearRoutes.map(r=>{const ids=(d:'E'|'S')=>r[d].map(z=>z[0]);
-        const jam=(d:'E'|'S')=>data?ids(d).filter(id=>data.zones[id]?.[1]===3).length:0,slow=data?[...ids('E'),...ids('S')].filter(id=>data.zones[id]?.[1]===2).length:0;
-        const worst=data?[...r.E,...r.S].map(([id,n])=>({id,n,z:data.zones[id]})).filter(x=>x.z&&x.z[1]>=2&&x.z[0]>0).sort((a,b)=>b.z[1]-a.z[1]||a.z[0]-b.z[0])[0]:undefined;
-        return <Link key={r.no} href={`/road/${r.no}${worst?`#${worst.id}`:''}`} className={`tf-card tf-near-road${jam('E')+jam('S')?' jam':slow?' slow':''}`}>
-          <span className="tf-card-title">{r.start} ↔ {r.end}</span><strong>{roadName(r)}</strong>
-          <small>{data?(jam('E')+jam('S')?`${dirLabel(r,'E')} 정체 ${jam('E')} · ${dirLabel(r,'S')} 정체 ${jam('S')}`:slow?`서행 ${slow}곳 · 정체 없음`:'지금 원활해요'):'실시간 확인 중…'}</small>
-          {worst&&<small className="tf-worst">가장 느린 곳: {worst.n.replace('-',' → ')} {worst.z[0]}km/h ({GRADE[worst.z[1]].text})</small>}</Link>;})}</div>
-      {cams.length>0&&<><div className="section-heading"><h2>📹 {where} CCTV</h2></div>
-        <div className="chips big">{cams.map(({c,d},i)=><button key={c.url} type="button" className="tf-cam" onClick={()=>setPlay(i)}>📹 {cctvName(c)} <span className="muted small">{fmtKm(d)}</span></button>)}</div></>}
+      <div className="tf-near-roads">{roads.map(({r,segs,k,d})=>{
+        // Without city names (e.g. 순환선), the directions are named after the ICs at both ends of this short window.
+        const win=k>=0?segs.slice(Math.max(0,k-1),k+2):[];
+        const cams=cctv.data?routeCctvs(cctv.data.items,r).map(c=>({c,d:km(pos.lat,pos.lon,c.lat,c.lng)})).filter(x=>x.d<=15).sort((a,b)=>a.d-b.d).slice(0,4):[];
+        const camList=cams.map(x=>x.c);
+        return <article key={r.no} className="tf-near-card">
+          <header><div><h3>{roadName(r)}</h3><span className="muted small">{k>=0?`${segs[k].from} 부근 · ${fmtKm(d)}`:`${r.start} ↔ ${r.end}`}</span></div><Link href={`/road/${r.no}`} className="tf-near-more">노선 전체 →</Link></header>
+          {win.length>0&&<table className="tf-table tf-mini"><thead><tr><th>구간</th><th>◀ {r.dirs?dirLabel(r,'S'):`${win[0].from} 방향`}</th><th>{r.dirs?dirLabel(r,'E'):`${win[win.length-1].to} 방향`} ▶</th></tr></thead>
+            <tbody>{win.map(s=><tr key={s.i} className={s.i===k?'here':''}><td><b>{s.from}</b> → {s.to}{s.i===k&&<span className="tf-here">📍</span>}</td><td><Speed t={data} id={s.s} label=""/></td><td><Speed t={data} id={s.e} label=""/></td></tr>)}</tbody></table>}
+          {cams.length>0&&<div className="tf-near-cams">{cams.map(({c,d},i)=><button key={c.url} type="button" className="tf-cam-btn" onClick={()=>setPlay({list:camList,i})}>📹 {cctvName(c)} <small>{fmtKm(d)}</small></button>)}</div>}
+        </article>;})}</div>
       <div className="section-heading"><h2>{where} 휴게소</h2><Link href="/rest">휴게소 전체</Link></div>
       <div className="tf-cards">{near.slice(0,3).map(({r,d})=><Link key={r.code} href={`/rest/${r.code}`} className="tf-card">
         <span className="tf-card-title">{fmtKm(d)}{r.dir?` · ${r.dir} 방향`:''}</span><strong>{r.name}</strong><small>{[r.food,r.gas&&`휘발유 ${r.gas}`].filter(Boolean).join(' · ')||'편의시설 보기'}</small></Link>)}</div>
     </>}
-    {play!==null&&<CctvPlayer list={cams.map(x=>x.c)} index={play} onIndex={setPlay} onClose={()=>setPlay(null)}/>}
+    {play&&<CctvPlayer list={play.list} index={play.i} onIndex={i=>setPlay({...play,i})} onClose={()=>setPlay(null)}/>}
   </section>;
 }

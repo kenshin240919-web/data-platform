@@ -67,3 +67,9 @@
 .tf-v{display:flex;align-items:baseline;gap:4px;flex-wrap:wrap}.tf-v em{margin-left:auto}.tf-table .tf-v em{margin-left:2px}
 @media(max-width:700px){.tf-seg-card{padding:13px}.tf-seg-card h3{font-size:16px}.tf-pill{padding:8px 10px}.tf-pill b{font-size:18px}}
 .tf-v i{font-style:normal}@media(max-width:700px){.tf-table .tf-v i{display:none}}
+.tf-near-roads{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:14px;margin-bottom:10px}
+.tf-near-card{border:1px solid var(--line);border-radius:16px;padding:16px;background:white;display:flex;flex-direction:column;gap:10px}
+.tf-near-card header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.tf-near-card h3{margin:0;font-size:18px}.tf-near-more{font-size:13px;font-weight:700;color:var(--tf);white-space:nowrap}
+.tf-mini{border-spacing:0 4px}.tf-mini td{font-size:13px;padding:6px}.tf-mini td:first-child{width:auto}.tf-mini td:last-child{width:auto;text-align:left}.tf-mini .tf-pill{padding:5px 8px}.tf-mini .tf-pill b{font-size:15px}.tf-mini .tf-v i{display:none}
+.tf-near-cams{display:flex;flex-wrap:wrap;gap:6px}.tf-near-cams .tf-cam-btn{font-size:13px;padding:8px 11px}.tf-near-cams small{opacity:.75;margin-left:3px}
+@media(max-width:700px){.tf-near-roads{grid-template-columns:1fr}}
