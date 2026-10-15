@@ -1,11 +1,13 @@
 import Link from 'next/link';
 import {CHARGE,TRIP,WEATHER} from '../../lib/data';
 import {IncidentBar} from './IncidentBar';
+import {NetworkBar} from '@guidejung/ui/network';
 export function Shell({children}:{children:React.ReactNode}){
   return <>
+    <NetworkBar current="traffic"/>
     <header className="header"><div className="header-inner">
       <Link href="/" className="brand"><span aria-hidden="true">🛣️</span><span>교통정보</span></Link>
-      <nav aria-label="주요 메뉴" className="tf-nav"><Link href="/">실시간 정체</Link><Link href="/road">고속도로별</Link><Link href="/rest">휴게소</Link><Link href="/gas">휴게소 기름값</Link><Link href="/incidents">사고·공사</Link><a href={WEATHER} className="tf-nav-out">날씨 ↗</a><a href={CHARGE} className="tf-nav-out">충전소 ↗</a></nav>
+      <nav aria-label="주요 메뉴" className="tf-nav"><Link href="/">실시간 정체</Link><Link href="/road">고속도로별</Link><Link href="/rest">휴게소</Link><Link href="/gas">휴게소 기름값</Link><Link href="/incidents">사고·공사</Link><a href={WEATHER} className="tf-nav-out">날씨 ↗</a><a href={CHARGE} className="tf-nav-out">충전소 ↗</a><a href={TRIP} className="tf-nav-out">여행 ↗</a></nav>
       <span className="header-note">고속도로 실시간 소통</span>
     </div></header>
     <IncidentBar/>

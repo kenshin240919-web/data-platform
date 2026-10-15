@@ -68,6 +68,7 @@ export function StationBoard({region,label,origin,snap}:{region:ChargeRegion;lab
             <a className="button" href={`https://map.kakao.com/link/to/${encodeURIComponent(s.name)},${s.lat},${s.lng}`} target="_blank" rel="noopener noreferrer">🧭 길찾기</a>
             <a className="ev-link" href={`${TRIP}/search?lat=${s.lat}&lon=${s.lng}&radius_km=3`}>🚗 충전하는 동안 갈 만한 곳</a>
             <a className="ev-link" href={`${WEATHER}/region/${region.weather}`}>🌤️ {label} 날씨</a>
+            <a className="ev-link" href="https://traffic.guidejung.com">🛣️ 가는 길 고속도로 상황</a>
           </div>
         </div>}
       </li></Fragment>;})}</ul>

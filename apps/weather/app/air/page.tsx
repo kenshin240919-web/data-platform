@@ -1,4 +1,5 @@
 import type {Metadata} from 'next';
+import {Connect,GENERIC,TRIP_URL} from '@guidejung/ui/network';
 import {AdSlot} from '@guidejung/ui/ads';
 import stations from '../../data/air-stations.json';
 import {AirBoard} from '../_components/AirBoard';
@@ -12,6 +13,6 @@ export default function AirPage(){
     const r=regions.reduce((a,b)=>((b.lat-s.lat)**2+(b.lon-s.lon)**2)<((a.lat-s.lat)**2+(a.lon-s.lon)**2)?b:a);
     places[s.name]={code:r.code,label:label(r)};
   }
-  return <section className="section"><div className="eyebrow">AIR QUALITY</div><h1>오늘 전국 미세먼지</h1><AirBoard places={places}/><AdSlot/>
+  return <section className="section"><div className="eyebrow">AIR QUALITY</div><h1>오늘 전국 미세먼지</h1><AirBoard places={places}/><Connect title="미세먼지 나쁜 날엔" items={[{icon:'🏛️',title:'실내 가볼만한곳',desc:'박물관·전시관 등 실내 여행지',href:`${TRIP_URL}/indoor`},GENERIC.trip,GENERIC.traffic]}/><AdSlot/>
     <div className="prose"><h2>미세먼지 등급 기준</h2><p>미세먼지(PM10)는 30 이하 좋음, 80 이하 보통, 150 이하 나쁨, 그 이상 매우나쁨입니다. 초미세먼지(PM2.5)는 15 이하 좋음, 35 이하 보통, 75 이하 나쁨, 그 이상 매우나쁨입니다(㎍/㎥).</p></div></section>;
 }

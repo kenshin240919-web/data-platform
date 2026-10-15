@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type {Metadata} from 'next';
 import {HomeWeather} from './_components/HomeWeather';
+import {Connect,genericFor} from '@guidejung/ui/network';
 import {Recent} from './_components/Recent';
 import {POPULAR,findRegion,label,regions,sidos,SITE} from '../lib/regions';
 
@@ -18,6 +19,7 @@ export default function Home(){
       <Link href="/air"><span aria-hidden="true">😷</span><b>오늘 미세먼지</b><small>깨끗한 곳·나쁜 곳 TOP 10</small></Link>
       <Link href="/wear"><span aria-hidden="true">👕</span><b>오늘 뭐 입지?</b><small>기온별 옷차림</small></Link>
     </section>
+    <Connect title="날씨 보고 떠나기" items={genericFor('weather')}/>
     <section className="section">
       <div className="section-heading"><div><div className="eyebrow">POPULAR</div><h2>많이 찾는 지역 날씨</h2></div></div>
       <div className="chips big">{popular.map(r=><Link key={r.code} href={`/region/${r.code}`}>{label(r)}</Link>)}</div>

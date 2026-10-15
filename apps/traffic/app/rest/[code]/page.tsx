@@ -3,6 +3,7 @@ import {notFound} from 'next/navigation';
 import type {Metadata} from 'next';
 import {AdSlot} from '@guidejung/ui/ads';
 import {CHARGE,SITE,TRIP,WEATHER,fetched,findRest,fmtDate,rests,restsOn,roadName,won} from '../../../lib/data';
+import {Connect,linksNear} from '@guidejung/ui/network';
 
 export const dynamicParams=false;
 export function generateStaticParams(){return rests.map(r=>({code:r.code}));}
@@ -35,6 +36,7 @@ export default async function RestPage(props:Props){
       <p className="muted small">한국도로공사 제공 · {fmtDate(fetched)} 기준 · 실제 가격은 현장에서 확인하세요.</p></>}
     {(r.facilities.length>0||r.brands)&&<><div className="section-heading"><h2>편의시설</h2></div>
       <div className="chips">{r.facilities.map(x=><span key={x} className="chip-static">{x}</span>)}{r.brands&&<span className="chip-static">☕ {r.brands}</span>}</div></>}
+    <Connect title={`${r.name}에서 함께 보기`} items={linksNear(r.lat,r.lng,'traffic')}/>
     {same.length>0&&<><div className="section-heading"><h2>{road} 다른 휴게소</h2></div><div className="chips big">{same.map(x=><Link key={x.code} href={`/rest/${x.code}`}>{x.name}</Link>)}</div></>}
   </section>;
 }
