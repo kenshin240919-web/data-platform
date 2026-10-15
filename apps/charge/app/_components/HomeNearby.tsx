@@ -20,7 +20,7 @@ export function HomeNearby({regions,fallback}:{regions:R[];fallback:string}){
   const origin=pos?.precise&&!picked?{lat:pos.lat,lon:pos.lon}:null;
   return <>
     <div className="ev-picker">
-      {!pos?.precise&&<LocateCard title="내 주변 충전소 찾기" desc="가까운 순으로 지금 비어 있는 충전기를 보여 드려요" status={status} onClick={()=>{setPicked(false);request();}} approxLabel={pos?.label}/>}
+      {!pos?.precise&&<LocateCard title="내 주변 충전소 찾기" desc="가까운 순으로 지금 비어 있는 충전기를 보여 드려요" status={status} onClick={()=>{setPicked(false);request();}} approxLabel={pos?nearest(regions,pos.lat,pos.lon).label:undefined}/>}
       <div className="ev-select"><label className="sr-only" htmlFor="region">지역</label><select id="region" value={region.code} onChange={e=>{setPicked(true);setCode(e.target.value);}}>{regions.map(r=><option key={r.code} value={r.code}>{r.label}</option>)}</select>
         <Link className="text-link" href={`/region/${region.code}`}>{region.label} 충전소 전체 →</Link>
         {pos?.precise&&picked&&<button type="button" className="text-link" onClick={()=>setPicked(false)}>📍 내 주변으로</button>}</div>

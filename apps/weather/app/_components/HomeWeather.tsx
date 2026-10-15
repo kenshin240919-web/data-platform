@@ -21,7 +21,7 @@ export function HomeWeather({regions,fallback}:{regions:Slim[];fallback:string})
   return <>
     <div className="wx-picker">
       <h1>{mine?`내 위치(${region.label})`:region.label} 날씨</h1>
-      {!pos?.precise&&<LocateCard title="내 위치 날씨 바로 보기" desc="지금 있는 곳의 날씨·미세먼지·우산 필요 여부를 먼저 보여 드려요" status={status} onClick={()=>{setPicked(false);request();}} approxLabel={pos?.label}/>}
+      {!pos?.precise&&<LocateCard title="내 위치 날씨 바로 보기" desc="지금 있는 곳의 날씨·미세먼지·우산 필요 여부를 먼저 보여 드려요" status={status} onClick={()=>{setPicked(false);request();}} approxLabel={pos?nearest(regions,pos.lat,pos.lon).label:undefined}/>}
       <div className="wx-picker-actions">
         <label className="sr-only" htmlFor="region-select">지역 선택</label>
         <select id="region-select" value={region.code} onChange={e=>{setPicked(true);setCode(e.target.value);}}>{regions.map(r=><option key={r.code} value={r.code}>{r.label}</option>)}</select>

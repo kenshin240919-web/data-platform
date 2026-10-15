@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import {useMemo,useState} from 'react';
-import {LocateCard,km,useMyPosition} from '@guidejung/ui/geo';
+import {LocateCard,km,nearest,useMyPosition} from '@guidejung/ui/geo';
 import {dirLabel,roadName,type Route} from '../../lib/format';
 import {CctvPlayer,cctvName} from './CctvPlayer';
 import {GRADE,useCctv,useTraffic} from './live';
@@ -10,16 +10,17 @@ export type RestLite={code:string;name:string;routeNo:string;lat:number;lng:numb
 const fmtKm=(d:number)=>d<1?`${Math.round(d*1000)}m`:`${d.toFixed(d<10?1:0)}km`;
 
 /** 메인 첫 화면: 내 위치(허용 전에는 접속 위치 부근) 기준 가까운 고속도로 상황·휴게소·CCTV. */
-export function NearMe({routes,rests}:{routes:Route[];rests:RestLite[]}){
+export function NearMe({routes,rests,places}:{routes:Route[];rests:RestLite[];places:{label:string;lat:number;lon:number}[]}){
   const {pos,status,request}=useMyPosition();const {data}=useTraffic();const cctv=useCctv();
   const [play,setPlay]=useState<number|null>(null);
   const near=useMemo(()=>pos?rests.map(r=>({r,d:km(pos.lat,pos.lon,r.lat,r.lng)})).sort((a,b)=>a.d-b.d):[],[pos,rests]);
   const nearRoutes=useMemo(()=>{const seen:string[]=[];for(const {r} of near){if(!seen.includes(r.routeNo))seen.push(r.routeNo);if(seen.length===3)break;}
     return seen.map(no=>routes.find(x=>x.no===no)).filter((r):r is Route=>!!r);},[near,routes]);
   const cams=useMemo(()=>pos&&cctv.data?cctv.data.items.map(c=>({c,d:km(pos.lat,pos.lon,c.lat,c.lng)})).sort((a,b)=>a.d-b.d).slice(0,6):[],[pos,cctv.data]);
-  const where=pos?.precise?'내 근처':pos?.label?`${pos.label} 부근`:'접속 위치 부근';
+  const place=pos?nearest(places,pos.lat,pos.lon).label:undefined;
+  const where=pos?.precise?'내 근처':place?`${place} 부근`:'접속 위치 부근';
   return <section className="section tf-near">
-    {!pos?.precise&&<LocateCard title="내 근처 고속도로 상황 보기" desc="가까운 고속도로의 막히는 구간·휴게소·CCTV를 먼저 보여 드려요" status={status} onClick={request} approxLabel={pos?.label}/>}
+    {!pos?.precise&&<LocateCard title="내 근처 고속도로 상황 보기" desc="가까운 고속도로의 막히는 구간·휴게소·CCTV를 먼저 보여 드려요" status={status} onClick={request} approxLabel={place}/>}
     {pos&&<>
       <div className="section-heading"><div><div className="eyebrow">NEAR ME</div><h2>{where} 고속도로</h2></div></div>
       <div className="tf-cards">{nearRoutes.map(r=>{const ids=(d:'E'|'S')=>r[d].map(z=>z[0]);

@@ -5,15 +5,16 @@
 // position right away without asking again. The position stays in this browser (localStorage) and is never sent.
 import {useCallback,useEffect,useState} from 'react';
 
-export type Pos={lat:number;lon:number;precise:boolean;label?:string};
+export type Pos={lat:number;lon:number;precise:boolean};
 type Status='idle'|'locating'|'ok'|'denied'|'unsupported';
 const KEY='gj.pos',MAX_AGE=30*60e3;
 
 function saved():Pos|null{try{const v=JSON.parse(localStorage.getItem(KEY)??'null');return v&&Date.now()-v.at<MAX_AGE?{lat:v.lat,lon:v.lon,precise:true}:null;}catch{return null;}}
 function save(p:{lat:number;lon:number}){try{localStorage.setItem(KEY,JSON.stringify({...p,at:Date.now()}));}catch{}}
 let approx:Promise<Pos|null>|null=null;
-/** City-level guess from the IP (no permission needed). Mobile data IPs can point to the wrong city. */
-export function approximate(){return approx??=fetch('/api/where').then(r=>r.ok?r.json():null).then(d=>d&&Number.isFinite(d.lat)?{lat:d.lat,lon:d.lon,precise:false,label:d.city}:null).catch(()=>null);}
+/** City-level guess from the IP (no permission needed). Mobile data IPs can point to the wrong city.
+ * Cloudflare's city name is English, so each site labels it with its own nearest 시군구 instead. */
+export function approximate(){return approx??=fetch('/api/where').then(r=>r.ok?r.json():null).then(d=>d&&Number.isFinite(d.lat)?{lat:d.lat,lon:d.lon,precise:false}:null).catch(()=>null);}
 
 export function useMyPosition(){
   const [pos,setPos]=useState<Pos|null>(null);const [status,setStatus]=useState<Status>('idle');
