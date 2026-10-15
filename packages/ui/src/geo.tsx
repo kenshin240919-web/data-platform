@@ -16,24 +16,29 @@ let approx:Promise<Pos|null>|null=null;
  * Cloudflare's city name is English, so each site labels it with its own nearest 시군구 instead. */
 export function approximate(){return approx??=fetch('/api/where').then(r=>r.ok?r.json():null).then(d=>d&&Number.isFinite(d.lat)?{lat:d.lat,lon:d.lon,precise:false}:null).catch(()=>null);}
 
+// One shared state per page, so every section (and the card that asks for permission) sees the same position.
+let state:{pos:Pos|null;status:Status}={pos:null,status:'idle'};let started=false;
+const subs=new Set<()=>void>();
+function set(next:Partial<typeof state>){state={...state,...next};subs.forEach(f=>f());}
+function locate(quiet:boolean){
+  if(!('geolocation' in navigator)){set({status:'unsupported'});return;}
+  set({status:'locating'});
+  navigator.geolocation.getCurrentPosition(p=>{const v={lat:p.coords.latitude,lon:p.coords.longitude};save(v);set({pos:{...v,precise:true},status:'ok'});},
+    ()=>set({status:quiet?'idle':'denied'}),{timeout:10000,maximumAge:5*60e3});
+}
+function start(){
+  if(started)return;started=true;
+  const s=saved();if(s){set({pos:s,status:'ok'});return;}
+  const guess=()=>approximate().then(a=>{if(a&&!state.pos)set({pos:a});});
+  // Already allowed before → use the precise position without asking; otherwise fall back to the IP guess.
+  (navigator.permissions?.query({name:'geolocation' as PermissionName})??Promise.reject()).then(r=>{if(r.state==='granted')locate(true);else guess();},guess);
+}
+
 export function useMyPosition(){
-  const [pos,setPos]=useState<Pos|null>(null);const [status,setStatus]=useState<Status>('idle');
-  const locate=useCallback((quiet=false)=>{
-    if(!('geolocation' in navigator)){setStatus('unsupported');return;}
-    setStatus('locating');
-    navigator.geolocation.getCurrentPosition(p=>{const v={lat:p.coords.latitude,lon:p.coords.longitude};save(v);setPos({...v,precise:true});setStatus('ok');},
-      ()=>setStatus(quiet?'idle':'denied'),{timeout:10000,maximumAge:5*60e3});
-  },[]);
-  useEffect(()=>{
-    const s=saved();if(s){setPos(s);setStatus('ok');return;}
-    let alive=true;
-    // Already allowed before → use the precise position without asking; otherwise fall back to the IP guess.
-    (navigator.permissions?.query({name:'geolocation' as PermissionName})??Promise.reject()).then(r=>{if(!alive)return;
-      if(r.state==='granted')locate(true);else approximate().then(a=>{if(alive&&a)setPos(p=>p??a);});
-    },()=>approximate().then(a=>{if(alive&&a)setPos(p=>p??a);}));
-    return ()=>{alive=false;};
-  },[locate]);
-  return {pos,status,request:()=>locate(false)};
+  const [,tick]=useState(0);
+  useEffect(()=>{const f=()=>tick(n=>n+1);subs.add(f);start();f();return ()=>{subs.delete(f);};},[]);
+  const request=useCallback(()=>locate(false),[]);
+  return {pos:state.pos,status:state.status,request};
 }
 
 /** 이유를 먼저 보여 주고, 누르면 그때 브라우저 위치 권한을 묻는 카드. */

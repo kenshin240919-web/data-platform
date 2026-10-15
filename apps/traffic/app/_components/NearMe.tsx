@@ -6,7 +6,7 @@ import {dirLabel,roadName,type Route} from '../../lib/format';
 import {CctvPlayer,cctvName} from './CctvPlayer';
 import {GRADE,useCctv,useTraffic} from './live';
 
-export type RestLite={code:string;name:string;routeNo:string;lat:number;lng:number;dir:string;gas:string;food:string};
+export type RestLite={code:string;name:string;routeNo:string;route:string;area:string;lat:number;lng:number;dir:string;gas:string;food:string;foodCost:string};
 const fmtKm=(d:number)=>d<1?`${Math.round(d*1000)}m`:`${d.toFixed(d<10?1:0)}km`;
 
 /** 메인 첫 화면: 내 위치(허용 전에는 접속 위치 부근) 기준 가까운 고속도로 상황·휴게소·CCTV. */
