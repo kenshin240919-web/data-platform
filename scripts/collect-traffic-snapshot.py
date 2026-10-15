@@ -5,7 +5,7 @@ Worker (/api/traffic). The API's firewall rejects requests without a browser-lik
 
 Usage: EX_API_KEY=... python scripts/collect-traffic-snapshot.py [--cache DIR]
 """
-import json, math, os, sys, time, urllib.parse, urllib.request
+import json, math, os, re, sys, time, urllib.parse, urllib.request
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -49,6 +49,54 @@ def price(v, low=1000):
     return v if low <= n <= 3500 else ''
 
 
+def norm(name):
+    # "판교IC", "판교JC", "판교(영)" → "판교" so IC·영업소 lists match the 구간 node names.
+    n = re.sub(r'\(.*?\)', '', (name or '').strip())
+    return re.sub(r'(하이패스IC|하이패스|분기점|요금소|나들목|휴게소|JCT|JC|IC|TG|Hi|HI)$', '', n).strip()
+
+
+def route_nodes(rt):
+    # Same order as the page's 노선도: E 구간 "A-B" chain, or S reversed when a route has only S.
+    if rt['E']:
+        return [rt['E'][0][1].split('-')[0]] + [n.split('-')[-1] for _, n in rt['E']]
+    seq = [n.split('-') for _, n in reversed(rt['S'])]
+    return [seq[0][-1]] + [p[0] for p in seq] if seq else []
+
+
+def place_nodes(route_list, ics, units):
+    by_route, anywhere = {}, {}
+    for x in ics:
+        try: pt = (float(x['yValue']), float(x['xValue']))
+        except (TypeError, ValueError): continue
+        by_route.setdefault(x['routeNo'], {}).setdefault(norm(x['icName']), pt); anywhere.setdefault(norm(x['icName']), pt)
+    for x in units:
+        try: anywhere.setdefault(norm(x['unitName']), (float(x['yValue']), float(x['xValue'])))
+        except (TypeError, ValueError): continue
+    found = total = 0
+    for rt in route_list:
+        names = route_nodes(rt)
+        pts = [by_route.get(rt['no'], {}).get(norm(n)) or anywhere.get(norm(n)) for n in names]
+        # Same name elsewhere in the country (e.g. 서울TG) → drop points far from both known neighbours.
+        known = [i for i, p in enumerate(pts) if p]
+        far = [i for k, i in enumerate(known)
+               if (nb := [pts[known[j]] for j in (k - 1, k + 1) if 0 <= j < len(known)]) and all(math.dist(pts[i], q) > 0.8 for q in nb)]
+        for i in far:
+            pts[i] = None
+        known = [i for i, p in enumerate(pts) if p]
+        found += len(known); total += len(pts)
+        if not known:
+            continue
+        for i in range(len(pts)):  # straight-line guess between the nearest known nodes
+            if pts[i]: continue
+            a = max((j for j in known if j < i), default=None); b = min((j for j in known if j > i), default=None)
+            if a is None: pts[i] = pts[b]
+            elif b is None: pts[i] = pts[a]
+            else:
+                t = (i - a) / (b - a); pts[i] = (pts[a][0] + (pts[b][0] - pts[a][0]) * t, pts[a][1] + (pts[b][1] - pts[a][1]) * t)
+        rt['pts'] = [[round(p[0], 4), round(p[1], 4)] for p in pts]
+    print(f'node coordinates: {found}/{total} matched, rest interpolated')
+
+
 def nearest_region(regions, lat, lng):
     best = min(regions, key=lambda r: (r['lat'] - lat) ** 2 + ((r['lon'] - lng) * math.cos(math.radians(lat))) ** 2)
     return best
@@ -90,6 +138,10 @@ def main():
     if len(route_list) < 30:
         sys.exit(f'only {len(route_list)} routes; not writing')
 
+    ics = get(key, 'locationinfo/locationinfoIc', {'numOfRows': 999, 'pageNo': 1}, cache).get('list') or []
+    units = get_all(key, 'locationinfo/locationinfoUnit', cache)
+    place_nodes(route_list, ics, units)
+
     loc = get_all(key, 'locationinfo/locationinfoRest', cache)
     foods = get_all(key, 'restinfo/restBestfoodList', cache)
     conv = get_all(key, 'restinfo/restConvList', cache)
@@ -126,6 +178,20 @@ def main():
                       'brands': b.get('brand') or '', 'facilities': sorted(set((b.get('convenience') or '').split('|') + by_conv.get(l['stdRestCd'], [])) - {''}),
                       'foods': sorted(by_food.get(l['stdRestCd'], []), key=lambda f: not f['best'])[:10], 'gas': by_gas.get(l['unitName'].strip()),
                       'weather': wcode, 'charge': wcode if wcode[4] == '0' else wcode[:4] + '0', 'area': f"{near['sidoShort']} {near['name']}"})
+    # Direction names people use ("서울 방향") from the rest areas' 방향: the city nearer the route's end is E.
+    places = {}
+    for r in regions:
+        for key in (r['sidoShort'], r['name'].split()[0], re.sub(r'(시|군|구)$', '', r['name'].split()[0])):
+            places.setdefault(key, (r['lat'], r['lon']))
+    for rt in route_list:
+        names = sorted({x['dir'] for x in rests if x['routeNo'] == rt['no'] and x['dir']})
+        pts = rt.get('pts')
+        if len(names) != 2 or not pts or not all(n in places for n in names):
+            continue
+        d = [(math.dist(places[n], pts[-1]) - math.dist(places[n], pts[0]), n) for n in names]
+        (_, to_end), (_, to_start) = sorted(d)
+        rt['dirs'] = {'E': to_end, 'S': to_start}
+
     if len(rests) < 150:
         sys.exit(f'only {len(rests)} rest areas; not writing')
     rests.sort(key=lambda r: (r['routeNo'], r['code']))

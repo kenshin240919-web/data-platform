@@ -16,13 +16,15 @@ export function HomeLive({routes,rests}:{routes:Route[];rests:RestLite[]}){
   if(!data)return <section className="tf-hero"><p className="tf-answer">전국 고속도로 <b>{routes.length}개 노선</b> 실시간 정체</p><p className="tf-sub" role="status">지금 막히는 구간을 찾고 있어요…</p></section>;
   const all=routes.flatMap(r=>(['E','S'] as const).flatMap(d=>r[d].map(([id,name])=>({id,name,r,d,v:data.zones[id]}))));
   const jam=all.filter(z=>z.v?.[1]===3),slow=all.filter(z=>z.v?.[1]===2);
+  // With a position, the headline is about the roads around the visitor, not the whole country.
+  const mine=local?all.filter(z=>nearNos!.has(z.r.no)):all;const mJam=mine.filter(z=>z.v?.[1]===3).length,mSlow=mine.filter(z=>z.v?.[1]===2).length;
   const top=[...jam,...slow].filter(z=>z.v![0]>0&&(!local||nearNos!.has(z.r.no))).sort((a,b)=>b.v![1]-a.v![1]||a.v![0]-b.v![0]).slice(0,10);
   // Routes ranked by how many 구간 are jammed or slow right now.
   const worst=[...byNo.values()].map(r=>({r,n:all.filter(z=>z.r===r&&(z.v?.[1]??0)>=2).length})).filter(x=>x.n).sort((a,b)=>b.n-a.n).slice(0,6);
   return <>
-    <section className={`tf-hero${jam.length?' jam':slow.length?' slow':''}`}>
-      <p className="tf-answer">지금 전국 고속도로 정체 <b>{jam.length}곳</b> · 서행 <b>{slow.length}곳</b></p>
-      <p className="tf-sub">{routes.length}개 노선 {all.length.toLocaleString()}개 구간 · {fmtTime(data.time)} 기준{data.refreshing?' · 최신 정보 확인 중':''}</p>
+    <section className={`tf-hero${mJam?' jam':mSlow?' slow':''}`}>
+      <p className="tf-answer">{local?<>{pos!.precise?'내 근처':'접속 위치 부근'} 고속도로 {mJam+mSlow?<>정체 <b>{mJam}곳</b> · 서행 <b>{mSlow}곳</b></>:<><b>원활</b>해요</>}</>:<>지금 전국 고속도로 정체 <b>{jam.length}곳</b> · 서행 <b>{slow.length}곳</b></>}</p>
+      <p className="tf-sub">{local?`가까운 ${nearNos!.size}개 노선 기준 · 전국 정체 ${jam.length}곳`:`${routes.length}개 노선 ${all.length.toLocaleString()}개 구간`} · {fmtTime(data.time)} 기준{data.refreshing?' · 최신 정보 확인 중':''}</p>
     </section>
     {worst.length>0&&<div className="chips big">{worst.map(({r,n})=><Link key={r.no} href={`/road/${r.no}`}>{roadName(r)} <span className="tf-badge">막힘 {n}</span></Link>)}</div>}
     <section className="section"><div className="section-heading"><div><div className="eyebrow">TOP 10</div><h2>{local?(pos!.precise?'내 근처':'접속 위치 부근'):'전국'} 가장 막히는 구간</h2></div>{nearNos?<button type="button" className="chip" onClick={()=>setWide(!wide)}>{wide?'내 근처 보기':'전국 보기'}</button>:<Link href="/road">고속도로별 보기</Link>}</div>
