@@ -136,7 +136,7 @@ def run(target=100,types=None):
             print('\n수집한 내용을 저장하는 중입니다...',flush=True)
             with SessionLocal() as db:publish(db)
             save('completed');print(f'사진/시설 보강 {len(state["records"])}건, 검수 대기 {len(state["rejected"])}건, 오류로 건너뜀 {len(state.get("skipped",[]))}건. 공개 총량 최대 {target}건.')
-    except (ValueError,RuntimeError) as error:
+    except (ValueError,RuntimeError,OSError) as error:  # OSError: a file kept locked (OneDrive/antivirus) after retries
         save('paused_error_or_budget')
         budget='예산' in str(error)
         # Daily limit or a run of API/network errors: publish what is ready, then resume later from the checkpoint.

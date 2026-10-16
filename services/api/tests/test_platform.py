@@ -114,6 +114,17 @@ class PlatformTest(unittest.TestCase):
         self.assertTrue({'오류 e1','오류 e3'}<=names);self.assertNotIn('오류 e2',names)
         state=json.loads((Path(temp.name)/'runtime'/'trip300'/'checkpoint.json').read_text(encoding='utf-8'))
         self.assertEqual((state['status'],state['skipped']),('completed',['e2']))
+    def test_write_json_retries_a_locked_file(self):
+        import json
+        from unittest.mock import patch
+        from app.full_trip import write_json
+        target=Path(temp.name)/'locked.json';real=Path.replace;calls=[]
+        def flaky(self,dst):
+            calls.append(1)
+            if len(calls)<3:raise PermissionError(5,'액세스가 거부되었습니다')
+            return real(self,dst)
+        with patch.object(Path,'replace',flaky),patch('time.sleep'):write_json(target,{'a':1})
+        self.assertEqual((len(calls),json.loads(target.read_text(encoding='utf-8'))),(3,{'a':1}))
     def test_build_file_is_card_subset_with_totals(self):
         from app.export_static import build_file,PER_LIST
         items=[{'id':f'p{i}','name':f'n{i}','kind':'place' if i%3 else 'festival','region_id':'r1' if i<40 else 'r2','quality_score':i,

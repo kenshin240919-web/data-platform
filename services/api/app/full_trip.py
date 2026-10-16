@@ -13,10 +13,17 @@ from .validation import normalize,checks
 
 TYPES=('12','14','28','15')
 
-def write_json(path,value):
+def write_json(path,value,tries=20):
+    """Write via a temp file and rename. On Windows, OneDrive sync or antivirus can hold the target for a moment
+    (PermissionError: WinError 5) — wait and retry instead of ending a long collection run."""
+    import time
     temporary=path.with_suffix('.tmp')
     temporary.write_text(json.dumps(value,ensure_ascii=False),encoding='utf-8')
-    temporary.replace(path)
+    for attempt in range(tries):
+        try:temporary.replace(path);return
+        except PermissionError:
+            if attempt==tries-1:raise
+            time.sleep(0.25*(attempt+1))
 
 def valid_record(raw,regions):
     item=normalize(raw)
