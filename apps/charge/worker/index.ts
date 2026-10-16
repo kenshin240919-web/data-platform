@@ -114,7 +114,10 @@ function overlay(v:StationsResponse,d:Delta|null):StationsResponse{
 
 /** Cron (5분마다): 전국 최근 5분 상태 변경을 받아 최근 70분치로 합쳐 KV에 둔다. */
 async function scheduled(env:Env,now:number){
-  const kv=env.CACHE;if(!kv||!env.DATA_GO_KR_KEY)return;
+  const kv=env.CACHE;if(!kv)return;
+  // Start mark first, so /api/status shows a run that was cut off before the end.
+  await kv.put('charge:cron',JSON.stringify({at:now,started:Date.now(),err:env.DATA_GO_KR_KEY?undefined:'no service key'}));
+  if(!env.DATA_GO_KR_KEY)return;
   let err:string|undefined,got=0,size=0;
   try{
     const b=await upstream(`https://apis.data.go.kr/B552584/EvCharger/getChargerStatus?serviceKey=${env.DATA_GO_KR_KEY}&pageNo=1&numOfRows=9999&dataType=JSON&period=5`,2);

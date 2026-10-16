@@ -40,6 +40,7 @@ GitHub `main`에 push → Cloudflare가 `wrangler.jsonc` 기준으로 `npm run b
 데이터 갱신 순서(컴퓨터): `collect-trip.bat` → (선택) 검수 → `export-site.bat` → `trip.json` 커밋·push → 자동 재배포.
 
 ## 현재 상태 (2026-10-16 기준)
+- **Cron 주의(10/16 경험)**: wrangler.jsonc에 `triggers.crons`를 처음 넣은 배포 직후에는 Cron이 돌지 않았고, **그다음 배포부터** 돌기 시작함(traffic·weather·charge 모두, 원인 미확인). Cron을 새로 넣으면 한 번 더 배포하고 각 사이트 `/api/status`로 확인.
 - **클라우드 허용 도메인 `*.guidejung.com`(10/16 사용자 추가)**: 이 세션에서 trip·weather·charge·traffic 페이지와 `/api/*` 모두 직접 접속 확인(200). `/api/where`는 해외 IP라 빈 값(정상).
 - **trip**(trip.guidejung.com): Cloudflare Workers 배포 완료, 검색 노출(SEO) 켜짐.
 - **weather**(weather.guidejung.com): 10/13 배포·도메인 연결·라이브 확인 완료. 메뉴 오늘 날씨·주말 날씨·미세먼지·옷차림·전국 날씨·여행정보↗, 시도 16·시군구 256 페이지, 애드센스·ads.txt·sitemap·rss.xml(275개 페이지)·네이버 인증 메타태그(10/13 라이브 확인)·Bing 인증 메타태그(msvalidate.01)·Daum PIN(robots.txt 마지막 줄) 적용, 10/13 Daum 인증·네이버 소유확인 완료, 사이트맵·RSS 제출 완료(사용자 보고). 남은 일: 며칠 뒤 각 검색엔진에서 사이트맵 처리 상태(성공·수집 페이지 수) 확인, 첫 호출 속도·무료 플랜 CPU 확인.
