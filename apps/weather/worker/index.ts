@@ -154,7 +154,10 @@ const json=(body:unknown,status=200,maxAge=300)=>new Response(JSON.stringify(bod
 const BATCH=32;
 /** Cron (5분마다): 특보·미세먼지, then the next 32 시군구 after each 단기예보 issue (all 256 in about 40 minutes, 8 passes a day). */
 async function scheduled(env:Env,now:number){
-  const kv=env.CACHE;if(!kv||!env.DATA_GO_KR_KEY)return;
+  const kv=env.CACHE;if(!kv){return;}
+  // Start mark first, so /api/status shows a run that was cut off before the end.
+  await kv.put('weather:cron',JSON.stringify({at:now,started:Date.now(),key:env.DATA_GO_KR_KEY?undefined:'no service key'}));
+  if(!env.DATA_GO_KR_KEY)return;
   const k=slowKey();const cur=await kv.get('weather:cursor',{type:'json'}).catch(()=>null) as {key:string;i:number}|null;
   const i=cur&&cur.key===k?cur.i:0;const part=regions.slice(i,i+BATCH);
   await Promise.allSettled([warnings(env),nationalAir(env)]);
@@ -166,7 +169,8 @@ async function scheduled(env:Env,now:number){
 }
 
 export default {
-  async scheduled(ev:{scheduledTime:number},env:Env,ctx:Ctx){ctx.waitUntil(scheduled(env,ev.scheduledTime));},
+  async scheduled(ev:{scheduledTime:number},env:Env,ctx:Ctx){
+    ctx.waitUntil(scheduled(env,ev.scheduledTime).catch(e=>env.CACHE?.put('weather:cron',JSON.stringify({at:ev.scheduledTime,failed:Date.now(),err:String((e as Error)?.message??e).slice(0,200)}))));},
   async fetch(req:Request,env:Env,ctx?:Ctx):Promise<Response>{
     const url=new URL(req.url);
     if(url.pathname==='/api/weather'){
