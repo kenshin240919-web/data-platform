@@ -1,20 +1,23 @@
 // Load the published trip dataset into D1 (guidejung-trip) for the trip Worker.
 // Usage: node scripts/build-trip-d1.mjs [data.json] [--remote | --local] [--if-newer]
-//   data.json: export from services/api (default apps/trip/data/trip.json: {status, regions, items}).
+//   data.json: full export from services/api (default runtime/trip-full.json, else apps/trip/data/trip.json).
 //   Writes runtime/d1/trip-*.sql; --remote / --local also runs them with wrangler (remote needs `npx wrangler login` once).
 // Rows go to places_next / regions_next and are swapped in by the last file, so the site never shows a half load.
 import {execFileSync} from 'node:child_process';
-import {mkdirSync,readFileSync,rmSync,writeFileSync} from 'node:fs';
+import {existsSync,mkdirSync,readFileSync,rmSync,writeFileSync} from 'node:fs';
 import {dirname,join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 const ROOT=join(dirname(fileURLToPath(import.meta.url)),'..');
 const args=process.argv.slice(2);
-const input=args.find(a=>!a.startsWith('--'))??join(ROOT,'apps/trip/data/trip.json');
+// Default: the computer's full export if there is one, else the git file (full until the first new-style export).
+const input=args.find(a=>!a.startsWith('--'))??[join(ROOT,'runtime/trip-full.json'),join(ROOT,'apps/trip/data/trip.json')].find(f=>existsSync(f));
 const mode=args.includes('--remote')?'--remote':args.includes('--local')?'--local':null;
-const ROWS_PER_FILE=4000;  // keeps each upload a manageable size
+const ROWS_PER_FILE=2000;  // about 15MB of SQL per upload
 
 const data=JSON.parse(readFileSync(input,'utf8'));
+// The git build file (subset: true) only has card fields; loading it would replace the full set with a stub.
+if(data.subset){console.log(`${input} is the small build file; D1 is loaded from the computer's full export (export-site.bat).`);process.exit(0);}
 const items=data.items??[];
 if(!items.length)throw new Error(`no items in ${input}`);
 const s=v=>v===null||v===undefined?'NULL':typeof v==='number'?(Number.isFinite(v)?String(v):'NULL'):`'${String(v).replace(/'/g,"''")}'`;

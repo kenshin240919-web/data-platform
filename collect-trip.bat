@@ -2,7 +2,7 @@
 cd /d "%~dp0"
 rem 공개 데이터를 목표 건수까지 늘립니다. 하루 호출 한도에 닿으면 멈추고, 다음 날 같은 목표로 다시 실행하면 이어서 수집합니다.
 set TARGET=
-set /p TARGET=총 몇 건까지 늘릴까요? (예: 1000, 최대 3000) : 
+set /p TARGET=총 몇 건까지 늘릴까요? (예: 10000, 최대 100000 · 1만 건씩 늘리기 권장) : 
 if "%TARGET%"=="" (echo 건수를 입력하지 않아 종료합니다. & pause & exit /b 1)
 ".venv\Scripts\python.exe" scripts\local-postgres.py setup || (echo 로컬 DB를 시작하지 못했습니다. & pause & exit /b 1)
 ".venv\Scripts\python.exe" -m services.api.app.trip100 --target %TARGET%

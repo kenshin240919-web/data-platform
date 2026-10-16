@@ -4,7 +4,8 @@ import { search, type Query } from './search';
 // Static site: data comes from the export (python -m app.export_static), not a live API.
 import data from '../../../apps/trip/data/trip.json';
 
-const site=data as unknown as {status:Status;regions:Region[];sitemap:{path:string;lastmod:string}[];items:Place[]};
+// items: the build file holds card fields only for the places the static pages show (the full set is in D1).
+const site=data as unknown as {status:Status;regions:Region[];sitemap:{path:string;lastmod:string}[];items:Place[];counts?:Record<string,number>};
 
 export function origin(service:Service){
   // Canonical/sitemap URLs are baked in at build time.
@@ -25,5 +26,7 @@ export async function api<T>(path:string):Promise<T>{
   throw new Error('데이터 조회 실패 (404)');
 }
 export const places=()=>site.items;
+/** Real totals ('all', 'kind:place', 'region:{id}', 'condition:kids'); missing in older full files → undefined. */
+export const count=(key:string)=>site.counts?.[key];
 // SEO switch comes from the exported data (SEO_ENABLED in .env at export time), not the build host.
 export const enabled=()=>site.status.seo_enabled && site.status.mode==='live';

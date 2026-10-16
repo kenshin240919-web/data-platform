@@ -3,7 +3,7 @@ import {notFound} from 'next/navigation';
 import type {Metadata} from 'next';
 import {Suspense} from 'react';
 import type {Place,Region,Results,Service,Status} from './types';
-import {api,enabled,origin,places} from './server';
+import {api,count,enabled,origin,places} from './server';
 import {Nearby,RegionPicker} from './controls';
 import {Cards,SearchForm,collections,labels} from './cards';
 import {ClientCards,Listing} from './listing';
@@ -47,7 +47,9 @@ async function listing(service:Service,segments:string[]){
   // Static HTML carries the first results so search engines (Naver Yeti renders little JS) see real content;
   // the browser then swaps in the interactive list with query-string filters and paging.
   const initial=search(places(),{...fixed,limit:24});
-  const fallback=<section className="section listing"><div className="eyebrow">FIND YOUR TRIP</div><h1>{title}</h1><div className="results-heading"><p><strong>{initial.total}</strong>개 정보</p></div><Cards items={initial.items}/></section>;
+  // The build file holds only the first cards of each list; the real total comes from its counts.
+  const total=(fixed.region?count(`region:${fixed.region}`):fixed.kind?count(`kind:${fixed.kind}`):fixed.condition?count(`condition:${fixed.condition}`):fixed.when?undefined:count('all'))??initial.total;
+  const fallback=<section className="section listing"><div className="eyebrow">FIND YOUR TRIP</div><h1>{title}</h1><div className="results-heading"><p><strong>{total}</strong>개 정보</p></div><Cards items={initial.items}/></section>;
   // Region pages link to that area on the other sites (centre of its places); other lists get the network links.
   const pts=initial.items.map(p=>[Number(p.latitude),Number(p.longitude)]).filter(([a,b])=>Number.isFinite(a)&&Number.isFinite(b));
   const links=region&&pts.length?linksNear(pts.reduce((n,p)=>n+p[0],0)/pts.length,pts.reduce((n,p)=>n+p[1],0)/pts.length,'trip')

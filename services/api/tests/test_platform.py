@@ -70,6 +70,52 @@ class PlatformTest(unittest.TestCase):
         self.assertIn('성장 g1',names);self.assertNotIn('성장 g2',names)
         import json
         self.assertEqual(json.loads((Path(temp.name)/'runtime'/'trip100'/'checkpoint.json').read_text(encoding='utf-8'))['status'],'paused_error_or_budget')
+        self.assertIn('성장 g0',names)  # already published items stay in the new version
+        # Next day: resumes after g1 (no second call for it) and publishes everything.
+        detail_ids.clear()
+        class NextDay(FakeAPI):
+            def call(self,endpoint,**params):
+                if endpoint=='areaBasedList2':return FakeAPI.call(self,endpoint,**params)
+                detail_ids.append(params['contentId']);return {'items':[],'total':0}
+        with patch.object(trip100,'TourAPI',NextDay),patch.object(trip100,'ROOT',Path(temp.name)):trip100.run(100)
+        self.assertNotIn('g1',detail_ids);self.assertIn('g3',detail_ids)
+        with SessionLocal() as db:
+            names={p.snapshot['name'] for p in db.scalars(select(Profile).where(Profile.dataset_id==active_dataset(db).id))}
+        self.assertTrue({'성장 g0','성장 g1','성장 g2','성장 g3'}<=names)
+        state=json.loads((Path(temp.name)/'runtime'/'trip100'/'checkpoint.json').read_text(encoding='utf-8'))
+        self.assertEqual(state['status'],'completed');self.assertTrue(all(isinstance(i,str) for i in state['records']))
+    def test_build_file_is_card_subset_with_totals(self):
+        from app.export_static import build_file,PER_LIST
+        items=[{'id':f'p{i}','name':f'n{i}','kind':'place' if i%3 else 'festival','region_id':'r1' if i<40 else 'r2','quality_score':i,
+                'conditions':{'kids':i%2==0},'images':[{'url':'a'},{'url':'b'}],'body_only':'x'} for i in range(60)]
+        small=build_file({'status':{},'regions':[],'items':items})
+        self.assertTrue(small['subset']);self.assertEqual(small['counts']['all'],60);self.assertEqual(small['counts']['region:r1'],40)
+        self.assertEqual(small['counts']['condition:kids'],30);self.assertNotIn('body_only',small['items'][0]);self.assertEqual(len(small['items'][0]['images']),1)
+        top=sorted(items,key=lambda p:-p['quality_score'])[:PER_LIST]
+        self.assertTrue({p['id'] for p in top}<={p['id'] for p in small['items']})
+    def test_growth_resumes_old_checkpoint_format(self):
+        # Checkpoints written before 10/16 held full records and the candidate list.
+        import json
+        from unittest.mock import patch
+        from app import trip100
+        from app.models import Region
+        def raw(ident):return {'contentid':ident,'contenttypeid':'12','title':'예전 '+ident,'addr1':'서울특별시 중구 시험로','lDongRegnCd':'11','lDongSignguCd':'140','mapy':'37.56','mapx':'126.99','_images':[]}
+        with SessionLocal() as db:
+            region=db.get(Region,'growth-region') or Region(id='growth-region',version_id='demo-regions-v1',code_system='MOIS_LEGAL',code='11140',name='서울특별시 중구',level='city')
+            region.status='active';db.add(region);db.commit()
+            self.assertEqual(ingest(db,[raw('o0')]).status,'completed')
+        work=Path(temp.name)/'runtime'/'trip200';work.mkdir(parents=True,exist_ok=True)
+        (work/'checkpoint.json').write_text(json.dumps({'candidates':[raw('o0'),raw('o1'),raw('o2')],'cursor':2,'records':[raw('o0'),raw('o1')],'known':['o0'],'rejected':[],'status':'paused_error_or_budget'}),encoding='utf-8')
+        calls=[]
+        class API:
+            def __init__(self,*a,**k):pass
+            def call(self,endpoint,**params):calls.append((endpoint,params.get('contentId')));return {'items':[],'total':0}
+        with patch.object(trip100,'TourAPI',API),patch.object(trip100,'ROOT',Path(temp.name)):trip100.run(200)
+        self.assertNotIn('o1',[c[1] for c in calls])  # its full record was kept as a cache file
+        self.assertIn('o2',[c[1] for c in calls])
+        with SessionLocal() as db:
+            names={p.snapshot['name'] for p in db.scalars(select(Profile).where(Profile.dataset_id==active_dataset(db).id))}
+        self.assertTrue({'예전 o0','예전 o1','예전 o2'}<=names)
     def test_seo_indexes_described_public_pages_without_review(self):
         from unittest.mock import patch
         from app import config
