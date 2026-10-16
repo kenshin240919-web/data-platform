@@ -89,6 +89,9 @@ export default {
       // Not in D1 (or D1 failed): the static 404 page. Detail pages are no longer built statically.
       return env.ASSETS.fetch(new Request(new URL('/404',req.url))).then(r=>new Response(r.body,{status:404,headers:r.headers}));
     }
+    // Approximate visitor position from Cloudflare's IP geolocation (Korea only), for the first screen before any prompt.
+    if(url.pathname==='/api/where'){const cf=(req as any).cf??{};const lat=Number(cf.latitude),lon=Number(cf.longitude);
+      return new Response(JSON.stringify(Number.isFinite(lat)&&Number.isFinite(lon)&&cf.country==='KR'?{lat,lon}:{}),{headers:{'content-type':'application/json; charset=utf-8','cache-control':'private, no-store'}});}
     if(url.pathname==='/api/search'){
       if(!env.DB)return json({error:'database not bound'},503,0);
       const q:Query={};for(const k of QUERY_KEYS){const v=url.searchParams.get(k);if(v!==null&&v!=='')(q as Record<string,string>)[k]=v;}
