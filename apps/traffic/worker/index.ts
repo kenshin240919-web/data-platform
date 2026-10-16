@@ -32,6 +32,11 @@ const at=(t:string)=>Date.UTC(+t.slice(0,4),+t.slice(4,6)-1,+t.slice(6,8),+t.sli
  * 10ms CPU limit, and detectors are mapped to 구간 with vds.json because live rows sometimes leave conzoneId empty.
  */
 async function loadTraffic(env:Env):Promise<TrafficResponse>{
+  let last:unknown;
+  for(let i=0;i<3;i++){try{return await loadTrafficOnce(env);}catch(e){last=e;await new Promise(r=>setTimeout(r,1500*(i+1)));}}
+  throw last;
+}
+async function loadTrafficOnce(env:Env):Promise<TrafficResponse>{
   const res=await fetch(`${BASE}odtraffic/trafficAmountByRealtime?key=${env.EX_API_KEY}&type=json`,{headers:{'user-agent':UA,accept:'application/json'},signal:AbortSignal.timeout(25000)});
   const text=await res.text();
   const acc=new Map<string,{sum:number;n:number;g:number[]}>();const map=vds as Record<string,string>;
@@ -44,7 +49,7 @@ async function loadTraffic(env:Env):Promise<TrafficResponse>{
   const time=t&&h?t[1]+h[1]:'';
   const zones:TrafficResponse['zones']={};
   for(const [id,a] of acc){const g=a.g[3]&&a.g[3]>=Math.max(a.g[1],a.g[2])?3:a.g[2]&&a.g[2]>=a.g[1]?2:a.g[1]?1:0;zones[id]=[a.n?Math.round(a.sum/a.n):-1,g];}
-  if(acc.size<500)throw new Error('traffic feed too small');
+  if(acc.size<500)throw new Error(`traffic feed too small (${res.status} ${text.length}B ${text.slice(0,60).replace(/\s+/g,' ')})`);
   return {time:time||kst(),zones,stale:false};
 }
 
