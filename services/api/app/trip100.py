@@ -42,9 +42,15 @@ def known_payloads(db,ids):
             out.setdefault(str(r.external_id),r.payload)
     return [out[i] for i in ids if i in out]
 
-def run(target=100):
+# 12 관광지·14 문화시설·28 레포츠·15 축제 (default); 39 음식점·32 숙박 once the site shows them (TOURAPI_TYPES / --types).
+DEFAULT_TYPES='12,14,28,15'
+
+def run(target=100,types=None):
     if not 100<=target<=MAX_TARGET:raise ValueError(f'목표는 100~{MAX_TARGET}건입니다.')
-    initialize();work=ROOT/'runtime'/f'trip{target}';work.mkdir(exist_ok=True)
+    codes=[c.strip() for c in (types or os.getenv('TOURAPI_TYPES') or DEFAULT_TYPES).split(',') if c.strip()]
+    # A different type set (맛집·숙소 added) gets its own work folder: its candidate list differs.
+    suffix='' if ','.join(codes)==DEFAULT_TYPES else '-'+'-'.join(codes)
+    initialize();work=ROOT/'runtime'/f'trip{target}{suffix}';work.mkdir(exist_ok=True)
     cache=work/'raw';cache.mkdir(exist_ok=True)
     statepath=work/'checkpoint.json';progress=work/'progress.json';listpath=work/'candidates.json'
     # Checkpoint keeps ids only (tens of thousands of full records made every save slow); each new record's content is
@@ -98,10 +104,10 @@ def run(target=100):
                 print(f"\r진행 {len(known)+new}/{target}건 · 오늘 새로 {new}건 · 오늘 API 호출 {calls}/{limit} · {name[:18]:<18}",end='',flush=True)
             if not candidates:
                 print('원천 목록을 확인하는 중입니다...',flush=True)
-                # Four types interleaved, 50 per page: enough pages to reach the target plus a buffer.
+                # Types interleaved, 50 per page each: enough pages to reach the target plus a buffer.
                 seen=set(known)
-                for page in range(1,target//200+3):
-                    batches=[api.call('areaBasedList2',contentTypeId=code,numOfRows=50,pageNo=page,arrange='C')['items'] for code in ['12','14','28','15']]
+                for page in range(1,target//(50*len(codes))+3):
+                    batches=[api.call('areaBasedList2',contentTypeId=code,numOfRows=50,pageNo=page,arrange='C')['items'] for code in codes]
                     if not any(batches):break
                     for offset in range(50):
                         for batch in batches:
@@ -132,4 +138,4 @@ def run(target=100):
 
 if __name__=='__main__':
     import argparse
-    parser=argparse.ArgumentParser();parser.add_argument('--target',type=int,default=200);args=parser.parse_args();run(args.target)
+    parser=argparse.ArgumentParser();parser.add_argument('--target',type=int,default=200);parser.add_argument('--types',help='contentTypeId 목록, 예: 12,14,28,15,39,32');args=parser.parse_args();run(args.target,args.types)

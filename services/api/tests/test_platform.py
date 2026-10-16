@@ -84,6 +84,14 @@ class PlatformTest(unittest.TestCase):
         self.assertTrue({'성장 g0','성장 g1','성장 g2','성장 g3'}<=names)
         state=json.loads((Path(temp.name)/'runtime'/'trip100'/'checkpoint.json').read_text(encoding='utf-8'))
         self.assertEqual(state['status'],'completed');self.assertTrue(all(isinstance(i,str) for i in state['records']))
+    def test_food_and_stay_kinds(self):
+        from app.validation import path_of
+        food=normalize({'contentid':'f1','contenttypeid':'39','title':'식당','firstmenu':'국밥','treatmenu':'국밥, 수육','opentimefood':'09:00~21:00','restdatefood':'월요일','infocenterfood':'02-1','packing':'가능','reservationfood':'가능'})
+        self.assertEqual((food['kind'],food['menu'],food['menus'],food['hours'],food['closed_days'],food['phone'],food['takeout']),('food','국밥','국밥, 수육','09:00~21:00','월요일','02-1','가능'))
+        stay=normalize({'contentid':'s1','contenttypeid':'32','title':'숙소','checkintime':'15:00','checkouttime':'11:00','roomtype':'온돌','roomcount':'12','reservationurl':'<a href="https://example.com/r">예약</a>','infocenterlodging':'02-2','chkcooking':'가능'})
+        self.assertEqual((stay['kind'],stay['checkin'],stay['checkout'],stay['rooms'],stay['room_count'],stay['reservation_url'],stay['phone'],stay['cooking']),('stay','15:00','11:00','온돌','12','https://example.com/r','02-2','가능'))
+        self.assertEqual(normalize({'contentid':'p','contenttypeid':'14','title':'박물관'})['kind'],'place')
+        self.assertEqual((path_of('food','x'),path_of('festival','y'),path_of('bogus','z')),('/food/x','/festival/y','/place/z'))
     def test_build_file_is_card_subset_with_totals(self):
         from app.export_static import build_file,PER_LIST
         items=[{'id':f'p{i}','name':f'n{i}','kind':'place' if i%3 else 'festival','region_id':'r1' if i<40 else 'r2','quality_score':i,

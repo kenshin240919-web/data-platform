@@ -5,6 +5,11 @@ import re
 from datetime import date
 
 CONDITIONS = ('free','kids','pet','indoor')
+# TourAPI contentTypeId → site kind (URL /{kind}/{id}). 12 관광지·14 문화시설·28 레포츠 are all 'place'.
+KIND_BY_TYPE = {'15':'festival','39':'food','32':'stay'}
+KINDS = ('place','festival','food','stay')
+def kind_of(raw): return KIND_BY_TYPE.get(str(raw.get('contenttypeid')),'place')
+def path_of(kind,place_id): return f'/{kind if kind in KINDS else "place"}/{place_id}'
 
 def digest(value):
     return hashlib.sha256(json.dumps(value, ensure_ascii=False, sort_keys=True).encode()).hexdigest()
@@ -56,18 +61,22 @@ def normalize(raw):
         'latitude':number(raw.get('mapy')), 'longitude':number(raw.get('mapx')),
         'legal_province':str(raw.get('lDongRegnCd') or raw.get('ldongregncd') or ''),
         'legal_city':str(raw.get('lDongSignguCd') or raw.get('ldongsigngucd') or ''),
-        'kind':'festival' if str(raw.get('contenttypeid')) == '15' else 'place',
+        'kind':kind_of(raw),
         'description':clean(raw.get('overview')), 'hours':first('usetime','usetimeculture','usetimeleports','opentimefood','opentime','playtime'),
         'closed_days':first('restdate','restdateculture','restdateleports','restdatefood','restdateshopping'),
-        'fee':first('usefee','usefeeLeports','usefeeleports','usefeeCulture','usefeeculture','usetimefestival') or facility_value('입장료','시설이용료','이용요금'), 'phone':first('tel','infocenter','infocenterculture','infocenterleports','sponsor1tel'),
+        'fee':first('usefee','usefeeLeports','usefeeleports','usefeeCulture','usefeeculture','usetimefestival') or facility_value('입장료','시설이용료','이용요금'), 'phone':first('tel','infocenter','infocenterculture','infocenterleports','infocenterfood','infocenterlodging','infocentershopping','sponsor1tel'),
         'conditions':conditions, 'evidence':evidence,
         'content_type':str(raw.get('contenttypeid') or ''),
-        'parking':first('parking','parkingculture','parkingleports','parkingfood'),'parking_fee':first('parkingfee','parkingfeeculture','parkingfeeleports') or facility_value('주차요금'),
-        'capacity':first('accomcount','accomcountculture','accomcountleports'),'age_guide':first('expagerange','expagerangeleports','agelimit'),'facilities':[{'name':clean(r.get('infoname')),'description':clean(r.get('infotext'))} for r in raw.get('_facilities',[]) if r.get('infoname') and r.get('infotext')],
+        'parking':first('parking','parkingculture','parkingleports','parkingfood','parkinglodging','parkingshopping'),'parking_fee':first('parkingfee','parkingfeeculture','parkingfeeleports') or facility_value('주차요금'),
+        'capacity':first('accomcount','accomcountculture','accomcountleports','accomcountlodging','seat'),'age_guide':first('expagerange','expagerangeleports','agelimit'),'facilities':[{'name':clean(r.get('infoname')),'description':clean(r.get('infotext'))} for r in raw.get('_facilities',[]) if r.get('infoname') and r.get('infotext')],
         'pet_policy':{k:clean(v) for k,v in (raw.get('_pet') or {}).items() if k!='contentid' and v},'official_url':homepage(raw),'organizer':first('sponsor1','sponsor2'),'images':image_records(raw),
         'review_status':raw.get('review_status','pending'),'review_note':clean(raw.get('review_note')),'source_hidden':raw.get('showflag')=='0',
         'start_date':str(raw.get('eventstartdate') or ''), 'end_date':str(raw.get('eventenddate') or ''),
-        'source_modified_at':str(raw.get('modifiedtime') or '')}
+        'source_modified_at':str(raw.get('modifiedtime') or ''),
+        # 음식점(39)·숙박(32) detailIntro fields.
+        'menu':first('firstmenu'),'menus':first('treatmenu'),'takeout':first('packing'),'reservation':first('reservationfood','reservationlodging'),
+        'reservation_url':homepage({'homepage':raw.get('reservationurl')}),'checkin':first('checkintime'),'checkout':first('checkouttime'),
+        'rooms':first('roomtype'),'room_count':first('roomcount'),'cooking':first('chkcooking'),'amenities':first('subfacility')}
     # Source-derived conditions fill only what a reviewer has not decided.
     modified=item['source_modified_at']
     as_of=f'{modified[:4]}-{modified[4:6]}-{modified[6:8]}' if len(modified)>=8 and modified[:8].isdigit() else date.today().isoformat()

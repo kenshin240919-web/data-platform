@@ -9,6 +9,7 @@ from sqlalchemy import select
 from . import config
 from .db import SessionLocal
 from .main import dataset, regions, status, view
+from .validation import KINDS
 from .models import Event, Profile
 
 TARGET=config.ROOT/'apps'/'trip'/'data'/'trip.json'
@@ -26,14 +27,18 @@ def build_file(full):
     def take(rows):
         for p in sorted(rows,key=rank)[:PER_LIST]:keep[p['id']]=p
     take(items)
-    for kind in ('place','festival'):take([p for p in items if p['kind']==kind])
-    for c in CONDITIONS:take([p for p in items if (p.get('conditions') or {}).get(c) is True])
-    by_region={}
+    for kind in KINDS:take([p for p in items if p['kind']==kind])
+    # Region and condition lists start with 가볼만한곳·축제 (맛집·숙소 behind chips): keep those first cards too.
+    pf=[p for p in items if p['kind'] in ('place','festival')]
+    for c in CONDITIONS:take([p for p in pf if (p.get('conditions') or {}).get(c) is True])
+    by_region={};pf_region={}
     for p in items:by_region.setdefault(p['region_id'],[]).append(p)
+    for p in pf:pf_region.setdefault(p['region_id'],[]).append(p)
     for rows in by_region.values():take(rows)
-    counts={'all':len(items),**{f'kind:{k}':sum(p['kind']==k for p in items) for k in ('place','festival')},
-            **{f'condition:{c}':sum((p.get('conditions') or {}).get(c) is True for p in items) for c in CONDITIONS},
-            **{f'region:{r}':len(rows) for r,rows in by_region.items()}}
+    for rows in pf_region.values():take(rows)
+    counts={'all':len(items),**{f'kind:{k}':sum(p['kind']==k for p in items) for k in KINDS},
+            **{f'condition:{c}':sum((p.get('conditions') or {}).get(c) is True for p in pf) for c in CONDITIONS},
+            **{f'region:{r}':len(rows) for r,rows in by_region.items()},**{f'region:{r}:pf':len(rows) for r,rows in pf_region.items()}}
     slim=[{**{k:p.get(k) for k in CARD},'images':(p.get('images') or [])[:1]} for p in sorted(keep.values(),key=lambda p:p['id'])]
     return {'status':full['status'],'regions':full['regions'],'sitemap':[],'counts':counts,'subset':True,'items':slim}
 

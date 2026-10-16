@@ -3,7 +3,7 @@ from datetime import date, datetime, timezone
 from uuid import NAMESPACE_URL, uuid5
 from sqlalchemy import select
 from .models import Dataset, Event, PagePolicy, Place, PlaceSource, Profile, RawRecord, Region, Source, SyncLog, Validation, now
-from .validation import checks, digest, normalize
+from .validation import checks, digest, normalize, path_of
 from .tourapi import KST
 
 def stable(source, external): return str(uuid5(NAMESPACE_URL, f'guidejung-data:{source}:{external}'))
@@ -84,7 +84,7 @@ def ingest(session, records, source_id='tourapi', demo=False, publish=True):
             session.add(Profile(place_id=place_id,dataset_id=dataset.id,snapshot=snapshot,kind=item['kind'],description=item['description'],hours=item['hours'],closed_days=item['closed_days'],fee=item['fee'],phone=item['phone'],official_url=item['official_url'],conditions=item['conditions'],evidence=item['evidence'],quality_score=score,indexable=indexable and item['review_status']!='rejected' and not item['source_hidden']))
             if item['kind']=='festival':
                 session.add(Event(dataset_id=dataset.id,place_id=place_id,external_id=external+':'+item['start_date'],series_id=place_id,name=item['name'],start_date=item['start_date'],end_date=item['end_date'],status='scheduled',organizer=item['organizer']))
-            path=('/festival/' if item['kind']=='festival' else '/place/')+place_id
+            path=path_of(item['kind'],place_id)
             session.add(PagePolicy(path=path,dataset_id=dataset.id,indexable=indexable,reason='검수 통과' if indexable else '샘플 또는 최신성/지역경계 검수 대기'))
             session.commit()
         if not records or job.rejected:

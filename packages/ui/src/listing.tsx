@@ -29,9 +29,14 @@ export function ClientCards({query,base=''}:{query:Query;base?:string}){
   return results?<Cards items={results.items} base={base}/>:loading;
 }
 
-export function Listing({fixed,regions,title}:{fixed:Query;regions:Region[];title:string}){
+/** Kind chips (가볼만한곳·축제 / 맛집 / 숙소 / 전체) on lists that are not fixed to one kind; only kinds the data has. */
+export type KindChip={value:string;label:string};
+export function Listing({fixed,regions,title,defaults={},kinds=[]}:{fixed:Query;regions:Region[];title:string;defaults?:Query;kinds?:KindChip[]}){
   const params=useSearchParams();
-  const effective:Params={...Object.fromEntries(params),...fixed as Params};
+  // defaults apply until the visitor picks something else (?kind=), fixed always wins.
+  const effective:Params={...defaults as Params,...Object.fromEntries(params),...fixed as Params};
+  const chip=(v:string)=>{const q=new URLSearchParams(params);if(v)q.set('kind',v);else q.delete('kind');q.delete('page');return `?${q}`;};
+  const kindNow=value(effective,'kind');
   const query=new URLSearchParams();
   for(const key of ['q','region','condition','kind','when','date_from','date_to','lat','lon','radius_km'])if(value(effective,key))query.set(key,value(effective,key));
   const region=regions.find(r=>r.id===value(effective,'region'));
@@ -39,6 +44,7 @@ export function Listing({fixed,regions,title}:{fixed:Query;regions:Region[];titl
   const {results,failed}=useResults(full.toString());
   function pageUrl(page:number){const next=new URLSearchParams(query);next.set('page',String(page));return `/search?${next}`;}
   return <section className="section listing"><div className="eyebrow">FIND YOUR TRIP</div><h1>{region&&!fixed.region?`${region.name} 여행`:title}</h1><SearchForm compact regions={regions} params={effective} target="/search"/><div className="filter-links"><Link className={!value(effective,'condition')?'selected':''} href="/place">전체 장소</Link>{Object.entries(labels).map(([key,label])=><Link className={value(effective,'condition')===key?'selected':''} key={key} href={`/${key}${region?'?region='+region.id:''}`}>{label}</Link>)}<Link href="/weekend">이번 주말</Link></div>
+    {!fixed.kind&&kinds.length>1&&<div className="kind-chips" role="tablist" aria-label="정보 종류">{kinds.map(k=><Link key={k.value} role="tab" aria-selected={kindNow===k.value} className={kindNow===k.value?'on':''} href={chip(k.value)}>{k.label}</Link>)}</div>}
     {failed?failure:!results?loading:<><div className="results-heading"><p><strong>{results.total}</strong>개 정보{value(effective,'q')&&<> · “{value(effective,'q')}”</>}</p><span className="muted small">{value(effective,'lat')?'직선거리순':'정보 충족도순'}</span></div><Cards items={results.items}/>{results.total>0&&<AdSlot/>}{results.pages>1&&<nav className="pagination" aria-label="검색 결과 페이지">{Array.from({length:Math.min(results.pages,30)},(_,i)=>i+1).map(p=><Link key={p} aria-current={p===results.page?'page':undefined} href={pageUrl(p)}>{p}</Link>)}</nav>}</>}</section>;
 }
 

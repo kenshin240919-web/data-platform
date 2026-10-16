@@ -11,6 +11,7 @@ from . import config
 from .db import SessionLocal, get_db, initialize
 from .models import Dataset, Event, Profile, Region, SyncLog, Validation
 from .pipeline import active_dataset
+from .validation import KINDS, path_of
 from .tourapi import lock_busy
 
 KST=timezone(timedelta(hours=9))
@@ -82,7 +83,7 @@ def status(db:Session=Depends(get_db)):
     current=dataset(db)
     profiles=db.scalars(select(Profile).where(Profile.dataset_id==current.id)).all() if current else []
     profiles=[p for p in profiles if p.snapshot.get('review_status')!='rejected' and not p.snapshot.get('source_hidden')]
-    return {'mode':config.DATA_MODE,'available':current is not None,'dataset_id':current.id if current else None,'updated_at':current.published_at.isoformat() if current else None,'place_count':sum(p.kind=='place' for p in profiles),'festival_count':sum(p.kind=='festival' for p in profiles),'indexable_count':sum(seo_indexable(p,current) for p in profiles),'seo_enabled':config.SEO_ENABLED,'services':[{'id':'trip','available':True},{'id':'traffic','available':False},{'id':'academy','available':False},{'id':'charge','available':False},{'id':'weather','available':False}]}
+    return {'mode':config.DATA_MODE,'available':current is not None,'dataset_id':current.id if current else None,'updated_at':current.published_at.isoformat() if current else None,'place_count':sum(p.kind=='place' for p in profiles),'festival_count':sum(p.kind=='festival' for p in profiles),'food_count':sum(p.kind=='food' for p in profiles),'stay_count':sum(p.kind=='stay' for p in profiles),'indexable_count':sum(seo_indexable(p,current) for p in profiles),'seo_enabled':config.SEO_ENABLED,'services':[{'id':'trip','available':True},{'id':'traffic','available':False},{'id':'academy','available':False},{'id':'charge','available':False},{'id':'weather','available':False}]}
 
 @app.get('/v1/regions')
 def regions(db:Session=Depends(get_db)):
@@ -100,7 +101,7 @@ def regions(db:Session=Depends(get_db)):
 def search(q:str='',region:str='',condition:str='',kind:str='',when:str='',date_from:str='',date_to:str='',page:int=Query(1,ge=1),limit:int=Query(12,ge=1,le=50),lat:float | None=Query(None,ge=-90,le=90),lon:float | None=Query(None,ge=-180,le=180),radius_km:float=Query(20,gt=0,le=100),db:Session=Depends(get_db)):
     if len(q)>200: raise HTTPException(422,'검색어는 200자 이하여야 합니다.')
     if condition and condition not in {'free','kids','pet','indoor'}: raise HTTPException(422,'지원하지 않는 조건입니다.')
-    if kind and kind not in {'place','festival'}: raise HTTPException(422,'지원하지 않는 유형입니다.')
+    if kind and kind not in KINDS: raise HTTPException(422,'지원하지 않는 유형입니다.')
     if when and when not in {'today','weekend'}: raise HTTPException(422,'지원하지 않는 날짜 조건입니다.')
     if (lat is None)!=(lon is None): raise HTTPException(422,'위도와 경도를 함께 전달하세요.')
     current=dataset(db)
@@ -155,7 +156,7 @@ def sitemap(db:Session=Depends(get_db)):
     current=dataset(db)
     if not current or current.is_demo or not config.SEO_ENABLED:return {'items':[]}
     profiles=db.scalars(select(Profile).where(Profile.dataset_id==current.id)).all()
-    return {'items':[{'path':('/festival/' if p.kind=='festival' else '/place/')+p.place_id,'lastmod':current.published_at.isoformat()} for p in profiles if seo_indexable(p,current)]}
+    return {'items':[{'path':path_of(p.kind,p.place_id),'lastmod':current.published_at.isoformat()} for p in profiles if seo_indexable(p,current)]}
 
 @app.get('/v1/admin/overview',dependencies=[Depends(admin)])
 def overview(db:Session=Depends(get_db)):

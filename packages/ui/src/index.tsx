@@ -38,31 +38,34 @@ async function listing(service:Service,segments:string[]){
   if(route==='region'&&!regions.items.some(r=>r.id===segments[1]))notFound();
   const fixed:Query={};
   if(route==='region')fixed.region=segments[1];
-  if(route==='place'||route==='festival')fixed.kind=route;
+  if(route==='place'||route==='festival'||route==='food'||route==='stay')fixed.kind=route;
   if(['today','weekend'].includes(route))fixed.when=route;
   if(route in labels)fixed.condition=route;
   const region=regions.items.find(r=>r.id===fixed.region);
-  const title=region?`${region.name} 여행`:collections[route]||(route==='festival'?'축제·행사 찾기':route==='place'?'가볼만한곳 찾기':'여행 검색');
+  const title=region?`${region.name} 여행`:collections[route]||({festival:'축제·행사 찾기',place:'가볼만한곳 찾기',food:'맛집 찾기',stay:'숙소 찾기'} as Record<string,string>)[route]||'여행 검색';
+  // 맛집·숙소 would crowd region and condition lists: those start with 가볼만한곳·축제, chips switch (search shows all).
+  const kinds=[{value:'place,festival',label:'가볼만한곳·축제'},...(count('kind:food')?[{value:'food',label:'🍽 맛집'}]:[]),...(count('kind:stay')?[{value:'stay',label:'🛏 숙소'}]:[]),{value:'',label:'전체'}];
+  const defaults:Query=!fixed.kind&&(fixed.region||fixed.condition)&&kinds.length>2?{kind:'place,festival'}:{};
   // Query-string filters (?q=, ?region=, ?page=) are applied in the browser: the site is static.
   // Static HTML carries the first results so search engines (Naver Yeti renders little JS) see real content;
   // the browser then swaps in the interactive list with query-string filters and paging.
-  const initial=search(places(),{...fixed,limit:24});
+  const initial=search(places(),{...defaults,...fixed,limit:24});
   // The build file holds only the first cards of each list; the real total comes from its counts.
-  const total=(fixed.region?count(`region:${fixed.region}`):fixed.kind?count(`kind:${fixed.kind}`):fixed.condition?count(`condition:${fixed.condition}`):fixed.when?undefined:count('all'))??initial.total;
+  const total=(fixed.region?count(`region:${fixed.region}${defaults.kind?':pf':''}`):fixed.kind?count(`kind:${fixed.kind}`):fixed.condition?count(`condition:${fixed.condition}`):fixed.when?undefined:count('all'))??initial.total;
   const fallback=<section className="section listing"><div className="eyebrow">FIND YOUR TRIP</div><h1>{title}</h1><div className="results-heading"><p><strong>{total}</strong>개 정보</p></div><Cards items={initial.items}/></section>;
   // Region pages link to that area on the other sites (centre of its places); other lists get the network links.
   const pts=initial.items.map(p=>[Number(p.latitude),Number(p.longitude)]).filter(([a,b])=>Number.isFinite(a)&&Number.isFinite(b));
   const links=region&&pts.length?linksNear(pts.reduce((n,p)=>n+p[0],0)/pts.length,pts.reduce((n,p)=>n+p[1],0)/pts.length,'trip')
     :route==='weekend'||route==='today'?[GENERIC.weather,GENERIC.traffic,GENERIC.charge]:route==='indoor'?[{icon:'😷',title:'오늘 미세먼지',desc:'나쁜 날엔 실내 여행지로',href:`${WEATHER}/air`},GENERIC.weather,GENERIC.traffic]:genericFor('trip');
-  return <><Suspense fallback={fallback}><Listing fixed={fixed} regions={regions.items} title={title}/></Suspense><Connect title={region?`${region.name} 여행 전에 확인하세요`:'함께 보면 좋은 정보'} items={links}/></>;
+  return <><Suspense fallback={fallback}><Listing fixed={fixed} regions={regions.items} title={title} defaults={defaults} kinds={kinds.length>2?kinds:[]}/></Suspense><Connect title={region?`${region.name} 여행 전에 확인하세요`:'함께 보면 좋은 정보'} items={links}/></>;
 }
 
 async function detail(service:Service,segments:string[]){
   let place:Place;try{place=await api<Place>(`/v1/places/${encodeURIComponent(segments[1])}`);}catch(e){if(e instanceof Error&&e.message.includes('(404)'))notFound();throw e;}
-  if((segments[0]==='festival')!==(place.kind==='festival'))notFound();
+  if(segments[0]!==place.kind)notFound();
   const query=new URLSearchParams({lat:String(place.latitude),lon:String(place.longitude),radius_km:'20',limit:'4'});
   const nearby=await api<Results>(`/v1/search?${query}`);
-  return <DetailView place={place} nearby={nearby.items}/>;
+  return <DetailView place={place} nearby={[{kind:'place',items:nearby.items}]}/>;
 }
 
 export async function Page({service,segments=[]}:{service:Service;segments?:string[]}){
@@ -72,22 +75,23 @@ export async function Page({service,segments=[]}:{service:Service;segments?:stri
     const copy:Record<string,[string,string[]]>={about:['여행정보 서비스',['여행정보는 지역과 날짜를 중심으로 가볼만한곳과 축제·행사를 찾는 여행 서비스입니다.','한국관광공사 공식 관광정보를 바탕으로 여행지와 행사 정보를 제공합니다.']], 'data-policy':['데이터·출처 안내',['여행정보는 한국관광공사 TourAPI와 공식 공공데이터를 대상으로 수집·정규화·검증 후 제공합니다. 샘플 모드의 정보는 실제 방문정보로 사용하지 마세요.','무료·아이 동반·반려동물·실내 조건은 근거가 있는 경우에만 분류합니다. 근거는 검수자가 확인한 출처이거나, 한국관광공사 원천 정보의 요금·이용연령·반려동물 동반·시설 분류에서 자동으로 판단한 것(‘원천 자동 분류’로 표시)입니다. 무료는 기본 입장·이용요금 기준이며 주차·체험 비용은 별도일 수 있습니다. 확인되지 않은 값은 확인 필요로 표시합니다.','수집 시각과 내용 확인일을 구분합니다. 요금과 운영시간은 변경될 수 있으므로 방문 전 공식 제공기관의 안내를 확인하세요.','이미지는 사용권과 출처를 확인한 자료만 공개합니다.']],privacy:['개인정보 안내',['회원가입 없이 지역과 장소를 검색할 수 있습니다. 위치 기반 검색은 사용자가 버튼을 누르고 위치 권한을 허용한 경우에만 작동합니다.','위치는 주변 검색 요청을 처리하는 용도로 사용하며 이 버전에서는 별도 위치 이력이나 사용자 프로필을 저장하지 않습니다. 외부 지도 링크를 열면 해당 서비스의 정책이 적용됩니다.','이 사이트는 Google AdSense 광고를 게재합니다. Google 등 제3자 광고 사업자는 쿠키를 사용해 이 사이트와 다른 사이트 방문 기록을 바탕으로 광고를 제공할 수 있습니다. 맞춤 광고는 Google 광고 설정(adssettings.google.com)에서 해제할 수 있습니다.','서비스 개선을 위해 Microsoft Clarity를 사용합니다. Clarity는 쿠키 등을 이용해 클릭·스크롤 같은 이용 행태와 화면 이용 기록을 익명으로 수집하며, 입력한 개인정보는 수집 대상에서 가려집니다. 수집된 정보는 Microsoft 개인정보처리방침(privacy.microsoft.com)에 따라 처리됩니다.','운영 서버의 접속 로그 보관기간과 담당자 정보는 실제 배포 전에 확정해 고지합니다.']]};const [title,paras]=copy[route];return <article className="section prose"><div className="eyebrow">GUIDEJUNG DATA</div><h1>{title}</h1>{paras.map(p=><p key={p}>{p}</p>)}</article>;
   }
   if(service==='home'&&!['search','region'].includes(route))notFound();
-  if(['place','festival'].includes(route)&&segments.length===2)return detail(service,segments);
-  if(['search','region','place','festival',...Object.keys(collections)].includes(route)&&segments.length<3)return listing(service,segments);
+  if(['place','festival','food','stay'].includes(route)&&segments.length===2)return detail(service,segments);
+  if(['search','region','place','festival','food','stay',...Object.keys(collections)].includes(route)&&segments.length<3)return listing(service,segments);
   notFound();
 }
 
-const INDEXED_LISTS=['region','place','festival','free','kids','pet','indoor'];
+// 맛집·숙소 lists are indexed once the data has them.
+const INDEXED_LISTS=['region','place','festival','free','kids','pet','indoor',...(['food','stay'] as const).filter(k=>count(`kind:${k}`))];
 export async function pageMetadata(service:Service,segments:string[]):Promise<Metadata>{
   const path='/'+segments.join('/');let description='지역과 날짜로 가볼만한곳·축제·생활정보를 찾아보세요.';let title=service==='home'?'GuideJung | 지역 기반 생활정보':'여행정보 | 오늘과 이번 주말 가볼만한곳';let index=false;
-  if(['place','festival'].includes(segments[0])&&segments[1]){try{const p=await api<Place>(`/v1/places/${encodeURIComponent(segments[1])}`);title=`${p.name} | 여행정보`;index=p.indexable&&!p.is_demo;}catch{}}
+  if(['place','festival','food','stay'].includes(segments[0])&&segments[1]){try{const p=await api<Place>(`/v1/places/${encodeURIComponent(segments[1])}`);title=`${p.name} | 여행정보`;index=p.indexable&&!p.is_demo;}catch{}}
   else if(!segments.length)index=enabled();
   else if(INDEXED_LISTS.includes(segments[0])&&segments.length<=2){
     // 지역·조건별 목록은 검색 유입 입구라 노출한다. 결과가 매번 바뀌는 검색(/search)과 날짜 기반(오늘·이번 주말) 목록은 제외.
     let name:string|undefined;
     if(segments[0]==='region'&&segments[1]){try{name=(await api<{items:Region[]}>('/v1/regions')).items.find(r=>r.id===segments[1])?.name;}catch{}}
     if(segments[0]!=='region'||!segments[1]||name){
-      const head=segments[0]==='region'?(name?`${name} 가볼만한곳·축제`:'지역별 여행지 찾기'):segments[0]==='place'?'전국 가볼만한곳':segments[0]==='festival'?'전국 축제·행사':collections[segments[0]];
+      const head=segments[0]==='region'?(name?`${name} 가볼만한곳·축제`:'지역별 여행지 찾기'):segments[0]==='place'?'전국 가볼만한곳':segments[0]==='festival'?'전국 축제·행사':segments[0]==='food'?'전국 맛집':segments[0]==='stay'?'전국 숙소':collections[segments[0]];
       title=`${head} | 여행정보`;index=enabled();
       description=segments[0]==='region'&&name?`${name}의 가볼만한곳과 축제·행사를 한국관광공사 공식 정보로 확인하세요. 운영시간·요금·주차 정보 제공.`:`${head} 목록을 지역과 조건으로 찾아보세요. 한국관광공사 공식 관광정보 기반.`;
     }
@@ -107,6 +111,6 @@ export const rss=(service:Service)=>rssXml(places(),origin(service));
 /** Every page the static build emits. Place/festival detail pages are not here: the trip Worker renders them from D1. */
 export async function staticSegments(){
   const regions=(await api<{items:Region[]}>('/v1/regions')).items;
-  return [[],['search'],['region'],['place'],['festival'],...Object.keys(collections).map(k=>[k]),['about'],['data-policy'],['privacy'],
+  return [[],['search'],['region'],['place'],['festival'],['food'],['stay'],...Object.keys(collections).map(k=>[k]),['about'],['data-policy'],['privacy'],
     ...regions.map(r=>['region',r.id])];
 }

@@ -21,7 +21,7 @@ export function search(all:Place[],query:Query,today=todayKST()):Results{
   const items:Place[]=[];
   for(const raw of all){
     const p=withEventStatus(raw,today);
-    if(query.kind&&p.kind!==query.kind)continue;
+    if(query.kind&&!String(query.kind).split(',').includes(p.kind))continue;  // one kind or a comma list (place,festival)
     if(query.region&&p.region_id!==query.region)continue;
     if(query.condition&&p.conditions[query.condition]!==true)continue;
     if(q&&![p.name,p.address,p.region_name,p.description].join(' ').toLowerCase().includes(q))continue;

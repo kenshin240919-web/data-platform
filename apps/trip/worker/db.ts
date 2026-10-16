@@ -18,7 +18,7 @@ export async function search(db:D1,query:Query,today=todayKST()):Promise<Results
   const geo=lat!==null&&lon!==null&&Number.isFinite(lat)&&Number.isFinite(lon);
   const radius=Number(query.radius_km)||20,q=String(query.q||'').toLowerCase(),dates=range(query,today);
   const where:string[]=[],args:unknown[]=[];
-  if(query.kind){where.push('kind=?');args.push(query.kind);}
+  if(query.kind){const ks=String(query.kind).split(',').filter(Boolean);where.push(`kind IN (${ks.map(()=>'?').join(',')})`);args.push(...ks);}  // one kind or a comma list
   if(query.region){where.push('region_id=?');args.push(query.region);}
   if(query.condition){if(!CONDITIONS.has(String(query.condition)))return {items:[],total:0,page,pages:0,dataset_id:null,mode:'live'};where.push(`${query.condition}=1`);}
   if(q){where.push("text LIKE ? ESCAPE '\\'");args.push(like(q));}

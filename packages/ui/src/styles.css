@@ -19,3 +19,10 @@
 .gj-network{background:#0f1c33;color:#c9d6ea;font-size:13px}.gj-network>div{max-width:1240px;margin:auto;padding:7px 28px;display:flex;gap:6px;overflow-x:auto;white-space:nowrap}.gj-network a,.gj-network span{padding:4px 12px;border-radius:20px}.gj-network a:hover{background:#ffffff1f;color:white}.gj-network .on{background:white;color:#0f1c33;font-weight:800}
 .gj-connect{margin:28px 0;padding:20px;border-radius:18px;background:#f3f7fe;border:1px solid #dbe6f8}.gj-connect h2{font-size:19px;margin:0 0 12px}.gj-connect>div{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}.gj-connect a{display:flex;align-items:center;gap:12px;padding:14px;border-radius:14px;background:white;border:1px solid #e1e9f6}.gj-connect a:hover{border-color:var(--blue);transform:translateY(-2px);box-shadow:0 8px 18px #1765e81a}.gj-connect-icon{font-size:26px;line-height:1}.gj-connect b{display:block;font-size:15px}.gj-connect small{font-size:12px;color:var(--muted)}.gj-connect-go{margin-left:auto;color:var(--blue);font-weight:800}
 @media(max-width:700px){.gj-network>div{padding:6px 14px}.gj-connect{padding:14px}.gj-connect>div{grid-template-columns:1fr}}
+/* 정보 종류 칩(가볼만한곳·축제 / 맛집 / 숙소 / 전체): 지역·조건·검색 목록 */
+.kind-chips{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 4px}.kind-chips a{padding:8px 14px;border-radius:999px;border:1px solid #d9e1ea;background:#fff;font-size:14px;font-weight:700;color:#334155;text-decoration:none}.kind-chips a.on{background:#0f172a;border-color:#0f172a;color:#fff}
+/* 상세 하단 주변 묶음(가볼만한곳·맛집·숙소·축제) */
+.nearby-group{margin-top:28px}.nearby-group .section-heading a{font-weight:700;text-decoration:none}
+.food .card-top{background:#fff1e6;color:#9a4a10}.stay .card-top{background:#efeafd;color:#4b3a8f}
+/* 휴대폰: 상세 하단 주변 묶음은 옆으로 넘겨 보기(세로로 16장이 이어지지 않게) */
+@media (max-width:760px){.nearby-group .cards{display:grid;grid-auto-flow:column;grid-auto-columns:80%;grid-template-columns:none;overflow-x:auto;scroll-snap-type:x mandatory;gap:12px;padding-bottom:6px}.nearby-group .place-card{scroll-snap-align:start}.nearby-group .section-heading{margin-bottom:12px}}
