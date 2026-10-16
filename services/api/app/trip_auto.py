@@ -1,7 +1,7 @@
 """Unattended trip collection for GitHub Actions — no PostgreSQL.
 
 The published set lives in runtime/trip-auto/full.json (kept between runs by the Actions cache) and in D1.
-Each run: merge D1 into the file if someone else loaded D1 → list TourAPI ids (all pages, once a day at most) →
+Each run: merge D1 into the file if someone else loaded D1 → apply source changes (sync) → list TourAPI ids (all pages, once a day at most) →
 enrich new ids until the time/call budget ends → write full.json + the small git build file (apps/trip/data/trip.json).
 scripts/build-trip-d1.mjs --upsert then sends only new/changed rows to D1.
 Usage: python -m services.api.app.trip_auto [--types 12,14,28,15,39,32] [--minutes 300]
@@ -120,6 +120,55 @@ def merge(base,other):
     regions={r['id']:r for r in base['regions']+other['regions']}
     return {'status':other.get('status') or base.get('status',{}),'regions':list(regions.values()),'items':list(by.values())}
 
+def sync(api,full,state,codes,deadline,cache,regions,stamp,dataset_id,counter):
+    """Source changes: areaBasedSyncList2 per day since the last run → re-fetch items whose modifiedtime changed,
+    drop items the source hid (showflag 0), bring them back if shown again. Runs before new ids, within the same budget."""
+    items={str(p.get('external_id')):p for p in full['items']}
+    hidden=set(state.setdefault('hidden',[]));queue=state.setdefault('sync_queue',[]);queued={q['contentid'] for q in queue}
+    today=now().date()
+    day=date.fromisoformat(state.get('sync_since') or (today-timedelta(days=7)).isoformat())
+    try:
+        # One query per day (YYYYMMDD) from the last run's day to today; today is asked again next run.
+        while day<=today:
+            page=state.get('sync_page',1)
+            while True:
+                if time.monotonic()>deadline:state['sync_page']=page;raise TimeoutError
+                batch=api.call('areaBasedSyncList2',modifiedtime=day.strftime('%Y%m%d'),numOfRows=PAGE,pageNo=page)
+                for row in batch['items']:
+                    ident=str(row.get('contentid'));kind=str(row.get('contenttypeid') or '')
+                    if kind not in codes or ident in queued:continue
+                    old=items.get(ident)
+                    if str(row.get('showflag','1'))=='0':
+                        if old:queue.append({'contentid':ident,'hide':True});queued.add(ident)
+                    elif (old and str(row.get('modifiedtime') or '')!=str(old.get('source_modified_at') or '')) or (not old and ident in hidden):
+                        queue.append({'contentid':ident,'contenttypeid':kind,'title':row.get('title','')});queued.add(ident)
+                if not batch['items'] or page*PAGE>=batch['total']:break
+                page+=1
+            state.pop('sync_page',None);state['sync_since']=day.isoformat();day+=timedelta(days=1)
+        if queue:print(f'원천 변경 {len(queue)}건 반영 중',flush=True)
+        fails=0
+        while queue:
+            if time.monotonic()>deadline:raise TimeoutError
+            q=queue[0];ident=q['contentid']
+            if q.get('hide'):
+                if items.pop(ident,None):hidden.add(ident);counter[0]+=1
+            else:
+                (cache/f'{ident}.json').unlink(missing_ok=True)  # cached details are the old version
+                try:raw=enrich(api,dict(q),cache)
+                except ValueError as error:
+                    if '예산' in str(error):raise
+                    fails+=1;queue.pop(0);print(f'변경 건너뜀 {ident}: {error}',flush=True)
+                    if fails>=MAX_FAILS_IN_ROW:raise RuntimeError(f'연속 {fails}건 실패: {error}') from None
+                    continue
+                fails=0
+                item=build_item(raw,regions,stamp,dataset_id)
+                if item:items[ident]=item;hidden.discard(ident)
+                elif items.pop(ident,None) is not None:state['rejected'].append(ident)
+                (cache/f'{ident}.json').unlink(missing_ok=True);counter[0]+=1
+            queue.pop(0)
+    finally:
+        full['items']=list(items.values());state['hidden']=sorted(hidden)
+
 def run(types=ALL_TYPES,minutes=300,limit=None):
     WORK.mkdir(parents=True,exist_ok=True);cache=WORK/'raw';cache.mkdir(exist_ok=True)
     deadline=time.monotonic()+minutes*60
@@ -138,7 +187,7 @@ def run(types=ALL_TYPES,minutes=300,limit=None):
     stamp=now().isoformat();dataset_id='auto-'+now().strftime('%Y%m%d%H%M')
     known={str(p.get('external_id')) for p in full['items']}
     lists=json.loads((WORK/'candidates.json').read_text(encoding='utf-8')) if (WORK/'candidates.json').exists() else {}
-    new=0;stop='done'
+    new=0;stop='done';changed=[0]
     def save():
         write_json(statepath,state);write_json(WORK/'candidates.json',lists)
     try:
@@ -146,6 +195,8 @@ def run(types=ALL_TYPES,minutes=300,limit=None):
             daily=int(limit or os.getenv('TOURAPI_DAILY_LIMIT','95000'))
             api=TourAPI(os.getenv('TOURAPI_SERVICE_KEY',''),WORK/'tourapi-budget.json',daily,client)
             regions=load_regions(api,full)
+            sync(api,full,state,codes,deadline,cache,regions,stamp,dataset_id,changed)
+            known={str(p.get('external_id')) for p in full['items']}
             # Listing: every page of each type, at most once a day (new ids appear in the next day's list).
             today=now().date().isoformat()
             if not lists.get('order') and state.get('listed_on')!=today:
@@ -157,7 +208,7 @@ def run(types=ALL_TYPES,minutes=300,limit=None):
                         ids+=[{'contentid':str(r['contentid']),'contenttypeid':str(r.get('contenttypeid') or code),'title':r.get('title','')} for r in batch['items']]
                         info['page']+=1;info['done']=not batch['items'] or (info['page']-1)*PAGE>=batch['total']
                         if info['page']%20==0:save()
-                skip=known|set(state['rejected'])
+                skip=known|set(state['rejected'])|set(state.get('hidden',[]))
                 order=[];seen=set()
                 # Interleave the types so a partial run publishes some of every kind.
                 for i in range(max((len(lists.get(c,[])) for c in codes),default=0)):
@@ -192,12 +243,12 @@ def run(types=ALL_TYPES,minutes=300,limit=None):
     except (ValueError,RuntimeError,OSError) as error:
         stop='budget' if '예산' in str(error) else 'error';print(f'멈춤: {error}',flush=True)
     save()
-    if new or not FULL.exists() or remote!=loaded:
+    if new or changed[0] or not FULL.exists() or remote!=loaded:
         full=finish(full,stamp,dataset_id)
     write_json(FULL,full)
     from .export_static import TARGET,build_file
     TARGET.write_text(json.dumps(build_file(full),ensure_ascii=False,separators=(',',':')),encoding='utf-8')
-    print(f'끝({stop}): 새로 {new}건, 전체 {len(full["items"])}건, 검수 제외 누적 {len(state["rejected"])}건',flush=True)
+    print(f'끝({stop}): 새로 {new}건, 원천 변경 반영 {changed[0]}건, 전체 {len(full["items"])}건, 검수 제외 누적 {len(state["rejected"])}건',flush=True)
     return stop,new
 
 if __name__=='__main__':

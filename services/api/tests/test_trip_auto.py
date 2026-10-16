@@ -49,7 +49,7 @@ class TripAutoTest(unittest.TestCase):
             (work/'m.json').write_text(json.dumps({'version':'2026-10-14T09:00:00+09:00#s2'}))
             API.calls=[];before=full['status']['updated_at']
             self.assertEqual(trip_auto.run('12,39',minutes=5),('done',0))
-            self.assertEqual([c for c in API.calls if c!='ldongCode2'],[])
+            self.assertEqual([c for c in API.calls if c not in ('ldongCode2','areaBasedSyncList2')],[])  # only today's change list
             self.assertEqual(json.loads((work/'full.json').read_text(encoding='utf-8'))['status']['updated_at'],before)
         temp.cleanup()
 
@@ -59,4 +59,41 @@ class TripAutoTest(unittest.TestCase):
         with patch.object(trip_auto,'WORK',work),patch.object(trip_auto,'FULL',work/'full.json'),patch.object(trip_auto,'MANIFEST',work/'m.json'),\
              patch.object(trip_auto,'d1_version',lambda:None):
             with self.assertRaises(SystemExit):trip_auto.run('12',minutes=1)
+        temp.cleanup()
+
+class SyncAPI(API):
+    """Same source, plus a change list: a1 edited, a2 hidden, f1 unchanged."""
+    changes=[]
+    def call(self,endpoint,**params):
+        if endpoint=='areaBasedSyncList2':
+            return {'items':SyncAPI.changes if params['pageNo']==1 and params['modifiedtime']==SyncAPI.day else [],'total':len(SyncAPI.changes)}
+        if endpoint=='detailCommon2' and params['contentId']=='a1' and SyncAPI.changes:
+            API.calls.append(endpoint);return {'items':[raw('a1',title='수정된 이름',modifiedtime='20261016120000')],'total':1}
+        return super().call(endpoint,**params)
+
+class TripSyncTest(unittest.TestCase):
+    def test_source_changes_update_and_hide_items(self):
+        from app import trip_auto,export_static
+        temp=tempfile.TemporaryDirectory();work=Path(temp.name)
+        d1={'status':{'updated_at':'2026-10-14T09:00:00+09:00'},'regions':[],'items':[]}
+        SyncAPI.changes=[];SyncAPI.day=trip_auto.now().strftime('%Y%m%d')
+        with patch.object(trip_auto,'WORK',work),patch.object(trip_auto,'FULL',work/'full.json'),patch.object(trip_auto,'MANIFEST',work/'m.json'),\
+             patch.object(trip_auto,'TourAPI',SyncAPI),patch.object(trip_auto,'d1_version',lambda:'v1'),\
+             patch.object(trip_auto,'d1_dataset',lambda:d1),patch.object(export_static,'TARGET',work/'trip.json'):
+            self.assertEqual(trip_auto.run('12,39',minutes=5),('done',4))
+            (work/'m.json').write_text(json.dumps({'version':'v1'}))
+            SyncAPI.changes=[{'contentid':'a1','contenttypeid':'12','modifiedtime':'20261016120000','showflag':'1'},
+                             {'contentid':'a2','contenttypeid':'12','modifiedtime':'20261016120000','showflag':'0'},
+                             {'contentid':'f1','contenttypeid':'39','modifiedtime':'','showflag':'1'},
+                             {'contentid':'zz','contenttypeid':'25','modifiedtime':'20261016','showflag':'1'}]
+            self.assertEqual(trip_auto.run('12,39',minutes=5),('done',0))
+            full=json.loads((work/'full.json').read_text(encoding='utf-8'))
+            names={p['external_id']:p['name'] for p in full['items']}
+            self.assertEqual(names,{'a1':'수정된 이름','f1':'자동 f1','old':'자동 old'})  # a2 hidden by the source, f1 untouched
+            state=json.loads((work/'state.json').read_text(encoding='utf-8'))
+            self.assertEqual((state['hidden'],state['sync_queue']),(['a2'],[]))
+            # Next run: nothing re-listed or re-fetched for the same changes.
+            API.calls=[]
+            trip_auto.run('12,39',minutes=5)
+            self.assertNotIn('detailCommon2',API.calls)
         temp.cleanup()
