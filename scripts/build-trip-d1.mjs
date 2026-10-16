@@ -1,9 +1,13 @@
 // Load the published trip dataset into D1 (guidejung-trip) for the trip Worker.
-// Usage: node scripts/build-trip-d1.mjs [data.json] [--remote | --local] [--if-newer]
+// Usage: node scripts/build-trip-d1.mjs [data.json] [--remote | --local] [--if-newer] [--upsert manifest.json]
 //   data.json: full export from services/api (default runtime/trip-full.json, else apps/trip/data/trip.json).
 //   Writes runtime/d1/trip-*.sql; --remote / --local also runs them with wrangler (remote needs `npx wrangler login` once).
 // Rows go to places_next / regions_next and are swapped in by the last file, so the site never shows a half load.
+//   --upsert manifest.json (GitHub Actions, services/api/app/trip_auto.py): when D1 still holds the version in the manifest,
+//   send only new/changed/removed rows (D1 bills rows written; a full reload of 100k places every run would not fit),
+//   otherwise a full load; the manifest is rewritten after a successful load.
 import {execFileSync} from 'node:child_process';
+import {createHash} from 'node:crypto';
 import {existsSync,mkdirSync,readFileSync,rmSync,writeFileSync} from 'node:fs';
 import {dirname,join,relative,sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -17,8 +21,9 @@ const wrangler=(args,opts={})=>process.platform==='win32'
 // Files are passed relative to the repo (no spaces, no drive letter).
 const rel=f=>relative(ROOT,f).split(sep).join('/');
 const args=process.argv.slice(2);
+const manifestPath=args.includes('--upsert')?args[args.indexOf('--upsert')+1]:null;
 // Default: the computer's full export if there is one, else the git file (full until the first new-style export).
-const input=args.find(a=>!a.startsWith('--'))??[join(ROOT,'runtime/trip-full.json'),join(ROOT,'apps/trip/data/trip.json')].find(f=>existsSync(f));
+const input=args.find(a=>!a.startsWith('--')&&a!==manifestPath)??[join(ROOT,'runtime/trip-full.json'),join(ROOT,'apps/trip/data/trip.json')].find(f=>existsSync(f));
 const mode=args.includes('--remote')?'--remote':args.includes('--local')?'--local':null;
 const ROWS_PER_FILE=2000;  // about 15MB of SQL per upload
 
@@ -47,7 +52,7 @@ ${table('places')}
 DROP TABLE IF EXISTS regions_next;
 ${table('regions')}
 `;
-const insert=p=>`INSERT INTO places_next (id,kind,name,region_id,lat,lon,start_date,end_date,quality,free,kids,pet,indoor,text,card,body,updated,indexable,changed) VALUES (${[
+const insert=(p,into='INSERT INTO places_next')=>`${into} (id,kind,name,region_id,lat,lon,start_date,end_date,quality,free,kids,pet,indoor,text,card,body,updated,indexable,changed) VALUES (${[
   s(p.id),s(p.kind),s(p.name),s(p.region_id),s(p.latitude),s(p.longitude),s(p.start_date||null),s(p.end_date||null),s(p.quality_score??0),
   flag(p.conditions?.free),flag(p.conditions?.kids),flag(p.conditions?.pet),flag(p.conditions?.indoor),s(text(p)),s(card(p)),s(JSON.stringify(p)),s(p.updated_at),p.indexable&&!p.is_demo?1:'NULL',s(changed(p))].join(',')});`;
 // Bump SCHEMA when the table layout changes so --if-newer reloads unchanged data into the new layout.
@@ -69,22 +74,48 @@ INSERT OR REPLACE INTO meta (key,value) VALUES ('version',${s(JSON.stringify(ver
 
 const out=join(ROOT,'runtime/d1');rmSync(out,{recursive:true,force:true});mkdirSync(out,{recursive:true});
 const files=[];
+const write=(sql)=>{const name=join(out,`trip-${String(files.length+1).padStart(3,'0')}.sql`);writeFileSync(name,sql);files.push(name);};
+const hash=p=>createHash('sha1').update(insert(p)).digest('hex');
+const remote=()=>{const res=JSON.parse(wrangler(['d1','execute','guidejung-trip',mode,'--json','--command',"SELECT (SELECT value FROM meta WHERE key='version') AS version, (SELECT COUNT(*) FROM places) AS n"],{encoding:'utf8'}));return res?.[0]?.results?.[0]??{};};
+const run=()=>{for(const f of files){console.log(`wrangler d1 execute ${mode} ${rel(f)}`);wrangler(['d1','execute','guidejung-trip',mode,'--file',rel(f),'-y'],{stdio:'inherit'});}};
+const saveManifest=()=>{if(manifestPath)writeFileSync(manifestPath,JSON.stringify({version,hashes:Object.fromEntries(items.map(p=>[p.id,hash(p)]))}));};
+
+if(manifestPath&&mode){
+  let row={};try{row=remote();}catch(e){console.log('D1 not initialised yet (first load)');}
+  // Never let a smaller file replace a bigger D1 (a wrong or empty input).
+  if(Number(row.n)>items.length*1.1){console.log(`D1 has ${row.n} places, the file only ${items.length}: not loading.`);process.exit(1);}
+  const manifest=existsSync(manifestPath)?JSON.parse(readFileSync(manifestPath,'utf8')):null;
+  if(manifest&&row.version===JSON.stringify(manifest.version)){
+    if(manifest.version===version){console.log(`D1 already holds ${version}`);process.exit(0);}
+    const changed=items.filter(p=>manifest.hashes[p.id]!==hash(p)),ids=new Set(items.map(p=>p.id));
+    const removed=Object.keys(manifest.hashes).filter(id=>!ids.has(id));
+    for(let i=0;i<changed.length;i+=ROWS_PER_FILE)write((i===0?tables+'\n':'')+changed.slice(i,i+ROWS_PER_FILE).map(p=>insert(p,'INSERT OR REPLACE INTO places')).join('\n')+'\n');
+    write(`${tables}
+${removed.map(id=>`DELETE FROM places WHERE id=${s(id)};`).join('\n')}
+DELETE FROM regions;
+${(data.regions??[]).map(r=>`INSERT INTO regions (id,name,code,count) VALUES (${s(r.id)},${s(r.name)},${s(r.code)},${s(r.count??0)});`).join('\n')}
+${tail.slice(tail.indexOf('CREATE INDEX'))}`);
+    console.log(`D1 upsert: ${changed.length} changed, ${removed.length} removed (${items.length} places), version ${version}`);
+    run();saveManifest();process.exit(0);
+  }
+}
 for(let i=0;i<items.length;i+=ROWS_PER_FILE){
-  const chunk=items.slice(i,i+ROWS_PER_FILE).map(insert).join('\n');
-  const name=join(out,`trip-${String(files.length+1).padStart(3,'0')}.sql`);
-  writeFileSync(name,(i===0?head:'')+chunk+'\n'+(i+ROWS_PER_FILE>=items.length?tail:''));files.push(name);
+  const chunk=items.slice(i,i+ROWS_PER_FILE).map(p=>insert(p)).join('\n');
+  write((i===0?head:'')+chunk+'\n'+(i+ROWS_PER_FILE>=items.length?tail:''));
 }
 console.log(`D1 SQL ${items.length}건 → ${files.length}개 파일 (${out}), version ${version}`);
 // --if-newer: skip when D1 already holds this version or more places (e.g. the full set loaded from the computer,
 // while git only carries the smaller build file). Used by the Cloudflare build so every push does not reload.
 if(mode&&args.includes('--if-newer')){
   try{
-    const res=JSON.parse(wrangler(['d1','execute','guidejung-trip',mode,'--json','--command',"SELECT (SELECT value FROM meta WHERE key='version') AS version, (SELECT COUNT(*) FROM places) AS n"],{encoding:'utf8'}));
-    const row=res?.[0]?.results?.[0]??{};
+    const row=remote();
     if(row.version===JSON.stringify(version)||Number(row.n)>items.length){console.log(`D1 skip: version ${row.version}, ${row.n} places`);process.exit(0);}
   }catch(e){console.log('D1 not initialised yet (first load)');}
 }
-if(mode)for(const f of files){
-  console.log(`wrangler d1 execute ${mode} ${rel(f)}`);
-  wrangler(['d1','execute','guidejung-trip',mode,'--file',rel(f),'-y'],{stdio:'inherit'});
+if(mode){
+  // A full load replaces everything: refuse a file clearly smaller than D1 (e.g. the computer's export after GitHub
+  // Actions has collected more), unless --force.
+  let row={};try{row=remote();}catch(e){}
+  if(Number(row.n)>items.length*1.1&&!args.includes('--force')){console.log(`D1에 ${row.n}건이 있어 이 파일(${items.length}건)로 덮어쓰지 않습니다. 자동 수집(GitHub Actions)이 더 많이 모았을 수 있습니다. 의도한 경우 --force.`);process.exit(1);}
+  run();saveManifest();
 }

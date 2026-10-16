@@ -1,0 +1,71 @@
+name: Trip collect
+# Unattended TourAPI collection for trip.guidejung.com (services/api/app/trip_auto.py) — no computer, no PostgreSQL.
+# The full set is kept in the Actions cache (runtime/trip-auto) and D1; only new/changed rows are sent to D1.
+# Secrets: DATA_GO_KR_KEY (or TOURAPI_SERVICE_KEY), CLOUDFLARE_API_TOKEN (D1 Edit), CLOUDFLARE_ACCOUNT_ID.
+on:
+  schedule:
+    - cron: '23 */6 * * *' # 4 runs a day, about 5 hours each: the daily TourAPI limit (100,000 calls) needs ~10 hours
+  workflow_dispatch:
+    inputs:
+      types:
+        description: 'TourAPI contentTypeId 목록 (12 관광지·14 문화시설·28 레포츠·15 축제·39 음식점·32 숙박)'
+        default: '12,14,28,15,39,32'
+      minutes:
+        description: '수집 시간(분), 최대 300'
+        default: '300'
+permissions:
+  contents: write
+concurrency:
+  group: trip-collect
+  cancel-in-progress: false
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: npm ci
+      - run: pip install -r services/api/requirements.lock.txt
+      - uses: actions/cache/restore@v4
+        with:
+          path: runtime/trip-auto
+          key: trip-auto-${{ github.run_id }}
+          restore-keys: trip-auto-
+      - name: Collect
+        env:
+          TOURAPI_SERVICE_KEY: ${{ secrets.TOURAPI_SERVICE_KEY || secrets.DATA_GO_KR_KEY }}
+          TOURAPI_DAILY_LIMIT: '95000'
+          TOURAPI_TYPES: ${{ inputs.types || '12,14,28,15,39,32' }}
+          TRIP_MINUTES: ${{ inputs.minutes || '300' }}
+          SEO_ENABLED: 'true'
+          DATA_MODE: live
+        run: python -m services.api.app.trip_auto
+      - name: Load D1 (new and changed rows)
+        if: always() && hashFiles('runtime/trip-auto/full.json') != ''
+        run: node scripts/build-trip-d1.mjs runtime/trip-auto/full.json --remote --upsert runtime/trip-auto/d1-manifest.json
+      - uses: actions/cache/save@v4
+        if: always() && hashFiles('runtime/trip-auto/full.json') != ''
+        with:
+          path: runtime/trip-auto
+          key: trip-auto-${{ github.run_id }}
+      - name: Commit build file
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add apps/trip/data/trip.json
+          if git diff --cached --quiet; then echo 'no change'; exit 0; fi
+          git commit -m 'trip: 자동 수집 데이터 갱신'
+          for i in 1 2 3; do git pull --rebase origin main && git push origin HEAD:main && exit 0; sleep 10; done
+          exit 1
