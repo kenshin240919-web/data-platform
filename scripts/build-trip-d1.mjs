@@ -5,10 +5,17 @@
 // Rows go to places_next / regions_next and are swapped in by the last file, so the site never shows a half load.
 import {execFileSync} from 'node:child_process';
 import {existsSync,mkdirSync,readFileSync,rmSync,writeFileSync} from 'node:fs';
-import {dirname,join} from 'node:path';
+import {dirname,join,relative,sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 const ROOT=join(dirname(fileURLToPath(import.meta.url)),'..');
+// Windows runs npx through cmd.exe, which splits unquoted arguments at spaces (the repo folder can be "data platform"):
+// quote every argument there; elsewhere pass them as they are.
+const wrangler=(args,opts={})=>process.platform==='win32'
+  ?execFileSync(['npx','wrangler',...args].map(a=>/[\s"&|<>^]/.test(a)?`"${a.replace(/"/g,'""')}"`:a).join(' '),[],{cwd:ROOT,shell:true,...opts})
+  :execFileSync('npx',['wrangler',...args],{cwd:ROOT,...opts});
+// Files are passed relative to the repo (no spaces, no drive letter).
+const rel=f=>relative(ROOT,f).split(sep).join('/');
 const args=process.argv.slice(2);
 // Default: the computer's full export if there is one, else the git file (full until the first new-style export).
 const input=args.find(a=>!a.startsWith('--'))??[join(ROOT,'runtime/trip-full.json'),join(ROOT,'apps/trip/data/trip.json')].find(f=>existsSync(f));
@@ -72,12 +79,12 @@ console.log(`D1 SQL ${items.length}건 → ${files.length}개 파일 (${out}), v
 // while git only carries the smaller build file). Used by the Cloudflare build so every push does not reload.
 if(mode&&args.includes('--if-newer')){
   try{
-    const res=JSON.parse(execFileSync('npx',['wrangler','d1','execute','guidejung-trip',mode,'--json','--command',"SELECT (SELECT value FROM meta WHERE key='version') AS version, (SELECT COUNT(*) FROM places) AS n"],{cwd:ROOT,encoding:'utf8',shell:process.platform==='win32'}));
+    const res=JSON.parse(wrangler(['d1','execute','guidejung-trip',mode,'--json','--command',"SELECT (SELECT value FROM meta WHERE key='version') AS version, (SELECT COUNT(*) FROM places) AS n"],{encoding:'utf8'}));
     const row=res?.[0]?.results?.[0]??{};
     if(row.version===JSON.stringify(version)||Number(row.n)>items.length){console.log(`D1 skip: version ${row.version}, ${row.n} places`);process.exit(0);}
   }catch(e){console.log('D1 not initialised yet (first load)');}
 }
 if(mode)for(const f of files){
-  console.log(`wrangler d1 execute ${mode} ${f}`);
-  execFileSync('npx',['wrangler','d1','execute','guidejung-trip',mode,'--file',f,'-y'],{cwd:ROOT,stdio:'inherit',shell:process.platform==='win32'});
+  console.log(`wrangler d1 execute ${mode} ${rel(f)}`);
+  wrangler(['d1','execute','guidejung-trip',mode,'--file',rel(f),'-y'],{stdio:'inherit'});
 }
