@@ -1,10 +1,23 @@
-// Cloudflare Workers: serves the static Next.js export (no server code).
+// Cloudflare Worker for trip.guidejung.com (Worker name data-platform).
+// Static pages: ./apps/trip/out. Places: D1 guidejung-trip (apps/trip/worker, scripts/build-trip-d1.mjs).
+// The build loads trip.json into D1 only when D1 does not already hold that version or a larger set.
 {
   "name": "data-platform",
+  "main": "apps/trip/worker/index.ts",
+  "tsconfig": "apps/trip/worker/tsconfig.json",
   "compatibility_date": "2025-09-01",
-  "build": { "command": "npm run build" },
+  "build": { "command": "npm run build && (node scripts/build-trip-d1.mjs --remote --if-newer || echo D1 load skipped)" },
   "assets": {
     "directory": "./apps/trip/out",
-    "not_found_handling": "404-page"
-  }
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    "run_worker_first": ["/api/*", "/place/*", "/festival/*"]
+  },
+  "d1_databases": [{ "binding": "DB", "database_name": "guidejung-trip", "database_id": "c19c21aa-eeb8-49b8-bf17-f8899c5d1e23" }],
+  // Detail pages are server-rendered without the Next.js runtime.
+  "alias": {
+    "next/link": "./apps/trip/worker/shims/link.tsx",
+    "next/navigation": "./apps/trip/worker/shims/navigation.ts"
+  },
+  "observability": { "enabled": true }
 }

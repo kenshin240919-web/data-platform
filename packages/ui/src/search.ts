@@ -7,7 +7,7 @@ export function todayKST(now=Date.now()){return new Date(now+9*3600_000).toISOSt
 function shift(day:string,days:number){const d=new Date(day+'T00:00:00Z');d.setUTCDate(d.getUTCDate()+days);return d.toISOString().slice(0,10);}
 export function withEventStatus(p:Place,today=todayKST()):Place{return p.start_date&&p.event_status==='scheduled'&&(p.end_date||'')<today?{...p,event_status:'ended'}:p;}
 
-function range(query:Query,today:string):[string,string]|null{
+export function range(query:Query,today:string):[string,string]|null{
   if(query.when==='today')return [today,today];
   if(query.when==='weekend'){const weekday=(new Date(today+'T00:00:00Z').getUTCDay()+6)%7;const start=weekday===6?shift(today,-1):shift(today,(5-weekday+7)%7);return [start,shift(start,1)];}
   if(query.date_from||query.date_to){const start=String(query.date_from||query.date_to),end=String(query.date_to||query.date_from);return start<=end?[start,end]:null;}

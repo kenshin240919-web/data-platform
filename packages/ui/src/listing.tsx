@@ -38,8 +38,9 @@ export function Listing({fixed,regions,title}:{fixed:Query;regions:Region[];titl
 }
 
 /** Event status text on detail pages, evaluated on the visitor's date rather than the build date. */
-export function EventNote({end,demo}:{end?:string;demo:boolean}){
-  const [ended,setEnded]=useState(false);
+export function EventNote({end,demo,today}:{end?:string;demo:boolean;today?:string}){
+  // today: the date the Worker rendered the page on (its HTML is cached briefly); the browser re-checks after load.
+  const [ended,setEnded]=useState(!!end&&!!today&&end<today);
   useEffect(()=>{setEnded(!!end&&end<todayKST());},[end]);
   return <p>{demo?'가상의 예시 일정입니다.':ended?'종료된 행사입니다. 다음 회차 일정과 구분해 확인하세요.':'행사 일정은 주최기관 안내를 확인하세요.'}</p>;
 }
