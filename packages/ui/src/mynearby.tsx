@@ -36,3 +36,24 @@ export function MyNearby({base=''}:{base?:string}){
       <div className="near-panel on"><Cards items={active.items} base={base}/>{active.total>active.items.length&&<a className="near-more" href={more(active.kind)}>{TABS.find(t=>t[0]===active.kind)![1].slice(3)} {active.total}곳 모두 보기 →</a>}</div></>}
   </section>;
 }
+
+/** A main-page section that switches to the visitor's surroundings once their position is known (same position as
+ * MyNearby; nearMore gets &lat=&lon= appended). Before that — and for search engines — it shows the nationwide cards (server items or `query`). */
+export function LocalSection({eyebrow,title,nearTitle,more,nearMore,query,nearQuery,items,base=''}:{eyebrow:string;title:string;nearTitle:string;more:string;nearMore:string;query:Record<string,string|number>;nearQuery:Record<string,string|number>;items?:Place[];base?:string}){
+  const {pos}=useMyPosition();
+  const [data,setData]=useState<{key:string;items:Place[]}|null>(null);
+  const near=!!pos;const key=pos?`${pos.lat.toFixed(3)},${pos.lon.toFixed(3)}`:'all';
+  useEffect(()=>{
+    if(!near&&items)return;let live=true;
+    const q=new URLSearchParams(Object.entries(near?{...nearQuery,lat:pos!.lat,lon:pos!.lon}:query).map(([k,v])=>[k,String(v)]));
+    fetch(`${base}/api/search?${q}`).then(r=>r.ok?r.json() as Promise<Results>:null).then(r=>{
+      // Nothing around the visitor: keep the nationwide cards rather than an empty section.
+      if(live)setData({key,items:near&&!r?.items.length?(items??[]):(r?.items??[]) as Place[]});
+    }).catch(()=>{});
+    return ()=>{live=false;};
+  },[key,base]);  // eslint-disable-line react-hooks/exhaustive-deps
+  const shown=data?.key===key?data.items:(!near&&items)?items:null;
+  const local=near&&data?.key===key&&shown!==items;
+  return <section className="section"><div className="section-heading"><div><div className="eyebrow">{eyebrow}</div><h2>{local?nearTitle:title}</h2></div><a href={local?`${nearMore}&lat=${pos!.lat}&lon=${pos!.lon}`:more}>모두 보기</a></div>
+    {shown?<Cards items={shown} base={base}/>:<div className="loading" role="status">정보를 불러오고 있습니다.</div>}</section>;
+}
