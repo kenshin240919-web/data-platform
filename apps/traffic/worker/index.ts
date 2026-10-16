@@ -104,7 +104,7 @@ async function get<T extends {stale:boolean}>(env:Env,job:Job<T>,ctx?:Ctx):Promi
   if(cache){const c=await cache.match(key(job.name,'fresh'));if(c){const v=await c.json() as T;memo.set(job.name,{until:Date.now()+30e3,value:v});return v;}}
   // Shared copy kept fresh by the Cron (any data center); its age decides whether it still counts as fresh.
   const shared=env.CACHE?await env.CACHE.get(`job:${job.name}`,{type:'json',cacheTtl:60}).catch(()=>null) as {at:number;v:T}|null:null;
-  if(shared&&Date.now()-shared.at<=job.ttl*1000){
+  if(shared&&Date.now()-shared.at<=job.ttl*1000+90e3){  // +90s: the Cron's next copy may land a little late
     const left=Math.max(30,Math.round(job.ttl-(Date.now()-shared.at)/1000));memo.set(job.name,{until:Date.now()+Math.min(left,60)*1000,value:shared.v});
     if(cache)ctx?.waitUntil(cache.put(key(job.name,'fresh'),new Response(JSON.stringify(shared.v),{headers:{'cache-control':`max-age=${left}`}})));
     return shared.v;
@@ -124,11 +124,11 @@ async function get<T extends {stale:boolean}>(env:Env,job:Job<T>,ctx?:Ctx):Promi
 
 const json=(body:unknown,status=200,maxAge=60)=>new Response(JSON.stringify(body),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':`public, max-age=${maxAge}`}});
 
-/** Cron (5분마다): refresh traffic every run, incidents every 10 minutes, CCTV hourly (ITS answers only from Korea; failures are ignored). */
+/** Cron (5분마다): traffic every run, incidents every 10 minutes, CCTV at most hourly (ITS answers only from Korea, so it often fails here; visitors in Korea refresh it). */
 async function scheduled(env:Env,now:number){
   const m=new Date(now).getUTCMinutes();const jobs:Job<any>[]=[JOBS.traffic];
   if(m%10<5)jobs.push(JOBS.incidents);
-  if(env.ITS_API_KEY&&env.CACHE){const c=await env.CACHE.get('job:cctv',{type:'json'}).catch(()=>null) as {at:number}|null;if(!c||now-c.at>=3600e3)jobs.push(JOBS.cctv);}
+  if(m<5&&env.ITS_API_KEY&&env.CACHE){const c=await env.CACHE.get('job:cctv',{type:'json'}).catch(()=>null) as {at:number}|null;if(!c||now-c.at>=3600e3)jobs.push(JOBS.cctv);}
   const res=await Promise.allSettled(jobs.map(j=>refresh(env,j)));
   // Last run, for /api/status (errors are short messages, no keys).
   await env.CACHE?.put('cron:last',JSON.stringify({at:now,done:Date.now(),jobs:res.map((r,i)=>({job:jobs[i].name,ok:r.status==='fulfilled',err:r.status==='rejected'?String((r.reason as Error)?.message??r.reason).slice(0,120):undefined}))}));
