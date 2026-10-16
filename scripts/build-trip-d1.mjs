@@ -29,7 +29,7 @@ const ROWS_PER_FILE=2000;  // about 15MB of SQL per upload
 
 const data=JSON.parse(readFileSync(input,'utf8'));
 // The git build file (subset: true) only has card fields; loading it would replace the full set with a stub.
-if(data.subset){console.log(`${input} is the small build file; D1 is loaded from the computer's full export (export-site.bat).`);process.exit(0);}
+if(data.subset){console.log(`${input} is the small build file; D1 is loaded from the full export (GitHub Actions trip-collect).`);process.exit(0);}
 const items=data.items??[];
 if(!items.length)throw new Error(`no items in ${input}`);
 const s=v=>v===null||v===undefined?'NULL':typeof v==='number'?(Number.isFinite(v)?String(v):'NULL'):`'${String(v).replace(/'/g,"''")}'`;

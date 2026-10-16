@@ -38,7 +38,7 @@
 <body>
 <main>
   <h1>로컬 검수</h1>
-  <p class="muted">이 컴퓨터에서만 열리는 검수 화면입니다. 모든 항목을 검수할 필요는 없습니다. 원천 정보가 바뀌어 <b>검수 대기</b>로 돌아온 항목만 기본으로 보여 줍니다(검수하지 않아도 공식 데이터로 공개됩니다). 반영은 <b>export-site.bat</b>으로 합니다.</p>
+  <p class="muted">이 컴퓨터에서만 열리는 검수 화면입니다. 모든 항목을 검수할 필요는 없습니다. 원천 정보가 바뀌어 <b>검수 대기</b>로 돌아온 항목만 기본으로 보여 줍니다(검수하지 않아도 공식 데이터로 공개됩니다). 이 화면의 검수 결과는 지금 사이트에 반영되지 않습니다(사이트 데이터는 GitHub Actions 자동 수집).</p>
 
   <div class="box">
     <form id="login" class="row">
@@ -159,7 +159,7 @@ async function save(event, item) {
       place_id: item.id, action, reviewer: form.reviewer.value.trim(), note: form.note.value.trim(),
       content_checked: form.content_checked.checked, boundary_checked: form.boundary_checked.checked, conditions})});
     $('editor').replaceChildren();
-    say('저장했습니다: ' + item.name + ' (' + (action === 'approve' ? '승인' : '반려') + '). 웹사이트 반영은 export-site.bat으로 합니다.');
+    say('저장했습니다: ' + item.name + ' (' + (action === 'approve' ? '승인' : '반려') + '). (사이트에는 반영되지 않습니다.)');
     await loadQueue();
   } catch (e) { say(e.message, true); }
   finally { busy = false; }

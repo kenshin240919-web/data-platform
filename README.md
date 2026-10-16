@@ -8,7 +8,7 @@
 
 - 설정: `wrangler.jsonc` (빌드 `npm run build` → `apps/trip/out` 업로드). GitHub `main`에 올리면 Cloudflare가 자동 빌드·배포합니다.
 - Cloudflare 대시보드 Workers & Pages → data-platform → Settings → Build: Deploy command `npx wrangler deploy`. 빌드는 `wrangler.jsonc`가 실행하므로 Build command는 비워 둡니다.
-- **데이터 갱신**: 수집·동기화·검수 후 `export-site.bat` 실행 → 전체 데이터는 Cloudflare D1(`guidejung-trip`)에 바로 올리고(`runtime/trip-full.json` → `scripts/build-trip-d1.mjs --remote`, 컴퓨터에서 **처음 한 번 `npx wrangler login`**), 메인·목록 빌드용 작은 파일 `apps/trip/data/trip.json`을 커밋·push → 자동 재배포. 상세·검색·사이트맵은 D1에서 나옵니다.
+- **데이터 갱신**: GitHub Actions `Trip collect`(6시간마다)가 수집 → Cloudflare D1(`guidejung-trip`)에 새로 받거나 바뀐 것만 반영 → 메인·목록 빌드용 작은 파일 `apps/trip/data/trip.json` 커밋 → 자동 재배포. 상세·검색·사이트맵은 D1에서 나옵니다. 컴퓨터용 `collect-trip.bat`·`export-site.bat`은 10/16 삭제(필요하면 git 기록에서 복구).
 - 공개 웹사이트에는 관리자 화면이 없습니다. 검수는 이 컴퓨터에서 `run.bat` 실행 후 **http://127.0.0.1:8100/admin** (로컬 전용, `APP_ENV=production`이면 404)에서 합니다.
 
 ## 로컬 실행 (Windows)
@@ -44,7 +44,6 @@ traffic/academy/charge/weather는 준비 중 카드입니다. 실시간 수집�
 사용자 요청으로 현재 공개 데이터는 **200건**입니다. 관광지 51·문화시설 49·레포츠 50·축제 50건이며, 187건에 공공누리 1/3유형 사진이 있습니다. 2026-10-07 공식 원천 내용 대조와 사용자 위임 검수 승인을 완료했습니다. 이 검수는 Codex(AI)가 원천 API·운영기관 홈페이지와 대조해 수행한 것으로(검수자 `Codex · 사용자 위임 검수`), 사람의 직접 확인은 로컬 검수 화면(http://127.0.0.1:8100/admin)으로 별도 기록합니다. 운영기관 홈페이지 일부를 추가 확인했고, 미제공 정보와 원천 불일치는 확인 필요로 표시합니다. 현장 확인·행정구역 공간 경계 확인은 별도입니다. [200건 검수 보고서](reports/200건-내용검수-2026-10-07.md)
 
 - **자동 수집(권장, 10/16~)**: GitHub Actions `Trip collect`가 6시간마다 TourAPI 새 항목을 받아 D1·사이트에 반영합니다(컴퓨터·DB 불필요). 수동 실행: GitHub → Actions → Trip collect → Run workflow. 자동 수집을 쓰는 동안 컴퓨터 수집·내보내기는 하지 않습니다(같은 하루 호출 한도를 나눠 쓰고, 더 작은 컴퓨터 데이터로 D1을 덮어쓰는 것은 막혀 있음).
-- `collect-trip.bat`: 공개 데이터를 목표 건수(100~100,000, **1만 건씩 늘리기 권장**)까지 늘립니다. 기존 항목은 다시 호출하지 않고 새 항목만 상세·사진·시설을 보강합니다. 하루 호출 한도(운영계정 100,000회 — `.env`의 `TOURAPI_DAILY_LIMIT=100000`, 새 항목 1건당 약 5회 → 하루 약 19,000건)에 닿으면 그때까지 모은 것을 공개 데이터에 넣고 멈추며, 다음 날 같은 목표로 다시 실행하면 이어서 수집합니다. 중간에 **Ctrl+C**(→ "일괄 작업을 끝내시겠습니까?"에 N)로 멈춰도 그때까지 모은 것을 공개 데이터에 넣고 멈춥니다. 반영은 `export-site.bat`.
 - 검수는 선택입니다. 새로 수집했거나 원천이 바뀐 항목도 공식 데이터로 공개되며(카드 표시 “한국관광공사 공식 데이터”), 반려한 항목만 제외됩니다. 무료·아이·반려동물·실내 조건은 검수 근거가 없으면 원천 정보(요금·이용연령·반려동물 동반·시설 분류)로 자동 분류하고 ‘원천 자동 분류’로 표시합니다.
 - 로컬 검수 화면(`run.bat` → http://127.0.0.1:8100/admin, `.env`의 ADMIN_TOKEN 입력): 현황·검수 목록 조회. 내용을 확인한 뒤 검수자·근거·조건·공간 경계 확인을 별도 기록하여 승인/반려합니다. 반려 항목은 공개 검색/상세에서 제외합니다.
 - `python -m services.api.app.sync_trip` (또는 검수 화면의 “변경 확인 시작”): 현재 대상 ID만 변경 동기화합니다. 새 장소를 추가하지 않습니다. 실제 변경은 재검수 대기로 되돌리고, `showflag=0`인 원천 비공개 항목은 공개에서 제외하되 이력을 보존합니다.
@@ -72,7 +71,7 @@ collect는 페이지당 최대 50건이며 `--pages`로 페이지 수를 지정�
 
 로컬 PostgreSQL은 `scripts/local-postgres.py setup`으로 시작합니다. 데이터는 OneDrive 밖의 영문 경로 `%LOCALAPPDATA%\guidejung-data-postgres`에 두며(`GUIDEJUNG_PG_HOME`으로 변경 가능), 예전 임시 폴더(ESTsoft CreatorTemp)에 있던 DB는 첫 실행 때 자동으로 옮깁니다. 전용 포트는 55432이고 자격증명은 Git에서 제외되는 `.env.postgres-local`에 저장됩니다. `verify-backup`은 별도 임시 DB에 백업을 복원해 주요 테이블의 건수를 확인합니다. 실제 운영 서버 설치와 도메인 연결은 사용자가 최종 확인한 후 수행합니다.
 
-**검색 노출(SEO)**: `.env`의 `SEO_ENABLED=true`로 켜져 있습니다(`export-site.bat` 때 데이터에 반영). 홈과 소개글 80자 이상인 공개 장소·행사 상세만 `index`이며 sitemap에 들어갑니다. 반려·원천 비공개·샘플 항목은 제외하고, 검색·필터 목록 페이지는 `noindex, follow`입니다. 검수 여부는 노출 조건이 아닙니다. 끄려면 `SEO_ENABLED=false`로 바꾸고 `export-site.bat`을 실행합니다.
+**검색 노출(SEO)**: `.env`의 `SEO_ENABLED=true`로 켜져 있습니다(자동 수집은 workflow의 `SEO_ENABLED: 'true'`). 홈과 소개글 80자 이상인 공개 장소·행사 상세만 `index`이며 sitemap에 들어갑니다. 반려·원천 비공개·샘플 항목은 제외하고, 검색·필터 목록 페이지는 `noindex, follow`입니다. 검수 여부는 노출 조건이 아닙니다. 끄려면 `.github/workflows/trip-collect.yml`의 `SEO_ENABLED`를 `'false'`로 바꿉니다(다음 수집 때 반영).
 
 DB migration 기준은 `services/api/app/models.py`입니다. `python -m app.db`는 신규 v1 schema 생성용이며 기존 DB 변경/파괴를 수행하지 않습니다. 배포 후 schema 변경은 버전별 migration으로 추가해야 합니다. PostgreSQL PostGIS 인덱스 보조 SQL은 `deploy/postgis.sql`입니다. 현재 API 주변 검색은 정확한 Haversine 직선거리를 사용하며 대규모 운영 전에 공간 인덱스 조회로 전환해야 합니다.
 

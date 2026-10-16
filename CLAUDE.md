@@ -33,12 +33,12 @@ GitHub `main`에 push → Cloudflare가 `wrangler.jsonc` 기준으로 `npm run b
 | 작업 | 컴퓨터 | 핸드폰/클라우드 |
 |---|---|---|
 | 화면·문구·SEO·코드 수정, 빌드 확인 | ✅ | ✅ |
-| 데이터 수집(`collect-trip.bat`), 검수(`run.bat` → /admin), 내보내기(`export-site.bat`) | ✅ | ❌ (로컬 PostgreSQL·`.env` 필요) |
+| 검수(`run.bat` → /admin, 로컬 PostgreSQL — 자동 수집 데이터와 연결 안 됨) | ✅ | ❌ |
 | trip 자동 수집(GitHub Actions `trip-collect.yml`, 6시간마다·DB 없음) 수동 실행·로그 확인 | ✅ | ✅ (GitHub) |
 | 테스트 `npm run check`(trip+weather+charge+traffic 빌드), Python 단위 테스트 | ✅ | ✅ |
 | weather 로컬 API 시험: `apps/weather/.dev.vars`에 `DATA_GO_KR_KEY=...`(gitignore) 후 `npm run worker:dev -w @guidejung/weather` | ✅ | △ (클라우드는 workerd가 프록시를 못 써서 Node 하네스로 시험) |
 
-데이터 갱신 순서(컴퓨터): `collect-trip.bat` → (선택) 검수 → `export-site.bat`(전체 → D1, 작은 `trip.json` 커밋·push → 자동 재배포).
+데이터 갱신: GitHub Actions `trip-collect.yml`이 자동(수집 → D1 바뀐 행만 → 작은 `trip.json` 커밋 → 자동 재배포). `collect-trip.bat`·`export-site.bat`은 10/16 삭제(사용자 결정, 복구는 git 기록).
 
 ## 현재 상태 (2026-10-16 기준)
 - **Cron 주의(10/16 경험)**: wrangler.jsonc에 `triggers.crons`를 처음 넣은 배포 직후에는 Cron이 돌지 않았고, **그다음 배포부터** 돌기 시작함(traffic·weather·charge 모두, 원인 미확인). Cron을 새로 넣으면 한 번 더 배포하고 각 사이트 `/api/status`로 확인.
