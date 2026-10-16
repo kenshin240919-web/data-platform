@@ -12,5 +12,8 @@
     "not_found_handling": "404-page",
     "run_worker_first": ["/api/*"]
   },
+  // 5분마다 전국 충전기 상태 변경을 받아 KV guidejung-cache(전 세계 공용)에 최근 70분치 저장 → 목록 위에 덮어 최신 상태 표시.
+  "triggers": { "crons": ["*/5 * * * *"] },
+  "kv_namespaces": [{ "binding": "CACHE", "id": "78659f07655e4ab99683b85951a377e3" }],
   "observability": { "enabled": true }
 }
