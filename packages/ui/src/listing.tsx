@@ -6,6 +6,7 @@ import type {Params,Region,Results} from './types';
 import {todayKST,type Query} from './search';
 import {Cards,SearchForm,labels,value} from './cards';
 import {AdSlot} from './ads';
+import {useMyPosition} from './geo';
 
 /** Results from the trip Worker (/api/search on D1); the same query string is fetched once per change. */
 function useResults(qs:string,base=''){
@@ -35,6 +36,14 @@ export function Listing({fixed,regions,title,defaults={},kinds=[]}:{fixed:Query;
   const params=useSearchParams();
   // defaults apply until the visitor picks something else (?kind=), fixed always wins.
   const effective:Params={...defaults as Params,...Object.fromEntries(params),...fixed as Params};
+  // After the visitor allowed location, every list starts with what is near them (20km, nearest first) unless they
+  // picked a region, typed a search or chose 전국 (?near=0). ?near_km= widens it.
+  const {pos,status,request}=useMyPosition();
+  const chosen=!!(value(effective,'region')||value(effective,'q')||value(effective,'lat'));
+  const nearKm=['20','50','100'].includes(params.get('near_km')??'')?params.get('near_km')!:'20';
+  const near=!chosen&&pos?.precise&&params.get('near')!=='0'?pos:null;
+  if(near)Object.assign(effective,{lat:String(near.lat),lon:String(near.lon),radius_km:nearKm});
+  const nearLink=(km:string|null)=>{const q=new URLSearchParams(params);q.delete('page');if(km){q.delete('near');q.set('near_km',km);}else{q.set('near','0');q.delete('near_km');}return `?${q}`;};
   const chip=(v:string)=>{const q=new URLSearchParams(params);if(v)q.set('kind',v);else q.delete('kind');q.delete('page');return `?${q}`;};
   const kindNow=value(effective,'kind');
   const query=new URLSearchParams();
@@ -42,10 +51,14 @@ export function Listing({fixed,regions,title,defaults={},kinds=[]}:{fixed:Query;
   const region=regions.find(r=>r.id===value(effective,'region'));
   const full=new URLSearchParams(query);if(value(effective,'page'))full.set('page',value(effective,'page'));
   const {results,failed}=useResults(full.toString());
-  function pageUrl(page:number){const next=new URLSearchParams(query);next.set('page',String(page));return `/search?${next}`;}
+  // Same page with ?page= (keeps 내 주변 mode and the page's fixed filters).
+  function pageUrl(page:number){const next=new URLSearchParams(params);next.set('page',String(page));return `?${next}`;}
   return <section className="section listing"><div className="eyebrow">FIND YOUR TRIP</div><h1>{region&&!fixed.region?`${region.name} 여행`:title}</h1><SearchForm compact regions={regions} params={effective} target="/search"/><div className="filter-links"><Link className={!value(effective,'condition')?'selected':''} href="/place">전체 장소</Link>{Object.entries(labels).map(([key,label])=><Link className={value(effective,'condition')===key?'selected':''} key={key} href={`/${key}${region?'?region='+region.id:''}`}>{label}</Link>)}<Link href="/weekend">이번 주말</Link></div>
     {!fixed.kind&&kinds.length>1&&<div className="kind-chips" role="tablist" aria-label="정보 종류">{kinds.map(k=><Link key={k.value} role="tab" aria-selected={kindNow===k.value} className={kindNow===k.value?'on':''} href={chip(k.value)}>{k.label}</Link>)}</div>}
-    {failed?failure:!results?loading:<><div className="results-heading"><p><strong>{results.total}</strong>개 정보{value(effective,'q')&&<> · “{value(effective,'q')}”</>}</p><span className="muted small">{value(effective,'lat')?'직선거리순':'정보 충족도순'}</span></div><Cards items={results.items}/>{results.total>0&&<AdSlot/>}{results.pages>1&&<nav className="pagination" aria-label="검색 결과 페이지">{Array.from({length:Math.min(results.pages,30)},(_,i)=>i+1).map(p=><Link key={p} aria-current={p===results.page?'page':undefined} href={pageUrl(p)}>{p}</Link>)}</nav>}</>}</section>;
+    {!chosen&&(pos?.precise?<div className="near-bar"><span>📍 내 위치 주변</span>{['20','50','100'].map(km=><Link key={km} className={near&&nearKm===km?'on':''} href={nearLink(km)}>{km}km</Link>)}<Link className={!near?'on':''} href={nearLink(null)}>전국</Link></div>
+      :<button type="button" className="near-ask" onClick={request} disabled={status==='locating'}>{status==='locating'?'위치 확인 중…':'📍 내 주변부터 보기'}</button>)}
+    {status==='denied'&&!pos?.precise&&<p className="muted small">위치 권한이 꺼져 있어요. 주소창의 자물쇠(사이트 설정)에서 위치를 허용해 주세요.</p>}
+    {failed?failure:!results?loading:<><div className="results-heading"><p><strong>{results.total}</strong>개 정보{value(effective,'q')&&<> · “{value(effective,'q')}”</>}</p><span className="muted small">{value(effective,'lat')?'직선거리순':'정보 충족도순'}</span></div><Cards items={results.items}/>{near&&results.total===0&&<p className="notice">{nearKm}km 안에는 아직 정보가 없습니다. {nearKm!=='100'&&<Link href={nearLink(nearKm==='20'?'50':'100')}>{nearKm==='20'?'50':'100'}km로 넓혀 보기</Link>} · <Link href={nearLink(null)}>전국 보기</Link></p>}{results.total>0&&<AdSlot/>}{results.pages>1&&<nav className="pagination" aria-label="검색 결과 페이지">{Array.from({length:Math.min(results.pages,30)},(_,i)=>i+1).map(p=><Link key={p} aria-current={p===results.page?'page':undefined} href={pageUrl(p)}>{p}</Link>)}</nav>}</>}</section>;
 }
 
 /** Event status text on detail pages, evaluated on the visitor's date rather than the build date. */

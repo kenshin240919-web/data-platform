@@ -37,3 +37,6 @@
 #near-place:checked~.near-labels .near-label-place span,#near-food:checked~.near-labels .near-label-food span,#near-stay:checked~.near-labels .near-label-stay span,#near-festival:checked~.near-labels .near-label-festival span{background:#ffffff26;color:#fff}
 .near-radio:focus-visible+.near-radio,.near-label:hover{border-color:var(--blue)}
 @media (max-width:760px){.my-nearby{margin-top:16px}.near-panel .cards{display:grid;grid-auto-flow:column;grid-auto-columns:80%;grid-template-columns:none;overflow-x:auto;scroll-snap-type:x mandatory;gap:12px;padding-bottom:6px}.near-panel .place-card{scroll-snap-align:start}.near-label{padding:8px 12px;font-size:14px}}
+.near-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:14px 0 2px;padding:10px 14px;border-radius:14px;background:#eef4ff;border:1px solid #d6e4ff}.near-bar>span{font-weight:800;margin-right:4px}.near-bar a{padding:6px 13px;border-radius:999px;background:#fff;border:1px solid #c9d8f5;font-size:14px;font-weight:700;color:#334155;text-decoration:none}.near-bar a.on{background:var(--blue);border-color:var(--blue);color:#fff}
+.near-ask{display:block;margin:14px 0 2px;padding:11px 18px;border-radius:12px;font-size:15px}
+@media (max-width:700px){.near-bar{gap:6px;padding:8px 10px}.near-bar>span{font-size:14px;margin-right:0}.near-bar a{padding:5px 10px;font-size:13px}}
