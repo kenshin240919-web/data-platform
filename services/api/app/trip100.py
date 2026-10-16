@@ -44,6 +44,7 @@ def known_payloads(db,ids):
 
 # 12 관광지·14 문화시설·28 레포츠·15 축제 (default); 39 음식점·32 숙박 once the site shows them (TOURAPI_TYPES / --types).
 DEFAULT_TYPES='12,14,28,15'
+MAX_FAILS_IN_ROW=20
 
 def run(target=100,types=None):
     if not 100<=target<=MAX_TARGET:raise ValueError(f'목표는 100~{MAX_TARGET}건입니다.')
@@ -115,25 +116,36 @@ def run(target=100,types=None):
                             record=batch[offset];ident=str(record['contentid'])
                             if ident not in seen:seen.add(ident);candidates.append(record)
                 write_json(listpath,candidates);save()
+            fails=0
             while state['cursor']<len(candidates) and len(known)+len(state['records'])<target:
                 record=candidates[state['cursor']]
-                raw=enrich(api,record,cache)
+                try:raw=enrich(api,record,cache)
+                except ValueError as error:
+                    if '예산' in str(error):raise
+                    # One item's network/result-code error must not end a run of tens of thousands of calls:
+                    # skip it (a later, larger target lists it again); many in a row means the API or network is down.
+                    fails+=1;state.setdefault('skipped',[]).append(str(record['contentid']));state['cursor']+=1
+                    print(f"\n건너뜀: {str(record.get('title',''))[:20]} — {error}",flush=True)
+                    if fails>=MAX_FAILS_IN_ROW:raise RuntimeError(f'연속 {fails}건 실패: {error}') from None
+                    continue
+                fails=0
                 (state['records'] if valid_record(raw,regions) else state['rejected']).append(str(raw['contentid']))
                 # enrich() caches per item, so a sparser checkpoint costs no extra API calls on resume.
                 state['cursor']+=1;show(raw.get('title',''))
                 if state['cursor']%50==0:save(current=raw.get('title',''))
             print('\n수집한 내용을 저장하는 중입니다...',flush=True)
             with SessionLocal() as db:publish(db)
-            save('completed');print(f'사진/시설 보강 {len(state["records"])}건, 검수 대기 {len(state["rejected"])}건. 공개 총량 최대 {target}건.')
-    except ValueError as error:
+            save('completed');print(f'사진/시설 보강 {len(state["records"])}건, 검수 대기 {len(state["rejected"])}건, 오류로 건너뜀 {len(state.get("skipped",[]))}건. 공개 총량 최대 {target}건.')
+    except (ValueError,RuntimeError) as error:
         save('paused_error_or_budget')
-        if '예산' not in str(error):raise
-        # Daily API limit: publish what is ready so each day's work shows up, then resume tomorrow.
+        budget='예산' in str(error)
+        # Daily limit or a run of API/network errors: publish what is ready, then resume later from the checkpoint.
         new=len(state['records'])
-        print('\n오늘 호출 한도에 도달해 지금까지 모은 내용을 저장하는 중입니다...',flush=True)
+        print(f"\n{'오늘 호출 한도에 도달해' if budget else '오류로 멈춰서'} 지금까지 모은 내용을 저장하는 중입니다...",flush=True)
         if new:
             with SessionLocal() as db:publish(db)
-        print(f'오늘 호출 한도에 도달했습니다. 지금까지 새로 {new}건을 공개 데이터에 넣었습니다. 내일 같은 목표로 다시 실행하면 이어서 수집합니다.')
+        if budget:print(f'오늘 호출 한도에 도달했습니다. 지금까지 새로 {new}건을 공개 데이터에 넣었습니다. 내일 같은 목표로 다시 실행하면 이어서 수집합니다.')
+        else:print(f'수집이 오류로 멈췄습니다: {error}\n지금까지 새로 {new}건을 공개 데이터에 넣었습니다. 잠시 후 같은 목표로 다시 실행하면 이어서 수집합니다. 계속 같은 오류면 이 화면을 Claude에게 보여 주세요.')
     finally:os.close(fd)
 
 if __name__=='__main__':

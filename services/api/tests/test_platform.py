@@ -92,6 +92,28 @@ class PlatformTest(unittest.TestCase):
         self.assertEqual((stay['kind'],stay['checkin'],stay['checkout'],stay['rooms'],stay['room_count'],stay['reservation_url'],stay['phone'],stay['cooking']),('stay','15:00','11:00','온돌','12','https://example.com/r','02-2','가능'))
         self.assertEqual(normalize({'contentid':'p','contenttypeid':'14','title':'박물관'})['kind'],'place')
         self.assertEqual((path_of('food','x'),path_of('festival','y'),path_of('bogus','z')),('/food/x','/festival/y','/place/z'))
+    def test_growth_skips_an_item_that_keeps_failing(self):
+        import json
+        from unittest.mock import patch
+        from app import trip100
+        from app.models import Region
+        def raw(ident):return {'contentid':ident,'contenttypeid':'12','title':'오류 '+ident,'addr1':'서울특별시 중구 시험로','lDongRegnCd':'11','lDongSignguCd':'140','mapy':'37.56','mapx':'126.99'}
+        with SessionLocal() as db:
+            region=db.get(Region,'growth-region') or Region(id='growth-region',version_id='demo-regions-v1',code_system='MOIS_LEGAL',code='11140',name='서울특별시 중구',level='city')
+            region.status='active';db.add(region);db.commit()
+            self.assertEqual(ingest(db,[{**raw('e0'),'_images':[]}]).status,'completed')
+        class API:
+            def __init__(self,*a,**k):pass
+            def call(self,endpoint,**params):
+                if endpoint=='areaBasedList2':return {'items':[raw(i) for i in ('e1','e2','e3')] if params['contentTypeId']=='12' and params['pageNo']==1 else [],'total':3}
+                if params['contentId']=='e2':raise ValueError('TourAPI 통신/응답 오류. 키·승인·현재 API 명세를 확인하세요.')
+                return {'items':[],'total':0}
+        with patch.object(trip100,'TourAPI',API),patch.object(trip100,'ROOT',Path(temp.name)):trip100.run(300)
+        with SessionLocal() as db:
+            names={p.snapshot['name'] for p in db.scalars(select(Profile).where(Profile.dataset_id==active_dataset(db).id))}
+        self.assertTrue({'오류 e1','오류 e3'}<=names);self.assertNotIn('오류 e2',names)
+        state=json.loads((Path(temp.name)/'runtime'/'trip300'/'checkpoint.json').read_text(encoding='utf-8'))
+        self.assertEqual((state['status'],state['skipped']),('completed',['e2']))
     def test_build_file_is_card_subset_with_totals(self):
         from app.export_static import build_file,PER_LIST
         items=[{'id':f'p{i}','name':f'n{i}','kind':'place' if i%3 else 'festival','region_id':'r1' if i<40 else 'r2','quality_score':i,
