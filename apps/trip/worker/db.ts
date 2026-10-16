@@ -18,6 +18,8 @@ export async function search(db:D1,query:Query,today=todayKST()):Promise<Results
   const geo=lat!==null&&lon!==null&&Number.isFinite(lat)&&Number.isFinite(lon);
   const radius=Number(query.radius_km)||20,q=String(query.q||'').toLowerCase(),dates=range(query,today);
   const where:string[]=[],args:unknown[]=[];
+  // Ended festivals stay out of lists and search unless asked (ended=1); their detail pages still open.
+  if(!query.ended&&!dates){where.push("NOT (kind='festival' AND end_date IS NOT NULL AND end_date<?)");args.push(today);}
   if(query.kind){const ks=String(query.kind).split(',').filter(Boolean);where.push(`kind IN (${ks.map(()=>'?').join(',')})`);args.push(...ks);}  // one kind or a comma list
   if(query.region){where.push('region_id=?');args.push(query.region);}
   if(query.condition){if(!CONDITIONS.has(String(query.condition)))return {items:[],total:0,page,pages:0,dataset_id:null,mode:'live'};where.push(`${query.condition}=1`);}

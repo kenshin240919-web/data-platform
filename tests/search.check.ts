@@ -17,5 +17,7 @@ assert.deepEqual(search(items,{condition:'free'},wed).items.map(i=>i.id),['a']);
 assert.deepEqual(search(items,{kind:'place'},wed).items.map(i=>i.id),['b','a']); // quality first
 assert.deepEqual(search(items,{lat:37.57,lon:126.98,radius_km:5},wed).items.map(i=>i.id),['a']);
 assert.equal(withEventStatus(items[3],wed).event_status,'ended');
-assert.equal(search(items,{limit:1,page:2},wed).pages,4);
+assert.equal(search(items,{limit:1,page:2},wed).pages,3);  // the ended festival is left out
+assert.equal(search(items,{limit:1,ended:1},wed).pages,4);
+assert.ok(!search(items,{kind:'festival'},wed).items.some(i=>i.id==='old'));
 console.log('search checks passed');

@@ -1,10 +1,12 @@
 import type {Place,Results} from './types';
 
 // Port of services/api/app/main.py search(); runs at build time and in the browser.
-export type Query={q?:string;region?:string;condition?:string;kind?:string;when?:string;date_from?:string;date_to?:string;page?:string|number;limit?:string|number;lat?:string|number;lon?:string|number;radius_km?:string|number};
+export type Query={ended?:string|number;q?:string;region?:string;condition?:string;kind?:string;when?:string;date_from?:string;date_to?:string;page?:string|number;limit?:string|number;lat?:string|number;lon?:string|number;radius_km?:string|number};
 
 export function todayKST(now=Date.now()){return new Date(now+9*3600_000).toISOString().slice(0,10);}
 function shift(day:string,days:number){const d=new Date(day+'T00:00:00Z');d.setUTCDate(d.getUTCDate()+days);return d.toISOString().slice(0,10);}
+/** A festival whose last day has passed. Lists and search leave these out unless asked (ended=1). */
+export function isEnded(p:Pick<Place,'kind'|'end_date'>,today=todayKST()){return p.kind==='festival'&&!!p.end_date&&p.end_date<today;}
 export function withEventStatus(p:Place,today=todayKST()):Place{return p.start_date&&p.event_status==='scheduled'&&(p.end_date||'')<today?{...p,event_status:'ended'}:p;}
 
 export function range(query:Query,today:string):[string,string]|null{
@@ -21,6 +23,7 @@ export function search(all:Place[],query:Query,today=todayKST()):Results{
   const items:Place[]=[];
   for(const raw of all){
     const p=withEventStatus(raw,today);
+    if(!query.ended&&!dates&&isEnded(p,today))continue;  // a date range (이번 주말 on Sunday) decides by itself
     if(query.kind&&!String(query.kind).split(',').includes(p.kind))continue;  // one kind or a comma list (place,festival)
     if(query.region&&p.region_id!==query.region)continue;
     if(query.condition&&p.conditions[query.condition]!==true)continue;

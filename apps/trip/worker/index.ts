@@ -12,7 +12,7 @@ import {rssXml} from '../../../packages/ui/src/rss';
 type Ctx={waitUntil:(p:Promise<unknown>)=>void};
 type Env={DB?:D1;ASSETS:{fetch:(r:Request|string)=>Promise<Response>}};
 const json=(body:unknown,status=200,maxAge=60)=>new Response(JSON.stringify(body),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':`public, max-age=${maxAge}`}});
-const QUERY_KEYS=['q','region','condition','kind','when','date_from','date_to','page','limit','lat','lon','radius_km'];
+const QUERY_KEYS=['ended','q','region','condition','kind','when','date_from','date_to','page','limit','lat','lon','radius_km'];
 
 // Stylesheet tags of the current static build, read once per isolate from the built home page.
 let styles:Promise<string>|null=null;

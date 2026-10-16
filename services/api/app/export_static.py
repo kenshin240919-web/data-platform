@@ -5,6 +5,7 @@
   static pages show before the browser asks D1 (home, the first 24 of each list/region/condition page).
 """
 import json
+from datetime import datetime,timedelta,timezone
 from sqlalchemy import select
 from . import config
 from .db import SessionLocal
@@ -23,7 +24,9 @@ def rank(p):return (-(p.get('quality_score') or 0),p['name'])
 
 def build_file(full):
     """Card-only subset for the static build, plus totals so list pages show the real count."""
-    items=full['items'];keep={}
+    # Lists leave ended festivals out (their detail pages stay in D1), so the static cards and totals do too.
+    today=datetime.now(timezone(timedelta(hours=9))).date().isoformat()
+    items=[p for p in full['items'] if not (p['kind']=='festival' and p.get('end_date') and p['end_date']<today)];keep={}
     def take(rows):
         for p in sorted(rows,key=rank)[:PER_LIST]:keep[p['id']]=p
     take(items)

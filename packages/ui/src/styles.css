@@ -26,3 +26,4 @@
 .food .card-top{background:#fff1e6;color:#9a4a10}.stay .card-top{background:#efeafd;color:#4b3a8f}
 /* 휴대폰: 상세 하단 주변 묶음은 옆으로 넘겨 보기(세로로 16장이 이어지지 않게) */
 @media (max-width:760px){.nearby-group .cards{display:grid;grid-auto-flow:column;grid-auto-columns:80%;grid-template-columns:none;overflow-x:auto;scroll-snap-type:x mandatory;gap:12px;padding-bottom:6px}.nearby-group .place-card{scroll-snap-align:start}.nearby-group .section-heading{margin-bottom:12px}}
+.ended-next{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:14px}.ended-next .button{display:inline-block;font-size:14px;padding:10px 18px}.ended-next .text-link{display:inline;margin:0}
