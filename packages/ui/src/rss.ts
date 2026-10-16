@@ -2,7 +2,7 @@ import type {Place} from './types';
 
 // RSS 2.0 of all indexable pages, newest source change (modifiedtime) first, for search engine discovery.
 // Kept here (not imported from cards) so tests/rss.check.ts runs in plain Node.
-const LABEL:Record<string,string>={place:'가볼만한곳',festival:'축제·행사',food:'맛집',stay:'숙소'};
+const LABEL:Record<string,string>={place:'가볼만한곳',festival:'축제·행사',food:'맛집',stay:'숙소',course:'여행코스',shop:'쇼핑'};
 const esc=(s:string)=>s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'})[c]!);
 function changed(p:Place){
   const m=(p.source_modified_at||'').match(/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/);

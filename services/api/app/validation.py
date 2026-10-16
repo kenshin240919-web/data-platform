@@ -6,8 +6,8 @@ from datetime import date
 
 CONDITIONS = ('free','kids','pet','indoor')
 # TourAPI contentTypeId → site kind (URL /{kind}/{id}). 12 관광지·14 문화시설·28 레포츠 are all 'place'.
-KIND_BY_TYPE = {'15':'festival','39':'food','32':'stay'}
-KINDS = ('place','festival','food','stay')
+KIND_BY_TYPE = {'15':'festival','39':'food','32':'stay','25':'course','38':'shop'}
+KINDS = ('place','festival','food','stay','course','shop')
 def kind_of(raw): return KIND_BY_TYPE.get(str(raw.get('contenttypeid')),'place')
 def path_of(kind,place_id): return f'/{kind if kind in KINDS else "place"}/{place_id}'
 
@@ -41,6 +41,21 @@ def homepage(raw):
     url=link.group(0) if link else plain
     return url if urlparse(url).scheme in {'http','https'} and urlparse(url).hostname else None
 
+def course_steps(raw):
+    """Stops of a 여행코스 in order. id = the same stable place id the pipeline gives that TourAPI contentid."""
+    from uuid import NAMESPACE_URL,uuid5
+    if str(raw.get('contenttypeid'))!='25':return []
+    steps=[]
+    for r in raw.get('_facilities',[]):
+        name=clean(r.get('subname'))
+        if not name:continue
+        sub=str(r.get('subcontentid') or '')
+        img=str(r.get('subdetailimg') or '')
+        steps.append({'order':int(r['subnum'])+1 if str(r.get('subnum','')).isdigit() else len(steps)+1,'name':name,'overview':clean(r.get('subdetailoverview')),
+                      'id':str(uuid5(NAMESPACE_URL,f'guidejung-data:tourapi:{sub}')) if sub.isdigit() else None,
+                      'image':img if img.startswith('https://tong.visitkorea.or.kr/') else None})
+    return sorted(steps,key=lambda s:s['order'])
+
 def normalize(raw):
     conditions = {key:None for key in CONDITIONS}
     evidence = {}
@@ -64,7 +79,7 @@ def normalize(raw):
         'kind':kind_of(raw),
         'description':clean(raw.get('overview')), 'hours':first('usetime','usetimeculture','usetimeleports','opentimefood','opentime','playtime'),
         'closed_days':first('restdate','restdateculture','restdateleports','restdatefood','restdateshopping'),
-        'fee':first('usefee','usefeeLeports','usefeeleports','usefeeCulture','usefeeculture','usetimefestival') or facility_value('입장료','시설이용료','이용요금'), 'phone':first('tel','infocenter','infocenterculture','infocenterleports','infocenterfood','infocenterlodging','infocentershopping','sponsor1tel'),
+        'fee':first('usefee','usefeeLeports','usefeeleports','usefeeCulture','usefeeculture','usetimefestival') or facility_value('입장료','시설이용료','이용요금'), 'phone':first('tel','infocentertourcourse','infocenter','infocenterculture','infocenterleports','infocenterfood','infocenterlodging','infocentershopping','sponsor1tel'),
         'conditions':conditions, 'evidence':evidence,
         'content_type':str(raw.get('contenttypeid') or ''),
         'parking':first('parking','parkingculture','parkingleports','parkingfood','parkinglodging','parkingshopping'),'parking_fee':first('parkingfee','parkingfeeculture','parkingfeeleports') or facility_value('주차요금'),
@@ -76,7 +91,10 @@ def normalize(raw):
         # 음식점(39)·숙박(32) detailIntro fields.
         'menu':first('firstmenu'),'menus':first('treatmenu'),'takeout':first('packing'),'reservation':first('reservationfood','reservationlodging'),
         'reservation_url':homepage({'homepage':raw.get('reservationurl')}),'checkin':first('checkintime'),'checkout':first('checkouttime'),
-        'rooms':first('roomtype'),'room_count':first('roomcount'),'cooking':first('chkcooking'),'amenities':first('subfacility')}
+        'rooms':first('roomtype'),'room_count':first('roomcount'),'cooking':first('chkcooking'),'amenities':first('subfacility'),
+        # 여행코스(25)·쇼핑(38) detailIntro fields; a course's stops come from detailInfo2 (subnum·subcontentid·subname…).
+        'distance':first('distance'),'taketime':first('taketime'),'course_theme':first('theme'),'course_steps':course_steps(raw),
+        'sale_items':first('saleitem'),'shop_guide':first('shopguide'),'fair_day':first('fairday')}
     # Source-derived conditions fill only what a reviewer has not decided.
     modified=item['source_modified_at']
     as_of=f'{modified[:4]}-{modified[4:6]}-{modified[6:8]}' if len(modified)>=8 and modified[:8].isdigit() else date.today().isoformat()
@@ -102,10 +120,11 @@ def auto_conditions(raw,fee):
 
 def checks(item, region):
     flags = [('identity', bool(item['external_id'] and item['name']), '원천 ID와 이름'),
-        ('address', bool(item['address']), '주소 존재'),
+        # A 여행코스 has no single address (its stops have them): the region code is enough.
+        ('address', bool(item['address']) or item['kind']=='course', '주소 존재'),
         ('region', region is not None, '공식 코드 버전의 현존 시군구 매핑'),
         ('coordinates', item['latitude'] is not None and item['longitude'] is not None and 32 <= item['latitude'] <= 40 and 123 <= item['longitude'] <= 133, 'WGS84 좌표/한국 영역 범위')]
-    if region:
+    if region and item['address']:
         token = region.name.split()[-1]
         flags.append(('region_address',token in item['address'], '주소와 매핑된 지역명 대조; 공간 경계 정합성은 별도 검수'))
     if item['kind']=='festival':

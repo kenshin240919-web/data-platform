@@ -1,5 +1,5 @@
 // Cloudflare Worker for trip.guidejung.com: static pages from apps/trip/out, places from D1 (guidejung-trip).
-// /place|festival|food|stay/{id}: rendered from D1 (cached per data version), 404 page when the place is not there.
+// /place|festival|food|stay|course|shop/{id}: rendered from D1 (cached per data version), 404 page when the place is not there.
 // /api/search: the site search on D1. /api/status: data version and counts.
 // /sitemap.xml (index) → /sitemap-pages.xml + /sitemap-places-{n}.xml (40,000 each), /rss.xml: from D1 as well.
 import type {Place} from '../../../packages/ui/src/types';
@@ -33,17 +33,25 @@ async function detail(req:Request,env:Env,ctx:Ctx|undefined,kind:string,id:strin
   const [version,css]=await Promise.all([dataVersion(env.DB),styleTags(env,new URL(req.url).origin)]);
   const build=css.match(/[\w-]+\.css/)?.[0]??'';
   const cache=(globalThis as any).caches?.default as Cache|undefined;
-  const key=new Request(`https://cache.trip.internal/${version}/${build}/${kind}/${encodeURIComponent(id)}`);
+  // encode: the version ends in '#s2', and a raw '#' would cut the rest of the key off (every page under one key).
+  const key=new Request(`https://cache.trip.internal/${encodeURIComponent(version)}/${build}/${kind}/${encodeURIComponent(id)}`);
   const hit=cache?await cache.match(key):undefined;if(hit)return hit;
   const p=await place(env.DB,id).catch(()=>null);
   if(!p)return null;  // not in D1 yet → static page or 404
   if(p.kind!==kind)return null;
+  // 여행코스: link each stop that is in the data to its page.
+  const stops=(p.course_steps??[]).map(s=>s.id).filter((x):x is string=>!!x);
+  if(stops.length){
+    const rows=(await env.DB.prepare(`SELECT id,kind FROM places WHERE id IN (${stops.map(()=>'?').join(',')})`).bind(...stops).all<{id:string;kind:string}>().catch(()=>({results:[]}))).results;
+    const by=new Map(rows.map(r=>[r.id,detailPath(r)]));
+    p.course_steps=p.course_steps!.map(s=>({...s,path:s.id?by.get(s.id):undefined}));
+  }
   const today=todayKST();
   // Nearby by kind (가볼만한곳·맛집·숙소·다가오는 축제), 8 each within 20km + how many there are; empty groups are not shown.
   const near=(k:string,extra:Query={})=>search(env.DB!,{lat:p.latitude,lon:p.longitude,radius_km:20,limit:9,kind:k,...extra},today).then(r=>{const self=r.items.some(i=>i.id===p.id);return {kind:k,items:r.items as Place[],total:r.total-(self?1:0)};});
   const soon=new Date(Date.now()+(9*3600+90*86400)*1000).toISOString().slice(0,10);
   const [groups,st]=await Promise.all([
-    Promise.all([near('place'),near('food'),near('stay'),near('festival',{date_from:today,date_to:soon})]).then(g=>g.map(x=>({...x,items:x.items.filter(i=>i.id!==p.id).slice(0,8)}))),
+    Promise.all([near('place'),near('food'),near('stay'),near('festival',{date_from:today,date_to:soon}),near('shop'),near('course')]).then(g=>g.map(x=>({...x,items:x.items.filter(i=>i.id!==p.id).slice(0,8)}))),
     status(env.DB).catch(()=>null)]);
   const res=new Response(detailHtml({place:p,nearby:groups,status:st,styles:css,today}),{headers:{'content-type':'text/html; charset=utf-8','cache-control':'public, max-age=600'}});
   // 1 hour at the edge; a new data version (meta.version) or deploy changes the cache key.
@@ -70,7 +78,7 @@ async function sitemap(db:D1,path:string):Promise<Response|null>{
   if(path==='/sitemap-pages.xml'){
     const regions=(await db.prepare('SELECT id FROM regions ORDER BY name').all<{id:string}>()).results;
     // 맛집·숙소 list pages only once there are any.
-    const extra=(await db.prepare("SELECT DISTINCT kind FROM places WHERE kind IN ('food','stay')").all<{kind:string}>()).results.map(r=>r.kind);
+    const extra=(await db.prepare("SELECT DISTINCT kind FROM places WHERE kind IN ('food','stay','course','shop')").all<{kind:string}>()).results.map(r=>r.kind);
     return urlset([{loc:ORIGIN+'/',lastmod:st.updated_at},...[...LISTS,...extra].map(k=>({loc:`${ORIGIN}/${k}`,lastmod:st.updated_at})),...regions.map(r=>({loc:`${ORIGIN}/region/${r.id}`,lastmod:st.updated_at}))]);
   }
   const m=path.match(/^\/sitemap-places-(\d+)\.xml$/);if(!m)return null;
@@ -82,7 +90,7 @@ export default {
   async fetch(req:Request,env:Env,ctx?:Ctx):Promise<Response>{
     const url=new URL(req.url);
     // Detail ids have no dots; other files under /place/ (Next.js list-page data such as __next._tree.txt) are static.
-    const m=url.pathname.match(/^\/(place|festival|food|stay)\/([^/.]+)(?:\.html)?$/);
+    const m=url.pathname.match(/^\/(place|festival|food|stay|course|shop)\/([^/.]+)(?:\.html)?$/);
     if(m&&req.method==='GET'){
       try{const r=await detail(req,env,ctx,m[1],decodeURIComponent(m[2]));if(r)return r;}
       catch(e){console.error('detail',e);}

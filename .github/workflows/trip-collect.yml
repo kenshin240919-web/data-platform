@@ -8,8 +8,8 @@ on:
   workflow_dispatch:
     inputs:
       types:
-        description: 'TourAPI contentTypeId 목록 (12 관광지·14 문화시설·28 레포츠·15 축제·39 음식점·32 숙박)'
-        default: '12,14,28,15,39,32'
+        description: 'TourAPI contentTypeId 목록 (12 관광지·14 문화시설·28 레포츠·15 축제·39 음식점·32 숙박·25 여행코스·38 쇼핑)'
+        default: '12,14,28,15,39,32,25,38'
       minutes:
         description: '수집 시간(분), 최대 300'
         default: '300'
@@ -47,7 +47,7 @@ jobs:
         env:
           TOURAPI_SERVICE_KEY: ${{ secrets.TOURAPI_SERVICE_KEY || secrets.DATA_GO_KR_KEY }}
           TOURAPI_DAILY_LIMIT: '95000'
-          TOURAPI_TYPES: ${{ inputs.types || '12,14,28,15,39,32' }}
+          TOURAPI_TYPES: ${{ inputs.types || '12,14,28,15,39,32,25,38' }}
           TRIP_MINUTES: ${{ inputs.minutes || '300' }}
           SEO_ENABLED: 'true'
           DATA_MODE: live

@@ -97,3 +97,20 @@ class TripSyncTest(unittest.TestCase):
             trip_auto.run('12,39',minutes=5)
             self.assertNotIn('detailCommon2',API.calls)
         temp.cleanup()
+
+class CourseShopTest(unittest.TestCase):
+    def test_course_and_shop_items(self):
+        from types import SimpleNamespace
+        from app import trip_auto
+        regions={'11140':SimpleNamespace(id='r',name='서울특별시 중구',code='11140',parent_id='p')}
+        course=raw('c1','25',addr1='',distance='12km',taketime='반나절',_facilities=[
+            {'subnum':'1','subcontentid':'200','subname':'둘째 곳','subdetailoverview':'설명2','subdetailimg':'http://x/1.jpg'},
+            {'subnum':'0','subcontentid':'100','subname':'첫 곳','subdetailoverview':'설명1','subdetailimg':'https://tong.visitkorea.or.kr/a.jpg'}])
+        item=trip_auto.build_item(course,regions,'2026-10-16T00:00:00+09:00','auto')
+        self.assertEqual((item['kind'],item['distance'],item['taketime']),('course','12km','반나절'))  # no address needed
+        self.assertEqual([s['name'] for s in item['course_steps']],['첫 곳','둘째 곳'])
+        self.assertEqual(item['course_steps'][0]['id'],trip_auto.stable('tourapi','100'))
+        self.assertEqual([s['image'] for s in item['course_steps']],['https://tong.visitkorea.or.kr/a.jpg',None])
+        shop=trip_auto.build_item(raw('s1','38',saleitem='건어물',fairday='2·7일'),regions,'t','auto')
+        self.assertEqual((shop['kind'],shop['sale_items'],shop['fair_day']),('shop','건어물','2·7일'))
+        self.assertIsNone(trip_auto.build_item(raw('s2','38',addr1=''),regions,'t','auto'))  # shops still need an address

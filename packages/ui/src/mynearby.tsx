@@ -7,7 +7,7 @@ import {Cards} from './cards';
 import {LocateCard,useMyPosition} from './geo';
 import {todayKST} from './search';
 
-const TABS=[['place','🏞️ 가볼만한곳'],['food','🍽️ 맛집'],['stay','🛏️ 숙소'],['festival','🎉 축제']] as const;
+const TABS=[['place','🏞️ 가볼만한곳'],['food','🍽️ 맛집'],['stay','🛏️ 숙소'],['festival','🎉 축제'],['shop','🛍️ 쇼핑'],['course','🧭 여행코스']] as const;
 type Group={kind:string;items:Place[];total:number};
 
 export function MyNearby({base=''}:{base?:string}){

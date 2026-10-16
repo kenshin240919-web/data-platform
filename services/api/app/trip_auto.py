@@ -17,14 +17,14 @@ from .full_trip import write_json
 from .pipeline import stable
 from .tourapi import TourAPI
 from .trip100 import enrich
-from .validation import checks,normalize
+from .validation import KINDS,checks,normalize
 
 KST=timezone(timedelta(hours=9))
 WORK=ROOT/'runtime'/'trip-auto'
 FULL=WORK/'full.json'
 MANIFEST=WORK/'d1-manifest.json'  # written by scripts/build-trip-d1.mjs --upsert: what D1 holds (version + row hashes)
 SOURCE_URL='https://www.data.go.kr/data/15101578/openapi.do'
-ALL_TYPES='12,14,28,15,39,32'
+ALL_TYPES='12,14,28,15,39,32,25,38'
 MAX_FAILS_IN_ROW=20
 PAGE=50
 
@@ -106,7 +106,7 @@ def finish(full,stamp,dataset_id):
     counts={};names={r['id']:r for r in full['regions']}
     for p in items:counts[p['region_id']]=counts.get(p['region_id'],0)+1;names.setdefault(p['region_id'],{'id':p['region_id'],'name':p['region_name'],'code':''})
     regions=[{'id':rid,'name':names[rid]['name'],'code':names[rid].get('code',''),'count':n} for rid,n in sorted(counts.items())]
-    kinds={k:sum(p['kind']==k for p in items) for k in ('place','festival','food','stay')}
+    kinds={k:sum(p['kind']==k for p in items) for k in KINDS}
     status={**full.get('status',{}),'mode':'live','available':True,'dataset_id':dataset_id,'updated_at':stamp,
             **{f'{k}_count':n for k,n in kinds.items()},'indexable_count':sum(bool(p['indexable']) for p in items),'seo_enabled':config.SEO_ENABLED}
     status.setdefault('services',[{'id':'trip','available':True}])
