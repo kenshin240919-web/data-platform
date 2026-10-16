@@ -136,6 +136,13 @@ def run(target=100,types=None):
             print('\n수집한 내용을 저장하는 중입니다...',flush=True)
             with SessionLocal() as db:publish(db)
             save('completed');print(f'사진/시설 보강 {len(state["records"])}건, 검수 대기 {len(state["rejected"])}건, 오류로 건너뜀 {len(state.get("skipped",[]))}건. 공개 총량 최대 {target}건.')
+    except KeyboardInterrupt:
+        # Ctrl+C: keep the checkpoint and put what was collected so far into the public data (export-site.bat then uploads it).
+        save('paused_by_user');new=len(state['records'])
+        print(f'\n중지 요청을 받았습니다. 지금까지 새로 모은 {new}건을 공개 데이터에 넣는 중입니다(창을 닫지 마세요)...',flush=True)
+        if new:
+            with SessionLocal() as db:publish(db)
+        print(f'지금까지 새로 {new}건을 공개 데이터에 넣었습니다. export-site.bat으로 사이트에 올릴 수 있고, 같은 목표로 다시 실행하면 이어서 수집합니다.')
     except (ValueError,RuntimeError,OSError) as error:  # OSError: a file kept locked (OneDrive/antivirus) after retries
         save('paused_error_or_budget')
         budget='예산' in str(error)

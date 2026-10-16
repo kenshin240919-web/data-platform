@@ -114,6 +114,28 @@ class PlatformTest(unittest.TestCase):
         self.assertTrue({'오류 e1','오류 e3'}<=names);self.assertNotIn('오류 e2',names)
         state=json.loads((Path(temp.name)/'runtime'/'trip300'/'checkpoint.json').read_text(encoding='utf-8'))
         self.assertEqual((state['status'],state['skipped']),('completed',['e2']))
+    def test_growth_ctrl_c_publishes_what_was_collected(self):
+        import json
+        from unittest.mock import patch
+        from app import trip100
+        from app.models import Region
+        def raw(ident):return {'contentid':ident,'contenttypeid':'12','title':'중지 '+ident,'addr1':'서울특별시 중구 시험로','lDongRegnCd':'11','lDongSignguCd':'140','mapy':'37.56','mapx':'126.99'}
+        with SessionLocal() as db:
+            region=db.get(Region,'growth-region') or Region(id='growth-region',version_id='demo-regions-v1',code_system='MOIS_LEGAL',code='11140',name='서울특별시 중구',level='city')
+            region.status='active';db.add(region);db.commit()
+            self.assertEqual(ingest(db,[{**raw('c0'),'_images':[]}]).status,'completed')
+        class API:
+            def __init__(self,*a,**k):pass
+            def call(self,endpoint,**params):
+                if endpoint=='areaBasedList2':return {'items':[raw(i) for i in ('c1','c2','c3')] if params['contentTypeId']=='12' and params['pageNo']==1 else [],'total':3}
+                if params['contentId']=='c3':raise KeyboardInterrupt
+                return {'items':[],'total':0}
+        with patch.object(trip100,'TourAPI',API),patch.object(trip100,'ROOT',Path(temp.name)):trip100.run(400)
+        with SessionLocal() as db:
+            names={p.snapshot['name'] for p in db.scalars(select(Profile).where(Profile.dataset_id==active_dataset(db).id))}
+        self.assertTrue({'중지 c1','중지 c2'}<=names);self.assertNotIn('중지 c3',names)
+        state=json.loads((Path(temp.name)/'runtime'/'trip400'/'checkpoint.json').read_text(encoding='utf-8'))
+        self.assertEqual((state['status'],state['cursor']),('paused_by_user',2))
     def test_write_json_retries_a_locked_file(self):
         import json
         from unittest.mock import patch
