@@ -92,7 +92,7 @@ function refresh<T>(env:Env,job:Job<T>):Promise<T>{
   let p=inflight.get(job.name) as Promise<T>|undefined;if(p)return p;
   p=(async()=>{
     const v=await job.load(env);memo.set(job.name,{until:Date.now()+job.ttl*1000,value:v});
-    if(env.CACHE)await env.CACHE.put(`job:${job.name}`,JSON.stringify({at:Date.now(),v}));
+    if(env.CACHE)await env.CACHE.put(`traffic:job:${job.name}`,JSON.stringify({at:Date.now(),v}));
     const cache=(globalThis as any).caches?.default as Cache|undefined;
     if(cache){const body=JSON.stringify(v);
       await cache.put(key(job.name,'fresh'),new Response(body,{headers:{'cache-control':`max-age=${job.ttl}`}}));
@@ -108,7 +108,7 @@ async function get<T extends {stale:boolean}>(env:Env,job:Job<T>,ctx?:Ctx):Promi
   const cache=(globalThis as any).caches?.default as Cache|undefined;
   if(cache){const c=await cache.match(key(job.name,'fresh'));if(c){const v=await c.json() as T;memo.set(job.name,{until:Date.now()+30e3,value:v});return v;}}
   // Shared copy kept fresh by the Cron (any data center); its age decides whether it still counts as fresh.
-  const shared=env.CACHE?await env.CACHE.get(`job:${job.name}`,{type:'json',cacheTtl:60}).catch(()=>null) as {at:number;v:T}|null:null;
+  const shared=env.CACHE?await env.CACHE.get(`traffic:job:${job.name}`,{type:'json',cacheTtl:60}).catch(()=>null) as {at:number;v:T}|null:null;
   if(shared&&Date.now()-shared.at<=job.ttl*1000+90e3){  // +90s: the Cron's next copy may land a little late
     const left=Math.max(30,Math.round(job.ttl-(Date.now()-shared.at)/1000));memo.set(job.name,{until:Date.now()+Math.min(left,60)*1000,value:shared.v});
     if(cache)ctx?.waitUntil(cache.put(key(job.name,'fresh'),new Response(JSON.stringify(shared.v),{headers:{'cache-control':`max-age=${left}`}})));
@@ -133,10 +133,10 @@ const json=(body:unknown,status=200,maxAge=60)=>new Response(JSON.stringify(body
 async function scheduled(env:Env,now:number){
   const m=new Date(now).getUTCMinutes();const jobs:Job<any>[]=[JOBS.traffic];
   if(m%10<5)jobs.push(JOBS.incidents);
-  if(m<5&&env.ITS_API_KEY&&env.CACHE){const c=await env.CACHE.get('job:cctv',{type:'json'}).catch(()=>null) as {at:number}|null;if(!c||now-c.at>=3600e3)jobs.push(JOBS.cctv);}
+  if(m<5&&env.ITS_API_KEY&&env.CACHE){const c=await env.CACHE.get('traffic:job:cctv',{type:'json'}).catch(()=>null) as {at:number}|null;if(!c||now-c.at>=3600e3)jobs.push(JOBS.cctv);}
   const res=await Promise.allSettled(jobs.map(j=>refresh(env,j)));
   // Last run, for /api/status (errors are short messages, no keys).
-  await env.CACHE?.put('cron:last',JSON.stringify({at:now,done:Date.now(),jobs:res.map((r,i)=>({job:jobs[i].name,ok:r.status==='fulfilled',err:r.status==='rejected'?String((r.reason as Error)?.message??r.reason).slice(0,120):undefined}))}));
+  await env.CACHE?.put('traffic:cron',JSON.stringify({at:now,done:Date.now(),jobs:res.map((r,i)=>({job:jobs[i].name,ok:r.status==='fulfilled',err:r.status==='rejected'?String((r.reason as Error)?.message??r.reason).slice(0,120):undefined}))}));
 }
 
 export default {
@@ -153,7 +153,7 @@ export default {
       return new Response(JSON.stringify(Number.isFinite(lat)&&Number.isFinite(lon)&&cf.country==='KR'?{lat,lon,city:cf.city??''}:{}),{headers:{'content-type':'application/json; charset=utf-8','cache-control':'private, no-store'}});}
     // Health of the shared cache: when the Cron last ran and how old each KV copy is.
     if(url.pathname==='/api/status'){const kv=env.CACHE;if(!kv)return json({kv:false},200,0);
-      const [cron,...jobs]=await Promise.all(['cron:last','job:traffic','job:incidents','job:cctv'].map(k=>kv.get(k,{type:'json'}).catch(()=>null)));
+      const [cron,...jobs]=await Promise.all(['traffic:cron','traffic:job:traffic','traffic:job:incidents','traffic:job:cctv'].map(k=>kv.get(k,{type:'json'}).catch(()=>null)));
       const age=(t?:number)=>t?Math.round((Date.now()-t)/1000):null;
       return json({kv:true,cron:cron?{...cron,ageSec:age(cron.at)}:null,copies:Object.fromEntries(['traffic','incidents','cctv'].map((n,i)=>[n,age(jobs[i]?.at)]))},200,0);}
     if(url.pathname.startsWith('/api/'))return json({error:'not found'},404,3600);

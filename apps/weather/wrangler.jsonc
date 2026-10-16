@@ -12,5 +12,8 @@
     "not_found_handling": "404-page",
     "run_worker_first": ["/api/*"]
   },
+  // 5분마다 특보·미세먼지와 시군구 32곳을 미리 받아 KV guidejung-cache(전 세계 공용, traffic과 같은 KV)에 저장.
+  "triggers": { "crons": ["*/5 * * * *"] },
+  "kv_namespaces": [{ "binding": "CACHE", "id": "78659f07655e4ab99683b85951a377e3" }],
   "observability": { "enabled": true }
 }
