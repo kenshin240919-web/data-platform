@@ -11,7 +11,7 @@
     "directory": "./apps/trip/out",
     "binding": "ASSETS",
     "not_found_handling": "404-page",
-    "run_worker_first": ["/api/*", "/place/*", "/festival/*"]
+    "run_worker_first": ["/api/*", "/place/*", "/festival/*", "/sitemap.xml", "/sitemap-*", "/rss.xml"]
   },
   "d1_databases": [{ "binding": "DB", "database_name": "guidejung-trip", "database_id": "c19c21aa-eeb8-49b8-bf17-f8899c5d1e23" }],
   // Detail pages are server-rendered without the Next.js runtime.

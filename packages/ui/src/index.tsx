@@ -15,7 +15,6 @@ import {ADSENSE_CLIENT} from './adsense';
 import {AdSlot} from './ads';
 export {ADSENSE_CLIENT};
 export {AdSenseScript} from './adsense-script';
-export {searchIndex} from './server';
 
 
 const services=[['trip','여행','축제 · 행사 · 가볼만한곳','✳'],['traffic','교통','도로 · CCTV · 교통상황','↗'],['academy','교육','학원 · 교습소 · 수강료','▤'],['charge','전기차','충전소 · 사용가능 충전기','ϟ'],['weather','날씨','지역 · 여행 · 생활날씨','◌']];
@@ -103,9 +102,9 @@ export async function siteMap(service:Service){
   return [{url:origin(service)+'/',lastModified:at},...lists.map(path=>({url:origin(service)+path,lastModified:at})),...rows.map(p=>({url:origin(service)+p.path,lastModified:new Date(p.lastmod)}))];
 }
 export const rss=(service:Service)=>rssXml(places(),origin(service));
-/** Every page the static build emits; other URLs get the 404 page. */
+/** Every page the static build emits. Place/festival detail pages are not here: the trip Worker renders them from D1. */
 export async function staticSegments(){
   const regions=(await api<{items:Region[]}>('/v1/regions')).items;
   return [[],['search'],['region'],['place'],['festival'],...Object.keys(collections).map(k=>[k]),['about'],['data-policy'],['privacy'],
-    ...regions.map(r=>['region',r.id]),...places().map(p=>[p.kind,p.id])];
+    ...regions.map(r=>['region',r.id])];
 }

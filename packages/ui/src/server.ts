@@ -25,9 +25,5 @@ export async function api<T>(path:string):Promise<T>{
   throw new Error('데이터 조회 실패 (404)');
 }
 export const places=()=>site.items;
-/** Slim per-item fields the browser needs for cards and filtering. */
-export function searchIndex(){
-  return site.items.map(({id,name,kind,address,region_id,region_name,description,latitude,longitude,conditions,images,start_date,end_date,event_status,quality_score,is_demo,verified_at})=>({id,name,kind,address,region_id,region_name,description,latitude,longitude,conditions,images:images?.slice(0,1),start_date,end_date,event_status,quality_score,is_demo,verified_at}));
-}
 // SEO switch comes from the exported data (SEO_ENABLED in .env at export time), not the build host.
 export const enabled=()=>site.status.seo_enabled && site.status.mode==='live';
