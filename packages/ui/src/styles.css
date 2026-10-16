@@ -27,3 +27,12 @@
 /* 휴대폰: 상세 하단 주변 묶음은 옆으로 넘겨 보기(세로로 16장이 이어지지 않게) */
 @media (max-width:760px){.nearby-group .cards{display:grid;grid-auto-flow:column;grid-auto-columns:80%;grid-template-columns:none;overflow-x:auto;scroll-snap-type:x mandatory;gap:12px;padding-bottom:6px}.nearby-group .place-card{scroll-snap-align:start}.nearby-group .section-heading{margin-bottom:12px}}
 .ended-next{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:14px}.ended-next .button{display:inline-block;font-size:14px;padding:10px 18px}.ended-next .text-link{display:inline;margin:0}
+/* 상세 하단 '주변에서 함께 둘러볼 곳' 종류 탭(라디오 + CSS, 자바스크립트 없음) */
+.near-tabs{margin-top:28px}.near-radio{position:absolute;opacity:0;pointer-events:none}
+.near-labels{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 16px}.near-label{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:999px;border:1px solid #d9e1ea;background:#fff;font-weight:800;font-size:15px;color:#334155;cursor:pointer}.near-label span{font-size:12px;font-weight:700;color:var(--muted);background:#f1f5f9;border-radius:999px;padding:1px 8px}
+.near-panel{display:none}.near-more{display:inline-block;margin-top:14px;font-weight:800;color:var(--blue);text-decoration:none}
+#near-place:checked~.near-panel-place,#near-food:checked~.near-panel-food,#near-stay:checked~.near-panel-stay,#near-festival:checked~.near-panel-festival{display:block}
+#near-place:checked~.near-labels .near-label-place,#near-food:checked~.near-labels .near-label-food,#near-stay:checked~.near-labels .near-label-stay,#near-festival:checked~.near-labels .near-label-festival{background:#0f172a;border-color:#0f172a;color:#fff}
+#near-place:checked~.near-labels .near-label-place span,#near-food:checked~.near-labels .near-label-food span,#near-stay:checked~.near-labels .near-label-stay span,#near-festival:checked~.near-labels .near-label-festival span{background:#ffffff26;color:#fff}
+.near-radio:focus-visible+.near-radio,.near-label:hover{border-color:var(--blue)}
+@media (max-width:760px){.near-panel .cards{display:grid;grid-auto-flow:column;grid-auto-columns:80%;grid-template-columns:none;overflow-x:auto;scroll-snap-type:x mandatory;gap:12px;padding-bottom:6px}.near-panel .place-card{scroll-snap-align:start}.near-label{padding:8px 12px;font-size:14px}}

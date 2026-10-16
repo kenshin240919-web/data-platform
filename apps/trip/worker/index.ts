@@ -37,11 +37,11 @@ async function detail(req:Request,env:Env,ctx:Ctx|undefined,kind:string,id:strin
   if(!p)return null;  // not in D1 yet → static page or 404
   if(p.kind!==kind)return null;
   const today=todayKST();
-  // Nearby by kind (가볼만한곳·맛집·숙소·다가오는 축제), 4 each within 20km; empty groups are not shown.
-  const near=(k:string,extra:Query={})=>search(env.DB!,{lat:p.latitude,lon:p.longitude,radius_km:20,limit:5,kind:k,...extra},today).then(r=>({kind:k,items:r.items as Place[]}));
+  // Nearby by kind (가볼만한곳·맛집·숙소·다가오는 축제), 8 each within 20km + how many there are; empty groups are not shown.
+  const near=(k:string,extra:Query={})=>search(env.DB!,{lat:p.latitude,lon:p.longitude,radius_km:20,limit:9,kind:k,...extra},today).then(r=>{const self=r.items.some(i=>i.id===p.id);return {kind:k,items:r.items as Place[],total:r.total-(self?1:0)};});
   const soon=new Date(Date.now()+(9*3600+90*86400)*1000).toISOString().slice(0,10);
   const [groups,st,css]=await Promise.all([
-    Promise.all([near('place'),near('food'),near('stay'),near('festival',{date_from:today,date_to:soon})]).then(g=>g.map(x=>({...x,items:x.items.filter(i=>i.id!==p.id).slice(0,4)}))),
+    Promise.all([near('place'),near('food'),near('stay'),near('festival',{date_from:today,date_to:soon})]).then(g=>g.map(x=>({...x,items:x.items.filter(i=>i.id!==p.id).slice(0,8)}))),
     status(env.DB).catch(()=>null),styleTags(env,new URL(req.url).origin)]);
   const res=new Response(detailHtml({place:p,nearby:groups,status:st,styles:css,today}),{headers:{'content-type':'text/html; charset=utf-8','cache-control':'public, max-age=600'}});
   // 1 hour at the edge; a new data version (meta.version) changes the cache key.

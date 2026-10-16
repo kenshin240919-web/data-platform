@@ -15,6 +15,7 @@ import {ADSENSE_CLIENT} from './adsense';
 import {AdSlot} from './ads';
 export {ADSENSE_CLIENT};
 export {AdSenseScript} from './adsense-script';
+export {IMAGE_FALLBACK} from './kinds';
 
 
 const services=[['trip','여행','축제 · 행사 · 가볼만한곳','✳'],['traffic','교통','도로 · CCTV · 교통상황','↗'],['academy','교육','학원 · 교습소 · 수강료','▤'],['charge','전기차','충전소 · 사용가능 충전기','ϟ'],['weather','날씨','지역 · 여행 · 생활날씨','◌']];
