@@ -2,7 +2,7 @@
 // One district per call (numOfRows 9999), compacted to stations and cached 30 minutes so the 1,000 calls/day limit holds.
 // Older copies are served instantly while a background refresh runs (stale-while-revalidate).
 // KV(guidejung-cache, 전 세계 공용): 지역 목록 사본(charge:st:코드)과, 5분마다 Cron이 받는 전국 상태 변경(getChargerStatus
-// period=5, 약 8,300건·1.4MB, 하루 288회/한도 1,000)을 최근 70분치 모아 둔 charge:delta. 응답할 때 목록에 최근 상태를
+// period=5, 약 8,300~13,400건·1~2쪽, 하루 최대 576회/한도 1,000)을 최근 70분치 모아 둔 charge:delta. 응답할 때 목록에 최근 상태를
 // 덮어씌우므로 목록은 1시간에 한 번만 새로 받아도 충전 가능 여부는 약 5분 이내로 맞다.
 import {regions} from '../lib/regions';
 import type {Charger,Station,StationsResponse} from '../lib/types';
@@ -120,8 +120,12 @@ async function scheduled(env:Env,now:number){
   if(!env.DATA_GO_KR_KEY)return;
   let err:string|undefined,got=0,size=0;
   try{
-    const b=await upstream(`https://apis.data.go.kr/B552584/EvCharger/getChargerStatus?serviceKey=${env.DATA_GO_KR_KEY}&pageNo=1&numOfRows=9999&dataType=JSON&period=5`,2);
-    const rows:Record<string,string>[]=b?.items?.item??[];got=rows.length;
+    // Busy 5 minutes can pass 9,999 changes (10/16 11시: 13,407): read page 2 too.
+    const url=(page:number)=>`https://apis.data.go.kr/B552584/EvCharger/getChargerStatus?serviceKey=${env.DATA_GO_KR_KEY}&pageNo=${page}&numOfRows=9999&dataType=JSON&period=5`;
+    const b=await upstream(url(1),2);const rows:Record<string,string>[]=[...(b?.items?.item??[])];
+    const pages=Math.min(2,Math.ceil(Number(b?.totalCount??rows.length)/9999));  // ≤2 pages: at most 576 calls/day of 1,000
+    for(let p=2;p<=pages;p++)rows.push(...((await upstream(url(p),2))?.items?.item??[]));
+    got=rows.length;
     const old=await kv.get('charge:delta',{type:'json'}).catch(()=>null) as Delta|null;
     const cut=kst(now-DELTA_MIN*60e3);const upd:Delta['upd']={};
     for(const [k,e] of Object.entries(old?.upd??{}))if(e[1]>=cut)upd[k]=e;
@@ -130,7 +134,7 @@ async function scheduled(env:Env,now:number){
     const body=JSON.stringify({at:at||kst(now),upd} satisfies Delta);size=body.length;
     await kv.put('charge:delta',body);
   }catch(e){err=String((e as Error)?.message??e).replace(env.DATA_GO_KR_KEY,'***').slice(0,160);}
-  await kv.put('charge:cron',JSON.stringify({at:now,done:Date.now(),got,size,err}));
+  await kv.put('charge:cron',JSON.stringify({at:now,done:Date.now(),got,size,err}));  // got>9,999 → extra pages were read
 }
 
 const json=(body:unknown,status=200,maxAge=300)=>new Response(JSON.stringify(body),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':`public, max-age=${maxAge}`}});
