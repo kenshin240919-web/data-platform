@@ -52,7 +52,8 @@ ${table('places')}
 DROP TABLE IF EXISTS regions_next;
 ${table('regions')}
 `;
-const insert=(p,into='INSERT INTO places_next')=>`${into} (id,kind,name,region_id,lat,lon,start_date,end_date,quality,free,kids,pet,indoor,text,card,body,updated,indexable,changed) VALUES (${[
+// OR REPLACE: a file re-sent after a network failure must not stop on rows it already wrote.
+const insert=(p,into='INSERT OR REPLACE INTO places_next')=>`${into} (id,kind,name,region_id,lat,lon,start_date,end_date,quality,free,kids,pet,indoor,text,card,body,updated,indexable,changed) VALUES (${[
   s(p.id),s(p.kind),s(p.name),s(p.region_id),s(p.latitude),s(p.longitude),s(p.start_date||null),s(p.end_date||null),s(p.quality_score??0),
   flag(p.conditions?.free),flag(p.conditions?.kids),flag(p.conditions?.pet),flag(p.conditions?.indoor),s(text(p)),s(card(p)),s(JSON.stringify(p)),s(p.updated_at),p.indexable&&!p.is_demo?1:'NULL',s(changed(p))].join(',')});`;
 // Bump SCHEMA when the table layout changes so --if-newer reloads unchanged data into the new layout.
@@ -75,9 +76,12 @@ INSERT OR REPLACE INTO meta (key,value) VALUES ('version',${s(JSON.stringify(ver
 const out=join(ROOT,'runtime/d1');rmSync(out,{recursive:true,force:true});mkdirSync(out,{recursive:true});
 const files=[];
 const write=(sql)=>{const name=join(out,`trip-${String(files.length+1).padStart(3,'0')}.sql`);writeFileSync(name,sql);files.push(name);};
-const hash=p=>createHash('sha1').update(insert(p)).digest('hex');
+const hash=p=>createHash('sha1').update(insert(p,'INSERT INTO places_next')).digest('hex');  // fixed text: manifests stay valid
 const remote=()=>{const res=JSON.parse(wrangler(['d1','execute','guidejung-trip',mode,'--json','--command',"SELECT (SELECT value FROM meta WHERE key='version') AS version, (SELECT COUNT(*) FROM places) AS n"],{encoding:'utf8'}));return res?.[0]?.results?.[0]??{};};
-const run=()=>{for(const f of files){console.log(`wrangler d1 execute ${mode} ${rel(f)}`);wrangler(['d1','execute','guidejung-trip',mode,'--file',rel(f),'-y'],{stdio:'inherit'});}};
+// Each file is safe to send twice (OR REPLACE, version written last), so a dropped connection is retried.
+const run=()=>{for(const f of files)for(let n=1;;n++){console.log(`wrangler d1 execute ${mode} ${rel(f)}${n>1?` (retry ${n})`:''}`);
+  try{wrangler(['d1','execute','guidejung-trip',mode,'--file',rel(f),'-y'],{stdio:'inherit'});break;}
+  catch(e){if(n>=4)throw e;Atomics.wait(new Int32Array(new SharedArrayBuffer(4)),0,0,30000*n);}}};
 const saveManifest=()=>{if(manifestPath)writeFileSync(manifestPath,JSON.stringify({version,hashes:Object.fromEntries(items.map(p=>[p.id,hash(p)]))}));};
 
 if(manifestPath&&mode){
