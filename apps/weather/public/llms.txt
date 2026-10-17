@@ -1,0 +1,19 @@
+# 내근처 날씨 (weather.guidejung.com)
+
+> 오늘 날씨 어때? 전국 시도 16곳·시군구 약 250곳의 지금 날씨, 시간별·10일 예보, 미세먼지·초미세먼지, 옷차림·우산·자외선, 기상특보를 기상청·에어코리아 공식 자료로 보여 주는 날씨 서비스입니다.
+
+## 주요 페이지
+- [오늘 날씨](https://weather.guidejung.com/): 내 위치(또는 접속 지역) 날씨
+- [전국 날씨](https://weather.guidejung.com/region): 시도·시군구별 날씨, 주소 /region/{행정구역코드}
+- [주말 날씨](https://weather.guidejung.com/weekend): 시도별 이번 주말 예보(맑은 순)
+- [미세먼지](https://weather.guidejung.com/air): 전국 초미세먼지 순위·시도 평균
+- [옷차림](https://weather.guidejung.com/wear): 기온별 옷차림
+- [기상특보](https://weather.guidejung.com/warnings): 발효 중·예비 특보
+
+## 데이터와 인용
+- 출처: 기상청 단기예보(하루 8번 발표)·초단기실황(매시간)·중기예보(하루 2번)·기상특보, 한국환경공단 에어코리아, 한국천문연구원 출몰시각
+- 지역 페이지의 수치는 브라우저에서 실시간으로 불러오므로, 인용할 때는 확인 시각과 "기상청 자료"를 함께 표기해 주세요.
+- [사이트맵](https://weather.guidejung.com/sitemap.xml), [RSS](https://weather.guidejung.com/rss.xml), [데이터·출처 안내](https://weather.guidejung.com/data-policy)
+
+## 함께 운영하는 사이트
+- [내근처 여행](https://trip.guidejung.com/llms.txt), [내근처 고속도로](https://traffic.guidejung.com/llms.txt), [내근처 충전소](https://charge.guidejung.com/llms.txt)

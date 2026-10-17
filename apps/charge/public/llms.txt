@@ -1,0 +1,15 @@
+# 내근처 충전소 (charge.guidejung.com)
+
+> 지금 바로 충전 가능한 곳. 전국 전기차 충전소 약 10만 곳·충전기 약 52만 대의 위치와 급속·완속, 무료 주차, 24시간 여부, 지금 사용 가능한 충전기 수를 한국환경공단 공식 자료로 보여 주는 서비스입니다.
+
+## 주요 페이지
+- [내 주변 충전소](https://charge.guidejung.com/): 가까운 순 충전소
+- [지역별 충전소](https://charge.guidejung.com/region): 시도 16곳·시군구 약 230곳, 주소 /region/{행정구역코드}(충전소·충전기·급속 수, 충전기별 실시간 상태)
+
+## 데이터와 인용
+- 출처: 한국환경공단 전기자동차 충전소 정보(충전소·충전기 목록은 매일, 충전기 상태는 5분 간격)
+- 충전소·충전기 수는 페이지에 표시된 기준일 자료이고, 사용 가능 여부는 실시간이라 인용할 때는 확인 시각을 함께 표기해 주세요.
+- [사이트맵](https://charge.guidejung.com/sitemap.xml), [RSS](https://charge.guidejung.com/rss.xml), [데이터·출처 안내](https://charge.guidejung.com/data-policy)
+
+## 함께 운영하는 사이트
+- [내근처 여행](https://trip.guidejung.com/llms.txt), [내근처 날씨](https://weather.guidejung.com/llms.txt), [내근처 고속도로](https://traffic.guidejung.com/llms.txt)

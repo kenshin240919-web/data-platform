@@ -12,7 +12,8 @@ import {search,type Query} from './search';
 import {EXTRA_KINDS,KIND,KINDS} from './kinds';
 import {Connect,GENERIC,genericFor,linksNear,CHARGE_URL as CHARGE,TRAFFIC_URL as TRAFFIC,WEATHER_URL as WEATHER} from './network';
 import {rssXml} from './rss';
-import {DetailView,ShellView} from './views';
+import {DetailView,ShellView,TRIP_DESC,placeDescription} from './views';
+import {Faq,JsonLd,breadcrumbLd,type QA} from './seo';
 import {ADSENSE_CLIENT} from './adsense';
 import {AdSlot} from './ads';
 export {ADSENSE_CLIENT};
@@ -60,7 +61,14 @@ async function listing(service:Service,segments:string[]){
   const pts=initial.items.map(p=>[Number(p.latitude),Number(p.longitude)]).filter(([a,b])=>Number.isFinite(a)&&Number.isFinite(b));
   const links=region&&pts.length?linksNear(pts.reduce((n,p)=>n+p[0],0)/pts.length,pts.reduce((n,p)=>n+p[1],0)/pts.length,'trip')
     :route==='weekend'||route==='today'?[GENERIC.weather,GENERIC.traffic,GENERIC.charge]:route==='indoor'?[{icon:'😷',title:'오늘 미세먼지',desc:'나쁜 날엔 실내 여행지로',href:`${WEATHER}/air`},GENERIC.weather,GENERIC.traffic]:genericFor('trip');
-  return <><Suspense fallback={fallback}><Listing fixed={fixed} regions={regions.items} title={title} defaults={defaults} kinds={kinds.length>2?kinds:[]}/></Suspense><Connect title={region?`${region.name} 여행 전에 확인하세요`:'함께 보면 좋은 정보'} items={links}/></>;
+  // Region pages answer the questions people ask about the area in plain sentences (AEO), from the build file.
+  const names=(kind:string)=>initial.items.filter(p=>p.kind===kind).slice(0,5).map(p=>p.name);
+  const fest=initial.items.filter(p=>p.kind==='festival').slice(0,3).map(p=>`${p.name}(${p.start_date}~${p.end_date})`);
+  const faq:QA[]=region?[[`${region.name} 가볼만한곳은 어디인가요?`,`내근처 여행에 등록된 ${region.name}의 가볼만한곳·축제는 ${total}곳입니다.${names('place').length?` 정보가 충실한 곳으로 ${names('place').join(', ')} 등이 있습니다.`:''}`],
+    [`${region.name}에서 열리는 축제·행사는 무엇인가요?`,fest.length?`진행 중이거나 열릴 예정인 행사로 ${fest.join(', ')} 등이 있습니다. 이번 주말 행사는 이번 주말 목록에서 확인하세요.`:`${region.name}의 축제·행사는 위 목록의 축제 카드에서, 이번 주말에 열리는 행사는 이번 주말 행사 목록에서 확인할 수 있습니다.`],
+    [`${region.name} 여행 정보는 믿을 수 있나요?`,'한국관광공사 TourAPI 공식 관광정보를 6시간마다 자동으로 받아 갱신합니다. 운영시간·요금은 바뀔 수 있으니 방문 전 공식 안내를 확인하세요.']]:[];
+  const crumbs=region?breadcrumbLd([['내근처 여행',origin('trip')+'/'],['지역별 여행',origin('trip')+'/region'],[region.name,`${origin('trip')}/region/${region.id}`]]):null;
+  return <><Suspense fallback={fallback}><Listing fixed={fixed} regions={regions.items} title={title} defaults={defaults} kinds={kinds.length>2?kinds:[]}/></Suspense><Connect title={region?`${region.name} 여행 전에 확인하세요`:'함께 보면 좋은 정보'} items={links}/>{region&&<Faq title={`${region.name} 여행 자주 묻는 질문`} items={faq}/>}{crumbs&&<JsonLd data={crumbs}/>}</>;
 }
 
 async function detail(service:Service,segments:string[]){
@@ -86,8 +94,8 @@ export async function Page({service,segments=[]}:{service:Service;segments?:stri
 // 맛집·숙소 lists are indexed once the data has them.
 const INDEXED_LISTS=['region','place','festival','free','kids','pet','indoor',...EXTRA_KINDS.filter(k=>count(`kind:${k}`))];
 export async function pageMetadata(service:Service,segments:string[]):Promise<Metadata>{
-  const path='/'+segments.join('/');let description='지역과 날짜로 가볼만한곳·축제·생활정보를 찾아보세요.';let title=service==='home'?'GuideJung | 지역 기반 생활정보':'내근처 여행 | 오늘 어디가? 내 주변 가볼만한곳·맛집·숙소';let index=false;
-  if(KINDS.includes(segments[0])&&segments[1]){try{const p=await api<Place>(`/v1/places/${encodeURIComponent(segments[1])}`);title=`${p.name} | 내근처 여행`;index=p.indexable&&!p.is_demo;}catch{}}
+  const path='/'+segments.join('/');let description=TRIP_DESC;let title=service==='home'?'GuideJung | 지역 기반 생활정보':'내근처 여행 | 오늘 어디가? 내 주변 가볼만한곳·맛집·숙소';let index=false;
+  if(KINDS.includes(segments[0])&&segments[1]){try{const p=await api<Place>(`/v1/places/${encodeURIComponent(segments[1])}`);title=`${p.name} | 내근처 여행`;index=p.indexable&&!p.is_demo;description=placeDescription(p);}catch{}}
   else if(!segments.length)index=enabled();
   else if(INDEXED_LISTS.includes(segments[0])&&segments.length<=2){
     // 지역·조건별 목록은 검색 유입 입구라 노출한다. 결과가 매번 바뀌는 검색(/search)과 날짜 기반(오늘·이번 주말) 목록은 제외.
@@ -99,7 +107,7 @@ export async function pageMetadata(service:Service,segments:string[]):Promise<Me
       description=segments[0]==='region'&&name?`${name}의 가볼만한곳과 축제·행사를 한국관광공사 공식 정보로 확인하세요. 운영시간·요금·주차 정보 제공.`:`${head} 목록을 지역과 조건으로 찾아보세요. 한국관광공사 공식 관광정보 기반.`;
     }
   }
-  return {title,description,alternates:{canonical:origin(service)+path,types:{'application/rss+xml':origin(service)+'/rss.xml'}},robots:{index,follow:true},openGraph:{title,url:origin(service)+path,siteName:'내근처 여행',locale:'ko_KR',type:'website'}};
+  return {title,description,alternates:{canonical:origin(service)+path,types:{'application/rss+xml':origin(service)+'/rss.xml'}},robots:{index,follow:true},twitter:{card:'summary_large_image'},openGraph:{images:origin(service)+'/og.png',title,description,url:origin(service)+path,siteName:'내근처 여행',locale:'ko_KR',type:'website'}};
 }
 export async function siteMap(service:Service){
   if(!enabled())return [];

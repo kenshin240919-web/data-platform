@@ -1,0 +1,20 @@
+# 내근처 여행 (trip.guidejung.com)
+
+> 오늘 어디가? 내 위치 주변 가볼만한곳·맛집·숙소·축제·여행코스·쇼핑을 한국관광공사 TourAPI 공식 정보로 찾는 여행 검색 서비스입니다. 장소마다 주소·운영시간·요금·주차·문의처와 출처·확인일을 함께 보여 줍니다. 데이터는 6시간마다 자동으로 갱신됩니다.
+
+## 주요 페이지
+- [가볼만한곳](https://trip.guidejung.com/place): 전국 관광지·문화시설·레포츠
+- [축제·행사](https://trip.guidejung.com/festival): 진행 중이거나 열릴 예정인 축제(종료된 행사는 목록에서 제외)
+- [맛집](https://trip.guidejung.com/food), [숙소](https://trip.guidejung.com/stay), [여행코스](https://trip.guidejung.com/course), [쇼핑](https://trip.guidejung.com/shop)
+- [지역별 여행](https://trip.guidejung.com/region): 시군구별 가볼만한곳·축제
+- [이번 주말 행사](https://trip.guidejung.com/weekend), [무료](https://trip.guidejung.com/free), [아이와 함께](https://trip.guidejung.com/kids), [반려동물 동반](https://trip.guidejung.com/pet), [실내](https://trip.guidejung.com/indoor)
+- 상세 페이지 주소: /place/{id}, /festival/{id}, /food/{id}, /stay/{id}, /course/{id}, /shop/{id}
+
+## 데이터와 인용
+- 출처: 한국관광공사 TourAPI(공공데이터), 사진은 공공누리 표시 자료만 사용
+- 운영시간·요금은 바뀔 수 있으므로 방문 전 공식 안내 확인을 권합니다.
+- 인용할 때는 해당 페이지 주소와 "내근처 여행(한국관광공사 자료)"을 표기해 주세요.
+- [사이트맵](https://trip.guidejung.com/sitemap.xml), [RSS](https://trip.guidejung.com/rss.xml), [데이터·출처 안내](https://trip.guidejung.com/data-policy)
+
+## 함께 운영하는 사이트
+- [내근처 날씨](https://weather.guidejung.com/llms.txt), [내근처 고속도로](https://traffic.guidejung.com/llms.txt), [내근처 충전소](https://charge.guidejung.com/llms.txt)

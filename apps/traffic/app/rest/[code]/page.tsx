@@ -4,6 +4,7 @@ import type {Metadata} from 'next';
 import {AdSlot} from '@guidejung/ui/ads';
 import {CHARGE,SITE,TRIP,WEATHER,fetched,findRest,fmtDate,rests,restsOn,roadName,won} from '../../../lib/data';
 import {Connect,linksNear} from '@guidejung/ui/network';
+import {Faq,JsonLd,breadcrumbLd,eun,type QA} from '@guidejung/ui/seo';
 
 export const dynamicParams=false;
 export function generateStaticParams(){return rests.map(r=>({code:r.code}));}
@@ -13,7 +14,7 @@ export async function generateMetadata(props:Props):Promise<Metadata>{
   const {code}=await props.params;const r=findRest(code);if(!r)return {};
   const f=r.foods.find(x=>x.best)??r.foods[0];
   return {title:`${r.name} 대표 음식·기름값·편의시설`,description:`${roadName({name:r.route})} ${r.name}${r.dir?`(${r.dir} 방향)`:''}${f?` 대표 음식 ${f.name}`:''}${won(r.gas?.gasoline)?`, 휘발유 ${r.gas!.gasoline}`:''}. 편의시설, 주변 충전소·날씨·가볼만한곳까지 확인하세요.`,
-    alternates:{canonical:`${SITE}/rest/${code}`},openGraph:{title:r.name,url:`${SITE}/rest/${code}`}};
+    alternates:{canonical:`${SITE}/rest/${code}`},openGraph:{images:'/og.png',title:r.name,url:`${SITE}/rest/${code}`}};
 }
 export default async function RestPage(props:Props){
   const {code}=await props.params;const r=findRest(code);if(!r)notFound();
@@ -37,6 +38,13 @@ export default async function RestPage(props:Props){
     {(r.facilities.length>0||r.brands)&&<><div className="section-heading"><h2>편의시설</h2></div>
       <div className="chips">{r.facilities.map(x=><span key={x} className="chip-static">{x}</span>)}{r.brands&&<span className="chip-static">☕ {r.brands}</span>}</div></>}
     <Connect title={`${r.name}에서 함께 보기`} items={linksNear(r.lat,r.lng,'traffic')}/>
+    <Faq title={`${r.name} 자주 묻는 질문`} items={([
+      [`${eun(r.name)} 어디에 있나요?`,`${road}${r.dir?` ${r.dir} 방향`:''}에 있는 휴게소로, ${r.area}에 있습니다.`],
+      best?[`${r.name} 대표 음식은 무엇인가요?`,`대표 음식은 ${best.name}${Number(best.cost)?`(${Number(best.cost).toLocaleString()}원)`:''}입니다.${r.foods.length>1?` 이 밖에 ${r.foods.filter(f=>f!==best).slice(0,4).map(f=>f.name).join(', ')} 등이 있습니다.`:''}`]:null,
+      g?[`${r.name} 기름값은 얼마인가요?`,`${fmtDate(fetched)} 기준 휘발유 ${r.gas!.gasoline}${d?`, 경유 ${r.gas!.diesel}`:''}입니다.${ag?` 전국 휴게소 휘발유 평균(${ag.toLocaleString()}원)보다 ${g<ag?`${ag-g}원 쌉니다`:g>ag?`${g-ag}원 비쌉니다`:'같습니다'}.`:''}`]:null,
+      r.facilities.length?[`${r.name}에는 어떤 편의시설이 있나요?`,`${r.facilities.join(', ')}${r.brands?`, 매장(${r.brands})`:''}이 있습니다.`]:null,
+    ] as (QA|null)[]).filter((x):x is QA=>!!x)}/>
+    <JsonLd data={breadcrumbLd([['내근처 고속도로',SITE+'/'],['휴게소',SITE+'/rest'],[road,`${SITE}/road/${r.routeNo}`],[r.name,`${SITE}/rest/${code}`]])}/>
     {same.length>0&&<><div className="section-heading"><h2>{road} 다른 휴게소</h2></div><div className="chips big">{same.map(x=><Link key={x.code} href={`/rest/${x.code}`}>{x.name}</Link>)}</div></>}
   </section>;
 }

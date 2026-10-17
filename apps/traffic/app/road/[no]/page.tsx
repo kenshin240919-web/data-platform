@@ -3,8 +3,9 @@ import {notFound} from 'next/navigation';
 import type {Metadata} from 'next';
 import {AdSlot} from '@guidejung/ui/ads';
 import {RouteLive} from '../../_components/RouteLive';
+import {Faq,JsonLd,breadcrumbLd,eun,type QA} from '@guidejung/ui/seo';
 import {Connect,nearArea,linksNear,type Link_} from '@guidejung/ui/network';
-import {SITE,WEATHER,findRoute,roadName,routes,restsOn,won} from '../../../lib/data';
+import {SITE,WEATHER,fetched,fmtDate,findRoute,roadName,routes,restsOn,won} from '../../../lib/data';
 
 export const dynamicParams=false;
 export function generateStaticParams(){return routes.map(r=>({no:r.no}));}
@@ -12,7 +13,7 @@ type Props={params:Promise<{no:string}>};
 export async function generateMetadata(props:Props):Promise<Metadata>{
   const {no}=await props.params;const r=findRoute(no);if(!r)return {};const name=roadName(r);
   return {title:`${name} 실시간 교통상황 - 정체 구간·휴게소`,description:`${name}(${r.start}~${r.end}) 실시간 정체·서행 구간을 IC 순서대로 확인하세요. 구간별 속도, 휴게소 ${restsOn(no).length}곳의 대표 음식과 기름값도 함께 안내합니다.`,
-    alternates:{canonical:`${SITE}/road/${no}`},openGraph:{title:`${name} 실시간 교통상황`,url:`${SITE}/road/${no}`}};
+    alternates:{canonical:`${SITE}/road/${no}`},openGraph:{images:'/og.png',title:`${name} 실시간 교통상황`,url:`${SITE}/road/${no}`}};
 }
 /** 출발·중간·도착 지역 날씨 + 노선 중간쯤 가볼만한곳·충전소. */
 function alongRoad(r:NonNullable<ReturnType<typeof findRoute>>):Link_[]{
@@ -38,6 +39,13 @@ export default async function RoutePage(props:Props){
         <span className="tf-card-title">{x.dir?`${x.dir} 방향`:x.area}</span><strong>{x.name}</strong><small>{[f?.name,won(x.gas?.gasoline)?`휘발유 ${x.gas!.gasoline}`:''].filter(Boolean).join(' · ')||x.area}</small></Link>;})}</div></>}
     <AdSlot/>
     <Connect title={`${name} 따라 함께 보기`} items={alongRoad(r)}/>
+    {(()=>{const cheap=rs.filter(x=>won(x.gas?.gasoline)).sort((a,b)=>won(a.gas!.gasoline)!-won(b.gas!.gasoline)!)[0];
+      const qa:QA[]=[[`${eun(name)} 어디부터 어디까지인가요?`,`${r.start}에서 ${r.end}까지이며, 실시간 소통 정보가 있는 구간은 양방향 합쳐 ${r.E.length+r.S.length}개입니다.`],
+        [`${name} 지금 막히는 곳은 어디인가요?`,`위 노선도에서 한국도로공사 실시간 소통 정보를 5분마다 받아 구간별 속도와 정체·서행을 색깔로 보여 드립니다. 내 위치를 허용하면 가까운 구간부터 보여 드립니다.`],
+        ...(rs.length?[[`${name} 휴게소는 어디가 있나요?`,`${rs.length}곳입니다: ${rs.slice(0,8).map(x=>x.dir?`${x.name}(${x.dir} 방향)`:x.name).join(', ')}${rs.length>8?' 등':''}.`] as QA]:[]),
+        ...(cheap?[[`${name} 휴게소 중 기름값이 가장 싼 곳은 어디인가요?`,`${fmtDate(fetched)} 한국도로공사 자료 기준 ${cheap.name}${cheap.dir?`(${cheap.dir} 방향)`:''}의 휘발유가 ${cheap.gas!.gasoline}으로 가장 쌉니다.`] as QA]:[])];
+      return <Faq title={`${name} 자주 묻는 질문`} items={qa}/>;})()}
+    <JsonLd data={breadcrumbLd([['내근처 고속도로',SITE+'/'],['고속도로',SITE+'/road'],[name,`${SITE}/road/${no}`]])}/>
     <div className="section-heading"><h2>다른 고속도로</h2></div>
     <div className="chips big">{others.map(x=><Link key={x.no} href={`/road/${x.no}`}>{roadName(x)}</Link>)}</div>
   </section>;

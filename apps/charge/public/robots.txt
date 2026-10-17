@@ -2,5 +2,23 @@ User-Agent: *
 Allow: /
 Disallow: /api/
 
+# AI answer engines and search crawlers are welcome (same rules as everyone).
+User-Agent: GPTBot
+User-Agent: OAI-SearchBot
+User-Agent: ChatGPT-User
+User-Agent: ClaudeBot
+User-Agent: Claude-SearchBot
+User-Agent: Claude-User
+User-Agent: PerplexityBot
+User-Agent: Perplexity-User
+User-Agent: Google-Extended
+User-Agent: Applebot-Extended
+User-Agent: Bingbot
+User-Agent: Yeti
+User-Agent: Daumoa
+Allow: /
+Disallow: /api/
+
+# Site summary for AI: https://charge.guidejung.com/llms.txt
 Sitemap: https://charge.guidejung.com/sitemap.xml
 #DaumWebMasterTool:aa45f8c51c64c09c51d3add9d6ae477283446493020a65f682d9db4c1903a4c8:98GztZ5EvdKnUPTh2E62HA==
