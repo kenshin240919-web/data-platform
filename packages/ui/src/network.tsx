@@ -4,17 +4,18 @@ import weatherRegions from '../../../apps/weather/data/regions.json';
 import traffic from '../../../apps/traffic/data/snapshot.json';
 
 export type Site='trip'|'weather'|'traffic'|'charge';
-export const SITES:Record<Site,{url:string;icon:string;name:string}>={
-  trip:{url:'https://trip.guidejung.com',icon:'🚗',name:'여행'},
-  weather:{url:'https://weather.guidejung.com',icon:'🌤️',name:'날씨'},
-  traffic:{url:'https://traffic.guidejung.com',icon:'🛣️',name:'교통'},
-  charge:{url:'https://charge.guidejung.com',icon:'⚡',name:'충전소'},
+// brand: 사이트 이름(로고·탭 제목), tagline: 부제(질문형 후킹). 10/17 사용자 결정: "내근처" 시리즈.
+export const SITES:Record<Site,{url:string;icon:string;name:string;brand:string;tagline:string}>={
+  trip:{url:'https://trip.guidejung.com',icon:'🚗',name:'여행',brand:'내근처 여행',tagline:'오늘 어디가?'},
+  weather:{url:'https://weather.guidejung.com',icon:'🌤️',name:'날씨',brand:'내근처 날씨',tagline:'오늘 날씨 어때?'},
+  traffic:{url:'https://traffic.guidejung.com',icon:'🛣️',name:'고속도로',brand:'내근처 고속도로',tagline:'지금 길 막혀?'},
+  charge:{url:'https://charge.guidejung.com',icon:'⚡',name:'충전소',brand:'내근처 충전소',tagline:'지금 바로 충전 가능한 곳'},
 };
 const {trip:T,weather:W,traffic:R,charge:C}=Object.fromEntries(Object.entries(SITES).map(([k,v])=>[k,v.url])) as Record<Site,string>;
 
 /** 모든 페이지 맨 위: 네 사이트 바로가기 한 줄. */
 export function NetworkBar({current}:{current:Site}){
-  return <nav className="gj-network" aria-label="GuideJung 서비스"><div>{(Object.keys(SITES) as Site[]).map(k=>k===current
+  return <nav className="gj-network" aria-label="내근처 서비스"><div><b className="gj-network-brand">📍 내근처</b>{(Object.keys(SITES) as Site[]).map(k=>k===current
     ?<span key={k} className="on" aria-current="page">{SITES[k].icon} {SITES[k].name}</span>
     :<a key={k} href={SITES[k].url}>{SITES[k].icon} {SITES[k].name}</a>)}</div></nav>;
 }

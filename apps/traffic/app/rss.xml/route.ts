@@ -8,5 +8,5 @@ export function GET(){
     ...routes.map(r=>[`/road/${r.no}`,`${roadName(r)} 실시간 교통상황`,`${r.start}~${r.end} 구간별 정체·속도와 휴게소`]),
     ...rests.map(r=>[`/rest/${r.code}`,`${r.name} 대표 음식·기름값`,`${roadName({name:r.route})} ${r.name} 음식 메뉴·주유 가격·편의시설`])];
   const items=pages.map(([p,t,d])=>`<item><title>${esc(t)}</title><link>${SITE}${p}</link><guid isPermaLink="true">${SITE}${p}</guid><pubDate>${now}</pubDate><description>${esc(d)}</description></item>`).join('');
-  return new Response(`<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>교통정보</title><link>${SITE}/</link><description>전국 고속도로 실시간 정체·휴게소·기름값</description><language>ko</language><lastBuildDate>${now}</lastBuildDate><atom:link href="${SITE}/rss.xml" rel="self" type="application/rss+xml"/>${items}</channel></rss>\n`,{headers:{'Content-Type':'application/rss+xml; charset=utf-8'}});
+  return new Response(`<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>내근처 고속도로</title><link>${SITE}/</link><description>전국 고속도로 실시간 정체·휴게소·기름값</description><language>ko</language><lastBuildDate>${now}</lastBuildDate><atom:link href="${SITE}/rss.xml" rel="self" type="application/rss+xml"/>${items}</channel></rss>\n`,{headers:{'Content-Type':'application/rss+xml; charset=utf-8'}});
 }

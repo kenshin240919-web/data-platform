@@ -17,5 +17,5 @@ export function rssXml(items:Place[],origin:string,limit=Infinity){
     return `<item><title>${esc(p.name)}</title><link>${url}</link><guid isPermaLink="true">${url}</guid><pubDate>${at.toUTCString()}</pubDate><category>${LABEL[p.kind]??LABEL.place}</category><description>${esc(`${p.region_name} · ${text}`)}</description></item>`;
   }).join('');
   const built=latest[0]?.at??new Date(0);
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>여행정보</title><link>${origin}/</link><description>지역과 날짜로 찾는 여행지·축제 정보</description><language>ko</language><lastBuildDate>${built.toUTCString()}</lastBuildDate><atom:link href="${origin}/rss.xml" rel="self" type="application/rss+xml"/>${entries}</channel></rss>\n`;
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>내근처 여행</title><link>${origin}/</link><description>지역과 날짜로 찾는 여행지·축제 정보</description><language>ko</language><lastBuildDate>${built.toUTCString()}</lastBuildDate><atom:link href="${origin}/rss.xml" rel="self" type="application/rss+xml"/>${entries}</channel></rss>\n`;
 }

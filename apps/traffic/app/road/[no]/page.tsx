@@ -29,7 +29,7 @@ export default async function RoutePage(props:Props){
   const {no}=await props.params;const r=findRoute(no);if(!r)notFound();
   const name=roadName(r);const rs=restsOn(no);const others=routes.filter(x=>x.no!==no).slice(0,16);
   return <section className="section">
-    <nav className="breadcrumbs" aria-label="현재 위치"><Link href="/">교통정보</Link><span>/</span><Link href="/road">고속도로</Link><span>/</span><span>{name}</span></nav>
+    <nav className="breadcrumbs" aria-label="현재 위치"><Link href="/">내근처 고속도로</Link><span>/</span><Link href="/road">고속도로</Link><span>/</span><span>{name}</span></nav>
     <h1>{name} 실시간 교통상황</h1>
     <p className="muted small">{r.start} ↔ {r.end} · 구간 {r.E.length+r.S.length}개 · 휴게소 {rs.length}곳</p>
     <RouteLive route={r}/>

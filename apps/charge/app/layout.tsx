@@ -7,6 +7,6 @@ import { Shell } from './_components/Shell';
 import { SITE } from '../lib/regions';
 
 // Search engine ownership tags (do not remove: verification is rechecked periodically).
-export const metadata:Metadata={metadataBase:new URL(SITE),icons:{icon:'/icon.svg'},verification:{other:{'naver-site-verification':'f8f3585df76d56b1b2fb599348e0bd4d0a10678c','msvalidate.01':'94FB5F5FCBAB10DABDC0256A035F8369'}},title:{default:'충전소정보 | 내 주변 전기차 충전소 실시간',template:'%s | 충전소정보'},
-  description:'내 주변 전기차 충전소와 지금 비어 있는 충전기를 실시간으로. 급속·완속, 무료 주차, 24시간 충전소를 지역별로 찾아보세요.',openGraph:{siteName:'충전소정보',locale:'ko_KR',type:'website'}};
+export const metadata:Metadata={metadataBase:new URL(SITE),icons:{icon:'/icon.svg'},verification:{other:{'naver-site-verification':'f8f3585df76d56b1b2fb599348e0bd4d0a10678c','msvalidate.01':'94FB5F5FCBAB10DABDC0256A035F8369'}},title:{default:'내근처 충전소 | 지금 바로 충전 가능한 전기차 충전소',template:'%s | 내근처 충전소'},
+  description:'내 주변 전기차 충전소와 지금 비어 있는 충전기를 실시간으로. 급속·완속, 무료 주차, 24시간 충전소를 지역별로 찾아보세요.',openGraph:{siteName:'내근처 충전소',locale:'ko_KR',type:'website'}};
 export default function Layout({children}:{children:React.ReactNode}){return <html lang="ko"><head><AdSenseScript/><ClarityScript id="yxl5298cyt"/></head><body><Shell>{children}</Shell></body></html>;}

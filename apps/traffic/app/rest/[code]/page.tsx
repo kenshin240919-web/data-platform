@@ -21,7 +21,7 @@ export default async function RestPage(props:Props){
   const diff=(v:number|null,a:number|null)=>v&&a?(v<a?<span className="tf-cheap">평균보다 {a-v}원 싸요</span>:v>a?<span className="muted small">평균보다 {v-a}원 비싸요</span>:null):null;
   const same=restsOn(r.routeNo).filter(x=>x.code!==code);const best=r.foods.find(x=>x.best)??r.foods[0];
   return <section className="section">
-    <nav className="breadcrumbs" aria-label="현재 위치"><Link href="/">교통정보</Link><span>/</span><Link href="/rest">휴게소</Link><span>/</span><Link href={`/road/${r.routeNo}`}>{road}</Link><span>/</span><span>{r.name}</span></nav>
+    <nav className="breadcrumbs" aria-label="현재 위치"><Link href="/">내근처 고속도로</Link><span>/</span><Link href="/rest">휴게소</Link><span>/</span><Link href={`/road/${r.routeNo}`}>{road}</Link><span>/</span><span>{r.name}</span></nav>
     <h1>{r.name}</h1>
     <p className="muted small">{road}{r.dir?` · ${r.dir} 방향`:''} · {r.area}</p>
     <section className="tf-hero rest"><p className="tf-answer">{best?<>대표 음식 <b>{best.name}</b></>:<>{r.name}</>}</p>

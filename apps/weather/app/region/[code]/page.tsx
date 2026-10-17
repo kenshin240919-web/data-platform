@@ -45,6 +45,6 @@ export default async function RegionPage(props:Props){
     <div className="chips big">{near.map(x=><Link key={x.code} href={`/region/${x.code}`}>{label(x)}</Link>)}</div>
     {sido&&<><div className="section-heading"><h2>{sido.name} 다른 지역</h2><Link href={`/region/${sido.code}`}>{sido.short} 전체</Link></div>
       <div className="chips">{sido.regions.filter(x=>x.code!==r.code).map(x=><Link key={x.code} href={`/region/${x.code}`}>{x.name}</Link>)}</div></>}
-    {!r.trip&&<p className="muted small"><a href={TRIP}>여행정보</a>에서 전국 가볼만한곳을 찾아보세요.</p>}
+    {!r.trip&&<p className="muted small"><a href={TRIP}>내근처 여행</a>에서 전국 가볼만한곳을 찾아보세요.</p>}
   </section>;
 }

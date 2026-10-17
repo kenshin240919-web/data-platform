@@ -13,6 +13,6 @@ export function GET(){
     ...regions.map(r=>[`/region/${r.code}`,`${label(r)} 날씨`,`${r.sidoName} ${r.name}의 지금 날씨, 시간별·10일 예보, 미세먼지, 오늘 옷차림`,'지역 날씨'] as [string,string,string,string]),
   ];
   const items=pages.map(([path,title,desc,cat])=>`<item><title>${esc(title)}</title><link>${SITE}${path}</link><guid isPermaLink="true">${SITE}${path}</guid><pubDate>${now}</pubDate><category>${esc(cat)}</category><description>${esc(desc)}</description></item>`).join('');
-  const xml=`<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>날씨정보</title><link>${SITE}/</link><description>전국 시군구 날씨·미세먼지·주간 예보</description><language>ko</language><lastBuildDate>${now}</lastBuildDate><atom:link href="${SITE}/rss.xml" rel="self" type="application/rss+xml"/>${items}</channel></rss>\n`;
+  const xml=`<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>내근처 날씨</title><link>${SITE}/</link><description>전국 시군구 날씨·미세먼지·주간 예보</description><language>ko</language><lastBuildDate>${now}</lastBuildDate><atom:link href="${SITE}/rss.xml" rel="self" type="application/rss+xml"/>${items}</channel></rss>\n`;
   return new Response(xml,{headers:{'Content-Type':'application/rss+xml; charset=utf-8'}});
 }
