@@ -7,7 +7,7 @@
 
 ## 사용자 작업 원칙
 - **최우선 설계 원칙(모든 사이트 공통)**: "가장 중요한 것은 사람들의 클릭을 유발해야 하고, 사이트에 접속하면 계속 체류하게 만들어야 한다." 화면·기능·설계 결정의 1순위 기준. 새 사이트 설계서는 "클릭·체류 설계" 장을 맨 앞에 둔다. 상세: `reports/서비스-공통원칙-클릭체류.md`. 클릭은 콘텐츠로 유도하고, 광고 클릭 유도 문구·배치는 애드센스 정책 위반이라 금지.
-- **SEO·GEO·AEO 기본 원칙(모든 사이트, 10/17 사용자)**: 검색엔진(SEO)·AI 생성형 검색(GEO)·답변 엔진(AEO)에 맞게 만든다. 새 페이지·사이트마다 ① 고유 title·description·canonical·og:image(`public/og.png`) ② 정적 HTML에 실제 내용(수치·이름) ③ schema.org JSON-LD(레이아웃 WebSite+Organization `siteLd`, 하위 페이지 `breadcrumbLd`, 장소·행사 스키마) ④ 페이지 데이터로 만든 짧은 질문·답변 `Faq`(화면 표시 + FAQPage JSON-LD) ⑤ `public/llms.txt`·robots.txt(AI 크롤러 명시 허용, Daum PIN은 마지막 줄 유지)·sitemap·RSS. 공통 부품 `packages/ui/src/seo.tsx`(`@guidejung/ui/seo`).
+- **SEO·GEO·AEO 기본 원칙(모든 사이트, 10/17 사용자)**: 검색엔진(SEO)·AI 생성형 검색(GEO)·답변 엔진(AEO)에 맞게 만든다. 새 페이지·사이트마다 ① 고유 title·description·canonical·og:image(`public/og.png`) ② 정적 HTML에 실제 내용(수치·이름) ③ schema.org JSON-LD(레이아웃 WebSite+Organization `siteLd`, 하위 페이지 `breadcrumbLd`, 장소·행사 스키마) ④ 페이지 데이터로 만든 짧은 질문·답변 `Faq`(화면 표시 + FAQPage JSON-LD) ⑤ `public/llms.txt`·robots.txt(AI 크롤러 명시 허용, Daum PIN은 마지막 줄 유지)·sitemap·RSS. 공통 부품 `packages/ui/src/seo.tsx`(`@guidejung/ui/seo`). **사용자 지시가 SEO·GEO·AEO에 어긋나면(예: 정적 HTML에서 내용 빼기·noindex·같은 문구 반복·중복 페이지·주소 변경으로 기존 링크 깨짐·내용 없는 페이지) 실행 전에 반드시 먼저 알리고 대안을 제시한다(10/18 사용자).**
 - 답변은 한국어 존댓말, 결과 위주로 간결하게.
 - 유료 API(AI API 등) 호출이 필요하면 **사용 전에 비용을 알리고 승인**을 받습니다. 구독(Claude Pro, ChatGPT Plus, Genspark AI Plus) 범위 안에서 가능한 방법을 우선합니다.
 - API 키·ADMIN_TOKEN·DB 비밀번호는 `.env`에만 둡니다. 코드·커밋·채팅에 넣지 않습니다. (`.env`, `개방데이터/`, `runtime/`은 gitignore 대상)
