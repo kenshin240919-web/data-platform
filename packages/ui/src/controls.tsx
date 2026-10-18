@@ -14,8 +14,8 @@ export function RegionPicker({items,base}:{items:{id:string;name:string;count:nu
   const [sel,setSel]=useState<string|null>(null);
   const label=(r:{name:string})=>{const [s,...rest]=r.name.split(' ');return `${SIDO_SHORT[s]??s} ${rest.join(' ')}`.trim();};
   return <div className="region-picker">
-    <div className="region-tabs" role="tablist">{sidos.map(s=><button key={s.name} type="button" role="tab" aria-selected={sel===s.name} className={sel===s.name?'on':''} onClick={()=>setSel(sel===s.name?null:s.name)}>{s.short}<small>{s.total}</small></button>)}</div>
-    <div className="region-chips" hidden={sel!==null}><span className="region-chips-label">인기 지역</span>{top.map(r=><a key={r.id} href={`${base}/region/${r.id}`}>{label(r)}<small>{r.count}</small></a>)}</div>
-    {sidos.map(s=><div key={s.name} className="region-chips" hidden={sel!==s.name}><span className="region-chips-label">{s.name}</span>{s.list.map(r=><a key={r.id} href={`${base}/region/${r.id}`}>{r.name.split(' ').slice(1).join(' ')||r.name}<small>{r.count}</small></a>)}</div>)}
+    <div className="region-tabs" role="tablist">{sidos.map(s=><button key={s.name} type="button" role="tab" aria-selected={sel===s.name} className={sel===s.name?'on':''} onClick={()=>setSel(sel===s.name?null:s.name)}>{s.short}<small>{Number(s.total).toLocaleString()}</small></button>)}</div>
+    <div className="region-chips" hidden={sel!==null}><span className="region-chips-label">인기 지역</span>{top.map(r=><a key={r.id} href={`${base}/region/${r.id}`}>{label(r)}<small>{Number(r.count).toLocaleString()}</small></a>)}</div>
+    {sidos.map(s=><div key={s.name} className="region-chips" hidden={sel!==s.name}><span className="region-chips-label">{s.name}</span>{s.list.map(r=><a key={r.id} href={`${base}/region/${r.id}`}>{r.name.split(' ').slice(1).join(' ')||r.name}<small>{Number(r.count).toLocaleString()}</small></a>)}</div>)}
   </div>;
 }

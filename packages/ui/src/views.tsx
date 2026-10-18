@@ -42,8 +42,8 @@ function NearbyTabs({groups,nearUrl}:{groups:Nearby[];nearUrl:(kind:string)=>str
   if(!groups.length)return null;
   return <section className="near-tabs" aria-label="주변에서 함께 둘러볼 곳"><div className="section-heading"><h2>주변에서 함께 둘러볼 곳</h2><span className="muted small">20km 안 · 가까운 순</span></div>
     {groups.map((g,i)=><input key={g.kind} type="radio" name="near-tab" id={`near-${g.kind}`} className="near-radio" defaultChecked={i===0}/>)}
-    <div className="near-labels" role="tablist">{groups.map(g=><label key={g.kind} htmlFor={`near-${g.kind}`} className={`near-label near-label-${g.kind}`}>{NEAR_TAB[g.kind]??g.kind}<span>{g.total??g.items.length}</span></label>)}</div>
-    {groups.map(g=><div key={g.kind} className={`near-panel near-panel-${g.kind}`}><Cards items={g.items}/>{(g.total??0)>g.items.length&&<a className="near-more" href={nearUrl(g.kind)}>{NEAR_TITLE[g.kind]} {g.total}곳 모두 보기 →</a>}</div>)}
+    <div className="near-labels" role="tablist">{groups.map(g=><label key={g.kind} htmlFor={`near-${g.kind}`} className={`near-label near-label-${g.kind}`}>{NEAR_TAB[g.kind]??g.kind}<span>{Number(g.total??g.items.length).toLocaleString()}</span></label>)}</div>
+    {groups.map(g=><div key={g.kind} className={`near-panel near-panel-${g.kind}`}><Cards items={g.items}/>{(g.total??0)>g.items.length&&<a className="near-more" href={nearUrl(g.kind)}>{NEAR_TITLE[g.kind]} {Number(g.total).toLocaleString()}곳 모두 보기 →</a>}</div>)}
   </section>;
 }
 const SCHEMA:Record<string,string>={festival:'Event',food:'Restaurant',stay:'LodgingBusiness',shop:'Store',course:'TouristTrip'};

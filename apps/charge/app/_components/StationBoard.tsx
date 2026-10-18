@@ -87,7 +87,7 @@ function StaticList({snap,label,loading}:{snap:SnapRegion;label:string;loading?:
       <p className="ev-answer">{label} 충전소 <b>{snap.stations.toLocaleString()}곳</b></p>
       <p className="ev-sub">충전기 {snap.chargers.toLocaleString()}대(급속 {snap.fast.toLocaleString()}대) · 무료 주차 {snap.freeParking.toLocaleString()}곳 · 24시간 {snap.h24.toLocaleString()}곳{loading&&<> · <span role="status">지금 사용 가능한 충전기를 확인하고 있어요…</span></>}</p>
     </section>
-    <p className="muted small">충전기가 많은 충전소 {snap.list.length}곳{snap.stations>snap.list.length?` (전체 ${snap.stations.toLocaleString()}곳은 실시간 목록에서)`:''}</p>
+    <p className="muted small">충전기가 많은 충전소 {Number(snap.list.length).toLocaleString()}곳{snap.stations>snap.list.length?` (전체 ${snap.stations.toLocaleString()}곳은 실시간 목록에서)`:''}</p>
     <ul className="ev-list">{snap.list.map(s=><li key={s.id} id={`station-${s.id}`} className="ev-item">
       <div className="ev-row">
         <span className="ev-name"><b>{s.name}</b><small>{s.addr}</small></span>

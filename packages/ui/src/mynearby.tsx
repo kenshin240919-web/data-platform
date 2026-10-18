@@ -32,8 +32,8 @@ export function MyNearby({base=''}:{base?:string}){
     {(!pos||!pos.precise)&&<LocateCard title={pos?'정확한 내 위치로 다시 찾기':'내 주변 20km 여행지·맛집·숙소'} desc="가까운 순으로 바로 보여 드려요" status={status} onClick={request} approxLabel={pos&&area?area:undefined}/>}
     {pos&&!list&&<div className="loading" role="status">주변 정보를 불러오고 있습니다.</div>}
     {list&&list.length===0&&<p className="notice">20km 안에 아직 등록된 정보가 없습니다. 아래에서 지역을 골라 보세요.</p>}
-    {list&&active&&<><div className="near-labels" role="tablist">{list.map(g=><button key={g.kind} type="button" role="tab" aria-selected={g.kind===active.kind} className={`near-label${g.kind===active.kind?' on':''}`} onClick={()=>setTab(g.kind)}>{TABS.find(t=>t[0]===g.kind)![1]}<span>{g.total}</span></button>)}</div>
-      <div className="near-panel on"><Cards items={active.items} base={base}/>{active.total>active.items.length&&<a className="near-more" href={more(active.kind)}>{TABS.find(t=>t[0]===active.kind)![1].slice(3)} {active.total}곳 모두 보기 →</a>}</div></>}
+    {list&&active&&<><div className="near-labels" role="tablist">{list.map(g=><button key={g.kind} type="button" role="tab" aria-selected={g.kind===active.kind} className={`near-label${g.kind===active.kind?' on':''}`} onClick={()=>setTab(g.kind)}>{TABS.find(t=>t[0]===g.kind)![1]}<span>{Number(g.total).toLocaleString()}</span></button>)}</div>
+      <div className="near-panel on"><Cards items={active.items} base={base}/>{active.total>active.items.length&&<a className="near-more" href={more(active.kind)}>{TABS.find(t=>t[0]===active.kind)![1].slice(3)} {Number(active.total).toLocaleString()}곳 모두 보기 →</a>}</div></>}
   </section>;
 }
 

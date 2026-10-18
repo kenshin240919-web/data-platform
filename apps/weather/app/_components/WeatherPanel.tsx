@@ -104,7 +104,7 @@ export function WeatherPanel({region,label}:{region:Region;label:string}){
 
     {region.trip&&<a className="wx-trip" href={`${TRIP}/region/${region.trip.id}`}>
       <span className="wx-trip-icon" aria-hidden="true">🚗</span>
-      <span><strong>{label} 가볼만한곳 {region.trip.count}곳</strong><small>{weekend??'날씨 좋은 날 가볼 만한 여행지를 찾아보세요'}</small></span><span className="pill">여행정보 보기 →</span>
+      <span><strong>{label} 가볼만한곳 {Number(region.trip.count).toLocaleString()}곳</strong><small>{weekend??'날씨 좋은 날 가볼 만한 여행지를 찾아보세요'}</small></span><span className="pill">여행정보 보기 →</span>
     </a>}
   </div>;
 }
