@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import {useMemo,useState} from 'react';
-import {LocateCard,km,nearest,useMyPosition} from '@guidejung/ui/geo';
+import {broadArea,LocateCard,km,nearest,useMyPosition} from '@guidejung/ui/geo';
 import {dirLabel,roadName,type Route} from '../../lib/format';
 import type {Cctv} from '../../lib/types';
 import {CctvPlayer,cctvName} from './CctvPlayer';
@@ -26,7 +26,7 @@ export function NearMe({routes,rests,places}:{routes:Route[];rests:RestLite[];pl
       if(k<0){const n=near.find(x=>x.r.routeNo===r.no);if(n)d=n.d+1;}return {r,segs,k,d};});
     return list.filter(x=>Number.isFinite(x.d)).sort((a,b)=>a.d-b.d).slice(0,3);
   },[pos,routes,near]);
-  const area=pos?nearest(places,pos.lat,pos.lon):undefined;const place=area?.label;
+  const area=pos?nearest(places,pos.lat,pos.lon):undefined;const place=pos&&!pos.precise?broadArea(places,pos.lat,pos.lon):area?.label;
   const where=pos?.precise?'내 근처':place?`${place} 부근`:'접속 위치 부근';
   return <section className="section tf-near">
     {!pos?.precise&&<LocateCard title="내 근처 고속도로 상황 보기" desc="가까운 고속도로의 구간별 속도·CCTV·휴게소를 먼저 보여 드려요" status={status} onClick={request} approxLabel={place}/>}
@@ -43,9 +43,9 @@ export function NearMe({routes,rests,places}:{routes:Route[];rests:RestLite[];pl
             <tbody>{win.map(s=><tr key={s.i} className={s.i===k?'here':''}><td><b>{s.from}</b> → {s.to}{s.i===k&&<span className="tf-here">📍</span>}</td><td><Speed t={data} id={s.s} label=""/></td><td><Speed t={data} id={s.e} label=""/></td></tr>)}</tbody></table>}
           {cams.length>0&&<div className="tf-near-cams">{cams.map(({c,d},i)=><button key={c.url} type="button" className="tf-cam-btn" onClick={()=>setPlay({list:camList,i})}>📹 {cctvName(c)} <small>{fmtKm(d)}</small></button>)}</div>}
         </article>;})}</div>
-      {area&&pos&&<div className="gj-connect tf-near-links"><h2>🔗 {place} 함께 보기</h2><div>
-        <a href={`https://weather.guidejung.com/region/${area.code}`}><span className="gj-connect-icon" aria-hidden="true">🌤️</span><span><b>{place} 날씨</b><small>비·눈·특보 확인하고 출발</small></span><span className="gj-connect-go" aria-hidden="true">→</span></a>
-        <a href={`https://charge.guidejung.com/region/${area.charge}`}><span className="gj-connect-icon" aria-hidden="true">⚡</span><span><b>{place} 전기차 충전소</b><small>지금 비어 있는 충전기</small></span><span className="gj-connect-go" aria-hidden="true">→</span></a>
+      {area&&pos&&<div className="gj-connect tf-near-links"><h2>🔗 {area.label} 함께 보기</h2><div>
+        <a href={`https://weather.guidejung.com/region/${area.code}`}><span className="gj-connect-icon" aria-hidden="true">🌤️</span><span><b>{area.label} 날씨</b><small>비·눈·특보 확인하고 출발</small></span><span className="gj-connect-go" aria-hidden="true">→</span></a>
+        <a href={`https://charge.guidejung.com/region/${area.charge}`}><span className="gj-connect-icon" aria-hidden="true">⚡</span><span><b>{area.label} 전기차 충전소</b><small>지금 비어 있는 충전기</small></span><span className="gj-connect-go" aria-hidden="true">→</span></a>
         <a href={`https://trip.guidejung.com/search?lat=${pos.lat.toFixed(4)}&lon=${pos.lon.toFixed(4)}&radius_km=20`}><span className="gj-connect-icon" aria-hidden="true">🚗</span><span><b>{where} 가볼만한곳</b><small>20km 안 여행지·축제</small></span><span className="gj-connect-go" aria-hidden="true">→</span></a>
       </div></div>}
       <div className="section-heading"><h2>{where} 휴게소</h2><Link href="/rest">휴게소 전체</Link></div>

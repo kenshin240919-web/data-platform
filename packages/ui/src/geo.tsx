@@ -62,3 +62,13 @@ export function km(aLat:number,aLon:number,bLat:number,bLon:number){
 export function nearest<T extends {lat:number;lon?:number;lng?:number}>(items:T[],lat:number,lon:number){
   return items.reduce((a,b)=>km(lat,lon,b.lat,(b.lon??b.lng)!)<km(lat,lon,a.lat,(a.lon??a.lng)!)?b:a);
 }
+
+const short=(name:string)=>name.trim().split(' ').pop()??name;  // "서울 양천구" → "양천구"
+/** 접속 위치(IP)는 통신사 거점 위치라 수십 km 틀릴 수 있어(김포 → 인천 계양구·서울 양천구) 한 지역으로 단정하지 않는다:
+ * 가장 가까운 지역부터 8km 안쪽 차이의 지역 최대 3곳을 "김포시·계양구·양천구"처럼 묶어 보여 준다. */
+export function broadArea(points:{name?:string;label?:string;lat:number;lon?:number;lng?:number}[],lat:number,lon:number){
+  const best=new Map<string,number>();
+  for(const p of points){const n=short(p.label??p.name??''),d=km(lat,lon,p.lat,(p.lon??p.lng)!);if(!(best.get(n)!<=d))best.set(n,d);}
+  const list=[...best.entries()].sort((a,b)=>a[1]-b[1]);if(!list.length)return '';
+  return list.filter(([,d])=>d<=list[0][1]+8).slice(0,3).map(([n])=>n).join('·');
+}

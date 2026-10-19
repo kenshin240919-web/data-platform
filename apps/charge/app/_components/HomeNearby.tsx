@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import {useEffect,useMemo,useState} from 'react';
 import {distanceKm} from '../../lib/format';
-import {LocateCard,nearest,useMyPosition} from '@guidejung/ui/geo';
+import {broadArea,LocateCard,nearest,useMyPosition} from '@guidejung/ui/geo';
 import type {ChargeRegion} from '../../lib/regions';
 import {StationBoard,recent} from './StationBoard';
 
@@ -23,7 +23,7 @@ export function HomeNearby({regions,fallback}:{regions:R[];fallback:string}){
   const extra=useMemo(()=>origin?regions.filter(r=>r.code!==region.code).map(r=>({r,d:distanceKm(origin.lat,origin.lon,r.lat,r.lon)})).filter(x=>x.d<=15).sort((a,b)=>a.d-b.d).slice(0,3).map(x=>x.r.code):[],[origin?.lat,origin?.lon,region.code,regions]);
   return <>
     <div className="ev-picker">
-      {!pos?.precise&&<LocateCard title="내 주변 충전소 찾기" desc="가까운 순으로 지금 비어 있는 충전기를 보여 드려요" status={status} onClick={()=>{setPicked(false);request();}} approxLabel={pos?nearest(regions,pos.lat,pos.lon).label:undefined}/>}
+      {!pos?.precise&&<LocateCard title="내 주변 충전소 찾기" desc="가까운 순으로 지금 비어 있는 충전기를 보여 드려요" status={status} onClick={()=>{setPicked(false);request();}} approxLabel={pos?broadArea(regions,pos.lat,pos.lon):undefined}/>}
       <div className="ev-select"><label className="sr-only" htmlFor="region">지역</label><select id="region" value={region.code} onChange={e=>{setPicked(true);setCode(e.target.value);}}>{regions.map(r=><option key={r.code} value={r.code}>{r.label}</option>)}</select>
         <Link className="text-link" href={`/region/${region.code}`}>{region.label} 충전소 전체 →</Link>
         {pos?.precise&&picked&&<button type="button" className="text-link" onClick={()=>setPicked(false)}>📍 내 주변으로</button>}</div>

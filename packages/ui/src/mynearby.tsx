@@ -4,7 +4,7 @@
 import {useEffect,useState} from 'react';
 import type {Place,Results} from './types';
 import {Cards} from './cards';
-import {LocateCard,useMyPosition} from './geo';
+import {broadArea,LocateCard,useMyPosition} from './geo';
 import {todayKST} from './search';
 
 const TABS=[['place','🏞️ 가볼만한곳'],['food','🍽️ 맛집'],['stay','🛏️ 숙소'],['festival','🎉 축제'],['shop','🛍️ 쇼핑'],['course','🧭 여행코스']] as const;
@@ -25,7 +25,7 @@ export function MyNearby({base=''}:{base?:string}){
   },[key,base]);  // eslint-disable-line react-hooks/exhaustive-deps
   const list=groups?.key===key?groups.list.filter(g=>g.items.length):null;
   const active=list?.find(g=>g.kind===tab)??list?.[0];
-  const area=list?.flatMap(g=>g.items)[0]?.region_name.split(' ').slice(-1)[0];
+  const area=pos&&list?broadArea(list.flatMap(g=>g.items).filter(p=>p.latitude!=null).map(p=>({name:p.region_name,lat:p.latitude!,lon:p.longitude!})),pos.lat,pos.lon):undefined;
   const more=(kind:string)=>`${base}/search?lat=${pos!.lat}&lon=${pos!.lon}&radius_km=20&kind=${kind}`;
   return <section className="my-nearby" aria-label="내 주변 여행 정보">
     {pos&&<div className="section-heading"><div><div className="eyebrow">NEAR ME · 20KM</div><h2>{pos.precise?'📍 내 위치 주변 여행 정보':`📍 ${area?`${area} 부근`:'접속 위치 주변'} 여행 정보`}</h2></div>{active&&<a href={more(active.kind)}>모두 보기</a>}</div>}
