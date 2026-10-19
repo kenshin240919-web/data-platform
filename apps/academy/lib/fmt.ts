@@ -2,8 +2,8 @@
 export const SITE='https://academy.guidejung.com';
 export const BRAND='내근처 학원';
 export const SUBJECTS:Record<string,string>={math:'수학',english:'영어',korean:'국어',science:'과학',social:'사회',essay:'논술·독서',coding:'코딩·컴퓨터',foreign:'제2외국어',
-  music:'음악',art:'미술',dance:'무용·댄스',baduk:'바둑',study:'독서실',job:'자격증·직업'};
-export const SUBJECT_ICON:Record<string,string>={math:'➗',english:'🔤',korean:'📖',science:'🔬',social:'🌏',essay:'✍️',coding:'💻',foreign:'🈶',music:'🎹',art:'🎨',dance:'💃',baduk:'⚫',study:'📚',job:'🛠️'};
+  music:'음악',art:'미술',dance:'무용·댄스',baduk:'바둑',study:'독서실',general:'보습·입시 종합',job:'자격증·직업'};
+export const SUBJECT_ICON:Record<string,string>={math:'➗',english:'🔤',korean:'📖',science:'🔬',social:'🌏',essay:'✍️',coding:'💻',foreign:'🈶',music:'🎹',art:'🎨',dance:'💃',baduk:'⚫',study:'📚',general:'🏫',job:'🛠️'};
 // 첫 화면 과목 버튼(학부모가 가장 많이 찾는 순).
 export const MAIN_SUBJECTS=['math','english','korean','science','essay','coding','music','art','dance'];
 export const GRADES:Record<string,string>={kinder:'유아',elem:'초등',middle:'중등',high:'고등',adult:'성인'};

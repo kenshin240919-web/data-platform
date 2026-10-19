@@ -29,8 +29,8 @@ MISS_RETRY_DAYS = 30  # an address Kakao did not find is tried again after this 
 
 # 과목: matched against course and fee names (first match wins per name, a name can carry several subjects).
 SUBJECTS = [
-    ('math', '수학', r'수학|연산|사고력|산수'),
-    ('english', '영어', r'영어|파닉스|리딩|리스닝|스피킹|토익|토플|텝스|챕터북|english'),
+    ('math', '수학', r'수학|연산|사고력|산수|영수|국영수|수리'),
+    ('english', '영어', r'영어|영수|국영수|파닉스|리딩|리스닝|스피킹|토익|토플|텝스|챕터북|english'),
     ('korean', '국어', r'국어|문학|한글'),
     ('science', '과학', r'과학|물리|화학|생물|생명과학|지구과학'),
     ('social', '사회', r'사회|역사|한국사'),
@@ -42,6 +42,8 @@ SUBJECTS = [
     ('dance', '무용·댄스', r'무용|발레|댄스|방송댄스|한국무용|현대무용'),
     ('baduk', '바둑', r'바둑|체스'),
     ('study', '독서실', r'독서실'),
+    # 과목 이름이 없는 보습·입시 학원(예: '예맥보습학원', 'DMZ입시학원', 기숙학원): 10/19 첫 수집에서 1만 곳이 과목 없음.
+    ('general', '보습·입시 종합', r'보습|입시|종합|단과|전과목|공부방|기숙|내신|수능|스터디|에듀|아카데미'),
     ('job', '자격증·직업', r'자격증|미용|바리스타|조리|제과|제빵|간호|운전|전기|용접|회계|세무'),
 ]
 GRADES = [('kinder', '유아', r'유아|유치|미취학|7세|6세|5세'), ('elem', '초등', r'초등|초[1-6]|초저|초고|초\s'), ('middle', '중등', r'중등|중학|중[1-3]'),
@@ -153,7 +155,7 @@ def build(rows):
             'courses': courses,
             'fees': fees,
             'fee_public': (r0.get('THCC_OTHBC_YN') or '').strip() == 'Y',
-            'subjects': tags(text, SUBJECT_RE),
+            'subjects': [k for k in tags(text, SUBJECT_RE) if k != 'general'] or tags(text, SUBJECT_RE),  # 종합은 다른 과목이 없을 때만
             'grades': tags(text, GRADE_RE),
             'capacity': max((r.get('TOFOR_SMTOT') or 0) for r in rs) or None,
             'capacity_now': max((r.get('DTM_RCPTN_ABLTY_NMPR_SMTOT') or 0) for r in rs) or None,
