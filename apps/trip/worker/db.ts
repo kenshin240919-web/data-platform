@@ -33,10 +33,14 @@ export async function search(db:D1,query:Query,today=todayKST()):Promise<Results
   const w=where.length?`WHERE ${where.join(' AND ')}`:'';
   const card=(c:string,extra?:Partial<Place>)=>withEventStatus({...JSON.parse(c),...extra} as Place,today);
   if(geo){
-    const rows=(await db.prepare(`SELECT card,lat,lon,quality,name FROM places ${w}`).bind(...args).all<{card:string;lat:number;lon:number;quality:number;name:string}>()).results;
+    // Distances from the small columns only, then the card JSON of just this page (a 50km box near Seoul holds
+    // ~10,000 rows: reading every card there took 1.5s+ per search and per detail page's nearby tabs).
+    const rows=(await db.prepare(`SELECT id,lat,lon,quality,name FROM places ${w}`).bind(...args).all<{id:string;lat:number;lon:number;quality:number;name:string}>()).results;
     const hits=rows.map(r=>({r,d:haversine(lat!,lon!,r.lat,r.lon)})).filter(x=>x.d<=radius)
       .sort((a,b)=>a.d-b.d||b.r.quality-a.r.quality||(a.r.name<b.r.name?-1:a.r.name>b.r.name?1:0));
-    return {items:hits.slice((page-1)*limit,page*limit).map(x=>card(x.r.card,{distance_km:x.d})),total:hits.length,page,pages:Math.ceil(hits.length/limit),dataset_id:null,mode:'live'};
+    const pageHits=hits.slice((page-1)*limit,page*limit);
+    const cards=pageHits.length?new Map((await db.prepare(`SELECT id,card FROM places WHERE id IN (${pageHits.map(()=>'?').join(',')})`).bind(...pageHits.map(x=>x.r.id)).all<{id:string;card:string}>()).results.map(r=>[r.id,r.card])):new Map<string,string>();
+    return {items:pageHits.filter(x=>cards.has(x.r.id)).map(x=>card(cards.get(x.r.id)!,{distance_km:x.d})),total:hits.length,page,pages:Math.ceil(hits.length/limit),dataset_id:null,mode:'live'};
   }
   const [count,rows]=await Promise.all([
     db.prepare(`SELECT COUNT(*) AS n FROM places ${w}`).bind(...args).first<{n:number}>(),
