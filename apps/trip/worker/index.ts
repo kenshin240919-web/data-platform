@@ -34,7 +34,7 @@ async function detail(req:Request,env:Env,ctx:Ctx|undefined,kind:string,id:strin
   const [version,css]=await Promise.all([dataVersion(env.DB),styleTags(env,new URL(req.url).origin)]);
   const build=css.match(/[\w-]+\.css/)?.[0]??'';
   const cache=(globalThis as any).caches?.default as Cache|undefined;
-  // encode: the version ends in '#s2', and a raw '#' would cut the rest of the key off (every page under one key).
+  // encode: the version ends in '#s3', and a raw '#' would cut the rest of the key off (every page under one key).
   const key=new Request(`https://cache.trip.internal/${encodeURIComponent(version)}/${build}/${kind}/${encodeURIComponent(id)}`);
   const hit=cache?await cache.match(key):undefined;if(hit)return hit;
   const p=await place(env.DB,id).catch(()=>null);

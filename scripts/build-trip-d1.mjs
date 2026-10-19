@@ -58,8 +58,8 @@ ${table('regions')}
 const insert=(p,into='INSERT OR REPLACE INTO places_next')=>`${into} (id,kind,name,region_id,lat,lon,start_date,end_date,quality,free,kids,pet,indoor,text,card,body,updated,indexable,changed) VALUES (${[
   s(p.id),s(p.kind),s(p.name),s(p.region_id),s(p.latitude),s(p.longitude),s(p.start_date||null),s(p.end_date||null),s(listRank(p)),
   flag(p.conditions?.free),flag(p.conditions?.kids),flag(p.conditions?.pet),flag(p.conditions?.indoor),s(text(p)),s(card(p)),s(JSON.stringify(p)),s(p.updated_at),p.indexable&&!p.is_demo?1:'NULL',s(changed(p))].join(',')});`;
-// Bump SCHEMA when the table layout changes so --if-newer reloads unchanged data into the new layout.
-const SCHEMA=2;
+// Bump SCHEMA when the table layout or a stored value rule changes (3: quality = listRank) so unchanged data is sent again.
+const SCHEMA=3;
 const version=`${data.status?.updated_at??new Date().toISOString()}#s${SCHEMA}`;
 const tail=`${(data.regions??[]).map(r=>`INSERT INTO regions_next (id,name,code,count) VALUES (${s(r.id)},${s(r.name)},${s(r.code)},${s(r.count??0)});`).join('\n')}
 DROP TABLE places;
