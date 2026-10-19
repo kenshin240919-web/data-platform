@@ -19,6 +19,8 @@ CREATE TABLE IF NOT EXISTS places (
 CREATE INDEX IF NOT EXISTS places_kind_quality ON places(kind, quality DESC, name);
 CREATE INDEX IF NOT EXISTS places_region ON places(region_id, quality DESC);
 CREATE INDEX IF NOT EXISTS places_lat ON places(lat);
+-- 내 주변 검색: kind + 위도 범위로 찾고 경도·점수·이름·종료일·id까지 인덱스에서 바로 읽음(표를 읽지 않음).
+CREATE INDEX IF NOT EXISTS places_geo ON places(kind, lat, lon, quality, name, end_date, id);
 CREATE INDEX IF NOT EXISTS places_dates ON places(start_date, end_date);
 CREATE INDEX IF NOT EXISTS places_changed ON places(indexable, changed DESC);
 CREATE TABLE IF NOT EXISTS regions (id TEXT PRIMARY KEY, name TEXT NOT NULL, code TEXT, count INTEGER NOT NULL DEFAULT 0);

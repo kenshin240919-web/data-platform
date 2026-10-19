@@ -70,6 +70,8 @@ ALTER TABLE regions_next RENAME TO regions;
 CREATE INDEX IF NOT EXISTS places_kind_quality ON places(kind, quality DESC, name);
 CREATE INDEX IF NOT EXISTS places_region ON places(region_id, quality DESC);
 CREATE INDEX IF NOT EXISTS places_lat ON places(lat);
+-- 내 주변 검색: kind + 위도 범위로 찾고 경도·점수·이름·종료일·id까지 인덱스에서 바로 읽음(표를 읽지 않음).
+CREATE INDEX IF NOT EXISTS places_geo ON places(kind, lat, lon, quality, name, end_date, id);
 CREATE INDEX IF NOT EXISTS places_dates ON places(start_date, end_date);
 CREATE INDEX IF NOT EXISTS places_changed ON places(indexable, changed DESC);
 INSERT OR REPLACE INTO meta (key,value) VALUES ('status',${s(JSON.stringify(data.status??null))});
@@ -93,7 +95,8 @@ if(manifestPath&&mode){
   if(Number(row.n)>items.length*1.1){console.log(`D1 has ${row.n} places, the file only ${items.length}: not loading.`);process.exit(1);}
   const manifest=existsSync(manifestPath)?JSON.parse(readFileSync(manifestPath,'utf8')):null;
   if(manifest&&row.version===JSON.stringify(manifest.version)){
-    if(manifest.version===version){console.log(`D1 already holds ${version}`);process.exit(0);}
+    // Same data: still add indexes introduced since the last load (CREATE INDEX IF NOT EXISTS is a no-op otherwise).
+    if(manifest.version===version){console.log(`D1 already holds ${version}`);wrangler(['d1','execute','guidejung-trip',mode,'--command',tail.split('\n').filter(l=>l.startsWith('CREATE INDEX')).join(' '),'-y'],{stdio:'inherit'});process.exit(0);}
     const changed=items.filter(p=>manifest.hashes[p.id]!==hash(p)),ids=new Set(items.map(p=>p.id));
     const removed=Object.keys(manifest.hashes).filter(id=>!ids.has(id));
     for(let i=0;i<changed.length;i+=ROWS_PER_FILE)write((i===0?tables+'\n':'')+changed.slice(i,i+ROWS_PER_FILE).map(p=>insert(p,'INSERT OR REPLACE INTO places')).join('\n')+'\n');
