@@ -1,5 +1,6 @@
 'use client';
 import {useState} from 'react';
+import {groupBySido} from './sido';
 
 const SIDO_SHORT:Record<string,string>={서울특별시:'서울',부산광역시:'부산',대구광역시:'대구',인천광역시:'인천',광주광역시:'광주',대전광역시:'대전',울산광역시:'울산',세종특별자치시:'세종',경기도:'경기',강원특별자치도:'강원',충청북도:'충북',충청남도:'충남',전북특별자치도:'전북',전라남도:'전남',경상북도:'경북',경상남도:'경남',제주특별자치도:'제주',전남광주통합특별시:'전남광주'};
 /**
@@ -7,9 +8,8 @@ const SIDO_SHORT:Record<string,string>={서울특별시:'서울',부산광역시
  * 모든 지역 링크는 HTML에 들어가 있어(숨김 그룹 포함) 검색엔진이 따라갈 수 있다.
  */
 export function RegionPicker({items,base}:{items:{id:string;name:string;count:number}[];base:string}){
-  const groups=new Map<string,typeof items>();
-  for(const r of items){const s=r.name.split(' ')[0];groups.set(s,[...(groups.get(s)??[]),r]);}
-  const sidos=[...groups.entries()].map(([name,list])=>({name,short:SIDO_SHORT[name]??name,list:[...list].sort((a,b)=>b.count-a.count),total:list.reduce((n,r)=>n+r.count,0)}));
+  // 시도는 행정 순서(서울·부산·…·제주), 시도 안 시군구는 정보 많은 순.
+  const sidos=groupBySido(items).map(({sido:name,list})=>({name,short:SIDO_SHORT[name]??name,list:[...list].sort((a,b)=>b.count-a.count),total:list.reduce((n,r)=>n+r.count,0)}));
   const top=[...items].sort((a,b)=>b.count-a.count).slice(0,8);
   const [sel,setSel]=useState<string|null>(null);
   const label=(r:{name:string})=>{const [s,...rest]=r.name.split(' ');return `${SIDO_SHORT[s]??s} ${rest.join(' ')}`.trim();};
