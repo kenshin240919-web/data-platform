@@ -1,0 +1,43 @@
+name: Academy collect
+# Daily collection for academy.guidejung.com (내근처 학원): NEIS 학원교습소정보 + Kakao 주소→좌표 (scripts/collect-academy.py).
+# runtime/academy (full.json, geo.json = address cache) is kept in the Actions cache so only new addresses are geocoded.
+# Secrets: NEIS_API_KEY, KAKAO_REST_KEY.
+on:
+  schedule:
+    - cron: '47 18 * * *' # 03:47 KST
+  workflow_dispatch:
+    inputs:
+      minutes:
+        description: '좌표 변환 시간(분), 최대 300'
+        default: '300'
+permissions:
+  contents: read
+concurrency:
+  group: academy-collect
+  cancel-in-progress: false
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/cache/restore@v4
+        with:
+          path: runtime/academy
+          key: academy-${{ github.run_id }}
+          restore-keys: academy-
+      - name: Collect
+        env:
+          NEIS_API_KEY: ${{ secrets.NEIS_API_KEY }}
+          KAKAO_REST_KEY: ${{ secrets.KAKAO_REST_KEY }}
+        run: python scripts/collect-academy.py --minutes ${{ inputs.minutes || '300' }}
+      - uses: actions/cache/save@v4
+        if: always() && hashFiles('runtime/academy/geo.json') != ''
+        with:
+          path: runtime/academy
+          key: academy-${{ github.run_id }}
