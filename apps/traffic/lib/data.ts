@@ -14,3 +14,8 @@ export const restsOn=(no:string)=>rests.filter(r=>r.routeNo===no);
 /** Rest areas with a fuel price, cheapest 휘발유 first. */
 export const cheapGas=()=>rests.filter(r=>won(r.gas?.gasoline)).sort((a,b)=>won(a.gas!.gasoline)!-won(b.gas!.gasoline)!);
 export const MAJOR=['0010','0150','1000','0100','0500','0251','0450','0550','0352','0600','0351','0120'];
+/** Cheapest rest area for a fuel and the average over those with a price (FAQ answers). */
+export function gasStat(k:'gasoline'|'diesel'){
+  const list=rests.filter(r=>won(r.gas?.[k])).sort((a,b)=>won(a.gas![k])!-won(b.gas![k])!);
+  return {list,avg:Math.round(list.reduce((a,r)=>a+won(r.gas![k])!,0)/Math.max(1,list.length))};
+}

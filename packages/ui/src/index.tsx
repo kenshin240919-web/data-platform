@@ -64,11 +64,19 @@ async function listing(service:Service,segments:string[]){
   // Region pages answer the questions people ask about the area in plain sentences (AEO), from the build file.
   const names=(kind:string)=>initial.items.filter(p=>p.kind===kind).slice(0,5).map(p=>p.name);
   const fest=initial.items.filter(p=>p.kind==='festival').slice(0,3).map(p=>`${p.name}(${p.start_date}~${p.end_date})`);
-  const faq:QA[]=region?[[`${region.name} 가볼만한곳은 어디인가요?`,`내근처 여행에 등록된 ${region.name}의 가볼만한곳·축제는 ${Number(total).toLocaleString()}곳입니다.${names('place').length?` 정보가 충실한 곳으로 ${names('place').join(', ')} 등이 있습니다.`:''}`],
+  // 전국 종류별·조건별 목록 (오늘·이번 주말은 noindex라 제외)
+  const COND:Record<string,string>={free:'기본 입장·이용요금이 무료인 곳입니다. 주차·체험 비용은 따로 들 수 있습니다.',kids:'한국관광공사 원천 정보의 이용연령·시설 안내에서 아이와 함께 가기 좋다는 근거가 확인된 곳입니다.',pet:'한국관광공사 반려동물 동반 여행 정보에 동반 가능으로 등록된 곳입니다. 동반 조건(크기·목줄 등)은 상세 페이지에서 확인하세요.',indoor:'한국관광공사 원천 정보의 시설 분류로 실내에서 즐길 수 있다고 확인된 곳입니다. 비 오는 날이나 미세먼지 나쁜 날에 좋습니다.'};
+  const listFaq:QA[]=!region&&KIND[route]?[[`전국 ${KIND[route].label}은 몇 곳인가요?`,`내근처 여행에 등록된 전국 ${KIND[route].label}은 ${Number(total).toLocaleString()}곳입니다.`],
+      [`내 주변 ${KIND[route].label}은 어떻게 찾나요?`,`위치를 허용하면 내 위치에서 20km 안의 ${KIND[route].label}부터 가까운 순으로 보여 드리고, 50km·100km·전국으로 넓혀 볼 수 있습니다.`],
+      ['정보는 어디서 오나요?','한국관광공사 TourAPI 공식 관광정보를 6시간마다 자동으로 받아 갱신합니다. 운영시간·요금은 바뀔 수 있으니 방문 전 공식 안내를 확인하세요.']]
+    :!region&&COND[route]?[[`${collections[route]} 목록은 어떤 기준인가요?`,COND[route]+' 근거가 확인되지 않은 곳은 넣지 않습니다.'],
+      [`${collections[route]}, 어디가 있나요?`,`전국 ${Number(total).toLocaleString()}곳이 있습니다.`]]:[];
+  const listCrumbs=!region&&(KIND[route]||COND[route])?breadcrumbLd([['내근처 여행',origin('trip')+'/'],[KIND[route]?.label??collections[route],`${origin('trip')}/${route}`]]):null;
+  const faq:QA[]=region?[[`${region.name} 가볼만한곳은 어디인가요?`,`내근처 여행에 등록된 ${region.name}의 가볼만한곳·축제는 ${Number(total).toLocaleString()}곳입니다.${names('place').length?` 예를 들어 ${names('place').join(', ')} 등이 있습니다.`:''}`],
     [`${region.name}에서 열리는 축제·행사는 무엇인가요?`,fest.length?`진행 중이거나 열릴 예정인 행사로 ${fest.join(', ')} 등이 있습니다. 이번 주말 행사는 이번 주말 목록에서 확인하세요.`:`${region.name}의 축제·행사는 위 목록의 축제 카드에서, 이번 주말에 열리는 행사는 이번 주말 행사 목록에서 확인할 수 있습니다.`],
     [`${region.name} 여행 정보는 믿을 수 있나요?`,'한국관광공사 TourAPI 공식 관광정보를 6시간마다 자동으로 받아 갱신합니다. 운영시간·요금은 바뀔 수 있으니 방문 전 공식 안내를 확인하세요.']]:[];
   const crumbs=region?breadcrumbLd([['내근처 여행',origin('trip')+'/'],['지역별 여행',origin('trip')+'/region'],[region.name,`${origin('trip')}/region/${region.id}`]]):null;
-  return <><Suspense fallback={fallback}><Listing fixed={fixed} regions={regions.items} title={title} defaults={defaults} kinds={kinds.length>2?kinds:[]}/></Suspense><Connect title={region?`${region.name} 여행 전에 확인하세요`:'함께 보면 좋은 정보'} items={links}/>{region&&<Faq title={`${region.name} 여행 자주 묻는 질문`} items={faq}/>}{crumbs&&<JsonLd data={crumbs}/>}</>;
+  return <><Suspense fallback={fallback}><Listing fixed={fixed} regions={regions.items} title={title} defaults={defaults} kinds={kinds.length>2?kinds:[]}/></Suspense><Connect title={region?`${region.name} 여행 전에 확인하세요`:'함께 보면 좋은 정보'} items={links}/>{region&&<Faq title={`${region.name} 여행 자주 묻는 질문`} items={faq}/>}{crumbs&&<JsonLd data={crumbs}/>}{listFaq.length>0&&<Faq items={listFaq}/>}{listCrumbs&&<JsonLd data={listCrumbs}/>}</>;
 }
 
 async function detail(service:Service,segments:string[]){

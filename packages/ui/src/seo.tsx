@@ -27,3 +27,5 @@ export function Faq({items,title='자주 묻는 질문'}:{items:QA[];title?:stri
 }
 /** Korean topic particle: 은 after a final consonant, else 는 (non-Hangul endings count as 는). */
 export function eun(word:string){const c=word.trim().charCodeAt(word.trim().length-1)-0xac00;return word+(c>=0&&c<11172&&c%28?'은':'는');}
+/** Korean subject particle: 이 after a final consonant, else 가. */
+export function ga(word:string){const c=word.trim().charCodeAt(word.trim().length-1)-0xac00;return word+(c>=0&&c<11172&&c%28?'이':'가');}

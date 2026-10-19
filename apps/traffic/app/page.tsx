@@ -7,7 +7,8 @@ import {NearMe} from './_components/NearMe';
 import {Connect,genericFor} from '@guidejung/ui/network';
 import regionData from '../../weather/data/regions.json';
 import {RouteCards} from './_components/RouteCards';
-import {MAJOR,SITE,findRoute,fmtDate,fetched,routes,rests} from '../lib/data';
+import {MAJOR,SITE,findRoute,fmtDate,fetched,gasStat,roadName,routes,rests,won} from '../lib/data';
+import {Faq,ga} from '@guidejung/ui/seo';
 
 export const metadata:Metadata={alternates:{canonical:SITE+'/'}};
 export default function Home(){
@@ -25,5 +26,11 @@ export default function Home(){
     <GasList rests={lite} date={fmtDate(fetched)}/>
     <FoodCards rests={lite} fallback={foods}/>
     <Connect title="떠나기 전에 함께 보기" items={genericFor('traffic')}/>
+    <Faq items={[
+      ['지금 고속도로 어디가 막히나요?','위 "지금 가장 막히는 구간 TOP 10"에서 한국도로공사 실시간 소통 정보를 5분마다 받아 전국 고속도로의 정체·서행 구간을 보여 드립니다. 위치를 허용하면 내 근처 고속도로부터 보여 드립니다.'],
+      ['어떤 고속도로 정보를 볼 수 있나요?',`전국 고속도로 ${routes.length}개 노선의 구간별 양방향 속도와 CCTV, 휴게소 ${rests.length}곳의 대표 음식·기름값·편의시설, 사고·공사 정보를 볼 수 있습니다.`],
+      [`고속도로 휴게소 중 휘발유가 가장 싼 곳은 어디인가요?`,(()=>{const g=gasStat('gasoline');const c=g.list[0];return c?`${fmtDate(fetched)} 한국도로공사 자료 기준 ${roadName({name:c.route})} ${c.dir?`${c.dir} 방향 `:''}${ga(c.name)} ${won(c.gas!.gasoline)!.toLocaleString()}원으로 가장 쌉니다. 전국 휴게소 평균은 ${g.avg.toLocaleString()}원입니다.`:'';})()],
+      [`고속도로 휴게소 중 경유가 가장 싼 곳은 어디인가요?`,(()=>{const g=gasStat('diesel');const c=g.list[0];return c?`${roadName({name:c.route})} ${c.dir?`${c.dir} 방향 `:''}${ga(c.name)} ${won(c.gas!.diesel)!.toLocaleString()}원으로 가장 쌉니다. 전국 휴게소 평균은 ${g.avg.toLocaleString()}원입니다.`:'';})()],
+      ['고속도로 CCTV는 어디서 보나요?','노선 페이지에서 내 위치와 가까운 CCTV부터 영상을 볼 수 있습니다. 영상은 국가교통정보센터에서 제공합니다.']]}/>
   </>;
 }

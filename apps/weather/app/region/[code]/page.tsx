@@ -5,11 +5,11 @@ import {WeatherPanel} from '../../_components/WeatherPanel';
 import {Connect,linksForCode} from '@guidejung/ui/network';
 import {Recent} from '../../_components/Recent';
 import {Faq,JsonLd,breadcrumbLd} from '@guidejung/ui/seo';
+import {UPDATE} from '../../../lib/faq';
 import {findRegion,findSido,label,nearby,regions,sidos,SITE,TRIP} from '../../../lib/regions';
 
 export const dynamicParams=false;
 export function generateStaticParams(){return [...sidos.map(s=>({code:s.code})),...regions.map(r=>({code:r.code}))];}
-const UPDATE:[string,string]=['날씨 예보는 언제 바뀌나요?','기상청 단기예보는 하루 8번(02·05·08·11·14·17·20·23시) 발표되고, 지금 날씨(초단기실황)는 매시간, 10일 예보(중기예보)는 하루 2번(06·18시) 갱신됩니다.'];
 type Props={params:Promise<{code:string}>};
 
 export async function generateMetadata(props:Props):Promise<Metadata>{

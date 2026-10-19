@@ -16,3 +16,9 @@ export function snapSum(codes:string[]){
 }
 /** 2026.10.15 */
 export const fmtDate=(t:string)=>t?`${t.slice(0,4)}.${t.slice(4,6)}.${t.slice(6,8)}`:'';
+/** Whole-country sums of the district counts, and districts ranked by 급속 chargers (FAQ answers). */
+export function snapNation(){
+  const rs=Object.entries(snap.regions);
+  const sum=(k:'fast'|'h24'|'freeParking')=>rs.reduce((a,[,r])=>a+r[k],0);
+  return {fast:sum('fast'),h24:sum('h24'),freeParking:sum('freeParking'),topFast:[...rs].sort((a,b)=>b[1].fast-a[1].fast).slice(0,5).map(([code,r])=>({code,fast:r.fast,stations:r.stations}))};
+}
