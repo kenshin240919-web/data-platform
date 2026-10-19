@@ -10,3 +10,4 @@ export function detailPath(p:{kind:string;id:string}){return `/${KIND[p.kind]?p.
 // Hide a photo (its <figure>) whose image fails to load instead of showing a broken icon. Runs in <head> so it
 // also catches errors of images in the first HTML; hiding (not removing) keeps React's DOM intact.
 export const IMAGE_FALLBACK="document.addEventListener('error',function(e){var t=e.target;if(t&&t.tagName==='IMG'){var f=t.closest('figure')||t;f.style.display='none';var c=t.closest('.place-card');if(c)c.classList.add('no-photo')}},true);";
+

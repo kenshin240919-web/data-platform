@@ -34,6 +34,8 @@ const items=data.items??[];
 if(!items.length)throw new Error(`no items in ${input}`);
 const s=v=>v===null||v===undefined?'NULL':typeof v==='number'?(Number.isFinite(v)?String(v):'NULL'):`'${String(v).replace(/'/g,"''")}'`;
 const flag=v=>v===true?1:'NULL';
+// Same as listRank in packages/ui/src/search.ts: quality first, then photo · introduction length, "(구)…" names last.
+const listRank=p=>[...String(p.id)].reduce((h,c)=>(h+c.charCodeAt(0))%97,0)/100+(p.quality_score??0)*100+(p.images?.length?40:0)+Math.min(Math.floor((p.description??'').length/20),40)-(String(p.name).startsWith('(')?30:0);
 // Same slim fields the browser search index used.
 const CARD=['id','name','kind','address','region_id','region_name','description','latitude','longitude','conditions','start_date','end_date','event_status','quality_score','is_demo','verified_at'];
 const card=p=>{const c=Object.fromEntries(CARD.map(k=>[k,p[k]]));c.images=p.images?.slice(0,1);return JSON.stringify(c);};
@@ -54,7 +56,7 @@ ${table('regions')}
 `;
 // OR REPLACE: a file re-sent after a network failure must not stop on rows it already wrote.
 const insert=(p,into='INSERT OR REPLACE INTO places_next')=>`${into} (id,kind,name,region_id,lat,lon,start_date,end_date,quality,free,kids,pet,indoor,text,card,body,updated,indexable,changed) VALUES (${[
-  s(p.id),s(p.kind),s(p.name),s(p.region_id),s(p.latitude),s(p.longitude),s(p.start_date||null),s(p.end_date||null),s(p.quality_score??0),
+  s(p.id),s(p.kind),s(p.name),s(p.region_id),s(p.latitude),s(p.longitude),s(p.start_date||null),s(p.end_date||null),s(listRank(p)),
   flag(p.conditions?.free),flag(p.conditions?.kids),flag(p.conditions?.pet),flag(p.conditions?.indoor),s(text(p)),s(card(p)),s(JSON.stringify(p)),s(p.updated_at),p.indexable&&!p.is_demo?1:'NULL',s(changed(p))].join(',')});`;
 // Bump SCHEMA when the table layout changes so --if-newer reloads unchanged data into the new layout.
 const SCHEMA=2;

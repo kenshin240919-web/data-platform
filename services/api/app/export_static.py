@@ -20,7 +20,10 @@ CARD=['id','name','kind','address','region_id','region_name','description','lati
       'event_status','quality_score','is_demo','verified_at','indexable','updated_at','source_modified_at']
 CONDITIONS=['free','kids','pet','indoor']
 
-def rank(p):return (-(p.get('quality_score') or 0),p['name'])
+def list_rank(p):
+    """Same as listRank in packages/ui/src/search.ts: quality first, then photo and introduction length; "(구)…" names last."""
+    return sum(map(ord,str(p['id'])))%97/100+(p.get('quality_score') or 0)*100+(40 if p.get('images') else 0)+min(len(p.get('description') or '')//20,40)-(30 if p['name'].startswith('(') else 0)
+def rank(p):return (-list_rank(p),p['name'])
 
 def build_file(full):
     """Card-only subset for the static build, plus totals so list pages show the real count."""

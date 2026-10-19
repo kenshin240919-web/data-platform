@@ -1,5 +1,12 @@
 import type {Place,Results} from './types';
 
+/** List order within the same quality score (most share 100): a photo, then a longer introduction come first,
+ *  names starting with "(" ((구)·(전)·(주)…) go last; a fraction from the id mixes the rest (not 가나다 order). Same rule in scripts/build-trip-d1.mjs and export_static.py. */
+export function listRank(p:{id:string;quality_score?:number|null;images?:unknown[]|null;description?:string|null;name:string}){
+  let h=0;for(const c of p.id)h=(h+c.charCodeAt(0))%97;
+  return h/100+(p.quality_score??0)*100+(p.images?.length?40:0)+Math.min(Math.floor((p.description??'').length/20),40)-(p.name.startsWith('(')?30:0);
+}
+
 // Port of services/api/app/main.py search(); runs at build time and in the browser.
 export type Query={ended?:string|number;q?:string;region?:string;condition?:string;kind?:string;when?:string;date_from?:string;date_to?:string;page?:string|number;limit?:string|number;lat?:string|number;lon?:string|number;radius_km?:string|number};
 
@@ -39,6 +46,6 @@ export function search(all:Place[],query:Query,today=todayKST()):Results{
     }
     items.push(item);
   }
-  items.sort((a,b)=>(a.distance_km??0)-(b.distance_km??0)||b.quality_score-a.quality_score||(a.name<b.name?-1:a.name>b.name?1:0));
+  items.sort((a,b)=>(a.distance_km??0)-(b.distance_km??0)||listRank(b)-listRank(a)||(a.name<b.name?-1:a.name>b.name?1:0));
   return {items:items.slice((page-1)*limit,page*limit),total:items.length,page,pages:Math.ceil(items.length/limit),dataset_id:null,mode:'live'};
 }
