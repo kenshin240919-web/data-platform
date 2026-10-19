@@ -1,0 +1,17 @@
+// Cloudflare Worker for academy.guidejung.com (내근처 학원), separate from the other sites.
+// Run from the repo root: npx wrangler deploy -c apps/academy/wrangler.jsonc (builds with npm run build:academy).
+// Static pages: ./out. Worker: /api/*, 학원 상세 /academy/{id}, sitemap. Data: D1 guidejung-academy (scripts/build-academy-d1.mjs).
+{
+  "name": "guidejung-academy",
+  "main": "worker/index.ts",
+  "compatibility_date": "2025-09-01",
+  "build": { "command": "npm run build:academy" },
+  "assets": {
+    "directory": "./out",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    "run_worker_first": ["/api/*", "/academy/*", "/sitemap.xml", "/sitemap-academies-*"]
+  },
+  "d1_databases": [{ "binding": "DB", "database_name": "guidejung-academy", "database_id": "411eb091-3497-498a-b612-da030dd70fe3" }],
+  "observability": { "enabled": true }
+}

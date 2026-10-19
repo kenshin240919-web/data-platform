@@ -14,7 +14,8 @@
     "check": "npm run typecheck && node tests/search.check.ts && node tests/rss.check.ts && npm run build && npm run build:weather && npm run build:charge && npm run build:traffic",
     "build:weather": "npm run build -w @guidejung/weather",
     "build:charge": "npm run build -w @guidejung/charge",
-    "build:traffic": "npm run build -w @guidejung/traffic"
+    "build:traffic": "npm run build -w @guidejung/traffic",
+    "build:academy": "npm run build -w @guidejung/academy"
   },
   "devDependencies": {
     "@playwright/test": "^1.56.0",

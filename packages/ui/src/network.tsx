@@ -3,19 +3,21 @@
 import weatherRegions from '../../../apps/weather/data/regions.json';
 import traffic from '../../../apps/traffic/data/snapshot.json';
 
-export type Site='trip'|'weather'|'traffic'|'charge';
+export type Site='trip'|'weather'|'traffic'|'charge'|'academy';
 // brand: 사이트 이름(로고·탭 제목), tagline: 부제(질문형 후킹). 10/17 사용자 결정: "내근처" 시리즈.
-export const SITES:Record<Site,{url:string;icon:string;name:string;brand:string;tagline:string}>={
+// hidden: 아직 배포 전인 사이트(그 사이트 자신의 연결 바에만 보임).
+export const SITES:Record<Site,{url:string;icon:string;name:string;brand:string;tagline:string;hidden?:boolean}>={
   trip:{url:'https://trip.guidejung.com',icon:'🚗',name:'여행',brand:'내근처 여행',tagline:'오늘 어디가?'},
   weather:{url:'https://weather.guidejung.com',icon:'🌤️',name:'날씨',brand:'내근처 날씨',tagline:'오늘 날씨 어때?'},
   traffic:{url:'https://traffic.guidejung.com',icon:'🛣️',name:'고속도로',brand:'내근처 고속도로',tagline:'지금 길 막혀?'},
   charge:{url:'https://charge.guidejung.com',icon:'⚡',name:'충전소',brand:'내근처 충전소',tagline:'지금 바로 충전 가능한 곳'},
+  academy:{url:'https://academy.guidejung.com',icon:'🎓',name:'학원',brand:'내근처 학원',tagline:'우리 동네 학원비 얼마야?',hidden:true},
 };
 const {trip:T,weather:W,traffic:R,charge:C}=Object.fromEntries(Object.entries(SITES).map(([k,v])=>[k,v.url])) as Record<Site,string>;
 
 /** 모든 페이지 맨 위: 네 사이트 바로가기 한 줄. */
 export function NetworkBar({current}:{current:Site}){
-  return <nav className="gj-network" aria-label="내근처 서비스"><div><b className="gj-network-brand">📍 내근처</b>{(Object.keys(SITES) as Site[]).map(k=>k===current
+  return <nav className="gj-network" aria-label="내근처 서비스"><div><b className="gj-network-brand">📍 내근처</b>{(Object.keys(SITES) as Site[]).filter(k=>!SITES[k].hidden||k===current).map(k=>k===current
     ?<span key={k} className="on" aria-current="page">{SITES[k].icon} {SITES[k].name}</span>
     :<a key={k} href={SITES[k].url}>{SITES[k].icon} {SITES[k].name}</a>)}</div></nav>;
 }
@@ -71,6 +73,7 @@ export const GENERIC:Record<Site,Link_>={
   weather:{icon:'🌤️',title:'이번 주말 날씨',desc:'맑은 지역 순위·미세먼지',href:`${W}/weekend`},
   traffic:{icon:'🛣️',title:'고속도로 실시간 정체',desc:'내 근처 도로·CCTV·휴게소',href:R},
   charge:{icon:'⚡',title:'내 주변 전기차 충전소',desc:'지금 비어 있는 충전기',href:C},
+  academy:{icon:'🎓',title:'우리 동네 학원·수강료',desc:'과목별 학원 수와 공개 수강료',href:SITES.academy.url},
 };
-export const genericFor=(skip:Site)=>(Object.keys(GENERIC) as Site[]).filter(k=>k!==skip).map(k=>GENERIC[k]);
+export const genericFor=(skip:Site)=>(Object.keys(GENERIC) as Site[]).filter(k=>k!==skip&&!SITES[k].hidden).map(k=>GENERIC[k]);
 export {T as TRIP_URL,W as WEATHER_URL,R as TRAFFIC_URL,C as CHARGE_URL};
