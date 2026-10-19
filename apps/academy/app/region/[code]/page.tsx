@@ -5,7 +5,7 @@ import {AdSlot} from '@guidejung/ui/ads';
 import {Faq,breadcrumbLd,JsonLd,ga} from '@guidejung/ui/seo';
 import {Connect,linksNear} from '@guidejung/ui/network';
 import {LiveList} from '../../_components/LiveList';
-import {GRADES,man,MIN_SUBJECT,n,region,regions,SITE,SUBJECTS,SUBJECT_ICON,updated} from '../../../lib/data';
+import {GRADES,MAIN_SUBJECTS,man,MIN_SUBJECT,n,region,regions,SITE,SUBJECTS,SUBJECT_ICON,updated} from '../../../lib/data';
 
 export const dynamicParams=false;
 export function generateStaticParams(){return regions.map(r=>({code:r.id}));}
@@ -19,11 +19,13 @@ export async function generateMetadata({params}:P):Promise<Metadata>{
 export default async function RegionPage({params}:P){
   const r=region((await params).code);if(!r)notFound();
   const subs=subjectsOf(r);const withFee=subs.filter(([,s])=>s.fees);
+  // 3초 답: 학부모가 가장 많이 찾는 수학·영어·국어 순으로 수강료가 공개된 과목.
+  const lead=MAIN_SUBJECTS.map(k=>withFee.find(([x])=>x===k)).find(Boolean)??withFee[0];
   const grades=Object.entries(r.grades).sort((a,b)=>b[1]-a[1]);
   return <div className="page">
     <nav className="crumbs"><Link href="/">홈</Link> › <Link href="/region">지역별 학원</Link> › {r.name}</nav>
     <h1>{r.name} 학원</h1>
-    <p className="ac-answer"><b>{r.name}</b>에는 학원·교습소 <b>{n(r.count)}곳</b>이 있고{withFee[0]?<>, {SUBJECTS[withFee[0][0]]} 공개 수강료 중앙값은 <b>{man(withFee[0][1].fees!.median)}</b>이에요</>:'요'}. <span className="muted">({updated()} 기준)</span></p>
+    <p className="ac-answer"><b>{r.name}</b>에는 학원·교습소 <b>{n(r.count)}곳</b>이 있고{lead?<>, {SUBJECTS[lead[0]]} 공개 수강료 중앙값은 <b>{man(lead[1].fees!.median)}</b>이에요</>:'요'}. <span className="muted">({updated()} 기준)</span></p>
     <div className="ac-subjects">{subs.filter(([,s])=>s.count>=MIN_SUBJECT).map(([k,s])=><Link key={k} href={`/region/${r.id}/${k}`}><span aria-hidden="true">{SUBJECT_ICON[k]}</span>{SUBJECTS[k]} <small>{n(s.count)}</small></Link>)}</div>
     {withFee.length>0&&<section><h2>{r.name} 과목별 공개 수강료</h2>
       <table className="ac-table"><thead><tr><th>과목</th><th>학원 수</th><th>중앙값</th><th>최저~최고</th></tr></thead>
