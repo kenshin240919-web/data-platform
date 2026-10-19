@@ -25,7 +25,8 @@ const manifestPath=args.includes('--upsert')?args[args.indexOf('--upsert')+1]:nu
 // Default: the computer's full export if there is one, else the git file (full until the first new-style export).
 const input=args.find(a=>!a.startsWith('--')&&a!==manifestPath)??[join(ROOT,'runtime/trip-full.json'),join(ROOT,'apps/trip/data/trip.json')].find(f=>existsSync(f));
 const mode=args.includes('--remote')?'--remote':args.includes('--local')?'--local':null;
-const ROWS_PER_FILE=2000;  // about 15MB of SQL per upload
+// About 4MB of SQL per upload. 2,000 rows (~15MB) sometimes ended with wrangler "Not currently importing anything" on every retry (10/19).
+const ROWS_PER_FILE=500;
 
 const data=JSON.parse(readFileSync(input,'utf8'));
 // The git build file (subset: true) only has card fields; loading it would replace the full set with a stub.
