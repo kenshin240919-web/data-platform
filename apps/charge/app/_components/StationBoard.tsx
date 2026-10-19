@@ -14,8 +14,9 @@ const fmtTime=(t:string)=>t?`${+t.slice(4,6)}.${+t.slice(6,8)} ${t.slice(8,10)}:
 type Filters={ok:boolean;fast:boolean;free:boolean;h24:boolean};
 
 /** 지역 충전소: 3초 답(지금 사용 가능 급속 수) → 조건 칩 → 상태 색깔 목록 → 카드마다 늘 보이는 바로가기(길찾기·충전 중 갈 곳·날씨·고속도로) → 펼치면 충전기별 상태. */
-export function StationBoard({region,label,origin,snap,road}:{region:ChargeRegion;label:string;origin?:{lat:number;lon:number}|null;snap?:SnapRegion|null;road?:string}){
-  const [data,setData]=useState<StationsResponse|null>(null);const [failed,setFailed]=useState(false);
+/** extra: neighbouring districts merged in for 내 주변 (a spot near a 시군구 border also lists the next district's stations). */
+export function StationBoard({region,label,origin,snap,road,extra=[]}:{region:ChargeRegion;label:string;origin?:{lat:number;lon:number}|null;snap?:SnapRegion|null;road?:string;extra?:string[]}){
+  const [data,setData]=useState<StationsResponse|null>(null);const [more,setMore]=useState<Record<string,StationsResponse>>({});const extraKey=extra.join(',');const [failed,setFailed]=useState(false);
   const [f,setF]=useState<Filters>({ok:false,fast:false,free:false,h24:false});const [limit,setLimit]=useState(30);const [open,setOpen]=useState<string|null>(null);const linked=useRef(false);
   useEffect(()=>{setData(null);setFailed(false);setLimit(30);linked.current=false;if(!origin)remember(region.code,label);
     const ctrl=new AbortController();
@@ -25,13 +26,22 @@ export function StationBoard({region,label,origin,snap,road}:{region:ChargeRegio
     const poll=(n:number)=>{timer=setTimeout(()=>get().then(d=>{if(!d.refreshing)setData(d);else if(n>1)poll(n-1);},()=>{}),6000);};
     get().then(d=>{setData(d);if(d.refreshing)poll(5);},e=>{if(e.name!=='AbortError')setFailed(true);});
     return ()=>{ctrl.abort();clearTimeout(timer);};},[region.code,label]);
+  // Neighbouring districts arrive on their own and are merged in (one failing does not hide the main list).
+  useEffect(()=>{setMore({});if(!extraKey)return;const ctrl=new AbortController();
+    for(const code of extraKey.split(','))fetch(`/api/stations?code=${code}`,{signal:ctrl.signal}).then(r=>r.ok?r.json() as Promise<StationsResponse>:null).then(d=>{if(d)setMore(m=>({...m,[code]:d}));},()=>{});
+    return ()=>ctrl.abort();},[extraKey]);
+  const merged=useMemo(()=>{
+    if(!data)return null;const extras=Object.values(more);if(!extras.length)return data;
+    const seen=new Set(data.stations.map(s=>s.id));const add=extras.flatMap(d=>d.stations).filter(s=>!seen.has(s.id)&&(seen.add(s.id),true));
+    return {...data,stations:[...data.stations,...add]};
+  },[data,more]);
 
   const rows=useMemo(()=>{
-    if(!data)return [];
-    return data.stations.map(s=>({s,sum:summary(s),km:origin?distanceKm(origin.lat,origin.lon,s.lat,s.lng):null}))
+    if(!merged)return [];
+    return merged.stations.map(s=>({s,sum:summary(s),km:origin?distanceKm(origin.lat,origin.lon,s.lat,s.lng):null}))
       .filter(({s,sum})=>(!f.ok||sum.ok>0)&&(!f.fast||sum.fast>0)&&(!f.free||s.freeParking)&&(!f.h24||is24h(s)))
       .sort((a,b)=>a.km!==null&&b.km!==null?a.km-b.km:(b.sum.fastOk-a.sum.fastOk)||(b.sum.ok-a.sum.ok));
-  },[data,f,origin]);
+  },[merged,f,origin]);
   // Shared links (#station-ID) open that station once the list is loaded, even if it sits beyond the first page.
   useEffect(()=>{
     if(linked.current||!rows.length)return;linked.current=true;
@@ -41,8 +51,8 @@ export function StationBoard({region,label,origin,snap,road}:{region:ChargeRegio
   },[rows]);
 
   if(failed)return <><p className="notice" role="alert">실시간 상태를 불러오지 못했습니다. 잠시 후 새로고침해 주세요.</p>{snap&&<StaticList snap={snap} label={label}/>}</>;
-  if(!data)return snap?<StaticList snap={snap} label={label} loading/>:<div className="loading" role="status">{label} 충전소와 실시간 상태를 불러오고 있습니다.</div>;
-  const all=data.stations.map(summary);const fastOk=all.reduce((n,s)=>n+s.fastOk,0),ok=all.reduce((n,s)=>n+s.ok,0),chargers=all.reduce((n,s)=>n+s.total,0);
+  if(!data||!merged)return snap?<StaticList snap={snap} label={label} loading/>:<div className="loading" role="status">{label} 충전소와 실시간 상태를 불러오고 있습니다.</div>;
+  const all=merged.stations.map(summary);const fastOk=all.reduce((n,s)=>n+s.fastOk,0),ok=all.reduce((n,s)=>n+s.ok,0),chargers=all.reduce((n,s)=>n+s.total,0);
   // 내 주변: 3km → 5km → 10km, the first radius with at least 3 fast chargers free now (else 10km).
   const nearKm=origin?[3,5,10].find(k=>rows.filter(r=>r.km!==null&&r.km<=k).reduce((n,r)=>n+r.sum.fastOk,0)>=3)??10:0;
   const near=origin?rows.filter(r=>r.km!==null&&r.km<=nearKm).reduce((n,r)=>n+r.sum.fastOk,0):null;
@@ -51,7 +61,7 @@ export function StationBoard({region,label,origin,snap,road}:{region:ChargeRegio
   return <div className="ev">
     <section className="ev-hero">
       <p className="ev-answer">{near!==null?<>내 주변 {nearKm}km 안에 지금 충전 가능한 급속 <b>{near}대</b></>:<>{label}에 지금 충전 가능한 급속 <b>{fastOk}대</b></>}</p>
-      <p className="ev-sub">충전소 {data.stations.length.toLocaleString()}곳 · 충전기 {chargers.toLocaleString()}대 중 지금 사용 가능 {ok.toLocaleString()}대 · {fmtTime(data.fetched)} 기준{data.stale?' (지연된 정보)':data.refreshing?' · 최신 상태 확인 중':''}</p>
+      <p className="ev-sub">충전소 {merged.stations.length.toLocaleString()}곳 · 충전기 {chargers.toLocaleString()}대 중 지금 사용 가능 {ok.toLocaleString()}대 · {fmtTime(data.fetched)} 기준{data.stale?' (지연된 정보)':data.refreshing?' · 최신 상태 확인 중':''}</p>
     </section>
     <div className="ev-chips">{chip('ok','지금 사용 가능')}{chip('fast','급속만')}{chip('free','무료 주차')}{chip('h24','24시간')}</div>
     <p className="muted small">{rows.length.toLocaleString()}곳 · {origin?'가까운 순':'사용 가능한 급속이 많은 순'}</p>

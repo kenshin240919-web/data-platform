@@ -1,6 +1,7 @@
 'use client';
 import Link from 'next/link';
-import {useEffect,useState} from 'react';
+import {useEffect,useMemo,useState} from 'react';
+import {distanceKm} from '../../lib/format';
 import {LocateCard,nearest,useMyPosition} from '@guidejung/ui/geo';
 import type {ChargeRegion} from '../../lib/regions';
 import {StationBoard,recent} from './StationBoard';
@@ -18,6 +19,8 @@ export function HomeNearby({regions,fallback}:{regions:R[];fallback:string}){
   useEffect(()=>{if(!pos||picked||(fromRecent&&!pos.precise))return;setCode(nearest(regions,pos.lat,pos.lon).code);},[pos,picked,fromRecent,regions]);
   const region=regions.find(r=>r.code===code)??regions[0];
   const origin=pos?.precise&&!picked?{lat:pos.lat,lon:pos.lon}:null;
+  // 내 주변: also the next districts whose centre is within 15km (at most 3), so a spot near a border is not cut off.
+  const extra=useMemo(()=>origin?regions.filter(r=>r.code!==region.code).map(r=>({r,d:distanceKm(origin.lat,origin.lon,r.lat,r.lon)})).filter(x=>x.d<=15).sort((a,b)=>a.d-b.d).slice(0,3).map(x=>x.r.code):[],[origin?.lat,origin?.lon,region.code,regions]);
   return <>
     <div className="ev-picker">
       {!pos?.precise&&<LocateCard title="내 주변 충전소 찾기" desc="가까운 순으로 지금 비어 있는 충전기를 보여 드려요" status={status} onClick={()=>{setPicked(false);request();}} approxLabel={pos?nearest(regions,pos.lat,pos.lon).label:undefined}/>}
@@ -26,6 +29,6 @@ export function HomeNearby({regions,fallback}:{regions:R[];fallback:string}){
         {pos?.precise&&picked&&<button type="button" className="text-link" onClick={()=>setPicked(false)}>📍 내 주변으로</button>}</div>
       {recents.length>0&&<div className="chips"><span className="chips-label">최근 본 지역</span>{recents.map(r=><Link key={r.code} href={`/region/${r.code}`}>{r.label}</Link>)}</div>}
     </div>
-    <StationBoard region={region} label={origin?'내 주변':region.label} origin={origin}/>
+    <StationBoard region={region} label={origin?'내 주변':region.label} origin={origin} extra={extra}/>
   </>;
 }
