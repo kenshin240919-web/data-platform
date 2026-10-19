@@ -99,21 +99,45 @@ def weather_regions():
     return json.loads((ROOT / 'apps/weather/data/regions.json').read_text(encoding='utf-8'))
 
 
-def region_code(office, zone, regions, misses):
-    """NEIS 교육청 + 행정구역명 → 5자리 시군구 코드. 일반구가 있는 시('수원시')는 시 코드(41110, charge와 같은 규칙)."""
+ZONE_ALIAS = {'연기군': '세종시'}  # 옛 행정구역명
+
+
+def region_code(office, zone, regions):
+    """NEIS 교육청 + 행정구역명 → (5자리 시군구 코드, 이름). 일반구가 있는 시('수원시')는 시 코드(41110, charge와 같은 규칙).
+    못 찾으면 None: 좌표를 붙인 뒤 가장 가까운 시군구로 정함(nearest_region) — 2026 인천 개편(동구·중구 → 제물포구·영종구),
+    빈 행정구역명, 옛 이름(연기군), 시도가 바뀐 곳(군위군 → 대구) 등."""
     short = OFFICES[office]
     cand = [r for r in regions if r['sidoShort'] == short or (short in ('광주', '전남') and r['sidoShort'] == '전남광주')]
     z = (zone or '').replace(' ', '')
+    if not z:
+        return None
     for r in cand:
         if r['name'].replace(' ', '') == z:
-            return r['code']
+            return r['code'], r['name']
     city = [r for r in cand if r['name'].split(' ')[0] == z]
     if city:
-        return city[0]['code'][:4] + '0'
+        return city[0]['code'][:4] + '0', z
+    sub = [r for r in cand if r['name'].endswith(' ' + z)]  # '상당구' → '청주시 상당구'
+    if len(sub) == 1:
+        return sub[0]['code'], sub[0]['name']
     if len(cand) == 1:  # 세종
-        return cand[0]['code']
-    misses[(short, zone)] += 1
-    return f'{office}-{z}'
+        return cand[0]['code'], cand[0]['name']
+    z = ZONE_ALIAS.get(z, z)
+    other = [r for r in regions if r['name'].replace(' ', '') == z]  # 시도가 바뀐 곳: 경북 군위군 → 대구 군위군
+    if len(other) == 1:
+        return other[0]['code'], other[0]['name']
+    return None
+
+
+def nearest_region(a, regions):
+    short = OFFICES[a['office']]
+    cand = [r for r in regions if r['sidoShort'] == short or (short in ('광주', '전남') and r['sidoShort'] == '전남광주')] or regions
+    if a['lat'] is None:
+        return None
+    r = min(cand, key=lambda r: (r['lat'] - a['lat']) ** 2 + ((r['lon'] - a['lon']) * 0.8) ** 2)
+    if (r['lat'] - a['lat']) ** 2 + ((r['lon'] - a['lon']) * 0.8) ** 2 > 0.25 ** 2:  # 약 28km보다 멀면 다른 시도일 수 있어 전체에서 다시
+        r = min(regions, key=lambda r: (r['lat'] - a['lat']) ** 2 + ((r['lon'] - a['lon']) * 0.8) ** 2)
+    return r['code'], r['name']
 
 
 def clean(v):
@@ -167,17 +191,16 @@ def build(rows):
             'loaded': clean(r0.get('LOAD_DTM')),
         })
     items = [a for a in items if any(r in REALMS for r in a['realms'])]
-    regions, misses = weather_regions(), Counter()
+    regions = weather_regions()
     for a in items:
         a['realm'] = next(REALMS[r] for r in a['realms'] if r in REALMS)
-        a['region_id'] = region_code(a['office'], a['zone'], regions, misses)
-        a['region_name'] = f"{OFFICES[a['office']]} {a['zone'] or ''}".strip()
+        hit = region_code(a['office'], a['zone'], regions)
+        side = hit and next(r['sidoShort'] for r in regions if r['code'][:4] == hit[0][:4])
+        a['region_id'], a['region_name'] = (hit[0], f"{OFFICES[a['office']] if side == '전남광주' else side} {hit[1]}") if hit else (None, None)
         ok = [f['won'] for f in a['fees'] if FEE_OK[0] <= f['won'] <= FEE_OK[1]]
         a['fee_min'], a['fee_max'] = (min(ok), max(ok)) if ok else (None, None)
         # 목록 순서: 수강료 공개 + 과정 정보가 많은 곳 먼저, 같은 점수는 id로 섞음(가나다순 아님).
         a['rank'] = (40 if ok else 0) + min(len(a['fees']), 10) * 2 + (10 if a['type'] == '학원' else 0) + (10 if a['tel'] else 0) + sum(map(ord, a['id'])) % 97 / 100
-    if misses:
-        log('시군구 코드를 못 찾은 지역', misses.most_common())
     items.sort(key=lambda a: a['id'])
     return items
 
@@ -249,7 +272,7 @@ def make_summary(items, status):
             won = [f['won'] for a in sub for f in a['fees'] if k in f['subjects'] and FEE_OK[0] <= f['won'] <= FEE_OK[1]]
             subjects[k] = {'count': len(sub), 'fees': fee_stats(won), 'top': [card(a) for a in sub[:6]]}
         regions.append({
-            'id': rid, 'name': rs[0]['region_name'], 'sido': OFFICES[rs[0]['office']], 'zone': rs[0]['zone'], 'count': len(rs),
+            'id': rid, 'name': rs[0]['region_name'], 'sido': rs[0]['region_name'].split(' ')[0], 'zone': ' '.join(rs[0]['region_name'].split(' ')[1:]), 'count': len(rs),
             'academies': sum(1 for a in rs if a['type'] == '학원'), 'with_fees': sum(1 for a in rs if a['fee_min']),
             'lat': round(sum(p[0] for p in pts) / len(pts), 5) if pts else None, 'lon': round(sum(p[1] for p in pts) / len(pts), 5) if pts else None,
             'realms': dict(Counter(a['realm'] for a in rs)), 'grades': dict(Counter(g for a in rs for g in a['grades'])),
@@ -293,6 +316,14 @@ def main():
         a['lat'], a['lon'] = (v if isinstance(v, list) else (None, None))
         if a['lat'] is None:
             a['rank'] -= 30  # 지도·거리에 못 나오는 곳은 뒤로
+    regions, misses = weather_regions(), Counter()
+    for a in items:
+        if a['region_id'] is None:
+            hit = nearest_region(a, regions)
+            misses[(OFFICES[a['office']], a['zone'], hit and hit[1])] += 1
+            a['region_id'], a['region_name'] = (hit[0], f"{next(r['sidoShort'] for r in regions if r['code'] == hit[0])} {hit[1]}") if hit else (f"{a['office']}-{a['zone'] or '기타'}", f"{OFFICES[a['office']]} {a['zone'] or ''}".strip())
+    if misses:
+        log('행정구역명으로 못 찾아 좌표로 정한 지역', misses.most_common(40))
     now = datetime.now(KST)
     prev_ids = {a['id']: a for a in prev['items']} if prev else {}
     first_seen = {a['id']: a.get('first_seen') for a in prev['items']} if prev else {}
