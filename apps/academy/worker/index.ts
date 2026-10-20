@@ -27,8 +27,9 @@ async function search(url:URL,env:Env){
     // 내 주변: 위·경도 상자로 거르고 거리순 정렬 → 그 페이지 카드만 읽음 (trip /api/search와 같은 방식).
     const km=Math.max(.5,Math.min(30,num(p.get('km'))??2));const dLat=km/111,dLon=km/(111*Math.cos(lat*Math.PI/180));
     where.push('lat BETWEEN ? AND ?','lon BETWEEN ? AND ?');args.push(lat-dLat,lat+dLat,lon-dLon,lon+dLon);
-    const {results}=await env.DB.prepare(`SELECT id,lat,lon FROM academies WHERE ${where.join(' AND ')}`).bind(...args).all<{id:string;lat:number;lon:number}>();
-    const near=results.map(r=>({id:r.id,km:distKm(lat,lon,r.lat,r.lon)})).filter(r=>r.km<=km).sort((a,b)=>a.km-b.km);
+    const {results}=await env.DB.prepare(`SELECT id,lat,lon,fee_min IS NOT NULL AS fee FROM academies WHERE ${where.join(' AND ')}`).bind(...args).all<{id:string;lat:number;lon:number;fee:number}>();
+    // 수강료가 공개된 학원을 먼저(10/20 사용자), 그 안에서 가까운 순.
+    const near=results.map(r=>({id:r.id,fee:r.fee,km:distKm(lat,lon,r.lat,r.lon)})).filter(r=>r.km<=km).sort((a,b)=>b.fee-a.fee||a.km-b.km);
     const slice=near.slice((page-1)*PAGE,page*PAGE);
     const cards=slice.length?(await env.DB.prepare(`SELECT id,card FROM academies WHERE id IN (${slice.map(()=>'?').join(',')})`).bind(...slice.map(s=>s.id)).all<{id:string;card:string}>()).results:[];
     const byId=new Map(cards.map(c=>[c.id,JSON.parse(c.card) as Card]));
@@ -101,7 +102,7 @@ async function detail(id:string,url:URL,env:Env,ctx:ExecutionContext){
     const k=a.subjects[0];const d=.03;
     const {results}=await env.DB.prepare(`SELECT card FROM academies WHERE lat BETWEEN ? AND ? AND lon BETWEEN ? AND ? AND id != ?${k?' AND subjects LIKE ?':''} ORDER BY rank DESC LIMIT 40`)
       .bind(a.lat-d,a.lat+d,a.lon-d*1.25,a.lon+d*1.25,a.id,...(k?[`% ${k} %`]:[])).all<{card:string}>();
-    near=results.map(r=>JSON.parse(r.card) as Card).map(c=>({...c,km:distKm(a.lat!,a.lon!,c.lat!,c.lon!)})).sort((x,y)=>x.km!-y.km!).slice(0,6);
+    near=results.map(r=>JSON.parse(r.card) as Card).map(c=>({...c,km:distKm(a.lat!,a.lon!,c.lat!,c.lon!)})).sort((x,y)=>Number(y.fee_min!=null)-Number(x.fee_min!=null)||x.km!-y.km!).slice(0,6);
   }
   const fee=feeRange(a);
   const title=`${a.name} 수강료·정보 | 내근처 학원`;
