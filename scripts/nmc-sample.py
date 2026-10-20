@@ -22,7 +22,8 @@ def get(path, **q):
     if isinstance(items, dict):
         items = [items]
     return dt, b.get('totalCount'), items or d.get('response', {}).get('header')
-for name, path in [('약국 목록', 'ErmctInsttInfoInqireService/getParmacyListInfoInqire'), ('병의원 목록', 'HsptlAsembySearchService/getHsptlMdcncListInfoInqire')]:
+for name, path in [('약국 목록', 'ErmctInsttInfoInqireService/getParmacyListInfoInqire'), ('병의원 목록', 'HsptlAsembySearchService/getHsptlMdcncListInfoInqire'),
+                   ('응급의료기관 목록', 'ErmctInfoInqireService/getEgytListInfoInqire'), ('응급실 실시간 가용병상', 'ErmctInfoInqireService/getEmrrmRltmUsefulSckbdInfoInqire')]:
     dt, total, items = get(path)
     print(f'== {name}: total={total} {dt:.1f}s')
     if isinstance(items, list) and items:
