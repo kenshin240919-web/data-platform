@@ -1,7 +1,6 @@
 name: Hospital setup
-# One-off: create D1 guidejung-hospital (if missing) and print its id for apps/hospital/wrangler.jsonc, and create an empty
-# Worker guidejung-hospital: wrangler's first deploy of a Worker with bindings asks for its secrets and the API answers
-# 'No access' (not 'not found') for a Worker that does not exist yet.
+# One-off: create D1 guidejung-hospital (if missing) and print its id for apps/hospital/wrangler.jsonc.
+# The GitHub token (CLOUDFLARE_API_TOKEN) has D1 permission only — it cannot deploy Workers (10/21 checked).
 on: workflow_dispatch
 permissions:
   contents: read
@@ -20,8 +19,3 @@ jobs:
           npx -y wrangler@4.145.0 d1 list --json > list.json || true
           if grep -q '"guidejung-hospital"' list.json; then echo 'exists'; else npx -y wrangler@4.145.0 d1 create guidejung-hospital --location apac; fi
           npx -y wrangler@4.145.0 d1 list --json | python3 -c "import json,sys;[print('D1', d['name'], d['uuid']) for d in json.load(sys.stdin) if d['name']=='guidejung-hospital']"
-      - name: Create empty Worker (first deploy)
-        run: |
-          mkdir boot && cd boot
-          printf 'export default {fetch(){return new Response("starting",{status:503})}};\n' > index.js
-          npx -y wrangler@4.145.0 deploy index.js --name guidejung-hospital --compatibility-date 2025-09-01

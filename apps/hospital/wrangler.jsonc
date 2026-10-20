@@ -1,5 +1,5 @@
 // Cloudflare Worker for hospital.guidejung.com (내근처 병원), separate from the other sites.
-// Deployed by GitHub Actions (.github/workflows/hospital-deploy.yml): npx wrangler deploy -c apps/hospital/wrangler.jsonc.
+// Run from the repo root: npx wrangler deploy -c apps/hospital/wrangler.jsonc (builds with npm run build:hospital).
 // Static pages: ./out. Worker: /api/*, 병원 상세 /hospital/{hpid}, sitemap. Data: D1 guidejung-hospital (scripts/build-hospital-d1.mjs).
 // 응급실 실시간 병상: 공공데이터포털 (Secret DATA_GO_KR_KEY), KV guidejung-cache (keys hospital:*).
 {
@@ -15,7 +15,5 @@
   },
   "d1_databases": [{ "binding": "DB", "database_name": "guidejung-hospital", "database_id": "527391ea-258a-45e4-92f5-1e20a77a7230" }],
   "kv_namespaces": [{ "binding": "CACHE", "id": "78659f07655e4ab99683b85951a377e3" }],
-  // 도메인: 배포 때 함께 연결.
-  "routes": [{ "pattern": "hospital.guidejung.com", "custom_domain": true }],
   "observability": { "enabled": true }
 }

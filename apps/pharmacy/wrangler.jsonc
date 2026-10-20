@@ -14,7 +14,5 @@
   },
   // The pharmacy list is imported as text and parsed on first use (a 6MB object literal slows the Worker start).
   "rules": [{ "type": "Text", "globs": ["**/data/pharmacies.json"], "fallthrough": true }],
-  // 도메인: 배포 때 함께 연결(Cloudflare 영역 guidejung.com에 DNS·인증서 자동).
-  "routes": [{ "pattern": "pharmacy.guidejung.com", "custom_domain": true }],
   "observability": { "enabled": true }
 }
