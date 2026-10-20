@@ -51,3 +51,7 @@
 button.ac-card{width:100%;text-align:left;font-weight:400;color:var(--ink);cursor:pointer}
 .ac-card-wrap.picked .ac-card{border-color:var(--ac);background:var(--ac-soft)}
 @media (max-width:760px){.ac-slots{grid-template-columns:1fr 1fr}}
+.ac-rank-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px 0}
+.ac-rank-card{display:flex;flex-direction:column;gap:4px;border:1px solid var(--line);border-radius:14px;padding:14px 16px}.ac-rank-card:hover{border-color:var(--ac)}
+.ac-rank-card b{font-size:17px}.ac-rank-card strong{color:var(--ac)}.ac-rank-card small{color:var(--muted);font-size:12px}
+@media (max-width:760px){.ac-rank-cards{grid-template-columns:1fr}}

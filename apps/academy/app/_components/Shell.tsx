@@ -6,7 +6,7 @@ export function Shell({children}:{children:React.ReactNode}){
     <NetworkBar current="academy"/>
     <header className="header"><div className="header-inner">
       <Link href="/" className="brand"><span aria-hidden="true">🎓</span><span>내근처 학원</span></Link>
-      <nav aria-label="주요 메뉴" className="ac-nav"><Link href="/region">지역별 학원</Link><Link href="/search">학원 찾기</Link><Link href="/compare">학원 비교</Link><a href={TRIP_URL+'/kids'} className="ac-nav-out">아이와 갈 곳 ↗</a><a href={WEATHER_URL} className="ac-nav-out">날씨 ↗</a></nav>
+      <nav aria-label="주요 메뉴" className="ac-nav"><Link href="/region">지역별 학원</Link><Link href="/search">학원 찾기</Link><Link href="/rank">학원비 순위</Link><Link href="/compare">학원 비교</Link><a href={TRIP_URL+'/kids'} className="ac-nav-out">아이와 갈 곳 ↗</a><a href={WEATHER_URL} className="ac-nav-out">날씨 ↗</a></nav>
       <span className="header-note">우리 동네 학원비 얼마야?</span>
     </div></header>
     <main>{children}</main>

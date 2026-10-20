@@ -24,6 +24,7 @@ export default function Home(){
     <section><h2>과목별 공개 수강료 (전국)</h2>
       <table className="ac-table"><thead><tr><th>과목</th><th>학원 수</th><th>중앙값</th><th>최저~최고</th></tr></thead>
         <tbody>{feeRows.map(k=>{const f=nation[k].fees!;return <tr key={k}><th><Link href={`/search?subject=${k}`}>{SUBJECT_ICON[k]} {SUBJECTS[k]}</Link></th><td>{n(nation[k].count)}곳</td><td><b>{man(f.median)}</b></td><td>{man(f.min)}~{man(f.max)}</td></tr>;})}</tbody></table>
+      <p><Link href="/rank" className="ac-more-link">과목별 학원비 비싼 동네·싼 동네 순위 →</Link></p>
       <p className="muted small">교육청에 공개된 과정별 수강료 {n(feeRows.reduce((a,k)=>a+nation[k].fees!.n,0))}건 기준. 기간(월·주) 표기가 없는 금액이 많아 실제와 다를 수 있어요.</p></section>
     <section><h2>시도별 학원</h2><div className="ac-sidos">{sidos.map(s=><Link key={s.name} href={`/region#${s.name}`}><b>{s.name}</b><span>{n(s.count)}곳</span></Link>)}</div></section>
     <Faq items={[
