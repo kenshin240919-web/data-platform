@@ -1,0 +1,18 @@
+// Cloudflare Worker for pharmacy.guidejung.com (내근처 약국), separate from the other sites.
+// Run from the repo root: npx wrangler deploy -c apps/pharmacy/wrangler.jsonc (builds with npm run build:pharmacy).
+// Static pages: ./out. Worker: /api/*, 약국 상세 /pharmacy/{hpid}. The pharmacy list ships with the Worker (data/pharmacies.json).
+{
+  "name": "guidejung-pharmacy",
+  "main": "worker/index.ts",
+  "compatibility_date": "2025-09-01",
+  "build": { "command": "npm run build:pharmacy" },
+  "assets": {
+    "directory": "./out",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    "run_worker_first": ["/api/*", "/pharmacy/*"]
+  },
+  // The pharmacy list is imported as text and parsed on first use (a 6MB object literal slows the Worker start).
+  "rules": [{ "type": "Text", "globs": ["**/data/pharmacies.json"], "fallthrough": true }],
+  "observability": { "enabled": true }
+}

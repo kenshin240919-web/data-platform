@@ -3,7 +3,7 @@
 import weatherRegions from '../../../apps/weather/data/regions.json';
 import traffic from '../../../apps/traffic/data/snapshot.json';
 
-export type Site='trip'|'weather'|'traffic'|'charge'|'academy'|'school';
+export type Site='trip'|'weather'|'traffic'|'charge'|'academy'|'school'|'pharmacy';
 // brand: 사이트 이름(로고·탭 제목), tagline: 부제(질문형 후킹). 10/17 사용자 결정: "내근처" 시리즈.
 // hidden: 아직 배포 전인 사이트(그 사이트 자신의 연결 바에만 보임).
 export const SITES:Record<Site,{url:string;icon:string;name:string;brand:string;tagline:string;hidden?:boolean}>={
@@ -13,6 +13,7 @@ export const SITES:Record<Site,{url:string;icon:string;name:string;brand:string;
   charge:{url:'https://charge.guidejung.com',icon:'⚡',name:'충전소',brand:'내근처 충전소',tagline:'지금 바로 충전 가능한 곳'},
   academy:{url:'https://academy.guidejung.com',icon:'🎓',name:'학원',brand:'내근처 학원',tagline:'우리 동네 학원비 얼마야?'},
   school:{url:'https://school.guidejung.com',icon:'🏫',name:'학교',brand:'내 학교',tagline:'오늘 급식 뭐야?'},
+  pharmacy:{url:'https://pharmacy.guidejung.com',icon:'💊',name:'약국',brand:'내근처 약국',tagline:'지금 문 연 약국 어디?',hidden:true},
 };
 const {trip:T,weather:W,traffic:R,charge:C}=Object.fromEntries(Object.entries(SITES).map(([k,v])=>[k,v.url])) as Record<Site,string>;
 
@@ -78,6 +79,7 @@ export const GENERIC:Record<Site,Link_>={
   charge:{icon:'⚡',title:'내 주변 전기차 충전소',desc:'지금 비어 있는 충전기',href:C},
   academy:{icon:'🎓',title:'우리 동네 학원·수강료',desc:'과목별 학원 수와 공개 수강료',href:SITES.academy.url},
   school:{icon:'🏫',title:'우리 학교 오늘 급식',desc:'급식·학사일정 D-day·시간표',href:SITES.school.url},
+  pharmacy:{icon:'💊',title:'지금 문 연 약국',desc:'내 주변 영업 중·심야·일요일 약국',href:SITES.pharmacy.url},
 };
 export const genericFor=(skip:Site)=>(Object.keys(GENERIC) as Site[]).filter(k=>k!==skip&&!SITES[k].hidden).map(k=>GENERIC[k]);
 export {T as TRIP_URL,W as WEATHER_URL,R as TRAFFIC_URL,C as CHARGE_URL};

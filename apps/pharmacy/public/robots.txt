@@ -1,0 +1,23 @@
+User-Agent: *
+Allow: /
+Disallow: /api/
+
+# AI answer engines and search crawlers are welcome (same rules as everyone).
+User-Agent: GPTBot
+User-Agent: OAI-SearchBot
+User-Agent: ChatGPT-User
+User-Agent: ClaudeBot
+User-Agent: Claude-SearchBot
+User-Agent: Claude-User
+User-Agent: PerplexityBot
+User-Agent: Perplexity-User
+User-Agent: Google-Extended
+User-Agent: Applebot-Extended
+User-Agent: Bingbot
+User-Agent: Yeti
+User-Agent: Daumoa
+Allow: /
+Disallow: /api/
+
+# Site summary for AI: https://pharmacy.guidejung.com/llms.txt
+Sitemap: https://pharmacy.guidejung.com/sitemap.xml
