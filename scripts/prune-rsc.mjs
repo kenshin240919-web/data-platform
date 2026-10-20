@@ -1,4 +1,4 @@
-// Remove Next.js RSC payload files (*.txt, __next.*) from a static export to keep the asset count low
+// Remove Next.js RSC payload files (all five sites: trip·weather·charge·traffic·academy) (*.txt, __next.*) from a static export to keep the asset count low
 // (Cloudflare Workers static assets have a file limit; academy had 10,443 .txt next to 2,089 pages).
 // Pages still work: the HTML carries its own payload, and a client navigation whose payload is missing
 // falls back to a normal page load. Root text files that are real content (robots.txt, ads.txt, llms.txt) stay.
