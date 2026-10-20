@@ -17,6 +17,6 @@
   },
   "include": [
     "./**/*.ts",
-    "../lib/fmt.ts"
+    "../lib/fmt.ts", "../../weather/data/regions.json"
   ]
 }

@@ -3,6 +3,24 @@
 // static template /academy/shell so header·footer·scripts match), /sitemap.xml + /sitemap-academies-{n}.xml.
 import {academyPath,esc,eun,feeRange,GRADES,n,SITE,SUBJECTS,subjectLabel,won,ymd,type Card} from '../lib/fmt';
 
+import weatherRegions from '../../weather/data/regions.json';
+
+// 학원 상세 → 다른 내근처 사이트(클릭·체류): 가장 가까운 시군구(weather 지역표)로 날씨·충전소, 좌표로 여행 검색.
+type WR={code:string;name:string;sidoShort:string;lat:number;lon:number};
+const WREG=weatherRegions as WR[];
+function connectHtml(a:{lat:number|null;lon:number|null;region_name:string}){
+  if(a.lat==null||a.lon==null)return '';
+  const r=WREG.reduce((x,y)=>distKm(a.lat!,a.lon!,y.lat,y.lon)<distKm(a.lat!,a.lon!,x.lat,x.lon)?y:x);
+  const charge=r.name.includes(' ')?r.code.slice(0,4)+'0':r.code,ll=`lat=${a.lat.toFixed(4)}&lon=${a.lon.toFixed(4)}`;
+  const items:[string,string,string,string][]=[
+    ['🧒','근처 아이와 갈 만한 곳','수업 끝나고 들르기 좋은 5km 안 아이 동반 장소',`https://trip.guidejung.com/search?${ll}&radius_km=5&condition=kids`],
+    ['🌤️',`${a.region_name} 등하원 날씨`,'비·미세먼지·옷차림 미리 확인',`https://weather.guidejung.com/region/${r.code}`],
+    ['🍜','근처 맛집','픽업 기다리며 들를 3km 안 맛집',`https://trip.guidejung.com/search?${ll}&radius_km=3&kind=food`],
+    ['⚡','근처 전기차 충전소','학원 기다리는 동안 충전',`https://charge.guidejung.com/region/${charge}`],
+  ];
+  return `<section class="gj-connect" aria-label="함께 보면 좋은 정보"><h2>🔗 함께 보면 좋은 정보</h2><div>${items.map(([i,t,d,h])=>`<a href="${esc(h)}"><span class="gj-connect-icon" aria-hidden="true">${i}</span><span><b>${esc(t)}</b><small>${esc(d)}</small></span><span class="gj-connect-go" aria-hidden="true">→</span></a>`).join('')}</div></section>`;
+}
+
 interface Env{ASSETS:Fetcher;DB:D1Database}
 type Academy=Card&{office_name:string|null;zone:string|null;region_name:string;region_id:string;realms:string[];courses:{order:string|null;course:string|null;list:string|null;realm:string|null}[];
   fees:{name:string;won:number;subjects:string[];grades:string[]}[];fee_public:boolean;capacity:number|null;capacity_now:number|null;boarding:boolean;
@@ -92,6 +110,7 @@ function detailHtml(a:Academy,near:Card[]){
 ${fees.length?`<section><h2>과정별 수강료</h2><ul class="ac-fees">${fees.map(f=>`<li><span>${esc(f.name)}</span><b>${esc(won(f.won))}</b></li>`).join('')}</ul><p class="muted small">교육청에 신고·공개된 인당 수강료(기간 표기 없음, 교재비 등 제외될 수 있음). 실제 수강료는 학원에 확인하세요.</p></section>`:''}
 <section><h2>학원 정보</h2><dl class="ac-facts">${facts.filter(([,v])=>v).map(([k,v])=>`<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl></section>
 ${near.length?`<section><h2>근처 같은 과목 학원</h2><div class="ac-cards">${near.map(c=>`<a class="ac-card" href="${academyPath(c.id)}"><span class="ac-card-body"><b>${esc(c.name)}</b><small class="muted">${c.km!=null?`📍 ${c.km<1?`${Math.round(c.km*1000)}m`:`${c.km.toFixed(1)}km`} · `:''}${esc(c.subjects.slice(0,3).map(subjectLabel).join(' · '))}</small></span><span class="${feeRange(c)?'ac-fee':'ac-fee none'}">${esc(feeRange(c)??'수강료 미공개')}</span></a>`).join('')}</div><p><a class="ac-more-link" href="/region/${esc(a.region_id)}">${esc(a.region_name)} 학원 모두 보기 →</a></p></section>`:''}
+${connectHtml(a)}
 <section class="gj-faq" aria-label="자주 묻는 질문"><h2>자주 묻는 질문</h2><dl>${faq.map(([q,x])=>`<div><dt>${esc(q)}</dt><dd>${esc(x)}</dd></div>`).join('')}</dl></section>
 <p class="muted small">출처: 나이스(NEIS) 교육정보 개방 포털 학원교습소정보. 잘못된 정보는 관할 교육지원청에 정정을 요청해 주세요.</p>
 ${ldTag(ld)}${ldTag(crumbs)}${faq.length?ldTag(faqLd):''}`;
@@ -99,7 +118,7 @@ ${ldTag(ld)}${ldTag(crumbs)}${faq.length?ldTag(faqLd):''}`;
 
 async function detail(id:string,url:URL,env:Env,ctx:ExecutionContext){
   const v=await version(env);
-  const key=new Request(`${url.origin}/academy/${id}?v=${encodeURIComponent(v)}&t=2`);
+  const key=new Request(`${url.origin}/academy/${id}?v=${encodeURIComponent(v)}&t=3`);
   const hit=await caches.default.match(key);if(hit)return hit;
   const row=await env.DB.prepare('SELECT body FROM academies WHERE id = ?').bind(id).first<{body:string}>();
   if(!row)return null;
