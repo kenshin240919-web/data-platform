@@ -7,6 +7,8 @@ export const SUBJECT_ICON:Record<string,string>={math:'➗',english:'🔤',korea
 // 첫 화면 과목 버튼(학부모가 가장 많이 찾는 순).
 export const MAIN_SUBJECTS=['math','english','korean','science','essay','coding','music','art','dance'];
 export const GRADES:Record<string,string>={kinder:'유아',elem:'초등',middle:'중등',high:'고등',adult:'성인'};
+// 카드·통계에 쓰는 수강료 범위(scripts/collect-academy.py FEE_OK와 같게).
+export const FEE_MIN=30000,FEE_MAX=3000000;
 export type Card={id:string;name:string;type:string|null;region_id?:string;region_name?:string;subjects:string[];grades:string[];fee_min:number|null;fee_max:number|null;address:string|null;lat:number|null;lon:number|null;established?:string|null;km?:number};
 export type FeeStats={n:number;min:number;median:number;max:number}|null;
 

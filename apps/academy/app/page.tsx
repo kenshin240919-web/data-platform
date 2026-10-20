@@ -4,11 +4,18 @@ import {AdSlot} from '@guidejung/ui/ads';
 import {Faq,breadcrumbLd,JsonLd,eun} from '@guidejung/ui/seo';
 import {Connect,genericFor} from '@guidejung/ui/network';
 import {HomeNearby} from './_components/HomeNearby';
+import {HomeLocal,type Area} from './_components/HomeLocal';
+import weatherRegions from '../../weather/data/regions.json';
+const wregions=weatherRegions as {code:string;name:string;lat:number;lon:number}[];
 import {man,MAIN_SUBJECTS,n,nation,regions,sidos,SITE,status,SUBJECTS,SUBJECT_ICON,updated} from '../lib/data';
 
 export const metadata:Metadata={alternates:{canonical:'/'}};
 export default function Home(){
   const popular=[...regions].sort((a,b)=>b.count-a.count).slice(0,12);
+  // 위치 → 시군구는 날씨 사이트와 같은 행정 중심점으로(학원이 몰린 곳의 평균점은 옆 시군구에 더 가까울 수 있음).
+  // 일반구가 있는 시(수원시 41110)는 그 시의 일반구 중심점들을 모두 후보로 씀.
+  const centres=(id:string)=>{const exact=wregions.filter(w=>w.code===id);if(exact.length)return exact;const city=wregions.filter(w=>id.endsWith('0')&&w.code.slice(0,4)===id.slice(0,4)&&w.name.includes(' '));return city;};
+  const areas:Area[]=regions.flatMap(r=>{const c=centres(r.id);const pts=c.length?c.map(w=>[w.lat,w.lon] as const):r.lat!=null?[[r.lat,r.lon!] as const]:[];return pts.map(([lat,lon])=>({id:r.id,name:r.name,lat,lon,count:r.count,math:r.subjects.math?.fees?.median,english:r.subjects.english?.fees?.median,korean:r.subjects.korean?.fees?.median}));});
   const feeRows=MAIN_SUBJECTS.filter(k=>nation[k]?.fees);
   const math=nation.math?.fees,eng=nation.english?.fees;
   return <div className="page ac-home">
@@ -17,6 +24,7 @@ export default function Home(){
       <p>전국 학원·교습소 <b>{n(status.count)}곳</b>의 위치와 교육청에 공개된 과정별 수강료를 지역·과목·학년별로 보여 드려요. <span className="muted">({updated()} 기준)</span></p>
       <div className="ac-subjects">{MAIN_SUBJECTS.map(k=><Link key={k} href={`/search?subject=${k}`}><span aria-hidden="true">{SUBJECT_ICON[k]}</span>{SUBJECTS[k]}</Link>)}</div>
     </section>
+    <HomeLocal areas={areas}/>
     <HomeNearby/>
     <AdSlot/>
     <section><h2>학원 많은 동네 TOP 12</h2><ol className="ac-rank">{popular.map(r=><li key={r.id}><Link href={`/region/${r.id}`}><b>{r.name}</b><span>{n(r.count)}곳</span></Link></li>)}</ol>

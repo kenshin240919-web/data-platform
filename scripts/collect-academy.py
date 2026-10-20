@@ -53,7 +53,9 @@ GRADE_RE = [(k, re.compile(p)) for k, _, p in GRADES]
 # 분야(REALM_SC_NM) → 사이트 분류. 처음 범위(10/19 사용자): 입시·보습 + 예체능, 영어 학원이 많은 국제화·종합·독서실도 포함.
 REALMS = {'입시.검정 및 보습': 'study', '예능(대)': 'arts', '국제화': 'lang', '종합(대)': 'study', '독서실': 'reading'}
 SIDO = {k: v for k, v in OFFICES.items()}
-FEE_OK = (10_000, 3_000_000)  # 이 범위 밖 금액(원본 오류·연간 금액 등)은 통계에서 뺌
+# 이 범위 밖 금액은 카드의 수강료 범위·통계에서 뺌(상세 '과정별 수강료'에는 원문 그대로). 10/20: 1만 원대(교재비·1회 수업 추정)가
+# '1.2만 원~30만 원'처럼 범위를 흐려 하한을 3만 원으로(공개 금액 하위 약 2%).
+FEE_OK = (30_000, 3_000_000)
 FEE_RE = re.compile(r'([^:,]+?)\s*:\s*([0-9]+)')
 PLACEHOLDER_TEL = re.compile(r'^0\d{1,2}-0{3,4}-0{4}$')
 
@@ -191,6 +193,11 @@ def build(rows):
             'loaded': clean(r0.get('LOAD_DTM')),
         })
     items = [a for a in items if any(r in REALMS for r in a['realms'])]
+    # 과목 이름이 전혀 없는 곳은 분야로 채움: 국제화 → 영어(대부분 영어 학원), 독서실 → 독서실, 입시·보습·종합 → 보습·입시 종합.
+    REALM_SUBJECT = {'국제화': 'english', '독서실': 'study', '입시.검정 및 보습': 'general', '종합(대)': 'general'}
+    for a in items:
+        if not a['subjects']:
+            a['subjects'] = list(dict.fromkeys(REALM_SUBJECT[r] for r in a['realms'] if r in REALM_SUBJECT))
     regions = weather_regions()
     for a in items:
         a['realm'] = next(REALMS[r] for r in a['realms'] if r in REALMS)

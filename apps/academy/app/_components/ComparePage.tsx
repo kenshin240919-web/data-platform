@@ -2,14 +2,14 @@
 import {useEffect,useRef,useState} from 'react';
 import {useMyPosition} from '@guidejung/ui/geo';
 import {LiveList} from './LiveList';
-import {academyPath,feeRange,GRADES,man,n,SUBJECTS,won,ymd,type Card} from '../../lib/fmt';
+import {FEE_MAX,FEE_MIN,academyPath,feeRange,GRADES,man,n,SUBJECTS,won,ymd,type Card} from '../../lib/fmt';
 import {clearCompare,COMPARE_MAX,toggleCompare} from '../../lib/compare';
 import {useCompare} from './useCompare';
 
 type Fee={name:string;won:number;subjects:string[]};
 type A={id:string;name:string;type:string|null;region_name:string;region_id:string;address:string|null;tel:string|null;subjects:string[];grades:string[];
   fee_min:number|null;fee_max:number|null;fees:Fee[];capacity:number|null;established:string|null;courses:{course:string|null;list:string|null}[]};
-const OK=(f:Fee)=>f.won>=10000&&f.won<=3000000;
+const OK=(f:Fee)=>f.won>=FEE_MIN&&f.won<=FEE_MAX;
 const median=(v:number[])=>{const s=[...v].sort((a,b)=>a-b);return s.length?s[Math.floor(s.length/2)]:null;};
 
 /** 위: 비교 칸 4개 + 비교 표, 아래: 학원 목록(내 위치 주변 또는 검색). 목록 카드를 누르면 위 칸으로 올라감(10/20 사용자). */

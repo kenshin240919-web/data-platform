@@ -1,7 +1,7 @@
 // Cloudflare Worker for academy.guidejung.com (내근처 학원). Static pages: ./out (Next.js export).
 // D1 guidejung-academy (scripts/build-academy-d1.mjs): /api/search, 학원 상세 /academy/{id} (server-rendered into the
 // static template /academy/shell so header·footer·scripts match), /sitemap.xml + /sitemap-academies-{n}.xml.
-import {academyPath,esc,eun,feeRange,GRADES,n,SITE,SUBJECTS,subjectLabel,won,ymd,type Card} from '../lib/fmt';
+import {FEE_MAX,FEE_MIN,academyPath,esc,eun,feeRange,GRADES,n,SITE,SUBJECTS,subjectLabel,won,ymd,type Card} from '../lib/fmt';
 
 import weatherRegions from '../../weather/data/regions.json';
 
@@ -79,7 +79,7 @@ const AD_FILL='<script>try{document.querySelectorAll("ins.adsbygoogle").forEach(
 function detailHtml(a:Academy,near:Card[]){
   const subj=a.subjects.map(subjectLabel),grades=a.grades.map(g=>GRADES[g]);
   const fees=[...a.fees].sort((x,y)=>x.won-y.won);
-  const okFees=fees.filter(f=>f.won>=10000&&f.won<=3000000);
+  const okFees=fees.filter(f=>f.won>=FEE_MIN&&f.won<=FEE_MAX);
   const fee=feeRange(a);
   const facts:[string,string|null][]=[
     ['구분',a.type],['지역',a.region_name],['주소',[a.address,a.address_detail].filter(Boolean).join(' ')||null],['전화',a.tel],
@@ -94,9 +94,9 @@ function detailHtml(a:Academy,near:Card[]){
     [`${a.name}에서는 무엇을 가르치나요?`,subj.length?`${subj.join('·')} 과정을 운영합니다${grades.length?`(${grades.join('·')} 대상 과정 포함)`:''}.`:''],
   ].filter(([,x])=>x) as [string,string][];
   const ld={'@context':'https://schema.org','@type':'EducationalOrganization',name:a.name,url:SITE+academyPath(a.id),
-    ...(a.address?{address:{'@type':'PostalAddress',streetAddress:[a.address,a.address_detail].filter(Boolean).join(' '),postalCode:a.zip??undefined,addressCountry:'KR'}}:{}),
+    image:SITE+'/og.png',...(a.address?{address:{'@type':'PostalAddress',streetAddress:[a.address,a.address_detail].filter(Boolean).join(' '),addressLocality:a.region_name.split(' ').slice(1).join(' ')||a.region_name,addressRegion:a.office_name?.replace(/교육청$/,'')??undefined,postalCode:a.zip??undefined,addressCountry:'KR'}}:{}),
     ...(a.lat!=null?{geo:{'@type':'GeoCoordinates',latitude:a.lat,longitude:a.lon}}:{}),...(a.tel?{telephone:a.tel}:{}),...(a.established?{foundingDate:ymd(a.established)!.replace(/\./g,'-')}:{}),
-    ...(okFees.length?{hasOfferCatalog:{'@type':'OfferCatalog',name:'교습 과정 수강료',itemListElement:okFees.slice(0,30).map(f=>({'@type':'Offer',itemOffered:{'@type':'Course',name:f.name,provider:{'@type':'Organization',name:a.name}},price:f.won,priceCurrency:'KRW'}))}}:{})};
+    ...(okFees.length?{hasOfferCatalog:{'@type':'OfferCatalog',name:'교습 과정 수강료',itemListElement:okFees.slice(0,30).map(f=>({'@type':'Offer',itemOffered:{'@type':'Course',name:f.name,description:`${a.name}의 ${f.name} 과정. 교육청에 공개된 인당 수강료 ${won(f.won)}(${a.region_name}).`,provider:{'@type':'Organization',name:a.name}},price:f.won,priceCurrency:'KRW'}))}}:{})};
   const crumbs={'@context':'https://schema.org','@type':'BreadcrumbList',itemListElement:[['내근처 학원',SITE+'/'],['지역별 학원',SITE+'/region'],[a.region_name,`${SITE}/region/${a.region_id}`],[a.name,SITE+academyPath(a.id)]].map(([name,item],i)=>({'@type':'ListItem',position:i+1,name,item}))};
   const faqLd={'@context':'https://schema.org','@type':'FAQPage',mainEntity:faq.map(([q,x])=>({'@type':'Question',name:q,acceptedAnswer:{'@type':'Answer',text:x}}))};
   const ldTag=(d:unknown)=>`<script type="application/ld+json">${JSON.stringify(d).replace(/</g,'\\u003c')}</script>`;
@@ -118,7 +118,7 @@ ${ldTag(ld)}${ldTag(crumbs)}${faq.length?ldTag(faqLd):''}`;
 
 async function detail(id:string,url:URL,env:Env,ctx:ExecutionContext){
   const v=await version(env);
-  const key=new Request(`${url.origin}/academy/${id}?v=${encodeURIComponent(v)}&t=3`);
+  const key=new Request(`${url.origin}/academy/${id}?v=${encodeURIComponent(v)}&t=4`);
   const hit=await caches.default.match(key);if(hit)return hit;
   const row=await env.DB.prepare('SELECT body FROM academies WHERE id = ?').bind(id).first<{body:string}>();
   if(!row)return null;
