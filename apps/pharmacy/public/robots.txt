@@ -21,3 +21,4 @@ Disallow: /api/
 
 # Site summary for AI: https://pharmacy.guidejung.com/llms.txt
 Sitemap: https://pharmacy.guidejung.com/sitemap.xml
+#DaumWebMasterTool:c3b91d0bd5789628f93a69a2fa70ecee3ac1e1f2ac63057069338da8d9146225:6JNuku1jO8QFMMcL4HrRjQ==
