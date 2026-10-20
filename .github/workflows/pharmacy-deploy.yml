@@ -1,0 +1,38 @@
+name: Pharmacy deploy
+# Deploys pharmacy.guidejung.com (Worker guidejung-pharmacy) with wrangler from GitHub Actions, because this Worker is not
+# connected to Cloudflare Workers Builds. Runs when the pharmacy app (or what it imports) changes on main, after the
+# daily pharmacy list commit, or by hand. Secrets: CLOUDFLARE_API_TOKEN (Workers Scripts edit + zone for the custom domain),
+# CLOUDFLARE_ACCOUNT_ID.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/pharmacy/**'
+      - 'apps/weather/data/**'
+      - 'apps/traffic/data/**'
+      - 'packages/**'
+      - 'scripts/prune-rsc.mjs'
+      - 'package.json'
+      - 'package-lock.json'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: pharmacy-deploy
+  cancel-in-progress: true
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Build and deploy
+        run: npx wrangler deploy -c apps/pharmacy/wrangler.jsonc
