@@ -50,6 +50,13 @@ const template=(env:Env,origin:string)=>shell??=env.ASSETS.fetch(new Request(ori
   .then(h=>h.replace(/<script[^>]*src="\/_next\/[^"]*"[^>]*><\/script>/g,'').replace(/<script>self\.__next_f[\s\S]*?<\/script>/g,'').replace(/<link rel="preload"[^>]*as="script"[^>]*\/?>/g,''))
   .catch(e=>{shell=null;throw e;});
 
+// 상세 페이지(하이드레이션 없음)의 비교 담기 버튼·비교함 띠: lib/compare.ts와 같은 키(gj.compare)·최대 4곳.
+const COMPARE_JS=`<script>(function(){var K='gj.compare',b=document.getElementById('ac-pick');function g(){try{return JSON.parse(localStorage.getItem(K)||'[]')}catch(e){return[]}}
+function draw(){var v=g(),on=b&&v.some(function(x){return x.id===b.dataset.id});if(b){b.textContent=on?'✓ 비교함에 담김':'+ 비교에 담기';b.className=on?'ac-pick-big on':'ac-pick-big'}
+var d=document.getElementById('ac-cbar');if(!v.length){if(d)d.remove();return}if(!d){d=document.createElement('div');d.id='ac-cbar';d.className='ac-comparebar';document.body.appendChild(d)}
+d.innerHTML='';var s=document.createElement('span');s.textContent='⚖️ 비교함 '+v.length+'/4 · '+v.map(function(x){return x.name}).join(', ');var a=document.createElement('a');a.href='/compare';a.textContent='비교하기 →';d.appendChild(s);d.appendChild(a)}
+if(b)b.addEventListener('click',function(){var v=g(),i=v.findIndex(function(x){return x.id===b.dataset.id});if(i>=0)v.splice(i,1);else if(v.length>=4){alert('비교는 최대 4곳까지예요. 비교함에서 하나를 빼 주세요.');return}else v.push({id:b.dataset.id,name:b.dataset.name});try{localStorage.setItem(K,JSON.stringify(v))}catch(e){}draw()});
+window.addEventListener('storage',draw);draw()})();</script>`;
 const AD_FILL='<script>try{document.querySelectorAll("ins.adsbygoogle").forEach(function(){(window.adsbygoogle=window.adsbygoogle||[]).push({})})}catch(e){}</script>';
 function detailHtml(a:Academy,near:Card[]){
   const subj=a.subjects.map(subjectLabel),grades=a.grades.map(g=>GRADES[g]);
@@ -81,7 +88,7 @@ function detailHtml(a:Academy,near:Card[]){
 <div class="ac-detail-head"><h1>${esc(a.name)}</h1><p>${esc([a.type,a.region_name].filter(Boolean).join(' · '))}</p>
 <div class="ac-tags">${[...subj,...grades].map(t=>`<span>${esc(t)}</span>`).join('')}</div></div>
 <p class="ac-answer">${fee?`교육청에 공개된 수강료는 <b>${esc(fee)}</b>${okFees.length>1?`(과정 ${n(okFees.length)}개)`:''}이에요.`:'교육청에 공개된 수강료 금액이 없어요. 학원에 직접 문의해 주세요.'}</p>
-<div class="ac-actions">${map?`<a href="${esc(map)}" rel="noopener" target="_blank">🧭 지도·길찾기</a>`:''}${a.tel?`<a class="sub" href="tel:${esc(a.tel.replace(/[^0-9]/g,''))}">📞 전화</a>`:''}${subjectLinks}</div>
+<div class="ac-actions"><button type="button" class="ac-pick-big" id="ac-pick" data-id="${esc(a.id)}" data-name="${esc(a.name)}">+ 비교에 담기</button>${map?`<a href="${esc(map)}" rel="noopener" target="_blank">🧭 지도·길찾기</a>`:''}${a.tel?`<a class="sub" href="tel:${esc(a.tel.replace(/[^0-9]/g,''))}">📞 전화</a>`:''}${subjectLinks}</div>
 ${fees.length?`<section><h2>과정별 수강료</h2><ul class="ac-fees">${fees.map(f=>`<li><span>${esc(f.name)}</span><b>${esc(won(f.won))}</b></li>`).join('')}</ul><p class="muted small">교육청에 신고·공개된 인당 수강료(기간 표기 없음, 교재비 등 제외될 수 있음). 실제 수강료는 학원에 확인하세요.</p></section>`:''}
 <section><h2>학원 정보</h2><dl class="ac-facts">${facts.filter(([,v])=>v).map(([k,v])=>`<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl></section>
 ${near.length?`<section><h2>근처 같은 과목 학원</h2><div class="ac-cards">${near.map(c=>`<a class="ac-card" href="${academyPath(c.id)}"><span class="ac-card-body"><b>${esc(c.name)}</b><small class="muted">${c.km!=null?`📍 ${c.km<1?`${Math.round(c.km*1000)}m`:`${c.km.toFixed(1)}km`} · `:''}${esc(c.subjects.slice(0,3).map(subjectLabel).join(' · '))}</small></span><span class="${feeRange(c)?'ac-fee':'ac-fee none'}">${esc(feeRange(c)??'수강료 미공개')}</span></a>`).join('')}</div><p><a class="ac-more-link" href="/region/${esc(a.region_id)}">${esc(a.region_name)} 학원 모두 보기 →</a></p></section>`:''}
@@ -92,7 +99,7 @@ ${ldTag(ld)}${ldTag(crumbs)}${faq.length?ldTag(faqLd):''}`;
 
 async function detail(id:string,url:URL,env:Env,ctx:ExecutionContext){
   const v=await version(env);
-  const key=new Request(`${url.origin}/academy/${id}?v=${encodeURIComponent(v)}`);
+  const key=new Request(`${url.origin}/academy/${id}?v=${encodeURIComponent(v)}&t=2`);
   const hit=await caches.default.match(key);if(hit)return hit;
   const row=await env.DB.prepare('SELECT body FROM academies WHERE id = ?').bind(id).first<{body:string}>();
   if(!row)return null;
@@ -115,7 +122,7 @@ async function detail(id:string,url:URL,env:Env,ctx:ExecutionContext){
     .replace(/<meta property="og:[^"]*" content="[^"]*"\/?>/g,'').replace(/<meta name="twitter:[^"]*" content="[^"]*"\/?>/g,'')
     .replace('</head>',`<link rel="canonical" href="${canonical}"/><meta property="og:title" content="${esc(title)}"/><meta property="og:description" content="${esc(desc)}"/><meta property="og:url" content="${canonical}"/><meta property="og:image" content="${SITE}/og.png"/><meta property="og:site_name" content="내근처 학원"/><meta property="og:locale" content="ko_KR"/><meta name="twitter:card" content="summary_large_image"/></head>`)
     .replace(/<div id="academy-detail">ACADEMY_DETAIL<\/div>/,detailHtml(a,near))
-    .replace('</body>',AD_FILL+'</body>');
+    .replace('</body>',AD_FILL+COMPARE_JS+'</body>');
   const res=new Response(html,{headers:{'content-type':'text/html; charset=utf-8','cache-control':'public, max-age=600'}});
   ctx.waitUntil(caches.default.put(key,res.clone()));
   return res;
@@ -141,6 +148,11 @@ export default {
       if(url.pathname==='/api/search')return await search(url,env);
       if(url.pathname==='/api/where'){const cf=(req as any).cf??{};const lat=Number(cf.latitude),lon=Number(cf.longitude);
         return new Response(JSON.stringify(Number.isFinite(lat)&&Number.isFinite(lon)&&cf.country==='KR'?{lat,lon,city:cf.city??''}:{}),{headers:{'content-type':'application/json; charset=utf-8','cache-control':'private, no-store'}});}
+      if(url.pathname==='/api/academies'){  // 비교함: ids=쉼표 목록(최대 4곳)
+        const ids=(url.searchParams.get('ids')??'').split(',').filter(x=>/^\d{4,20}$/.test(x)).slice(0,4);
+        if(!ids.length)return json({items:[]});
+        const {results}=await env.DB.prepare(`SELECT body FROM academies WHERE id IN (${ids.map(()=>'?').join(',')})`).bind(...ids).all<{body:string}>();
+        return json({items:results.map(r=>{const a=JSON.parse(r.body);return {id:a.id,name:a.name,type:a.type,region_name:a.region_name,region_id:a.region_id,address:a.address,tel:a.tel,subjects:a.subjects,grades:a.grades,fee_min:a.fee_min,fee_max:a.fee_max,fees:a.fees,capacity:a.capacity,established:a.established,courses:a.courses};})});}
       if(url.pathname==='/api/status'){const s=await env.DB.prepare("SELECT value FROM meta WHERE key='status'").first<{value:string}>().catch(()=>null);return json({status:s?JSON.parse(s.value):null,version:await version(env)},200,60);}
       if(url.pathname.startsWith('/api/'))return json({error:'not found'},404,3600);
       const m=url.pathname.match(/^\/academy\/(\d{4,20})\/?$/);

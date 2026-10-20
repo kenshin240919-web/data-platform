@@ -32,3 +32,15 @@
   .ac-nav{gap:16px;overflow-x:auto;white-space:nowrap}.ac-facts div{grid-template-columns:90px 1fr}
   .ac-table{font-size:13px}.ac-table th,.ac-table td{padding:8px 4px}
 }
+/* 학원 비교 */
+.ac-card-wrap{position:relative}.ac-card-wrap .ac-card{padding-right:14px}
+.ac-pick{position:absolute;top:8px;right:10px;background:white;color:var(--ac);border:1px solid #d9d0f7;border-radius:20px;padding:2px 9px;font-size:11px;font-weight:700}
+.ac-pick.on{background:var(--ac);color:white;border-color:var(--ac)}
+.ac-card-wrap .ac-fee{margin-top:18px}
+.ac-pick-big{background:white;color:var(--ac);border:1px solid #c5b8f2;border-radius:10px;padding:10px 16px;font-weight:700;font-size:14px}.ac-pick-big.on{background:var(--ac);color:white}
+.ac-comparebar{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:50;display:flex;gap:14px;align-items:center;background:#1f1640;color:white;border-radius:14px;padding:10px 16px;box-shadow:0 10px 30px #0003;max-width:calc(100% - 24px);font-size:14px}
+.ac-comparebar span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}.ac-comparebar a{background:#ffd54a;color:#1f1640;border-radius:9px;padding:6px 12px;font-weight:800;white-space:nowrap}
+.ac-compare-scroll{overflow-x:auto}.ac-compare{min-width:640px}.ac-compare th,.ac-compare td{vertical-align:top}.ac-compare thead th{font-size:14px;color:var(--ink);font-weight:800}.ac-compare thead th a{color:var(--ac)}
+.ac-compare tbody th{width:120px;color:var(--muted);font-weight:600;font-size:13px}
+.ac-x{background:none;color:var(--muted);padding:0 0 0 6px;font-size:16px;border-radius:4px}
+.ac-mini{list-style:none;padding:0;margin:0;font-size:12px}.ac-mini b{color:var(--ac)}
