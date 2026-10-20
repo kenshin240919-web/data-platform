@@ -1,5 +1,5 @@
 name: Pharmacy collect
-# Daily school list for pharmacy.guidejung.com (내근처 약국): 국립중앙의료원 전국 약국 정보 (hours + coordinates)
+# Daily pharmacy list for pharmacy.guidejung.com (내근처 약국): 국립중앙의료원 전국 약국 정보 (hours + coordinates)
 # (scripts/collect-pharmacy.py). apps/pharmacy/data/pharmacies.json is committed to main only when it changed
 # (Cloudflare rebuilds the site).
 # Secret: DATA_GO_KR_KEY.
@@ -27,7 +27,7 @@ jobs:
         env:
           DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
         run: python scripts/collect-pharmacy.py
-      - name: Commit school list
+      - name: Commit pharmacy list
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
