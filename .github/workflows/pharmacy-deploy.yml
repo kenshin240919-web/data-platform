@@ -14,6 +14,10 @@ on:
       - 'scripts/prune-rsc.mjs'
       - 'package.json'
       - 'package-lock.json'
+  # 매일 약국 목록 커밋은 GITHUB_TOKEN으로 push돼 push 이벤트가 안 생김 → 수집 작업이 끝나면 따로 배포.
+  workflow_run:
+    workflows: ['Pharmacy collect']
+    types: [completed]
   workflow_dispatch:
 permissions:
   contents: read
@@ -22,6 +26,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   deploy:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -29,6 +34,8 @@ jobs:
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
       - uses: actions/setup-node@v4
         with:
           node-version: 24

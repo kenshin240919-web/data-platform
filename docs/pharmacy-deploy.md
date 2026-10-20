@@ -7,12 +7,11 @@
 - 목록 갱신: GitHub Actions `pharmacy-collect.yml` 매일 04:27 KST, 바뀌었을 때만 main 커밋. Secret `DATA_GO_KR_KEY`(이미 있음).
 - '지금 영업 중'은 요일별 시간 + 한국 시각으로 계산. 공휴일 표는 `apps/pharmacy/lib/fmt.ts` `HOLIDAYS`(2026·2027) — 해가 바뀌기 전에 다음 해 추가.
 
-## Cloudflare 설정 (사용자, 처음 한 번)
-1. Workers & Pages → Create → Import a repository → `data-platform`
-2. 이름 `guidejung-pharmacy`, Build command 비움, Deploy command `npx wrangler deploy -c apps/pharmacy/wrangler.jsonc`
-3. 비프로덕션 분기 빌드 끄기
-4. 빌드 감시 경로: `apps/pharmacy/**`, `apps/weather/data/**`, `apps/traffic/data/**`, `packages/**`, `scripts/prune-rsc.mjs`, `package.json`, `package-lock.json`
-5. 배포 후 Settings → Domains & Routes → Custom domain `pharmacy.guidejung.com`
+## 배포 (10/20부터 GitHub Actions — Cloudflare 대시보드 설정 없음)
+- `.github/workflows/pharmacy-deploy.yml`이 `npx wrangler deploy -c apps/pharmacy/wrangler.jsonc` 실행(Secret `CLOUDFLARE_API_TOKEN`·`CLOUDFLARE_ACCOUNT_ID`).
+- 언제: main에 약국 앱·공통 부품이 바뀐 push, 매일 `Pharmacy collect`가 끝난 뒤(workflow_run), 수동 실행.
+- 도메인은 `wrangler.jsonc` `routes`의 `custom_domain`으로 배포 때 함께 연결(10/20 첫 배포에서 연결 확인).
+- Cloudflare Workers Builds(Git 연결)는 쓰지 않음 → 빌드 감시 경로 설정도 필요 없음.
 
 ## 확인
 - `/api/status`(약국 수·지금 한국 시각), `/pharmacy/C1107932`, `/region/11680`, `/region/11680/night`, `/sitemap.xml`
