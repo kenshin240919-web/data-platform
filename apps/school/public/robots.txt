@@ -21,3 +21,4 @@ Disallow: /api/
 
 # Site summary for AI: https://school.guidejung.com/llms.txt
 Sitemap: https://school.guidejung.com/sitemap.xml
+#DaumWebMasterTool:683f28eb94cf81effc28f5fdc3ca0c139a55f3e05a509c379a524644a3600e89:6JNuku1jO8QFMMcL4HrRjQ==
