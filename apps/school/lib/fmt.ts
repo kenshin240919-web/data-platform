@@ -18,7 +18,7 @@ export type Card={code:string;name:string;kind:string;k:string;region_name:strin
 export type Dish={name:string;allergens:number[]};
 export type Meal={type:string;dishes:Dish[];cal:string|null;origin?:string|null;nutrition?:string|null};
 export type MealDay={date:string;meals:Meal[]};
-export type Event={date:string;name:string;off:boolean;grades:number[]};
+export type Event={date:string;end?:string;name:string;off:boolean;grades:number[]};
 export type Today={school:Card;today:string;meal:MealDay|null;next:MealDay|null;events:Event[];timetable:{date:string;periods:string[]}|null;errors?:string[]};
 
 export const card=(s:School):Card=>({code:s.code,name:s.name,kind:s.kind,k:s.k,region_name:s.region_name,address:s.address,lat:s.lat,lon:s.lon});
@@ -47,11 +47,14 @@ export function parseDishes(raw:string):Dish[]{
   return raw.split(/<br\s*\/?>/i).map(x=>x.trim()).filter(Boolean).map(x=>{
     const m=x.match(/\(([\d.\s]+)\)\s*$/);
     const allergens=m?[...new Set(m[1].split('.').map(Number).filter(v=>v>=1&&v<ALLERGENS.length))]:[];
-    return {name:(m?x.slice(0,m.index):x).replace(/[*#]+$/,'').trim(),allergens};
+    // 학교 식단표의 끝 숫자·기호('조랭이떡월과채1', '멘츠까스(소스포함)1')는 메뉴 이름이 아니라 뺌.
+    return {name:(m?x.slice(0,m.index):x).trim().replace(/(?<=[가-힣)])\d+$/,'').replace(/[*#]+$/,'').trim(),allergens};
   }).filter(d=>d.name);
 }
 /** 급식 한 줄 요약: '기장밥 · 민물새우고추장수제비국 · 청포묵무침 …' */
 export const menuLine=(m:Meal,max=6)=>m.dishes.slice(0,max).map(d=>d.name).join(' · ')+(m.dishes.length>max?' …':'');
+/** 일정 날짜: '10월 26일(월)' 또는 '10월 26일(월)~28일(수)' */
+export const eventDate=(e:Event)=>e.end?`${mdw(e.date)}~${e.end.slice(4,6)===e.date.slice(4,6)?`${+e.end.slice(6,8)}일(${weekday(e.end)})`:mdw(e.end)}`:mdw(e.date);
 /** 학사일정에서 D-day로 보여 줄 큰 행사(토요휴업일·매주 반복되는 일정은 뺌). */
 export const bigEvent=(e:Event)=>!/토요휴업|^토요|주말/.test(e.name);
 /** 은/는 (digits read in Korean: 0·1·3·6·7·8 end in a consonant). */

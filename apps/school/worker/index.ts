@@ -6,7 +6,7 @@
 // 학교 상세 /school/{학교코드} (server-rendered into the static template /school/shell so header·footer·scripts match).
 import raw from '../data/schools.json';
 import weatherRegions from '../../weather/data/regions.json';
-import {addDays,ALLERGENS,bigEvent,card,dayDiff,dday,esc,eun,GRADES_OF,KIND_LABEL,kstDay,mdw,menuLine,monday,parseDishes,schoolPath,schoolYear,SITE,
+import {addDays,ALLERGENS,bigEvent,card,dayDiff,dday,esc,eun,eventDate,GRADES_OF,KIND_LABEL,kstDay,mdw,menuLine,monday,parseDishes,schoolPath,schoolYear,SITE,
   TIMETABLE_API,weekday,ymd,type Card,type Event,type Meal,type MealDay,type School,type Today} from '../lib/fmt';
 
 interface Env{ASSETS:Fetcher;CACHE:KVNamespace;NEIS_API_KEY?:string}
@@ -71,7 +71,12 @@ async function schedule(env:Env,ctx:ExecutionContext,s:School,today:string):Prom
   const flags=['ONE','TW','THREE','FR','FIV','SIX'];
   for(const r of rows){const date=String(r.AA_YMD),name=String(r.EVENT_NM??'').trim();if(!name||seen.has(date+name))continue;seen.add(date+name);
     out.push({date,name,off:/휴업|공휴/.test(String(r.SBTR_DD_SC_NM??'')),grades:flags.map((f,i)=>r[`${f}_GRADE_EVENT_YN`]==='Y'?i+1:0).filter(Boolean)});}
-  return out.sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0);
+  out.sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0);
+  // 같은 이름이 며칠 이어지면(기말고사 3일, 주말 사이 포함) 한 줄로: date~end.
+  const merged:Event[]=[];
+  for(const e of out){const prev=[...merged].reverse().find(x=>x.name===e.name);
+    if(prev&&dayDiff(prev.end??prev.date,e.date)<=3&&merged.indexOf(prev)>=merged.length-3)prev.end=e.date;else merged.push({...e});}
+  return merged.sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0);
 }
 async function classes(env:Env,ctx:ExecutionContext,s:School,today:string){
   const rows=await neis(env,ctx,'classInfo',{...base(s),AY:schoolYear(today)},7*24*3600);
@@ -90,6 +95,8 @@ async function timetable(env:Env,ctx:ExecutionContext,s:School,grade:string,cls:
 /** Week shown on a school page: this Monday–Friday, next week from Saturday on. */
 const shownWeek=(today:string)=>{const wd=weekday(today);const mon=wd==='토'||wd==='일'?addDays(monday(today),7):monday(today);return {from:mon,to:addDays(mon,4)};};
 
+// 메인 3초 답에는 원산지·영양 정보가 필요 없음(응답 크기).
+const slim=(d?:MealDay)=>d?{date:d.date,meals:d.meals.map(m=>({type:m.type,dishes:m.dishes,cal:m.cal}))}:null;
 async function todayOf(env:Env,ctx:ExecutionContext,s:School,grade:string|null,cls:string|null):Promise<Today>{
   const today=kstDay(),errors:string[]=[];
   const safe=<T,>(p:Promise<T>,fb:T,what:string)=>p.catch(e=>{console.error(e);errors.push(what);return fb;});
@@ -98,8 +105,8 @@ async function todayOf(env:Env,ctx:ExecutionContext,s:School,grade:string|null,c
     safe(schedule(env,ctx,s,today),[] as Event[],'schedule'),
     grade&&cls&&TIMETABLE_API[s.k]?safe(timetable(env,ctx,s,grade,cls,today,today),[] as {date:string;periods:string[]}[],'timetable'):Promise.resolve([]),
   ]);
-  return {school:card(s),today,meal:ms.find(d=>d.date===today)??null,next:ms.find(d=>d.date>today)??null,
-    events:ev.filter(e=>e.date>=today&&bigEvent(e)).slice(0,4),timetable:tt[0]??null,...(errors.length?{errors}:{})};
+  return {school:card(s),today,meal:slim(ms.find(d=>d.date===today)),next:slim(ms.find(d=>d.date>today)),
+    events:ev.filter(e=>(e.end??e.date)>=today&&bigEvent(e)).slice(0,4),timetable:tt[0]??null,...(errors.length?{errors}:{})};
 }
 
 // ---- search ---------------------------------------------------------------------------------------------------------
@@ -172,8 +179,8 @@ const AD_FILL='<script>try{document.querySelectorAll("ins.adsbygoogle").forEach(
 
 function detailHtml(s:School,today:string,week:MealDay[],todayMeal:MealDay|null,nextMeal:MealDay|null,events:Event[],failed:string[]){
   const lunch=todayMeal?.meals.find(m=>m.type==='중식')??todayMeal?.meals[0];
-  const upcoming=events.filter(e=>e.date>=today&&bigEvent(e));
-  const nextBig=upcoming.find(e=>e.date>today)??upcoming[0];
+  const upcoming=events.filter(e=>(e.end??e.date)>=today&&bigEvent(e));
+  const nextBig=upcoming.find(e=>e.date>today)??upcoming[0];  // 진행 중인 일정보다 다음 일정을 D-day로
   const vacation=upcoming.find(e=>/방학/.test(e.name)),exam=upcoming.find(e=>/고사|시험|평가/.test(e.name));
   const days=Array.from({length:5},(_,i)=>addDays(shownWeek(today).from,i));
   const answer=lunch?`오늘 ${esc(mdw(today))} ${esc(s.name)} ${esc(lunch.type)}은 <b>${esc(menuLine(lunch,5))}</b>${lunch.cal?` (${esc(lunch.cal)})`:''}이에요.`
@@ -187,14 +194,14 @@ function detailHtml(s:School,today:string,week:MealDay[],todayMeal:MealDay|null,
     :`${mdw(today)}에는 나이스에 올라온 ${s.name} 급식이 없습니다${nextMeal?`. 다음 급식은 ${mdw(nextMeal.date)}입니다`:''}.`;
   const faq:[string,string][]=([
     [`${s.name} 오늘 급식 메뉴는 무엇인가요?`,failed.includes('meal')?'':lunchFaq],
-    [`${s.name} 다음 방학은 언제인가요?`,vacation?`학사일정에 ${eun(vacation.name)} ${mdw(vacation.date)}(${dday(today,vacation.date)})로 올라와 있습니다.`:''],
-    [`${s.name} 시험(고사)은 언제인가요?`,exam?`학사일정의 다음 시험 일정은 ${mdw(exam.date)} ${exam.name}(${dday(today,exam.date)})입니다.`:''],
+    [`${s.name} 다음 방학은 언제인가요?`,vacation?`학사일정에 ${eun(vacation.name)} ${eventDate(vacation)}(${dday(today,vacation.date)})로 올라와 있습니다.`:''],
+    [`${s.name} 시험(고사)은 언제인가요?`,exam?`학사일정의 다음 시험 일정은 ${eventDate(exam)} ${exam.name}(${dday(today,exam.date)})입니다.`:''],
     [`${eun(s.name)} 어디에 있나요?`,s.address?`${[s.address,s.detail].filter(Boolean).join(' ')}에 있는 ${[s.found,s.coedu].filter(Boolean).join(' ')} ${s.kind}입니다${s.tel?`(전화 ${s.tel})`:''}.`:''],
   ] as [string,string][]).filter(([,x])=>x);
   const ld={'@context':'https://schema.org','@type':s.k==='elem'?'ElementarySchool':s.k==='middle'?'MiddleSchool':s.k==='high'?'HighSchool':'School',name:s.name,url:SITE+schoolPath(s.code),image:SITE+'/og.png',
     ...(s.eng?{alternateName:s.eng}:{}),...(s.address?{address:{'@type':'PostalAddress',streetAddress:[s.address,s.detail].filter(Boolean).join(' '),addressLocality:s.region_name.split(' ').slice(1).join(' ')||s.region_name,addressRegion:s.region_name.split(' ')[0],postalCode:s.zip??undefined,addressCountry:'KR'}}:{}),
     ...(s.lat!=null?{geo:{'@type':'GeoCoordinates',latitude:s.lat,longitude:s.lon}}:{}),...(s.tel?{telephone:s.tel}:{}),...(s.homepage?{sameAs:s.homepage}:{}),...(s.founded?{foundingDate:ymd(s.founded)!.replace(/\./g,'-')}:{}),
-    ...(upcoming.length?{event:upcoming.slice(0,5).map(e=>({'@type':'Event',name:`${s.name} ${e.name}`,startDate:`${e.date.slice(0,4)}-${e.date.slice(4,6)}-${e.date.slice(6,8)}`,eventAttendanceMode:'https://schema.org/OfflineEventAttendanceMode',eventStatus:'https://schema.org/EventScheduled',
+    ...(upcoming.length?{event:upcoming.slice(0,5).map(e=>({'@type':'Event',name:`${s.name} ${e.name}`,startDate:`${e.date.slice(0,4)}-${e.date.slice(4,6)}-${e.date.slice(6,8)}`,...(e.end?{endDate:`${e.end.slice(0,4)}-${e.end.slice(4,6)}-${e.end.slice(6,8)}`}:{}),eventAttendanceMode:'https://schema.org/OfflineEventAttendanceMode',eventStatus:'https://schema.org/EventScheduled',
       location:{'@type':'Place',name:s.name,address:[s.address,s.detail].filter(Boolean).join(' ')||s.region_name},organizer:{'@type':'Organization',name:s.name,url:SITE+schoolPath(s.code)},description:`${s.name} 학사일정: ${e.name}`,image:SITE+'/og.png'}))}:{})};
   const crumbs={'@context':'https://schema.org','@type':'BreadcrumbList',itemListElement:[['내 학교',SITE+'/'],['지역별 학교',SITE+'/region'],...(s.region.includes('기타')?[]:[[s.region_name,`${SITE}/region/${s.region}`]]),[s.name,SITE+schoolPath(s.code)]].map(([name,item],i)=>({'@type':'ListItem',position:i+1,name,item}))};
   const faqLd={'@context':'https://schema.org','@type':'FAQPage',mainEntity:faq.map(([q,x])=>({'@type':'Question',name:q,acceptedAnswer:{'@type':'Answer',text:x}}))};
@@ -207,14 +214,14 @@ function detailHtml(s:School,today:string,week:MealDay[],todayMeal:MealDay|null,
 <div class="sc-head"><h1>${esc(s.name)} <small>급식·학사일정·시간표</small></h1><p>${esc([s.kind,s.found,s.region_name].filter(Boolean).join(' · '))}</p>
 <div class="sc-actions"><button type="button" class="sc-save" id="sc-save">☆ 내 학교로 저장</button>${map?`<a href="${esc(map)}" rel="noopener" target="_blank">🧭 지도</a>`:''}${s.homepage?`<a href="${esc(s.homepage)}" rel="noopener nofollow" target="_blank">🏠 학교 홈페이지</a>`:''}</div></div>
 <p class="sc-answer">🍱 ${answer}</p>
-${nextBig?`<div class="sc-dday"><b>${esc(dday(today,nextBig.date))}</b><span>${esc(nextBig.name)} · ${esc(mdw(nextBig.date))}</span></div>`:''}
+${nextBig?`<div class="sc-dday"><b>${esc(dday(today,nextBig.date))}</b><span>${esc(nextBig.name)} · ${esc(eventDate(nextBig))}</span></div>`:''}
 ${todayMeal?`<section><h2>오늘 급식 <span class="muted">${esc(mdw(today))}</span></h2><div class="sc-meals">${todayMeal.meals.map(mealHtml).join('')}</div></section>`:''}
 <section><h2>이번 주 급식 <span class="muted">${esc(mdw(days[0]))} ~ ${esc(mdw(days[4]))}</span></h2>
 <div class="sc-week">${days.map(d=>{const m=byDate.get(d);const l=m?.meals.find(x=>x.type==='중식')??m?.meals[0];return `<div class="sc-day${d===today?' today':''}"><div class="sc-day-head"><b>${esc(weekday(d))}</b><span>${+d.slice(4,6)}/${+d.slice(6,8)}</span>${l?.cal?`<small>${esc(l.cal)}</small>`:''}</div>${l?dishHtml(l):'<p class="muted small">급식 없음</p>'}</div>`;}).join('')}</div>
 ${failed.includes('meal')?'<p class="muted small">급식 정보를 잠시 불러오지 못했어요.</p>':''}
 <details class="sc-allergy-box"><summary>⚠️ 알레르기 표시하기 (내 아이 알레르기를 고르면 해당 메뉴를 빨갛게)</summary><div id="sc-allergy" class="sc-allergy">${ALLERGENS.slice(1).map((a,i)=>`<button type="button" data-n="${i+1}">${i+1}. ${esc(a)}</button>`).join('')}</div><p class="muted small">고른 항목은 이 브라우저에만 저장돼요. 메뉴 옆 작은 글씨가 그 메뉴의 알레르기 유발 식품이에요.</p></details>
 </section>
-<section><h2>학사일정 <span class="muted">다가오는 일정</span></h2>${monthEvents.length?`<ul class="sc-events">${monthEvents.map(e=>`<li class="${e.date<today?'past':''}${e.off?' off':''}"><span class="sc-ev-date">${esc(mdw(e.date))}</span><b>${esc(e.name)}</b>${e.date>=today?`<em>${esc(dday(today,e.date))}</em>`:''}${e.grades.length&&e.grades.length<GRADES_OF[s.k]?`<small>${e.grades.join('·')}학년</small>`:''}</li>`).join('')}</ul>`:`<p class="muted">${failed.includes('schedule')?'학사일정을 잠시 불러오지 못했어요.':'앞으로 두 달 안에 올라온 학사일정이 없어요.'}</p>`}</section>
+<section><h2>학사일정 <span class="muted">다가오는 일정</span></h2>${monthEvents.length?`<ul class="sc-events">${monthEvents.map(e=>`<li class="${(e.end??e.date)<today?'past':''}${e.off?' off':''}"><span class="sc-ev-date">${esc(eventDate(e))}</span><b>${esc(e.name)}</b>${e.date>today?`<em>${esc(dday(today,e.date))}</em>`:(e.end??e.date)>=today?'<em>진행 중</em>':''}${e.grades.length&&e.grades.length<GRADES_OF[s.k]?`<small>${e.grades.join('·')}학년</small>`:''}</li>`).join('')}</ul>`:`<p class="muted">${failed.includes('schedule')?'학사일정을 잠시 불러오지 못했어요.':'앞으로 두 달 안에 올라온 학사일정이 없어요.'}</p>`}</section>
 ${TIMETABLE_API[s.k]?`<section id="sc-tt"><h2>시간표 <span class="muted">이번 주</span></h2><div class="sc-tt-pick"><select id="sc-grade" aria-label="학년"><option value="">학년</option></select><select id="sc-class" aria-label="반"><option value="">반</option></select><span class="muted small">학년·반을 고르면 이 브라우저에 기억해요</span></div><div id="sc-tt-out"></div></section>`:''}
 <section><h2>학교 정보</h2><dl class="sc-facts">${facts.filter(([,v])=>v).map(([k,v])=>`<div><dt>${esc(k)}</dt><dd>${k==='홈페이지'?`<a href="${esc(v)}" rel="noopener nofollow" target="_blank">${esc(v)}</a>`:esc(v)}</dd></div>`).join('')}</dl>
 ${s.region.includes('기타')?'':`<p><a class="sc-more-link" href="/region/${esc(s.region)}">${esc(s.region_name)} 학교 모두 보기 →</a></p>`}</section>
@@ -227,7 +234,7 @@ ${faq.length?`<section class="gj-faq" aria-label="자주 묻는 질문"><h2>자�
 async function detail(s:School,url:URL,env:Env,ctx:ExecutionContext){
   const today=kstDay(),hour=new Date(Date.now()+9*3600e3).getUTCHours();
   // 날짜가 바뀌면 새 화면(급식은 학교가 고칠 수 있어 3시간 단위로 다시 만듦).
-  const key=new Request(`${url.origin}/school/${s.code}?d=${today}&h=${Math.floor(hour/3)}&v=${encodeURIComponent(D.status.updated_at)}&t=1`);
+  const key=new Request(`${url.origin}/school/${s.code}?d=${today}&h=${Math.floor(hour/3)}&v=${encodeURIComponent(D.status.updated_at)}&t=2`);
   const hit=await caches.default.match(key);if(hit)return hit;
   const failed:string[]=[];
   const w=shownWeek(today);
