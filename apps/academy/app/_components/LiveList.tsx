@@ -6,7 +6,7 @@ import {AcademyCard} from './AcademyCard';
 
 type Query={region?:string;lat?:number;lon?:number;km?:number;subject?:string;grade?:string;q?:string};
 type Result={total:number;items:Card[]};
-export function LiveList({initial,query,chips=true,title,empty='조건에 맞는 학원이 없어요.'}:{initial?:Card[];query:Query;chips?:boolean;title?:string;empty?:string}){
+export function LiveList({initial,query,chips=true,title,empty='조건에 맞는 학원이 없어요.',onPick}:{initial?:Card[];query:Query;chips?:boolean;title?:string;empty?:string;onPick?:(c:Card)=>void}){
   const [subject,setSubject]=useState(query.subject??'');const [grade,setGrade]=useState(query.grade??'');
   const [items,setItems]=useState<Card[]>(initial??[]);const [total,setTotal]=useState<number|null>(null);
   const [page,setPage]=useState(1);const [busy,setBusy]=useState(false);const [failed,setFailed]=useState(false);
@@ -29,7 +29,7 @@ export function LiveList({initial,query,chips=true,title,empty='조건에 맞는
     {chips&&<div className="ac-chips" role="group" aria-label="학년">{chip(!grade,'전체 학년',()=>setGrade(''))}{Object.entries(GRADES).map(([k,v])=>chip(grade===k,v,()=>setGrade(grade===k?'':k)))}</div>}
     {failed&&!items.length?<p className="muted">목록을 불러오지 못했어요. 잠시 뒤 다시 시도해 주세요.</p>:
       !busy&&total===0?<p className="muted">{empty}</p>:
-      <div className="ac-cards">{items.map(c=><AcademyCard key={c.id} c={c}/>)}</div>}
+      <div className="ac-cards">{items.map(c=><AcademyCard key={c.id} c={c} onPick={onPick}/>)}</div>}
     {busy&&<p className="muted">불러오는 중…</p>}
     {total!=null&&items.length<total&&!busy&&<button type="button" className="ac-more" onClick={()=>setPage(p=>p+1)}>더 보기 ({(total-items.length).toLocaleString('ko-KR')}곳 남음)</button>}
   </section>;
