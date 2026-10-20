@@ -82,7 +82,7 @@ def build(rows, depts_of, regions):
             depts.append('korean')
         if div in ('치과의원', '치과병원') and 'dental' not in depts:
             depts.append('dental')
-        night = any(span_end(hours[d]) >= 2000 for d in '12345' if d in hours)
+        night = any(span_end(hours[d]) > 2000 for d in '12345' if d in hours)  # 저녁 8시 넘어서까지
         h = {'id': hid, 'name': name, 'div': div, 'address': addr, 'tel': clean_text(r.get('dutyTel1'), 20), 'er_tel': clean_text(r.get('dutyTel3'), 20),
              'er': str(r.get('dutyEryn')) == '1', 'lat': lat, 'lon': lon, 'hours': hours, 'depts': sorted(depts),
              'info': clean_text(r.get('dutyInf'), 400), 'note': clean_text(r.get('dutyEtc'), 200),

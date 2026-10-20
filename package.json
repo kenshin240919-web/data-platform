@@ -17,7 +17,8 @@
     "build:traffic": "npm run build -w @guidejung/traffic",
     "build:academy": "npm run build -w @guidejung/academy",
     "build:school": "npm run build -w @guidejung/school",
-    "build:pharmacy": "npm run build -w @guidejung/pharmacy"
+    "build:pharmacy": "npm run build -w @guidejung/pharmacy",
+    "build:hospital": "npm run build -w @guidejung/hospital"
   },
   "devDependencies": {
     "@playwright/test": "^1.56.0",
