@@ -290,7 +290,13 @@ def make_summary(items, status):
     for k, label, _ in SUBJECTS:
         won = [f['won'] for a in items for f in a['fees'] if k in f['subjects'] and FEE_OK[0] <= f['won'] <= FEE_OK[1]]
         nation[k] = {'count': sum(1 for a in items if k in a['subjects']), 'fees': fee_stats(won)}
-    return {'status': status, 'subjects': [{'key': k, 'label': l} for k, l, _ in SUBJECTS], 'grades': [{'key': k, 'label': l} for k, l, _ in GRADES],
+    # 최근 개원(개설일 기준, 오늘 이후 날짜는 원본 오류로 뺌): /new 페이지·RSS. 월별 개원 수는 최근 12개월.
+    today = datetime.now(KST).strftime('%Y%m%d')
+    opened = sorted((a for a in items if a['established'] and a['established'] <= today), key=lambda a: (a['established'], a['id']), reverse=True)
+    latest = [{**card(a), 'region_id': a['region_id'], 'region_name': a['region_name'], 'established': a['established']} for a in opened[:120]]
+    months = Counter(a['established'][:6] for a in opened)
+    by_month = [{'month': m, 'count': months[m]} for m in sorted(months, reverse=True)[:12]]
+    return {'status': status, 'latest': latest, 'opened_by_month': by_month, 'subjects': [{'key': k, 'label': l} for k, l, _ in SUBJECTS], 'grades': [{'key': k, 'label': l} for k, l, _ in GRADES],
             'nation': nation, 'regions': regions}
 
 

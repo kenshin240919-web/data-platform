@@ -24,7 +24,7 @@ export function SearchPage(){
       <button type="button" className={near?'ac-chip on':'ac-chip'} aria-pressed={!!near} onClick={()=>setNation(false)}>📍 내 주변 {NEAR_KM}km</button>
       <button type="button" className={!near?'ac-chip on':'ac-chip'} aria-pressed={!near} onClick={()=>setNation(true)}>전국</button>
     </div>}
-    <LiveList key={near?'near':'all'} title={applied?`‘${applied}’ 검색 결과`:near?`📍 내 주변 ${NEAR_KM}km ${label}`:`전국 ${label}`}
+    <LiveList key={near?'near':'all'} title={applied?`‘${applied}’ 검색 결과`:near?`📍 내 주변 ${NEAR_KM}km ${label}`:sp.has('lat')?`📍 이 위치 주변 ${num('km')??3}km ${label}`:`전국 ${label}`}
       query={near?{lat:near.lat,lon:near.lon,km:NEAR_KM,subject,grade:sp.get('grade')??undefined}:{q:applied||undefined,region,subject,grade:sp.get('grade')??undefined,lat:num('lat'),lon:num('lon'),km:num('km')}}
       empty={near?'내 주변에 조건에 맞는 학원이 없어요. ‘전국’을 눌러 넓혀 보세요.':undefined}/>
   </>;

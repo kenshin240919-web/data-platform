@@ -59,6 +59,8 @@ export function linksNear(lat:number,lon:number,skip:Site){
   if(skip!=='trip')out.push({icon:'🚗',title:`${a.label} 근처 가볼만한곳`,desc:'20km 안 여행지·축제를 가까운 순으로',href:`${T}/search?lat=${lat.toFixed(4)}&lon=${lon.toFixed(4)}&radius_km=20`});
   if(skip!=='charge')out.push({icon:'⚡',title:`${a.label} 전기차 충전소`,desc:'지금 비어 있는 충전기',href:`${C}/region/${a.charge}`});
   if(skip!=='traffic'&&rd)out.push({icon:'🛣️',title:`${rd.name} 실시간 상황`,desc:`가까운 고속도로(약 ${rd.km}km) 정체·CCTV`,href:`${R}/road/${rd.no}`});
+  // 여행(아이와 갈 곳·지역)·날씨·충전소 → 근처 학원(학부모 동선). 고속도로 휴게소에서는 맥락이 달라 넣지 않음.
+  if(skip!=='academy'&&skip!=='traffic')out.push({icon:'🎓',title:`${a.label} 근처 학원·학원비`,desc:'3km 안 학원과 교육청 공개 수강료',href:`${SITES.academy.url}/search?lat=${lat.toFixed(4)}&lon=${lon.toFixed(4)}&km=3`});
   if(skip!=='traffic')for(const r of nearRests(lat,lon,1))out.push({icon:'🍜',title:r.name,desc:`약 ${r.km}km · 대표 음식·기름값`,href:`${R}/rest/${r.code}`});
   return out;
 }

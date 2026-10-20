@@ -7,7 +7,7 @@ import {HomeNearby} from './_components/HomeNearby';
 import {HomeLocal,type Area} from './_components/HomeLocal';
 import weatherRegions from '../../weather/data/regions.json';
 const wregions=weatherRegions as {code:string;name:string;lat:number;lon:number}[];
-import {man,MAIN_SUBJECTS,n,nation,regions,sidos,SITE,status,SUBJECTS,SUBJECT_ICON,updated} from '../lib/data';
+import {latest,man,MAIN_SUBJECTS,n,nation,regions,sidos,SITE,status,SUBJECTS,SUBJECT_ICON,updated} from '../lib/data';
 
 export const metadata:Metadata={alternates:{canonical:'/'}};
 export default function Home(){
@@ -34,6 +34,7 @@ export default function Home(){
         <tbody>{feeRows.map(k=>{const f=nation[k].fees!;return <tr key={k}><th><Link href={`/search?subject=${k}`}>{SUBJECT_ICON[k]} {SUBJECTS[k]}</Link></th><td>{n(nation[k].count)}곳</td><td><b>{man(f.median)}</b></td><td>{man(f.min)}~{man(f.max)}</td></tr>;})}</tbody></table>
       <p><Link href="/rank" className="ac-more-link">과목별 학원비 비싼 동네·싼 동네 순위 →</Link></p>
       <p className="muted small">교육청에 공개된 과정별 수강료 {n(feeRows.reduce((a,k)=>a+nation[k].fees!.n,0))}건 기준. 기간(월·주) 표기가 없는 금액이 많아 실제와 다를 수 있어요.</p></section>
+    {latest.length>0&&<section><h2>🆕 새로 문 연 학원</h2><ul className="ac-links">{latest.slice(0,6).map(a=><li key={a.id}><a href={`/academy/${a.id}`}>{a.name}</a> <span className="muted">· {a.region_name} · {a.established.slice(0,4)}.{a.established.slice(4,6)}.{a.established.slice(6,8)} 개설</span></li>)}</ul><p><Link href="/new" className="ac-more-link">새로 문 연 학원 모두 보기 →</Link></p></section>}
     <section><h2>시도별 학원</h2><div className="ac-sidos">{sidos.map(s=><Link key={s.name} href={`/region#${s.name}`}><b>{s.name}</b><span>{n(s.count)}곳</span></Link>)}</div></section>
     <Faq items={[
       ['전국에 학원·교습소는 몇 곳인가요?',`나이스 교육정보 개방 포털 기준 ${updated()} 현재 개원 중인 학원·교습소는 ${n(status.count)}곳이고, 그중 ${n(status.with_fees)}곳이 과정별 수강료 금액을 공개하고 있습니다.`],

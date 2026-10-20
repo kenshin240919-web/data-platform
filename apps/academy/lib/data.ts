@@ -6,11 +6,15 @@ export * from './fmt';
 export type SubjectStat={count:number;fees:FeeStats;top:Card[]};
 export type Region={id:string;name:string;sido:string;zone:string;count:number;academies:number;with_fees:number;lat:number|null;lon:number|null;
   realms:Record<string,number>;grades:Record<string,number>;subjects:Record<string,SubjectStat>;top:Card[];new:Card[]};
-type Summary={status:{updated_at:string;count:number;with_coords:number;with_fees:number};nation:Record<string,{count:number;fees:FeeStats}>;regions:Region[]};
+export type Opened=Card&{region_id:string;region_name:string;established:string};
+type Summary={latest?:Opened[];opened_by_month?:{month:string;count:number}[];status:{updated_at:string;count:number;with_coords:number;with_fees:number};nation:Record<string,{count:number;fees:FeeStats}>;regions:Region[]};
 const S=summary as unknown as Summary;
 export const status=S.status;
 export const nation=S.nation;
 export const regions=S.regions;
+// 최근 개원(개설일 기준): 수집기가 아직 이 항목을 만들기 전 파일이면 빈 목록.
+export const latest=S.latest??[];
+export const openedByMonth=S.opened_by_month??[];
 export const region=(id:string)=>regions.find(r=>r.id===id);
 // 시도 순서는 교육청 코드 순(서울·부산·…·제주).
 export const sidos=[...new Set(regions.map(r=>r.sido))].map(name=>{const rs=regions.filter(r=>r.sido===name);return {name,regions:rs,count:rs.reduce((a,r)=>a+r.count,0)};});
