@@ -1,0 +1,17 @@
+name: Hospital sample
+# One-off: 국립중앙의료원 병·의원 data for hospital.guidejung.com (types, 진료과목 codes, hours, ER beds). Prints statistics only.
+on: workflow_dispatch
+permissions:
+  contents: read
+jobs:
+  sample:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Sample
+        env:
+          DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
+        run: python scripts/hospital-sample.py
