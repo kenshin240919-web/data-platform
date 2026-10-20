@@ -1,0 +1,39 @@
+name: School collect
+# Daily school list for school.guidejung.com (내 학교): NEIS 학교기본정보 + Kakao 주소→좌표 for new addresses
+# (scripts/collect-school.py). apps/school/data/schools.json is committed to main only when it changed
+# (Cloudflare rebuilds the site). Meals·학사일정·시간표 are fetched live by the Worker, not here.
+# Secrets: NEIS_API_KEY, KAKAO_REST_KEY.
+on:
+  schedule:
+    - cron: '7 19 * * *' # 04:07 KST
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: school-collect
+  cancel-in-progress: false
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Collect
+        env:
+          NEIS_API_KEY: ${{ secrets.NEIS_API_KEY }}
+          KAKAO_REST_KEY: ${{ secrets.KAKAO_REST_KEY }}
+        run: python scripts/collect-school.py
+      - name: Commit school list
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add apps/school/data/schools.json
+          if git diff --cached --quiet; then echo 'no change'; exit 0; fi
+          git commit -m 'school: 학교 목록 갱신'
+          for i in 1 2 3; do git pull --rebase origin main && git push origin HEAD:main && exit 0; sleep 10; done
+          exit 1
