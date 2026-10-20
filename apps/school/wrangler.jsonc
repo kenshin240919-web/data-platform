@@ -1,0 +1,18 @@
+// Cloudflare Worker for school.guidejung.com (내 학교), separate from the other sites.
+// Run from the repo root: npx wrangler deploy -c apps/school/wrangler.jsonc (builds with npm run build:school).
+// Static pages: ./out. Worker: /api/*, 학교 상세 /school/{학교코드}. The school list ships with the Worker (data/schools.json).
+// 급식·학사일정·시간표: NEIS on demand, cached in KV guidejung-cache (keys school:*). Secret: NEIS_API_KEY.
+{
+  "name": "guidejung-school",
+  "main": "worker/index.ts",
+  "compatibility_date": "2025-09-01",
+  "build": { "command": "npm run build:school" },
+  "assets": {
+    "directory": "./out",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    "run_worker_first": ["/api/*", "/school/*"]
+  },
+  "kv_namespaces": [{ "binding": "CACHE", "id": "78659f07655e4ab99683b85951a377e3" }],
+  "observability": { "enabled": true }
+}

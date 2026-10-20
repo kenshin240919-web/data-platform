@@ -15,7 +15,8 @@
     "build:weather": "npm run build -w @guidejung/weather",
     "build:charge": "npm run build -w @guidejung/charge",
     "build:traffic": "npm run build -w @guidejung/traffic",
-    "build:academy": "npm run build -w @guidejung/academy"
+    "build:academy": "npm run build -w @guidejung/academy",
+    "build:school": "npm run build -w @guidejung/school"
   },
   "devDependencies": {
     "@playwright/test": "^1.56.0",
