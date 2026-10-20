@@ -1,0 +1,59 @@
+name: Hospital collect
+# Daily collection for hospital.guidejung.com (내근처 병원): 국립중앙의료원 병·의원 + 진료과목 (scripts/collect-hospital.py).
+# runtime/hospital (full.json, d1-manifest.json) is kept in the Actions cache so D1 only gets changed rows.
+# Then: D1 guidejung-hospital gets new/changed rows (scripts/build-hospital-d1.mjs) and the small build file
+# apps/hospital/data/summary.json is committed to main (hospital-deploy.yml then rebuilds and deploys).
+# Secrets: DATA_GO_KR_KEY, CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID. hospital-deploy.yml redeploys when this finishes.
+on:
+  schedule:
+    - cron: '57 19 * * *' # 04:57 KST
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: hospital-collect
+  cancel-in-progress: false
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: npm ci
+      - uses: actions/cache/restore@v4
+        with:
+          path: runtime/hospital
+          key: hospital-${{ github.run_id }}
+          restore-keys: hospital-
+      - name: Collect
+        env:
+          DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
+        run: python scripts/collect-hospital.py
+      - name: Load D1 (new and changed rows)
+        run: node scripts/build-hospital-d1.mjs runtime/hospital/full.json --remote --manifest runtime/hospital/d1-manifest.json
+      - uses: actions/cache/save@v4
+        if: always() && hashFiles('runtime/hospital/full.json') != ''
+        with:
+          path: runtime/hospital
+          key: hospital-${{ github.run_id }}
+      - name: Commit build file
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add apps/hospital/data/summary.json
+          if git diff --cached --quiet; then echo 'no change'; exit 0; fi
+          git commit -m 'hospital: 병원 요약 데이터 갱신'
+          for i in 1 2 3; do git pull --rebase origin main && git push origin HEAD:main && exit 0; sleep 10; done
+          exit 1
