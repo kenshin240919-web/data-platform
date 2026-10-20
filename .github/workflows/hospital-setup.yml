@@ -1,0 +1,20 @@
+name: Hospital setup
+# One-off: create D1 guidejung-hospital (if missing) and print its id for apps/hospital/wrangler.jsonc.
+on: workflow_dispatch
+permissions:
+  contents: read
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Create D1
+        run: |
+          npx -y wrangler@4.145.0 d1 list --json > list.json || true
+          if grep -q '"guidejung-hospital"' list.json; then echo 'exists'; else npx -y wrangler@4.145.0 d1 create guidejung-hospital --location apac; fi
+          npx -y wrangler@4.145.0 d1 list --json | python3 -c "import json,sys;[print('D1', d['name'], d['uuid']) for d in json.load(sys.stdin) if d['name']=='guidejung-hospital']"
