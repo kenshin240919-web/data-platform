@@ -4,14 +4,18 @@
 // school costs one NEIS call per month of meals, per few months of calendar and per class-week of timetable, shared worldwide.
 // Routes: /api/search, /api/today, /api/meal, /api/schedule, /api/classes, /api/timetable, /api/where, /api/status,
 // 학교 상세 /school/{학교코드} (server-rendered into the static template /school/shell so header·footer·scripts match).
-import data from '../data/schools.json';
+import raw from '../data/schools.json';
 import weatherRegions from '../../weather/data/regions.json';
 import {addDays,ALLERGENS,bigEvent,card,dayDiff,dday,esc,eun,GRADES_OF,KIND_LABEL,kstDay,mdw,menuLine,monday,parseDishes,schoolPath,schoolYear,SITE,
   TIMETABLE_API,weekday,ymd,type Card,type Event,type Meal,type MealDay,type School,type Today} from '../lib/fmt';
 
 interface Env{ASSETS:Fetcher;CACHE:KVNamespace;NEIS_API_KEY?:string}
-const D=data as unknown as {status:{updated_at:string;count:number};items:School[]};
-const BY_CODE=new Map(D.items.map(s=>[s.code,s]));
+type Data={status:{updated_at:string;count:number};items:School[]};
+// wrangler.jsonc imports the file as text (rules): parse once, on the first request that needs it.
+let parsed:Data|null=null,byCode:Map<string,School>|null=null;
+const data=()=>parsed??=(typeof raw==='string'?JSON.parse(raw):raw) as Data;
+const D={get status(){return data().status;},get items(){return data().items;}};
+const BY_CODE={get:(c:string)=>(byCode??=new Map(data().items.map(s=>[s.code,s]))).get(c)};
 const json=(d:unknown,status=200,maxAge=300)=>new Response(JSON.stringify(d),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':`public, max-age=${maxAge}`,'access-control-allow-origin':'*'}});
 const distKm=(aLat:number,aLon:number,bLat:number,bLon:number)=>{const r=Math.PI/180,dLat=(bLat-aLat)*r,dLon=(bLon-aLon)*r;const h=Math.sin(dLat/2)**2+Math.cos(aLat*r)*Math.cos(bLat*r)*Math.sin(dLon/2)**2;return 12742*Math.asin(Math.sqrt(h));};
 const num=(v:string|null)=>v!==null&&v!==''&&Number.isFinite(Number(v))?Number(v):null;
@@ -112,7 +116,8 @@ function search(url:URL){
   // '대치중' → 대치중학교, '서울 대치' → 지역+이름. 이름 앞부분이 맞는 학교 먼저.
   const words=(p.get('q')??'').trim().toLowerCase().split(/\s+/).filter(Boolean).slice(0,4);
   const hit=list.filter(s=>{const name=flat(s.name),where=flat(s.region_name+(s.address??''));return words.every(w=>name.includes(flat(w))||where.includes(flat(w)));});
-  const score=(s:School)=>{const name=flat(s.name);return name.startsWith(q)?0:name.includes(q)?1:2;};
+  // 이름에 맞는 낱말이 많은 학교 먼저(주소에만 맞는 학교는 뒤로: '서울 상암' → 상암초·상암중이 상암로의 학교보다 먼저).
+  const score=(s:School)=>{const name=flat(s.name);return name.startsWith(q)?0:name.includes(q)?1:2+words.filter(w=>!name.includes(flat(w))).length;};
   hit.sort((a,b)=>score(a)-score(b)||a.name.length-b.name.length||a.name.localeCompare(b.name));
   return json({total:hit.length,items:hit.slice(0,limit).map(card)},200,3600);
 }
@@ -191,14 +196,14 @@ function detailHtml(s:School,today:string,week:MealDay[],todayMeal:MealDay|null,
     ...(s.lat!=null?{geo:{'@type':'GeoCoordinates',latitude:s.lat,longitude:s.lon}}:{}),...(s.tel?{telephone:s.tel}:{}),...(s.homepage?{sameAs:s.homepage}:{}),...(s.founded?{foundingDate:ymd(s.founded)!.replace(/\./g,'-')}:{}),
     ...(upcoming.length?{event:upcoming.slice(0,5).map(e=>({'@type':'Event',name:`${s.name} ${e.name}`,startDate:`${e.date.slice(0,4)}-${e.date.slice(4,6)}-${e.date.slice(6,8)}`,eventAttendanceMode:'https://schema.org/OfflineEventAttendanceMode',eventStatus:'https://schema.org/EventScheduled',
       location:{'@type':'Place',name:s.name,address:[s.address,s.detail].filter(Boolean).join(' ')||s.region_name},organizer:{'@type':'Organization',name:s.name,url:SITE+schoolPath(s.code)},description:`${s.name} 학사일정: ${e.name}`,image:SITE+'/og.png'}))}:{})};
-  const crumbs={'@context':'https://schema.org','@type':'BreadcrumbList',itemListElement:[['내 학교',SITE+'/'],['지역별 학교',SITE+'/region'],[s.region_name,`${SITE}/region/${s.region}`],[s.name,SITE+schoolPath(s.code)]].map(([name,item],i)=>({'@type':'ListItem',position:i+1,name,item}))};
+  const crumbs={'@context':'https://schema.org','@type':'BreadcrumbList',itemListElement:[['내 학교',SITE+'/'],['지역별 학교',SITE+'/region'],...(s.region.includes('기타')?[]:[[s.region_name,`${SITE}/region/${s.region}`]]),[s.name,SITE+schoolPath(s.code)]].map(([name,item],i)=>({'@type':'ListItem',position:i+1,name,item}))};
   const faqLd={'@context':'https://schema.org','@type':'FAQPage',mainEntity:faq.map(([q,x])=>({'@type':'Question',name:q,acceptedAnswer:{'@type':'Answer',text:x}}))};
   const ldTag=(d:unknown)=>`<script type="application/ld+json">${JSON.stringify(d).replace(/</g,'\\u003c')}</script>`;
   const map=s.lat!=null?`https://map.kakao.com/link/map/${encodeURIComponent(s.name)},${s.lat},${s.lon}`:s.address?`https://map.kakao.com/?q=${encodeURIComponent(s.address)}`:null;
   const byDate=new Map(week.map(d=>[d.date,d]));
   const monthEvents=events.filter(e=>e.date>=addDays(today,-7)&&e.date<=addDays(today,62)&&bigEvent(e));
   return `<div id="sc-page" data-code="${esc(s.code)}" data-name="${esc(s.name)}" data-kind="${esc(s.kind)}" data-k="${esc(s.k)}">
-<nav class="crumbs"><a href="/">홈</a> › <a href="/region">지역별 학교</a> › <a href="/region/${esc(s.region)}">${esc(s.region_name)}</a> › ${esc(s.name)}</nav>
+<nav class="crumbs"><a href="/">홈</a> › <a href="/region">지역별 학교</a> › ${s.region.includes('기타')?'':`<a href="/region/${esc(s.region)}">${esc(s.region_name)}</a> › `}${esc(s.name)}</nav>
 <div class="sc-head"><h1>${esc(s.name)} <small>급식·학사일정·시간표</small></h1><p>${esc([s.kind,s.found,s.region_name].filter(Boolean).join(' · '))}</p>
 <div class="sc-actions"><button type="button" class="sc-save" id="sc-save">☆ 내 학교로 저장</button>${map?`<a href="${esc(map)}" rel="noopener" target="_blank">🧭 지도</a>`:''}${s.homepage?`<a href="${esc(s.homepage)}" rel="noopener nofollow" target="_blank">🏠 학교 홈페이지</a>`:''}</div></div>
 <p class="sc-answer">🍱 ${answer}</p>
@@ -212,7 +217,7 @@ ${failed.includes('meal')?'<p class="muted small">급식 정보를 잠시 불러
 <section><h2>학사일정 <span class="muted">다가오는 일정</span></h2>${monthEvents.length?`<ul class="sc-events">${monthEvents.map(e=>`<li class="${e.date<today?'past':''}${e.off?' off':''}"><span class="sc-ev-date">${esc(mdw(e.date))}</span><b>${esc(e.name)}</b>${e.date>=today?`<em>${esc(dday(today,e.date))}</em>`:''}${e.grades.length&&e.grades.length<GRADES_OF[s.k]?`<small>${e.grades.join('·')}학년</small>`:''}</li>`).join('')}</ul>`:`<p class="muted">${failed.includes('schedule')?'학사일정을 잠시 불러오지 못했어요.':'앞으로 두 달 안에 올라온 학사일정이 없어요.'}</p>`}</section>
 ${TIMETABLE_API[s.k]?`<section id="sc-tt"><h2>시간표 <span class="muted">이번 주</span></h2><div class="sc-tt-pick"><select id="sc-grade" aria-label="학년"><option value="">학년</option></select><select id="sc-class" aria-label="반"><option value="">반</option></select><span class="muted small">학년·반을 고르면 이 브라우저에 기억해요</span></div><div id="sc-tt-out"></div></section>`:''}
 <section><h2>학교 정보</h2><dl class="sc-facts">${facts.filter(([,v])=>v).map(([k,v])=>`<div><dt>${esc(k)}</dt><dd>${k==='홈페이지'?`<a href="${esc(v)}" rel="noopener nofollow" target="_blank">${esc(v)}</a>`:esc(v)}</dd></div>`).join('')}</dl>
-<p><a class="sc-more-link" href="/region/${esc(s.region)}">${esc(s.region_name)} 학교 모두 보기 →</a></p></section>
+${s.region.includes('기타')?'':`<p><a class="sc-more-link" href="/region/${esc(s.region)}">${esc(s.region_name)} 학교 모두 보기 →</a></p>`}</section>
 ${connectHtml(s)}
 ${faq.length?`<section class="gj-faq" aria-label="자주 묻는 질문"><h2>자주 묻는 질문</h2><dl>${faq.map(([q,x])=>`<div><dt>${esc(q)}</dt><dd>${esc(x)}</dd></div>`).join('')}</dl></section>`:''}
 <p class="muted small">출처: 나이스(NEIS) 교육정보 개방 포털(학교기본정보·급식식단정보·학사일정·시간표). 학교가 입력한 내용이라 바뀔 수 있으니 중요한 일정은 학교 안내를 확인하세요.</p>

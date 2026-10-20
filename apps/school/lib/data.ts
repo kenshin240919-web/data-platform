@@ -8,7 +8,8 @@ export const status=D.status;
 export const schools=D.items;
 export type Region={id:string;name:string;sido:string;zone:string;count:number;kinds:Record<string,number>;schools:School[];lat:number|null;lon:number|null};
 const byRegion=new Map<string,School[]>();
-for(const s of schools)(byRegion.get(s.region)??byRegion.set(s.region,[]).get(s.region)!).push(s);
+// 주소가 없어 시군구를 못 정한 학교('부산 기타' 등 몇 곳)는 지역 페이지를 만들지 않음(학교 상세는 열림).
+for(const s of schools)if(!s.region.includes('기타'))(byRegion.get(s.region)??byRegion.set(s.region,[]).get(s.region)!).push(s);
 const avg=(v:number[])=>v.length?+(v.reduce((a,b)=>a+b,0)/v.length).toFixed(5):null;
 export const regions:Region[]=[...byRegion].map(([id,list])=>{const [sido,...rest]=list[0].region_name.split(' ');const pts=list.filter(s=>s.lat!=null);
   return {id,name:list[0].region_name,sido,zone:rest.join(' ')||sido,count:list.length,kinds:Object.fromEntries(KIND_ORDER.map(k=>[k,list.filter(s=>s.k===k).length]).filter(([,c])=>c)),

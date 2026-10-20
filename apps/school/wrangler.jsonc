@@ -14,5 +14,7 @@
     "run_worker_first": ["/api/*", "/school/*"]
   },
   "kv_namespaces": [{ "binding": "CACHE", "id": "78659f07655e4ab99683b85951a377e3" }],
+  // The school list is imported as text and parsed on first use (a 6MB object literal slows the Worker start).
+  "rules": [{ "type": "Text", "globs": ["**/data/schools.json"], "fallthrough": true }],
   "observability": { "enabled": true }
 }
