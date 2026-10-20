@@ -1,0 +1,38 @@
+name: Pharmacy collect
+# Daily school list for pharmacy.guidejung.com (내근처 약국): 국립중앙의료원 전국 약국 정보 (hours + coordinates)
+# (scripts/collect-pharmacy.py). apps/pharmacy/data/pharmacies.json is committed to main only when it changed
+# (Cloudflare rebuilds the site).
+# Secret: DATA_GO_KR_KEY.
+on:
+  schedule:
+    - cron: '27 19 * * *' # 04:27 KST
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: pharmacy-collect
+  cancel-in-progress: false
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Collect
+        env:
+          DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
+        run: python scripts/collect-pharmacy.py
+      - name: Commit school list
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add apps/pharmacy/data/pharmacies.json
+          if git diff --cached --quiet; then echo 'no change'; exit 0; fi
+          git commit -m 'pharmacy: 약국 목록 갱신'
+          for i in 1 2 3; do git pull --rebase origin main && git push origin HEAD:main && exit 0; sleep 10; done
+          exit 1
