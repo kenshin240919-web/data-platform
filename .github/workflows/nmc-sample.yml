@@ -1,0 +1,17 @@
+name: NMC pharmacy hospital sample
+# One-off: can DATA_GO_KR_KEY read 국립중앙의료원 약국·병의원 APIs (활용신청 여부·필드·한도)? Prints statistics only.
+on: workflow_dispatch
+permissions:
+  contents: read
+jobs:
+  sample:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Sample
+        env:
+          DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
+        run: python scripts/nmc-sample.py
