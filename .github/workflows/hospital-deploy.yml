@@ -1,0 +1,49 @@
+name: Hospital deploy
+# Deploys hospital.guidejung.com (Worker guidejung-hospital) with wrangler from GitHub Actions, because this Worker is not
+# connected to Cloudflare Workers Builds. Runs when the hospital app (or what it imports) changes on main, after the
+# daily hospital summary commit, or by hand. Secrets: CLOUDFLARE_API_TOKEN (D1·Workers 스크립트·KV 편집·계정 설정 읽기, 영역 권한 없음 — 도메인은 대시보드에서 연결),
+# CLOUDFLARE_ACCOUNT_ID, DATA_GO_KR_KEY (copied into the Worker secret for 응급실 병상).
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/hospital/**'
+      - 'apps/weather/data/**'
+      - 'apps/traffic/data/**'
+      - 'packages/**'
+      - 'scripts/prune-rsc.mjs'
+      - 'package.json'
+      - 'package-lock.json'
+  # 매일 병원 요약 커밋은 GITHUB_TOKEN으로 push돼 push 이벤트가 안 생김 → 수집 작업이 끝나면 따로 배포.
+  workflow_run:
+    workflows: ['Hospital collect']
+    types: [completed]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: hospital-deploy
+  cancel-in-progress: true
+jobs:
+  deploy:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Build and deploy
+        run: npx wrangler deploy -c apps/hospital/wrangler.jsonc
+      - name: Secret for 응급실 실시간 병상
+        env:
+          DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
+        run: printf '%s' "$DATA_GO_KR_KEY" | npx wrangler secret put DATA_GO_KR_KEY -c apps/hospital/wrangler.jsonc
