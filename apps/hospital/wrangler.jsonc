@@ -15,5 +15,6 @@
   },
   "d1_databases": [{ "binding": "DB", "database_name": "guidejung-hospital", "database_id": "527391ea-258a-45e4-92f5-1e20a77a7230" }],
   "kv_namespaces": [{ "binding": "CACHE", "id": "78659f07655e4ab99683b85951a377e3" }],
+  "routes": [{ "pattern": "hospital.guidejung.com", "custom_domain": true }],
   "observability": { "enabled": true }
 }
