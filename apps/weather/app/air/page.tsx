@@ -1,9 +1,10 @@
+import {SITE as SITE_} from '../../lib/regions';
 import type {Metadata} from 'next';
 import {Connect,GENERIC,TRIP_URL} from '@guidejung/ui/network';
 import {AdSlot} from '@guidejung/ui/ads';
 import stations from '../../data/air-stations.json';
 import {AirBoard} from '../_components/AirBoard';
-import {Faq} from '@guidejung/ui/seo';
+import {Faq,JsonLd,breadcrumbLd} from '@guidejung/ui/seo';
 import {label,regions,SITE} from '../../lib/regions';
 
 export const metadata:Metadata={title:'오늘 미세먼지 - 전국 실시간 순위',description:'전국 미세먼지·초미세먼지 실시간 측정값. 지금 공기 가장 깨끗한 곳과 나쁜 곳 TOP 10, 시도별 평균을 확인하세요.',alternates:{canonical:SITE+'/air'}};
@@ -19,5 +20,5 @@ export default function AirPage(){
       ['미세먼지 좋음·나쁨 기준은 무엇인가요?','미세먼지(PM10)는 ㎥당 30㎍ 이하 좋음, 31~80 보통, 81~150 나쁨, 151 이상 매우나쁨입니다.'],
       ['초미세먼지 기준은 무엇인가요?','초미세먼지(PM2.5)는 ㎥당 15㎍ 이하 좋음, 16~35 보통, 36~75 나쁨, 76 이상 매우나쁨입니다.'],
       ['미세먼지 측정값은 어디서 오나요?',`한국환경공단 에어코리아의 전국 측정소 ${(stations as unknown[]).length.toLocaleString()}곳 실시간 측정값이며, 보통 1시간마다 갱신됩니다.`],
-      ['미세먼지 나쁜 날에는 어디로 가면 좋나요?','박물관·전시관·실내 체험시설처럼 실내에서 즐길 수 있는 곳이 좋습니다. 내근처 여행의 실내 여행지 목록에서 가까운 곳을 찾아보세요.']]}/></section>;
+      ['미세먼지 나쁜 날에는 어디로 가면 좋나요?','박물관·전시관·실내 체험시설처럼 실내에서 즐길 수 있는 곳이 좋습니다. 내근처 여행의 실내 여행지 목록에서 가까운 곳을 찾아보세요.']]}/><JsonLd data={breadcrumbLd([['내근처 날씨',SITE_+'/'],['미세먼지',SITE_+'/air']])}/></section>;
 }

@@ -1,3 +1,5 @@
+import {SITE as SITE_} from '../../lib/regions';
+import {JsonLd,breadcrumbLd} from '@guidejung/ui/seo';
 import Link from 'next/link';
 import type {Metadata} from 'next';
 import {label,sidos,SITE} from '../../lib/regions';
@@ -11,5 +13,5 @@ export default function RegionIndex(){
       <div className="chips">{s.regions.map(r=><Link key={r.code} href={`/region/${r.code}`}>{r.name}</Link>)}</div>
     </div>)}
     <p className="muted small">{sidos.reduce((n,s)=>n+s.regions.length,0)}개 시군구 · {sidos.map(s=>label(s.capital)).slice(0,3).join(', ')} 등</p>
-  </section>;
+  <JsonLd data={breadcrumbLd([['내근처 날씨',SITE_+'/'],['전국 날씨',SITE_+'/region']])}/></section>;
 }

@@ -16,6 +16,7 @@ import {DetailView,ShellView,TRIP_DESC,placeDescription} from './views';
 import {Faq,JsonLd,breadcrumbLd,type QA} from './seo';
 import {ADSENSE_CLIENT} from './adsense';
 import {AdSlot} from './ads';
+import {groupBySido} from './sido';
 export {ADSENSE_CLIENT};
 export {AdSenseScript} from './adsense-script';
 export {IMAGE_FALLBACK} from './kinds';
@@ -38,7 +39,15 @@ async function landing(service:Service){
 async function listing(service:Service,segments:string[]){
   const route=segments[0];const trip=service==='home'?origin('trip'):'';
   const regions=await api<{items:Region[]}>('/v1/regions');
-  if(route==='region'&&!segments[1])return <section className="section"><div className="eyebrow">REGIONS</div><h1>어느 지역으로 떠나볼까요?</h1><div className="region-links">{regions.items.map(r=><Link href={`${trip}/region/${r.id}`} key={r.id}><strong>{r.name}</strong><span>{Number(r.count).toLocaleString()}개 정보</span></Link>)}</div></section>;
+  if(route==='region'&&!segments[1]){
+    // 시도별 묶음(서울·부산…제주 순), 시도 안은 가나다순 — 지역 id 순이라 섞여 보이던 것(10/20).
+    const groups=groupBySido(regions.items);const top=[...regions.items].sort((a,b)=>b.count-a.count);
+    return <section className="section"><div className="eyebrow">REGIONS</div><h1>어느 지역으로 떠나볼까요?</h1>
+      {groups.map(g=><div key={g.sido}><h2 className="region-group">{g.sido}</h2><div className="region-links">{g.list.map(r=><Link href={`${trip}/region/${r.id}`} key={r.id}><strong>{r.label}</strong><span>{Number(r.count).toLocaleString()}개 정보</span></Link>)}</div></div>)}
+      <Faq items={[['여행 정보가 가장 많은 지역은 어디인가요?',`${top.slice(0,3).map(r=>`${r.name}(${Number(r.count).toLocaleString()}개)`).join(', ')} 순입니다.`],
+        ['몇 개 지역의 여행 정보가 있나요?',`${groups.length}개 시도, ${regions.items.length.toLocaleString()}개 시군구의 가볼만한곳·축제·맛집·숙소를 한국관광공사 공식 데이터로 보여 드립니다.`]]}/>
+      <JsonLd data={breadcrumbLd([['내근처 여행',origin('trip')+'/'],['지역별 여행',origin('trip')+'/region']])}/></section>;
+  }
   if(route==='region'&&!regions.items.some(r=>r.id===segments[1]))notFound();
   const fixed:Query={};
   if(route==='region')fixed.region=segments[1];

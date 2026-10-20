@@ -50,3 +50,5 @@
 @media (max-width:700px){.course-steps li{grid-template-columns:34px 1fr}.course-steps figure{grid-column:2}.course-steps img{width:100%;height:150px}.header nav{overflow-x:auto;white-space:nowrap;gap:14px;justify-content:flex-start;scrollbar-width:none}}
 .gj-network-brand{color:#d4f563;font-size:13px;margin-right:6px;white-space:nowrap}
 @media(max-width:480px){.gj-network-brand{display:none}}
+
+.region-group{font-size:20px;margin:26px 0 12px}
