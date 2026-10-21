@@ -1,0 +1,17 @@
+name: Opinet sample
+# One-off: 오피넷 API 표본 호출 (fuel 사이트 설계용). 통계·필드만 출력.
+on: workflow_dispatch
+permissions:
+  contents: read
+jobs:
+  sample:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Sample
+        env:
+          OPINET_API_KEY: ${{ secrets.OPINET_API_KEY }}
+        run: python scripts/opinet-sample.py
