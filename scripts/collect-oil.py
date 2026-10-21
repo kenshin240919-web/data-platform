@@ -4,7 +4,7 @@ The free key allows only 300 calls a day, so this runs once a day (GitHub Action
 Worker only read the file it writes: apps/oil/data/oil.json.
 Calls (about 270): 전국 평균·최근 7일·시도 평균 (5) → 시도별 시군구 평균 휘발유 (17) → 시군구별 휘발유 최저가 20곳
 (about 230) → 시도별 경유 최저가 20곳 (17) → 시도별 시군구 평균 경유 (17, only while the budget lasts).
-Area codes (apps/oil/data/areas.json) are fetched only when missing or on Mondays (18 calls).
+Area codes (apps/oil/data/areas.json) are fetched only when missing or on the 1st of the month (18 calls).
 Coordinates come as KATEC (Bessel TM) and are converted to WGS84 here.
 Usage: OPINET_API_KEY=... python scripts/collect-oil.py [--budget 280]
 """
@@ -18,7 +18,7 @@ OUT, AREAS = DATA / 'oil.json', DATA / 'areas.json'
 BASE = 'https://www.opinet.co.kr/api/'
 KST = timezone(timedelta(hours=9))
 PRODUCTS = {'B027': '휘발유', 'D047': '경유', 'B034': '고급휘발유', 'K015': 'LPG', 'C004': '실내등유'}
-BRANDS = {'SKE': 'SK에너지', 'GSC': 'GS칼텍스', 'HDO': 'HD현대오일뱅크', 'SOL': 'S-OIL', 'RTE': '자영알뜰', 'RTX': '고속도로알뜰',
+BRANDS = {'SKE': 'SK에너지', 'GSC': 'GS칼텍스', 'HDO': 'HD현대오일뱅크', 'SOL': 'S-OIL', 'RTO': '알뜰주유소', 'RTE': '알뜰주유소', 'RTX': '고속도로 알뜰',
           'NHO': '농협알뜰', 'ETC': '자가상표', 'E1G': 'E1', 'SKG': 'SK가스'}
 
 
@@ -92,7 +92,7 @@ def load(path, default):
 
 def areas(api, now):
     cur = load(AREAS, None)
-    if cur and now.weekday() != 0:
+    if cur and now.day != 1:  # 지역 코드는 매달 1일에만 다시 받음(18회)
         return cur
     sidos = api('areaCode.do')
     if not sidos:
@@ -147,11 +147,12 @@ def main():
                 sigun_avg.setdefault(r['SIGUNCD'], {})[p] = {'price': price(r['PRICE']), 'diff': price(r['DIFF'])}
     sigun('B027')
 
-    stations, regions = {}, []
+    stations, regions, fresh = {}, [], set()
     def add(r, p, region=None):
         sid = r.get('UNI_ID')
         if not sid:
             return None
+        fresh.add(sid)
         s = stations.get(sid)
         if not s:
             try:
@@ -179,7 +180,7 @@ def main():
                     regions.append(old)
                     for sid in old['top']:
                         if sid in prev.get('stations', {}) and sid not in stations:
-                            stations[sid] = prev['stations'][sid]
+                            stations[sid] = dict(prev['stations'][sid])
                 continue
             ids = [x for x in (add(r, 'B027', g['code']) for r in rows) if x]
             regions.append({'code': g['code'], 'name': g['name'], 'sido': s['code'], 'sido_name': s['name'], 'avg': sigun_avg.get(g['code'], {}), 'top': ids})
@@ -203,12 +204,21 @@ def main():
             near = [(abs(c[0] - st['lat']) + abs(c[1] - st['lon']), k) for k, c in centers.items()]
             st['region'] = min(near)[1] if near else None
 
+    # 오늘 최저가 목록에서 빠진 주유소도 60일 동안 상세 페이지를 남김(검색에 올라간 주소가 깨지지 않게, 마지막 확인 가격·날짜 표시).
+    today = now.strftime('%Y%m%d')
+    for sid in fresh:
+        stations[sid]['seen'] = today
+    keep_from = (now - timedelta(days=60)).strftime('%Y%m%d')
+    for sid, st in prev.get('stations', {}).items():
+        if sid not in stations and st.get('seen', today) >= keep_from:
+            stations[sid] = st
     history = {h['date']: h for h in prev.get('history', [])}
     for p, rows in recent.items():
         for r in rows:
             history.setdefault(r['date'], {'date': r['date']})[p] = r['price']
     history = sorted(history.values(), key=lambda h: h['date'])[-400:]
-    status = {'updated_at': now.isoformat(timespec='seconds'), 'source': '한국석유공사 오피넷', 'calls': api.calls, 'stations': len(stations),
+    status = {'updated_at': now.isoformat(timespec='seconds'), 'date': today, 'source': '한국석유공사 오피넷', 'calls': api.calls, 'stations': len(stations),
+              'today': sum(1 for st in stations.values() if st.get('seen') == today),
               'regions': len(regions), 'skipped_regions': skipped}
     if len(regions) < len(prev.get('regions', [])) * 0.9 and '--force' not in args:
         raise SystemExit(f"시군구 수가 {len(prev['regions'])} → {len(regions)}로 줄어 중단합니다 (--force로 무시)")
