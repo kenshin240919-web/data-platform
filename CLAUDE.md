@@ -38,6 +38,7 @@
 - **Cloudflare 빌드 감시 경로(10/20 사용자 설정, 여섯 Worker)**: 관련 파일이 바뀔 때만 빌드. 공통: `packages/**`·`scripts/prune-rsc.mjs`·`package.json`·`package-lock.json`. 여행(루트) `apps/trip/**`·`services/**`·`wrangler.jsonc`·`scripts/build-trip-d1.mjs`·`apps/weather/data/**`·`apps/traffic/data/**` / weather `apps/weather/**`·`apps/traffic/data/**` / charge·academy·school 자기 앱 + `apps/weather/data/**`·`apps/traffic/data/**` / traffic `apps/traffic/**`·`apps/weather/data/**`. **새 사이트를 만들거나 앱이 다른 앱의 파일을 새로 import하면 그 Worker의 감시 경로를 사용자에게 알려 추가**(안 하면 바뀐 내용이 배포 안 됨). 문서·보고서·CLAUDE.md·.github만 바뀐 push는 빌드 없음.
 GitHub `main`에 push → Cloudflare가 `wrangler.jsonc` 기준으로 `npm run build` 후 `apps/trip/out`을 자동 배포.
 - Cloudflare Build 설정: Deploy command `npx wrangler deploy`, Build command는 비워 둠.
+- **10/21 Cloudflare Workers Builds가 push를 받지 않음**(커밋 e5be603·705a4b0에 빌드 기록 0, 3feb853까지는 정상, 원인 미확인) → 수동 배포 워크플로 `manual-deploy.yml`(입력 sites, 같은 wrangler 설정·여행은 D1 단계 포함)을 사용자 승인 후 실행. Git 연결 상태는 사용자가 Cloudflare 대시보드에서 확인 필요.
 - GitHub Actions(`verify.yml`)는 테스트만 하고 배포하지 않음.
 
 ## 어디서 무엇을 할 수 있나 (중요)

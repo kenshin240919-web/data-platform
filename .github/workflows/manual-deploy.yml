@@ -1,0 +1,47 @@
+name: Manual deploy
+# 수동 배포: Cloudflare Workers Builds(Git 연결)가 push를 받지 못할 때, 같은 wrangler 설정으로 GitHub Actions에서 배포.
+# Cloudflare 빌드와 같은 명령(npx wrangler deploy -c …, 빌드 명령은 각 wrangler.jsonc의 build.command —
+# 여행은 D1 올리기 포함). 비밀값·도메인은 Worker에 그대로 남음. 실행은 사용자 승인 후(받은 권한으로 하는 일).
+# Secrets: CLOUDFLARE_API_TOKEN (github-d1), CLOUDFLARE_ACCOUNT_ID.
+on:
+  workflow_dispatch:
+    inputs:
+      sites:
+        description: '배포할 사이트(쉼표): trip,weather,traffic,charge,academy,school,pharmacy'
+        default: 'trip,weather,traffic,charge,academy,school,pharmacy'
+permissions:
+  contents: read
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      sites: ${{ steps.p.outputs.sites }}
+    steps:
+      - id: p
+        run: echo "sites=$(echo '${{ github.event.inputs.sites }}' | tr -d ' ' | jq -R -c 'split(",")|map(select(length>0))')" >> "$GITHUB_OUTPUT"
+  deploy:
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        site: ${{ fromJson(needs.plan.outputs.sites) }}
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Deploy ${{ matrix.site }}
+        run: |
+          if [ "${{ matrix.site }}" = trip ]; then cfg=wrangler.jsonc; else cfg="apps/${{ matrix.site }}/wrangler.jsonc"; fi
+          test -f "$cfg" || { echo "unknown site ${{ matrix.site }}"; exit 1; }
+          npx wrangler deploy -c "$cfg"
