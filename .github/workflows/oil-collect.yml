@@ -1,0 +1,41 @@
+name: Oil collect
+# Daily fuel prices for oil.guidejung.com (내근처 주유소): 오피넷 무료 API (scripts/collect-oil.py, about 270 of the
+# 300 calls a day). apps/oil/data/oil.json (+ areas.json) is committed to main when it changed.
+# Secret: OPINET_API_KEY.
+on:
+  schedule:
+    - cron: '13 22 * * *' # 07:13 KST (주유소가 아침 가격을 올린 뒤)
+  workflow_dispatch:
+    inputs:
+      budget:
+        description: 'max API calls (daily limit 300)'
+        default: '280'
+permissions:
+  contents: write
+concurrency:
+  group: oil-collect
+  cancel-in-progress: false
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Collect
+        env:
+          OPINET_API_KEY: ${{ secrets.OPINET_API_KEY }}
+        run: python scripts/collect-oil.py --budget "${{ github.event.inputs.budget || '280' }}"
+      - name: Commit prices
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add apps/oil/data
+          if git diff --cached --quiet; then echo 'no change'; exit 0; fi
+          git commit -m 'oil: 주유소 가격 갱신'
+          for i in 1 2 3; do git pull --rebase origin main && git push origin HEAD:main && exit 0; sleep 10; done
+          exit 1
