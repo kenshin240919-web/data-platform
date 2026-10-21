@@ -1,0 +1,91 @@
+name: Sites deploy
+# 여행·날씨·고속도로·충전소·학원·학교·약국 7개 사이트를 GitHub Actions에서 wrangler로 배포(10/21 사용자 승인).
+# Cloudflare Workers Builds(Git 연결)가 10/21부터 push를 받지 않아 대신함 — 연결이 되살아나면 두 번 배포될 수 있음(해 없음).
+# 바뀐 파일로 배포할 사이트를 고름(예전 Cloudflare 빌드 감시 경로와 같은 규칙). 데이터 수집 커밋은 GITHUB_TOKEN으로
+# push돼 push 이벤트가 없으므로 수집 작업이 끝나면(workflow_run) 그 사이 바뀐 파일로 다시 고름. 수동 실행은 sites 입력.
+# 병원·주유소는 hospital-deploy.yml·oil-deploy.yml. Secrets: CLOUDFLARE_API_TOKEN (github-d1), CLOUDFLARE_ACCOUNT_ID.
+on:
+  push:
+    branches: [main]
+  workflow_run:
+    workflows: ['Trip collect', 'Charge station snapshot', 'Traffic snapshot', 'Academy collect', 'School collect', 'Pharmacy collect']
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      sites:
+        description: '배포할 사이트(쉼표): trip,weather,traffic,charge,academy,school,pharmacy'
+        default: 'trip,weather,traffic,charge,academy,school,pharmacy'
+permissions:
+  contents: read
+jobs:
+  plan:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    outputs:
+      sites: ${{ steps.p.outputs.sites }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 200
+      - id: p
+        env:
+          EVENT: ${{ github.event_name }}
+          INPUT: ${{ github.event.inputs.sites }}
+          BEFORE: ${{ github.event.before }}
+          RUN_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          if [ "$EVENT" = workflow_dispatch ]; then
+            echo "sites=$(echo "$INPUT" | tr -d ' ' | jq -R -c 'split(",")|map(select(length>0))')" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          base=$([ "$EVENT" = push ] && echo "$BEFORE" || echo "$RUN_SHA")
+          if ! git cat-file -e "$base^{commit}" 2>/dev/null; then echo "base $base not found → all"; files='packages/'; else files=$(git diff --name-only "$base" HEAD); fi
+          echo "$files" | head -50
+          python3 - "$files" >> "$GITHUB_OUTPUT" <<'PY'
+          import json, re, sys
+          files = [f for f in sys.argv[1].split('\n') if f]
+          common = r'^(packages/|scripts/prune-rsc\.mjs$|package\.json$|package-lock\.json$)'
+          data = r'^apps/(weather|traffic)/data/'
+          rules = {
+            'trip': [r'^apps/trip/', r'^services/', r'^wrangler\.jsonc$', r'^scripts/build-trip-d1\.mjs$', data],
+            'weather': [r'^apps/weather/', r'^apps/traffic/data/'],
+            'traffic': [r'^apps/traffic/', r'^apps/weather/data/'],
+            'charge': [r'^apps/charge/', data],
+            'academy': [r'^apps/academy/', data],
+            'school': [r'^apps/school/', data],
+            'pharmacy': [r'^apps/pharmacy/', data],
+          }
+          out = [s for s, rs in rules.items() if any(re.search(r, f) for f in files for r in rs + [common])]
+          print('sites=' + json.dumps(out))
+          PY
+          cat "$GITHUB_OUTPUT"
+  deploy:
+    needs: plan
+    if: needs.plan.outputs.sites != '[]' && needs.plan.outputs.sites != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        site: ${{ fromJson(needs.plan.outputs.sites) }}
+    concurrency:
+      group: sites-deploy-${{ matrix.site }}
+      cancel-in-progress: false
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Deploy ${{ matrix.site }}
+        run: |
+          if [ "${{ matrix.site }}" = trip ]; then cfg=wrangler.jsonc; else cfg="apps/${{ matrix.site }}/wrangler.jsonc"; fi
+          test -f "$cfg" || { echo "unknown site ${{ matrix.site }}"; exit 1; }
+          npx wrangler deploy -c "$cfg"
