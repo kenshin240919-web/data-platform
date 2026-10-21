@@ -19,7 +19,7 @@ export const SITES:Record<Site,{url:string;icon:string;name:string;brand:string;
 };
 const {trip:T,weather:W,traffic:R,charge:C}=Object.fromEntries(Object.entries(SITES).map(([k,v])=>[k,v.url])) as Record<Site,string>;
 
-/** 모든 페이지 맨 위: 네 사이트 바로가기 한 줄. */
+/** 모든 페이지 맨 위: 내근처 사이트 바로가기 한 줄(hidden 사이트는 자기 사이트에서만 보임). */
 export function NetworkBar({current}:{current:Site}){
   return <nav className="gj-network" aria-label="내근처 서비스"><div><b className="gj-network-brand">📍 내근처</b>{(Object.keys(SITES) as Site[]).filter(k=>!SITES[k].hidden||k===current).map(k=>k===current
     ?<span key={k} className="on" aria-current="page">{SITES[k].icon} {SITES[k].name}</span>
