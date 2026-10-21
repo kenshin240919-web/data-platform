@@ -15,3 +15,8 @@ jobs:
         env:
           DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
         run: python scripts/hospital-sample.py
+        if: false
+      - name: 명절 비상 진료기관 sample
+        env:
+          DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
+        run: python scripts/holiday-sample.py
