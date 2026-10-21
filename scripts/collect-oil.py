@@ -105,6 +105,7 @@ def areas(api, now):
         if subs is None and cur:
             return cur
         out.append({'code': s['AREA_CD'], 'name': s['AREA_NM'], 'sigungu': [{'code': g['AREA_CD'], 'name': g['AREA_NM']} for g in subs or []]})
+    DATA.mkdir(parents=True, exist_ok=True)
     AREAS.write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding='utf-8')
     log(f'지역 코드 시도 {len(out)} · 시군구 {sum(len(s["sigungu"]) for s in out)}')
     return out
