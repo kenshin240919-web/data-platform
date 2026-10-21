@@ -1,8 +1,22 @@
 name: Oil deploy
 # Deploys oil.guidejung.com (Worker guidejung-oil) with wrangler from GitHub Actions (not connected to Cloudflare
 # Workers Builds). Secrets: CLOUDFLARE_API_TOKEN (github-d1: Workers Scripts edit …), CLOUDFLARE_ACCOUNT_ID.
-# 사용자 승인 전에는 수동 실행만(자동 배포 트리거는 승인 후 추가).
+# Runs when the oil app (or what it imports) changes on main, after the daily price commit, or by hand (10/21 사용자 승인).
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/oil/**'
+      - 'apps/weather/data/**'
+      - 'apps/traffic/data/**'
+      - 'packages/**'
+      - 'scripts/prune-rsc.mjs'
+      - 'package.json'
+      - 'package-lock.json'
+  # 매일 가격 커밋은 GITHUB_TOKEN으로 push돼 push 이벤트가 안 생김 → 수집 작업이 끝나면 따로 배포.
+  workflow_run:
+    workflows: ['Oil collect']
+    types: [completed]
   workflow_dispatch:
 permissions:
   contents: read
@@ -11,6 +25,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   deploy:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:

@@ -1,7 +1,7 @@
 // Cloudflare Worker for oil.guidejung.com (내근처 주유소), separate from the other sites.
 // Run from the repo root: npx wrangler deploy -c apps/oil/wrangler.jsonc (builds with npm run build:oil).
 // Static pages: ./out. Worker: /api/*. The price file ships with the Worker (data/oil.json).
-// Deployed by GitHub Actions (oil-deploy.yml), domain oil.guidejung.com (custom domain, 사용자 승인 후 연결).
+// Deployed by GitHub Actions (oil-deploy.yml), domain oil.guidejung.com (custom domain, 10/21 사용자 승인).
 {
   "name": "guidejung-oil",
   "main": "worker/index.ts",
@@ -14,5 +14,6 @@
     "run_worker_first": ["/api/*"]
   },
   "rules": [{ "type": "Text", "globs": ["**/data/oil.json"], "fallthrough": true }],
+  "routes": [{ "pattern": "oil.guidejung.com", "custom_domain": true }],
   "observability": { "enabled": true }
 }
