@@ -21,3 +21,4 @@ Disallow: /api/
 
 # Site summary for AI: https://hospital.guidejung.com/llms.txt
 Sitemap: https://hospital.guidejung.com/sitemap.xml
+#DaumWebMasterTool:c5e021c7167f099b92d91c093e63a04accebdc894a1d2627a11d78763bfd94a8:sgQJn+c4WOkeYlgoF2KRow==
