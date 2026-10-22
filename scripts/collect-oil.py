@@ -210,7 +210,9 @@ def main():
         stations[sid]['seen'] = today
     keep_from = (now - timedelta(days=60)).strftime('%Y%m%d')
     for sid, st in prev.get('stations', {}).items():
-        if sid not in stations and st.get('seen', today) >= keep_from:
+        # 'seen'이 없던 첫 수집(10/21) 주유소는 그날 확인한 것으로 봄(오늘 가격으로 잘못 보이지 않게)
+        st.setdefault('seen', prev.get('status', {}).get('date') or prev.get('status', {}).get('updated_at', '')[:10].replace('-', '') or today)
+        if sid not in stations and st['seen'] >= keep_from:
             stations[sid] = st
     history = {h['date']: h for h in prev.get('history', [])}
     for p, rows in recent.items():
