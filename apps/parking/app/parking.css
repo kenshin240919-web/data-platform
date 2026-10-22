@@ -1,0 +1,38 @@
+:root{--pk:#1c64d6;--pk-soft:#eef4ff;--open:#1f9d55;--soon:#e8a400;--closed:#9aa5b5}
+.page{padding:22px 0 10px}.page h1{font-size:34px;margin-bottom:12px}.page>section{margin:30px 0}
+.crumbs{font-size:13px;color:var(--muted);margin-bottom:14px}.crumbs a:hover{color:var(--pk)}
+.pk-nav{gap:26px}.pk-nav-out{color:var(--muted)}
+.pk-hero{background:linear-gradient(135deg,#1450b4,#2f7ae5);color:white;border-radius:20px;padding:24px 28px;margin:16px 0 14px}.pk-hero h1{font-size:32px;margin:0 0 8px}.pk-hero p{margin:0;color:#dbe8ff}.pk-hero b{color:#fff3bf}
+.pk-answer{font-size:19px;background:var(--pk-soft);border-radius:14px;padding:16px 18px;line-height:1.6}.pk-answer .pk-dot{margin-right:8px;vertical-align:1px}.pk-answer b{color:var(--pk)}.pk-answer a{color:inherit}
+.pk-answer.open{background:#e9f8ef}.pk-answer.open b{color:var(--open)}.pk-answer.soon{background:#fff6d6}.pk-answer.soon b{color:#b25f00}.pk-answer.closed{background:#f1f3f6}.pk-answer.closed b{color:#55606e}
+.pk-dot{width:11px;height:11px;border-radius:50%;background:var(--closed);flex-shrink:0;display:inline-block}
+.open .pk-dot{background:var(--open);box-shadow:0 0 0 4px #1f9d5522}.soon .pk-dot{background:var(--soon)}
+.pk-chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}.pk-chip{background:white;color:var(--ink);border:1px solid var(--line);border-radius:30px;padding:6px 13px;font-size:13px;font-weight:600}.pk-chip small{color:var(--muted);font-weight:500}.pk-chip.on{background:var(--pk);color:white;border-color:var(--pk)}.pk-chip.on small{color:#dbe8ff}
+.pk-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}
+.pk-card{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:white;min-width:0}.pk-card:hover{border-color:#9cc0f5}
+.pk-card.closed{background:#fafbfc}.pk-card.closed b{color:#55606e}
+.pk-card-main{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
+.pk-card-body{display:flex;flex-direction:column;min-width:0}.pk-card-body b{font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pk-card-body small{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.open .pk-card-body small:first-of-type{color:var(--open);font-weight:700}.soon .pk-card-body small:first-of-type{color:#b25f00;font-weight:700}
+.pk-tel{font-size:18px;border:1px solid var(--line);border-radius:10px;padding:6px 9px;flex-shrink:0}
+.pk-more{display:block;margin:14px auto 0;background:white;color:var(--pk);border:1px solid #9cc0f5}.pk-more-link{color:var(--pk);font-weight:700;font-size:14px}
+.pk-rank{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;counter-reset:r}.pk-rank li{counter-increment:r}.pk-rank a{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:12px;padding:10px 14px}.pk-rank a::before{content:counter(r);font-weight:900;color:var(--pk);width:18px}.pk-rank a span{margin-left:auto;color:var(--muted);font-size:13px}.pk-rank a:hover{border-color:var(--pk)}
+.pk-sidos{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}.pk-sidos a{display:flex;justify-content:space-between;gap:8px;background:var(--surface);border-radius:10px;padding:10px 14px;font-size:14px}.pk-sidos a span{color:var(--muted);font-size:12px}.pk-sidos a:hover{background:var(--pk-soft);color:var(--pk)}
+.pk-jump{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.pk-jump a{border:1px solid var(--line);border-radius:30px;padding:7px 14px;font-size:14px;font-weight:600}.pk-jump a:hover{border-color:var(--pk);color:var(--pk)}.pk-jump small{color:var(--muted)}
+.pk-search input{width:100%;border:1px solid #c8d4e5;border-radius:12px;padding:13px 15px;font-size:16px;box-sizing:border-box}.pk-list-title{font-size:18px;margin:14px 0 4px}
+.pk-head{border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:16px}.pk-head p{margin:0;color:var(--muted);font-size:14px}
+.pk-actions{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}.pk-actions a{background:var(--pk);color:white;border-radius:10px;padding:10px 16px;font-weight:700;font-size:14px}.pk-actions a.sub{background:white;color:var(--pk);border:1px solid #9cc0f5}
+.pk-hours{border-collapse:collapse;width:100%;max-width:460px;font-size:15px}.pk-hours th,.pk-hours td{padding:9px 12px;border-bottom:1px solid #edf0f5;text-align:left}.pk-hours th{width:120px;color:var(--muted);font-weight:600}.pk-hours tr.today{background:var(--pk-soft)}.pk-hours tr.today th,.pk-hours tr.today td{color:var(--pk);font-weight:800}
+.pk-facts{margin:0}.pk-facts div{display:grid;grid-template-columns:110px 1fr;gap:14px;padding:10px 0;border-bottom:1px solid #edf0f5;font-size:14px}.pk-facts dt{color:var(--muted)}.pk-facts dd{margin:0;overflow-wrap:anywhere}
+.page>div>section,#parking-detail>section{margin:30px 0}
+@media (max-width:760px){
+  .page h1{font-size:26px}.pk-hero{padding:20px}.pk-hero h1{font-size:25px}.pk-answer{font-size:16px}
+  .pk-cards{grid-template-columns:1fr}.pk-rank{grid-template-columns:1fr}.pk-nav{gap:16px;overflow-x:auto;white-space:nowrap}.pk-facts div{grid-template-columns:86px 1fr}
+}
+.pk-free{color:var(--open);font-weight:800}.pk-fee{color:var(--pk);font-weight:800}.pk-unknown{color:var(--muted)}
+.pk-card-body small .pk-tag{display:inline-block;background:var(--surface);border-radius:6px;padding:0 5px;margin-right:4px;font-size:11px;color:var(--muted)}
+.pk-price{margin-left:auto;text-align:right;flex-shrink:0;font-size:15px;white-space:nowrap}.pk-price small{display:block;font-size:11px;color:var(--muted);font-weight:500}
+.pk-sort{display:flex;gap:6px;align-items:center;font-size:13px;color:var(--muted)}
+.pk-dur{background:var(--pk-soft);border-radius:14px;padding:10px 12px;margin:10px 0}.pk-dur b{font-size:14px;margin-right:6px}
+.pk-feetable{border-collapse:collapse;width:100%;max-width:460px;font-size:15px}.pk-feetable th,.pk-feetable td{padding:9px 12px;border-bottom:1px solid #edf0f5;text-align:left}.pk-feetable th{width:120px;color:var(--muted);font-weight:600}.pk-feetable td b{color:var(--pk)}
+.pk-note{background:#fff8e6;border-radius:10px;padding:10px 14px;font-size:13px;color:#6b5600}

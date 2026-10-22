@@ -164,9 +164,9 @@ def place(items, regions):
             skipped += 1
             continue
         sido = next((x['sidoShort'] for x in regions if x['code'][:2] == hit[0][:2]), '')
-        name = hit[1] if hit[1].startswith(sido) else f'{sido} {hit[1]}'.strip()
-        s, _, rest = name.partition(' ')  # "세종 세종시" → "세종시"
-        p['region'], p['region_name'] = hit[0], rest if rest.startswith(s) else name
+        name = hit[1] if hit[1].split(' ')[0] == sido else f'{sido} {hit[1]}'.strip()  # '제주시' → '제주 제주시'
+        s, _, rest = name.partition(' ')  # "세종 세종시" → "세종시" (제주 제주시·부산 부산진구는 그대로)
+        p['region'], p['region_name'] = hit[0], rest if s == '세종' and rest else name
         out.append(p)
     log(f'지역 못 정해 뺀 주차장 {skipped:,}곳')
     return out
