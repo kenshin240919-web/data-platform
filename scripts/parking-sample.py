@@ -15,7 +15,10 @@ def call(page=1, rows=1000):
     except ValueError:
         print('  not JSON:', raw[:400])
         return [], 0
-    resp = d.get('response', {})
+    if 'response' not in d:
+        print('  raw', raw[:1500])
+        d = d.get('data') if isinstance(d.get('data'), dict) else d
+    resp = d.get('response', d)
     print('  header', resp.get('header'))
     body = resp.get('body', {}) or {}
     items = body.get('items') or []
