@@ -337,9 +337,9 @@ def main():
             a['region_id'], a['region_name'] = (hit[0], f"{next(r['sidoShort'] for r in regions if r['code'] == hit[0])} {hit[1]}") if hit else (f"{a['office']}-{a['zone'] or '기타'}", f"{OFFICES[a['office']]} {a['zone'] or ''}".strip())
     if misses:
         log('행정구역명으로 못 찾아 좌표로 정한 지역', misses.most_common(40))
-    for a in items:  # "세종 세종시" → "세종시"
+    for a in items:  # "세종 세종시" → "세종시" (제주 제주시·부산 부산진구는 그대로)
         sido, _, rest = a['region_name'].partition(' ')
-        if rest.startswith(sido):
+        if sido == '세종' and rest:
             a['region_name'] = rest
     now = datetime.now(KST)
     prev_ids = {a['id']: a for a in prev['items']} if prev else {}

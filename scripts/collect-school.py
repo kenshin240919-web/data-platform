@@ -105,7 +105,7 @@ def main():
         hit = A.region_code(s['office'], zone_of(s['address']), regions) or A.nearest_region(s, regions)
         if hit:
             sido = next((r['sidoShort'] for r in regions if r['code'][:2] == hit[0][:2]), OFFICES[s['office']])
-            s['region'], s['region_name'] = hit[0], hit[1] if hit[1].startswith(sido) else f'{sido} {hit[1]}'
+            s['region'], s['region_name'] = hit[0], hit[1] if hit[1].split(' ')[0] == sido or sido == '세종' else f'{sido} {hit[1]}'
         else:
             s['region'], s['region_name'] = f"{s['office']}-기타", f"{OFFICES[s['office']]} 기타"
     items.sort(key=lambda s: (s['region'], s['k'], s['name']))

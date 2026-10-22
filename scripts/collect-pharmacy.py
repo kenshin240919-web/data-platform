@@ -86,7 +86,7 @@ def build(rows, regions):
             skipped['지역 못 정함'] += 1
             continue
         sido = next((x['sidoShort'] for x in regions if x['code'][:2] == hit[0][:2]), '')
-        p['region'], p['region_name'] = hit[0], hit[1] if hit[1].startswith(sido) else f'{sido} {hit[1]}'.strip()
+        p['region'], p['region_name'] = hit[0], hit[1] if hit[1].split(' ')[0] == sido else f'{sido} {hit[1]}'.strip()
         out.append(p)
     log('뺀 약국', dict(skipped))
     return out
@@ -100,9 +100,9 @@ def main():
     now = datetime.now(KST)
     regions = A.weather_regions()
     items = build(fetch(key), regions)
-    for p in items:  # "세종 세종시" → "세종시"
+    for p in items:  # "세종 세종시" → "세종시" (제주 제주시·부산 부산진구는 그대로)
         sido, _, rest = p['region_name'].partition(' ')
-        if rest.startswith(sido):
+        if sido == '세종' and rest:
             p['region_name'] = rest
     items.sort(key=lambda p: (p['region'], p['name'], p['id']))
     prev = json.loads(OUT.read_text(encoding='utf-8')) if OUT.exists() else None

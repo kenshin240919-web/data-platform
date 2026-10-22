@@ -97,7 +97,7 @@ def build(rows, depts_of, regions):
             continue
         reg = next((x for x in regions if x['code'][:2] == hit[0][:2]), None)
         sido = reg['sidoShort'] if reg else ''
-        h['region'], h['region_name'] = hit[0], hit[1] if hit[1].startswith(sido) else f'{sido} {hit[1]}'.strip()
+        h['region'], h['region_name'] = hit[0], hit[1] if hit[1].split(' ')[0] == sido else f'{sido} {hit[1]}'.strip()
         h['sido'] = reg['sidoName'] if reg else None  # 응급실 실시간 병상 조회(STAGE1)용 시도 이름
         rank = DIV_RANK.get(div or '', 4) + 20 * h['sun'] + 15 * h['hol'] + 15 * h['night'] + 5 * h['sat'] + 5 * bool(h['info']) + 10 * h['er']
         h['rank'] = round(rank + int(hashlib.sha1(hid.encode()).hexdigest()[:6], 16) / 0xFFFFFF, 4)
@@ -153,9 +153,9 @@ def main():
             log(f'  {label}({code}) {n:,}곳')
     regions = A.weather_regions()
     items = build(rows, depts_of, regions)
-    for h in items:  # "세종 세종시" → "세종시"
+    for h in items:  # "세종 세종시" → "세종시" (제주 제주시·부산 부산진구는 그대로)
         sido, _, rest = h['region_name'].partition(' ')
-        if rest.startswith(sido):
+        if sido == '세종' and rest:
             h['region_name'] = rest
     items.sort(key=lambda h: (h['region'], -h['rank']))
     OUT.mkdir(parents=True, exist_ok=True)
