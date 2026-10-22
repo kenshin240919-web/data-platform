@@ -21,3 +21,4 @@ Disallow: /api/
 
 # Site summary for AI: https://parking.guidejung.com/llms.txt
 Sitemap: https://parking.guidejung.com/sitemap.xml
+#DaumWebMasterTool:a9cc75458e6558c12a33844199ba52329fe6e625addb158c409924f1dabaff38:WoYFtMaR84eZ7MaX1Xjw9A==
