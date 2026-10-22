@@ -21,3 +21,4 @@ Disallow: /api/
 
 # Site summary for AI: https://oil.guidejung.com/llms.txt
 Sitemap: https://oil.guidejung.com/sitemap.xml
+#DaumWebMasterTool:e95c04b2027f2d59f6fdafb9084e23bfe426d4408c037ffb4825ca03c480f6b9:RXqVBM7XE5wroppTXsoV6g==
