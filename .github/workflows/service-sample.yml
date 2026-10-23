@@ -1,0 +1,17 @@
+name: Service sample
+# One-off: 서비스센터 표준데이터 표본 호출 (service 설계용). 통계·필드만 출력.
+on: workflow_dispatch
+permissions:
+  contents: read
+jobs:
+  sample:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Sample
+        env:
+          DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
+        run: python scripts/service-sample.py
