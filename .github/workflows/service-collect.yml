@@ -1,0 +1,39 @@
+name: Service collect
+# Daily list for service.guidejung.com (내근처 서비스센터): 정비업체·검사소 표준데이터 + LOCALDATA 세차장·배출가스 정비
+# (scripts/collect-service.py). apps/service/data/centers.json is committed to main only when it changed
+# (service-deploy.yml deploys after this run).
+# Secrets: DATA_GO_KR_KEY, KAKAO_REST_KEY (좌표 없는 곳만).
+on:
+  schedule:
+    - cron: '47 19 * * *' # 04:47 KST
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: service-collect
+  cancel-in-progress: false
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Collect
+        env:
+          DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
+          KAKAO_REST_KEY: ${{ secrets.KAKAO_REST_KEY }}
+        run: python scripts/collect-service.py
+      - name: Commit service list
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add apps/service/data/centers.json
+          if git diff --cached --quiet; then echo 'no change'; exit 0; fi
+          git commit -m 'service: 서비스센터 목록 갱신'
+          for i in 1 2 3; do git pull --rebase origin main && git push origin HEAD:main && exit 0; sleep 10; done
+          exit 1
