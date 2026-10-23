@@ -1,0 +1,17 @@
+name: Kakao brand sample
+# One-off: 카카오 로컬 키워드 검색으로 가전 브랜드 서비스센터 검색어 확인(내근처 서비스센터 3안). 이름·거리만 출력.
+on: workflow_dispatch
+permissions:
+  contents: read
+jobs:
+  sample:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Sample
+        env:
+          KAKAO_REST_KEY: ${{ secrets.KAKAO_REST_KEY }}
+        run: python scripts/kakao-brand-sample.py
