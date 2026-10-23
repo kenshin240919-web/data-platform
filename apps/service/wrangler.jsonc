@@ -14,5 +14,7 @@
   },
   // The list is imported as text and parsed on first use (a large object literal slows the Worker start).
   "rules": [{ "type": "Text", "globs": ["**/data/centers.json"], "fallthrough": true }],
-  "observability": { "enabled": true }
+  "observability": { "enabled": true },
+  // 10/23 사용자 승인: service.guidejung.com 연결(wrangler가 DNS 기록을 만듦).
+  "routes": [{ "pattern": "service.guidejung.com", "custom_domain": true }]
 }
