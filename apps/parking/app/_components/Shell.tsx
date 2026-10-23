@@ -5,7 +5,7 @@ export function Shell({children}:{children:React.ReactNode}){
     <NetworkBar current="parking"/>
     <header className="header"><div className="header-inner">
       <Link href="/" className="brand"><span aria-hidden="true">🅿️</span><span>내근처 주차장</span></Link>
-      <nav aria-label="주요 메뉴" className="pk-nav"><Link href="/">내 주변 주차장</Link><Link href="/region">지역별 주차장</Link><Link href="/search">주차장 찾기</Link><a href={TRIP_URL} className="pk-nav-out">여행 ↗</a></nav>
+      <nav aria-label="주요 메뉴" className="pk-nav"><Link href="/">무료·싼 주차장</Link><Link href="/region">지역별 주차장</Link><Link href="/search">주차장 찾기</Link><a href={TRIP_URL} className="pk-nav-out">여행 ↗</a></nav>
       <span className="header-note">여기 주차 어디 해?</span>
     </div></header>
     <main>{children}</main>

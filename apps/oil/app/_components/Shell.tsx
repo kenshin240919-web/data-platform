@@ -5,7 +5,7 @@ export function Shell({children}:{children:React.ReactNode}){
     <NetworkBar current="oil"/>
     <header className="header"><div className="header-inner">
       <Link href="/" className="brand"><span aria-hidden="true">⛽</span><span>내근처 주유소</span></Link>
-      <nav aria-label="주요 메뉴" className="oi-nav"><Link href="/">내 주변 최저가</Link><Link href="/region">지역별 휘발유</Link><Link href="/diesel">경유 최저가</Link><a href={TRAFFIC_URL+'/gas'} className="oi-nav-out">휴게소 기름값 ↗</a></nav>
+      <nav aria-label="주요 메뉴" className="oi-nav"><Link href="/">오늘 최저가</Link><Link href="/region">지역별 휘발유</Link><Link href="/diesel">경유 최저가</Link><a href={TRAFFIC_URL+'/gas'} className="oi-nav-out">휴게소 기름값 ↗</a></nav>
       <span className="header-note">기름값 제일 싼 곳 어디?</span>
     </div></header>
     <main>{children}</main>
