@@ -3,7 +3,7 @@
 import weatherRegions from '../../../apps/weather/data/regions.json';
 import traffic from '../../../apps/traffic/data/snapshot.json';
 
-export type Site='trip'|'weather'|'traffic'|'charge'|'academy'|'school'|'pharmacy'|'hospital'|'oil'|'parking';
+export type Site='trip'|'weather'|'traffic'|'charge'|'academy'|'school'|'pharmacy'|'hospital'|'oil'|'parking'|'service';
 // brand: 사이트 이름(로고·탭 제목), tagline: 부제(질문형 후킹). 10/17 사용자 결정: "내근처" 시리즈.
 // hidden: 아직 배포 전인 사이트(그 사이트 자신의 연결 바에만 보임).
 export const SITES:Record<Site,{url:string;icon:string;name:string;brand:string;tagline:string;hidden?:boolean}>={
@@ -17,6 +17,7 @@ export const SITES:Record<Site,{url:string;icon:string;name:string;brand:string;
   hospital:{url:'https://hospital.guidejung.com',icon:'🏥',name:'병원',brand:'내근처 병원',tagline:'지금 진료하는 병원 어디?'},
   oil:{url:'https://oil.guidejung.com',icon:'⛽',name:'주유소',brand:'내근처 주유소',tagline:'기름값 제일 싼 곳 어디?'},
   parking:{url:'https://parking.guidejung.com',icon:'🅿️',name:'주차장',brand:'내근처 주차장',tagline:'여기 주차 어디 해?'},
+  service:{url:'https://service.guidejung.com',icon:'🔧',name:'정비소',brand:'내근처 서비스센터',tagline:'고장 났다, 어디로 가지?',hidden:true},
 };
 const {trip:T,weather:W,traffic:R,charge:C}=Object.fromEntries(Object.entries(SITES).map(([k,v])=>[k,v.url])) as Record<Site,string>;
 
@@ -86,6 +87,7 @@ export const GENERIC:Record<Site,Link_>={
   hospital:{icon:'🏥',title:'지금 진료하는 병원',desc:'소아과·내과 야간·주말 진료, 응급실 병상',href:SITES.hospital.url},
   oil:{icon:'⛽',title:'내 주변 싼 주유소',desc:'오늘 휘발유·경유 최저가',href:SITES.oil.url},
   parking:{icon:'🅿️',title:'내 주변 공영·무료 주차장',desc:'1시간·2시간 예상 요금 싼 순',href:SITES.parking.url},
+  service:{icon:'🔧',title:'내 주변 자동차 정비소·검사소',desc:'정비 맡기기 전 체크리스트·검사 과태료 계산',href:SITES.service.url},
 };
 export const genericFor=(skip:Site)=>(Object.keys(GENERIC) as Site[]).filter(k=>k!==skip&&!SITES[k].hidden).map(k=>GENERIC[k]);
 export {T as TRIP_URL,W as WEATHER_URL,R as TRAFFIC_URL,C as CHARGE_URL};

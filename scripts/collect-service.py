@@ -127,17 +127,26 @@ def repairs(rows, today):
     return out
 
 
+OPER = re.compile(r'(?:(평일|토요일|토|공휴일|일요일|휴일)[^\d]{0,4})?(\d{1,2})\s*[: ]\s*(\d{2})\s*[~-]\s*(\d{1,2})\s*[: ]\s*(\d{2})')
+
+
 def parse_oper(s):
-    """'평일:09:00~18:00+토요일:09:00~13:00' → {'wk': [...], 'sat': [...]}"""
+    """'평일:09:00~18:00+토요일:09:00~13:00' / '09:00 ~ 18:00' / '평일09 00-18 00 토요일09 00-13 00' → {'wk': [...], 'sat': [...]}
+    (요일이 없는 첫 시간은 평일로 봄)"""
     out = {}
-    for part in re.split(r'[+,/]', s or ''):
-        m = re.match(r'\s*(평일|토요일|토|공휴일|일요일|휴일)\s*[:：]?\s*(\d{1,2}:?\d{2})\s*[~-]\s*(\d{1,2}:?\d{2})', part)
-        if m:
-            k = {'평일': 'wk', '토요일': 'sat', '토': 'sat'}.get(m.group(1), 'hol')
-            h = pair(m.group(2), m.group(3))
-            if h:
-                out[k] = h
+    for m in OPER.finditer(s or ''):
+        k = {'평일': 'wk', '토요일': 'sat', '토': 'sat', None: 'wk'}.get(m.group(1), 'hol')
+        if k in out:
+            continue
+        h = pair(f'{m.group(2)}:{m.group(3)}', f'{m.group(4)}:{m.group(5)}')
+        if h:
+            out[k] = h
     return out
+
+
+def compact(p):
+    """빈 값은 저장하지 않음(파일 크기 절반 가까이 줄어듦). tags·hours는 항상 둠."""
+    return {k: v for k, v in p.items() if k in ('tags', 'hours') or v not in (None, '', [], {})}
 
 
 def inspections(rows):
@@ -214,7 +223,7 @@ def main():
     kakao = os.environ.get('KAKAO_REST_KEY', '').strip()
     if kakao:
         K.geocode(items, kakao)
-    items = K.place(items, regions)
+    items = [compact(p) for p in K.place(items, regions)]
     items.sort(key=lambda p: (p['region'], p['kind'], p['name'], p['id']))
     if prev and len(items) < len(prev['items']) * 0.9 and '--force' not in args:
         raise SystemExit(f"서비스센터 수가 {len(prev['items']):,} → {len(items):,}로 10% 넘게 줄어 중단합니다 (--force로 무시)")

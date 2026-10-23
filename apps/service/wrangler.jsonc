@@ -1,0 +1,18 @@
+// Cloudflare Worker for service.guidejung.com (내근처 서비스센터), separate from the other sites.
+// Run from the repo root: npx wrangler deploy -c apps/service/wrangler.jsonc (builds with npm run build:service).
+// Static pages: ./out. Worker: /api/*, 상세 /center/{id}, sitemap index. The list ships with the Worker (data/centers.json).
+{
+  "name": "guidejung-service",
+  "main": "worker/index.ts",
+  "compatibility_date": "2025-09-01",
+  "build": { "command": "npm run build:service" },
+  "assets": {
+    "directory": "./out",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    "run_worker_first": ["/api/*", "/center/*", "/sitemap.xml", "/sitemap-centers-*"]
+  },
+  // The list is imported as text and parsed on first use (a large object literal slows the Worker start).
+  "rules": [{ "type": "Text", "globs": ["**/data/centers.json"], "fallthrough": true }],
+  "observability": { "enabled": true }
+}
