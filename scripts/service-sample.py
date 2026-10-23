@@ -3,7 +3,7 @@ import json, os, re, urllib.parse, urllib.request
 from collections import Counter
 
 KEY = os.environ['DATA_GO_KR_KEY']
-APIS = {'정비업체': 'https://api.data.go.kr/openapi/tn_pubr_public_auto_maintenance_company_api'}
+APIS = {'검사소': 'https://api.data.go.kr/openapi/tn_pubr_public_car_inspofc_api'}  # 정비업체(tn_pubr_public_auto_maintenance_company_api)는 10/23 확인 완료
 
 
 def call(url, page=1, rows=1000):
