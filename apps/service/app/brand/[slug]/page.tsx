@@ -4,6 +4,7 @@ import {notFound} from 'next/navigation';
 import {AdSlot} from '@guidejung/ui/ads';
 import {Faq,breadcrumbLd,JsonLd} from '@guidejung/ui/seo';
 import {BRANDS,brand} from '../../../lib/brands';
+import {BrandNear} from '../../_components/BrandNear';
 import {SITE} from '../../../lib/fmt';
 export const dynamicParams=false;
 export function generateStaticParams(){return BRANDS.map(b=>({slug:b.slug}));}
@@ -17,6 +18,7 @@ export default async function BrandPage({params}:P){
     <nav className="crumbs"><Link href="/">홈</Link> › <Link href="/brand">가전·휴대폰</Link> › {b.name}</nav>
     <h1>{b.icon} {b.name} 서비스센터</h1>
     <p className="sv-answer">{b.phones.length?<><b>{b.phones[0].label} {b.phones[0].tel}</b>{b.hours?<> · {b.hours}</>:null}</>:<b>공식 지원 페이지에서 예약·위치를 확인하세요</b>} <span className="muted">· {b.products}</span></p>
+    {b.near&&<BrandNear slug={b.slug} name={b.name.replace(/ 공인 서비스| 서비스| \(큐에이드\)/,'')} fallback={b.links[b.links.length-1][1]}/>}
     {b.phones.length>0&&<section><h2>📞 고객센터 번호</h2><div className="sv-cards">{b.phones.map(p=><a key={p.tel} className="sv-card" href={`tel:${p.tel.replace(/[^0-9]/g,'')}`}><span className="sv-kind" aria-hidden="true">📞</span><span className="sv-card-body"><b>{p.tel}</b><small>{p.label}</small>{p.note&&<small className="muted">{p.note}</small>}</span></a>)}</div></section>}
     <section className="sv-guide"><h2>알아 두면 좋은 점</h2><ul>{b.notes.map(x=><li key={x}>{x}</li>)}</ul></section>
     <section><h2>🔗 공식 센터 찾기·예약</h2><div className="sv-jump">{b.links.map(([t,u])=><a key={u} href={u} rel="noopener" target="_blank">{t} ↗</a>)}</div></section>

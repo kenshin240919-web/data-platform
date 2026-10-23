@@ -5,9 +5,10 @@
 // /sitemap.xml (index) → /sitemap-pages.xml (Next) + /sitemap-centers-{n}.xml (here, 40,000 each).
 import raw from '../data/centers.json';
 import weatherRegions from '../../weather/data/regions.json';
+import {brand} from '../lib/brands';
 import {centerPath,distKm,esc,eun,hoursLine,KIND_LABEL,KINDS,km,kstNow,mapUrl,openNow,REPAIR_INFO,SITE,slim,years,type Center,type Kind} from '../lib/fmt';
 
-interface Env{ASSETS:Fetcher}
+interface Env{ASSETS:Fetcher;KAKAO_REST_KEY?:string}
 type Data={status:{updated_at:string;count:number};items:Center[]};
 let parsed:Data|null=null,byId:Map<string,Center>|null=null;
 const data=()=>parsed??=(typeof raw==='string'?JSON.parse(raw):raw) as Data;
@@ -28,6 +29,20 @@ function near(lat:number,lon:number,radius:number,limit:number,kinds:Kind[]|null
   }
   out.sort((a,b)=>a.km-b.km);
   return {total:out.length,items:out.slice(0,limit)};
+}
+
+// 내 주변 브랜드 서비스센터: 카카오 로컬 키워드 검색을 요청마다 실시간으로 부름. 카카오 API 조건상 결과를 저장·캐시하지 않음(no-store).
+async function brandNear(env:Env,slug:string,lat:number,lon:number){
+  const b=brand(slug);if(!b?.near||!env.KAKAO_REST_KEY)return null;
+  if(lat<33||lat>39||lon<124||lon>132)return {items:[]};
+  const q=new URLSearchParams({query:b.near.query,x:lon.toFixed(5),y:lat.toFixed(5),radius:'20000',sort:'distance',size:'15'});
+  const r=await fetch(`https://dapi.kakao.com/v2/local/search/keyword.json?${q}`,{headers:{Authorization:`KakaoAK ${env.KAKAO_REST_KEY}`}});
+  if(!r.ok)throw new Error(`kakao ${r.status}`);
+  const d=await r.json() as {documents:{place_name:string;category_name:string;road_address_name:string;address_name:string;phone:string;distance:string;place_url:string}[]};
+  const n=b.near;
+  const items=d.documents.filter(p=>(!n.category||p.category_name.split(' > ').pop()===n.category)&&(!n.name||p.place_name.includes(n.name))&&(!n.exclude||!p.place_name.includes(n.exclude)))
+    .map(p=>({name:p.place_name,addr:p.road_address_name||p.address_name||null,tel:p.phone||null,km:Math.round(+p.distance/10)/100,url:p.place_url}));
+  return {items:items.slice(0,10)};
 }
 
 // ---- detail page ----------------------------------------------------------------------------------------------------
@@ -130,6 +145,9 @@ export default {
         const kinds=(p.get('kind')??'').split(',').filter(k=>k in KINDS) as Kind[];
         const r=near(lat,lon,Math.max(.2,Math.min(30,num(p.get('km'))??2)),Math.max(1,Math.min(150,num(p.get('limit'))??40)),kinds.length?kinds:null);
         return json({total:r.total,items:r.items.map(x=>({...slim(x),km:x.km}))},200,300);}
+      if(url.pathname==='/api/brand-near'){const lat=num(p.get('lat')),lon=num(p.get('lon'));if(lat===null||lon===null)return json({error:'lat/lon'},400,0);
+        const r=await brandNear(env,p.get('brand')??'',lat,lon);if(!r)return json({error:'unavailable'},404,0);
+        return new Response(JSON.stringify(r),{headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store'}});}
       if(url.pathname==='/api/search'){const q=flat(p.get('q')??'').slice(0,30);if(!q)return json({total:0,items:[]});
         const words=(p.get('q')??'').trim().toLowerCase().split(/\s+/).filter(Boolean).slice(0,4).map(flat);
         const hit=data().items.filter(x=>{const name=flat(x.name),where=flat(x.region_name+(x.addr??'')+(x.jibun??''));return words.every(w=>name.includes(w)||where.includes(w));});

@@ -11,5 +11,5 @@
     "skipLibCheck": true,
     "isolatedModules": true
   },
-  "include": ["./**/*.ts", "../lib/fmt.ts", "../data/centers.json", "../../weather/data/regions.json"]
+  "include": ["./**/*.ts", "../lib/fmt.ts", "../lib/brands.ts", "../data/centers.json", "../../weather/data/regions.json"]
 }

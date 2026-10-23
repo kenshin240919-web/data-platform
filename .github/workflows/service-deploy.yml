@@ -42,3 +42,8 @@ jobs:
       - run: npm ci
       - name: Build and deploy
         run: npx wrangler deploy -c apps/service/wrangler.jsonc
+      - name: Worker secret (카카오 로컬 검색 — 내 주변 브랜드 서비스센터)
+        if: env.KAKAO_REST_KEY != ''
+        env:
+          KAKAO_REST_KEY: ${{ secrets.KAKAO_REST_KEY }}
+        run: printf '%s' "$KAKAO_REST_KEY" | npx wrangler secret put KAKAO_REST_KEY -c apps/service/wrangler.jsonc
