@@ -137,7 +137,7 @@ async function scheduled(env:Env,now:number){
   await kv.put('charge:cron',JSON.stringify({at:now,done:Date.now(),got,size,err}));  // got>9,999 → extra pages were read
 }
 
-const json=(body:unknown,status=200,maxAge=300)=>new Response(JSON.stringify(body),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':`public, max-age=${maxAge}`}});
+const json=(body:unknown,status=200,maxAge=300)=>new Response(JSON.stringify(body),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':`public, max-age=${maxAge}`,'access-control-allow-origin':'*'}});
 
 export default {
   async scheduled(ev:{scheduledTime:number},env:Env,ctx:Ctx){ctx.waitUntil(scheduled(env,ev.scheduledTime));},

@@ -20,6 +20,7 @@
     "build:pharmacy": "npm run build -w @guidejung/pharmacy",
     "build:oil": "npm run build -w @guidejung/oil",
     "build:parking": "npm run build -w @guidejung/parking",
+    "build:near": "npm run build -w @guidejung/near",
     "build:service": "npm run build -w @guidejung/service",
     "build:hospital": "npm run build -w @guidejung/hospital"
   },

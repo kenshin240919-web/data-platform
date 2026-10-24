@@ -6,7 +6,7 @@ import oilAreas from '../../../apps/oil/data/areas.json';
 import {InstallHint} from './install';
 import {ACTIONS_JS} from './actions';
 
-export type Site='trip'|'weather'|'traffic'|'charge'|'academy'|'school'|'pharmacy'|'hospital'|'oil'|'parking'|'service';
+export type Site='trip'|'weather'|'traffic'|'charge'|'academy'|'school'|'pharmacy'|'hospital'|'oil'|'parking'|'service'|'near';
 // brand: 사이트 이름(로고·탭 제목), tagline: 부제(질문형 후킹). 10/17 사용자 결정: "내근처" 시리즈.
 // hidden: 아직 배포 전인 사이트(그 사이트 자신의 연결 바에만 보임).
 export const SITES:Record<Site,{url:string;icon:string;name:string;brand:string;tagline:string;hidden?:boolean}>={
@@ -21,6 +21,7 @@ export const SITES:Record<Site,{url:string;icon:string;name:string;brand:string;
   oil:{url:'https://oil.guidejung.com',icon:'⛽',name:'주유소',brand:'내근처 주유소',tagline:'기름값 제일 싼 곳 어디?'},
   parking:{url:'https://parking.guidejung.com',icon:'🅿️',name:'주차장',brand:'내근처 주차장',tagline:'여기 주차 어디 해?'},
   service:{url:'https://service.guidejung.com',icon:'🔧',name:'정비소',brand:'내근처 서비스센터',tagline:'고장 났다, 어디로 가지?'},
+  near:{url:'https://near.guidejung.com',icon:'📍',name:'한눈에',brand:'내근처',tagline:'내 주변, 지금 한 번에',hidden:true},
 };
 const {trip:T,weather:W,traffic:R,charge:C}=Object.fromEntries(Object.entries(SITES).map(([k,v])=>[k,v.url])) as Record<Site,string>;
 
@@ -45,6 +46,9 @@ const regions=weatherRegions as WR[];
 const OIL=new Map((oilAreas as {name:string;sigungu:{code:string;name:string}[]}[]).flatMap(a=>a.sigungu.map(g=>[`${a.name} ${g.name}`,g.code] as const)));
 const oilCode=(r:WR)=>OIL.get(`${r.sidoShort} ${r.name}`)??OIL.get(`${r.sidoShort} ${r.name.split(' ')[0]}`)??null;
 const dist=(aLat:number,aLon:number,bLat:number,bLon:number)=>{const x=(bLon-aLon)*Math.cos(aLat*Math.PI/180);return Math.sqrt((bLat-aLat)**2+x**2)*111;};
+/** 시군구 목록과 사이트별 지역 코드(w: 날씨, c: 충전소·약국·병원·주차장·서비스센터·학교, o: 주유소) — 브라우저에서 가까운 지역을 찾을 때. */
+export const AREAS=regions.map(r=>({w:r.code,c:r.name.includes(' ')?r.code.slice(0,4)+'0':r.code,o:oilCode(r),n:r.name.startsWith(r.sidoShort)?r.name:`${r.sidoShort} ${r.name}`,lat:r.lat,lon:r.lon}));
+export type Area=(typeof AREAS)[number];
 /** Nearest 시군구 (weather code; charge folds only 일반구 like "수원시 장안구" into the city code). */
 export function nearArea(lat:number,lon:number){
   const r=regions.reduce((a,b)=>dist(lat,lon,b.lat,b.lon)<dist(lat,lon,a.lat,a.lon)?b:a);
@@ -77,6 +81,7 @@ const ORDER:Record<Site,Site[]>={
   oil:['service','charge','parking','traffic','trip','weather'],
   parking:['trip','oil','charge','service','weather','pharmacy'],
   service:['oil','parking','charge','traffic','weather','trip'],
+  near:['weather','pharmacy','hospital','parking','oil','trip','charge'],
 };
 const MAX_LINKS=7;
 /** Standard links for a spot: the sister sites' pages for the same 시군구 (or the spot itself), in the order that fits the current site. */
@@ -118,6 +123,7 @@ export const GENERIC:Record<Site,Link_>={
   oil:{icon:'⛽',title:'내 주변 싼 주유소',desc:'오늘 휘발유·경유 최저가',href:SITES.oil.url},
   parking:{icon:'🅿️',title:'내 주변 공영·무료 주차장',desc:'1시간·2시간 예상 요금 싼 순',href:SITES.parking.url},
   service:{icon:'🔧',title:'내 주변 자동차 정비소·검사소',desc:'정비 맡기기 전 체크리스트·검사 과태료 계산',href:SITES.service.url},
+  near:{icon:'📍',title:'내 주변 한눈에',desc:'날씨·문 연 약국·병원·주유소·주차장을 한 화면에',href:SITES.near.url},
 };
 export const genericFor=(skip:Site)=>(Object.keys(GENERIC) as Site[]).filter(k=>k!==skip&&!SITES[k].hidden).map(k=>GENERIC[k]);
 export {T as TRIP_URL,W as WEATHER_URL,R as TRAFFIC_URL,C as CHARGE_URL};

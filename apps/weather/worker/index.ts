@@ -149,7 +149,7 @@ async function weather(env:Env,r:Region):Promise<WeatherResponse>{
     air:airOut,uv:uv.value??null,stale:[now,short,mid].some(x=>x.stale),errors:[now,short,mid,air,uv].map(x=>x.error).filter((e):e is string=>!!e).map(e=>e.replace(key,'***'))};
 }
 
-const json=(body:unknown,status=200,maxAge=300)=>new Response(JSON.stringify(body),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':`public, max-age=${maxAge}`}});
+const json=(body:unknown,status=200,maxAge=300)=>new Response(JSON.stringify(body),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':`public, max-age=${maxAge}`,'access-control-allow-origin':'*'}});
 
 const BATCH=32;
 /** Cron (5분마다): 특보·미세먼지, then the next 32 시군구 after each 단기예보 issue (all 256 in about 40 minutes, 8 passes a day). */
