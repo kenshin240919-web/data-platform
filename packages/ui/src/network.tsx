@@ -3,6 +3,7 @@
 import weatherRegions from '../../../apps/weather/data/regions.json';
 import traffic from '../../../apps/traffic/data/snapshot.json';
 import oilAreas from '../../../apps/oil/data/areas.json';
+import {InstallHint} from './install';
 
 export type Site='trip'|'weather'|'traffic'|'charge'|'academy'|'school'|'pharmacy'|'hospital'|'oil'|'parking'|'service';
 // brand: 사이트 이름(로고·탭 제목), tagline: 부제(질문형 후킹). 10/17 사용자 결정: "내근처" 시리즈.
@@ -24,9 +25,9 @@ const {trip:T,weather:W,traffic:R,charge:C}=Object.fromEntries(Object.entries(SI
 
 /** 모든 페이지 맨 위: 내근처 사이트 바로가기 한 줄(hidden 사이트는 자기 사이트에서만 보임). */
 export function NetworkBar({current}:{current:Site}){
-  return <nav className="gj-network" aria-label="내근처 서비스"><div><b className="gj-network-brand">📍 내근처</b>{(Object.keys(SITES) as Site[]).filter(k=>!SITES[k].hidden||k===current).map(k=>k===current
+  return <><nav className="gj-network" aria-label="내근처 서비스"><div><b className="gj-network-brand">📍 내근처</b>{(Object.keys(SITES) as Site[]).filter(k=>!SITES[k].hidden||k===current).map(k=>k===current
     ?<span key={k} className="on" aria-current="page">{SITES[k].icon} {SITES[k].name}</span>
-    :<a key={k} href={SITES[k].url}>{SITES[k].icon} {SITES[k].name}</a>)}</div></nav>;
+    :<a key={k} href={SITES[k].url}>{SITES[k].icon} {SITES[k].name}</a>)}</div></nav><InstallHint brand={SITES[current].brand}/></>;
 }
 
 export type Link_={icon:string;title:string;desc:string;href:string};
