@@ -3,7 +3,7 @@
 // 방문자 요청마다 오피넷을 부르지 않음), imported as text (wrangler.jsonc rules) and parsed on first use.
 // Routes: /api/near (내 주변 최저가), /api/where, /api/status.
 import raw from '../data/oil.json';
-import {distKm,type Card,type Prod,type Station} from '../lib/fmt';
+import {distKm,won,type Card,type Prod,type Station} from '../lib/fmt';
 
 interface Env{ASSETS:Fetcher}
 type Data={status:{updated_at:string;date?:string;stations:number};stations:Record<string,Station>};
@@ -29,6 +29,8 @@ export default {
   async fetch(req:Request,env:Env):Promise<Response>{
     const url=new URL(req.url),p=url.searchParams;
     try{
+      if(url.pathname==='/api/fav'){const ids=[...new Set((p.get('ids')??'').split(','))].filter(x=>/^[0-9A-Za-z-]{2,40}$/.test(x)).slice(0,20);const all=data().stations,day=data().status.date;
+        return json({items:ids.map(id=>all[id]).filter((x):x is Station=>!!x).map(x=>{const cur=!x.seen||!day||x.seen===day;return {id:x.id,state:null,label:[x.prices.B027?`휘발유 ${won(x.prices.B027)}`:'',x.prices.D047?`경유 ${won(x.prices.D047)}`:''].filter(Boolean).join(' · ')||'가격 확인',line:cur?'오늘 가격':`${x.seen} 확인 가격`};})},200,600);}
       if(url.pathname==='/api/near'){const lat=num(p.get('lat')),lon=num(p.get('lon'));
         if(lat==null||lon==null||Math.abs(lat-36)>6||Math.abs(lon-128)>6)return json({error:'lat/lon'},400,60);
         const prod=(p.get('prod')==='D047'?'D047':'B027') as Prod;

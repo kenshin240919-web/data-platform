@@ -212,7 +212,7 @@ function detailHtml(s:School,today:string,week:MealDay[],todayMeal:MealDay|null,
   return `<div id="sc-page" data-code="${esc(s.code)}" data-name="${esc(s.name)}" data-kind="${esc(s.kind)}" data-k="${esc(s.k)}">
 <nav class="crumbs"><a href="/">홈</a> › <a href="/region">지역별 학교</a> › ${s.region.includes('기타')?'':`<a href="/region/${esc(s.region)}">${esc(s.region_name)}</a> › `}${esc(s.name)}</nav>
 <div class="sc-head"><h1>${esc(s.name)} <small>급식·학사일정·시간표</small></h1><p>${esc([s.kind,s.found,s.region_name].filter(Boolean).join(' · '))}</p>
-<div class="sc-actions"><button type="button" class="sc-save" id="sc-save">☆ 내 학교로 저장</button>${map?`<a href="${esc(map)}" rel="noopener" target="_blank">🧭 지도</a>`:''}${s.homepage?`<a href="${esc(s.homepage)}" rel="noopener nofollow" target="_blank">🏠 학교 홈페이지</a>`:''}</div></div>
+<div class="sc-actions"><button type="button" class="sc-save" id="sc-save">☆ 내 학교로 저장</button><button type="button" class="gj-share">📤 공유하기</button>${map?`<a href="${esc(map)}" rel="noopener" target="_blank">🧭 지도</a>`:''}${s.homepage?`<a href="${esc(s.homepage)}" rel="noopener nofollow" target="_blank">🏠 학교 홈페이지</a>`:''}</div></div>
 <p class="sc-answer">🍱 ${answer}</p>
 ${nextBig?`<div class="sc-dday"><b>${esc(dday(today,nextBig.date))}</b><span>${esc(nextBig.name)} · ${esc(eventDate(nextBig))}</span></div>`:''}
 ${todayMeal?`<section><h2>오늘 급식 <span class="muted">${esc(mdw(today))}</span></h2><div class="sc-meals">${todayMeal.meals.map(mealHtml).join('')}</div></section>`:''}

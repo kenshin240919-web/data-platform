@@ -7,6 +7,7 @@ import {NearCheap} from './_components/NearCheap';
 import {StationList} from './_components/StationList';
 import {Trend} from './_components/Trend';
 import {change,cheapest,diff,history,n,nation,regions,sidos,SITE,slim,status,tank,updated,won,type Prod} from '../lib/data';
+import {FavList} from '@guidejung/ui/favlist';
 
 export const metadata:Metadata={alternates:{canonical:'/'}};
 const Avg=({label,p}:{label:string;p:string})=>{const a=nation[p];return a?.price?<div><span>전국 평균 {label}</span><b>{won(a.price)}</b>
@@ -21,6 +22,7 @@ export default function Home(){
   return <div className="page oi-home">
     <section className="oi-hero"><h1>기름값 제일 싼 곳 어디?</h1>
       <p>오늘 전국 평균 휘발유 <b>{won(g)}</b> · 경유 <b>{won(d)}</b>. 시군구마다 가장 싼 주유소 20곳씩, 전국 <b>{n(status.stations)}곳</b>의 오늘 가격으로 내 주변 최저가를 찾아 드려요.</p></section>
+    <FavList hint="주유소 상세에서 ☆ 즐겨찾기를 누르면 여기서 바로 오늘 가격을 볼 수 있어요."/>
     <NearCheap avg={{B027:g,D047:d} as Record<Prod,number|null>}/>
     <div className="oi-avg"><Avg label="휘발유" p="B027"/><Avg label="경유" p="D047"/><Avg label="고급휘발유" p="B034"/></div>
     <AdSlot/>

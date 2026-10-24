@@ -5,6 +5,7 @@
 import raw from '../data/parkings.json';
 import weatherRegions from '../../weather/data/regions.json';
 import {allDay,distKm,esc,eun,feeFor,feeLine,hoursLine,km,kstNow,KIND_LABEL,lotPath,mapUrl,n,openNow,SITE,slim,won,type Lot} from '../lib/fmt';
+import {actionsHtml} from '../../../packages/ui/src/actions';
 
 interface Env{ASSETS:Fetcher}
 type Data={status:{updated_at:string;count:number};items:Lot[]};
@@ -73,7 +74,7 @@ function detailHtml(p:Lot,nearby:(Lot&{km:number})[]){
     ['도로명 주소',p.addr],['지번 주소',p.jibun],['결제 방법',p.pay],['장애인 전용 구획',p.dis?'있음':null],['특기사항',p.note],['관리기관',p.org],['전화',p.tel],['기준일',p.ref],['지역',p.region_name]];
   const fee=p.fee;
   return `<nav class="crumbs"><a href="/">홈</a> › <a href="/region">지역별 주차장</a> › <a href="/region/${esc(p.region)}">${esc(p.region_name)}</a> › ${esc(p.name)}</nav>
-<div class="pk-head"><h1>${esc(p.name)}</h1><p>${esc([p.region_name,p.se&&`${p.se} 주차장`,addr].filter(Boolean).join(' · '))}</p></div>
+<div class="pk-head"><h1>${esc(p.name)}</h1><p>${esc([p.region_name,p.se&&`${p.se} 주차장`,addr].filter(Boolean).join(' · '))}</p></div>${actionsHtml({id:p.id,name:p.name,sub:p.region_name,url:lotPath(p.id)})}
 <p class="pk-answer ${o.open?'open':'closed'}"><span class="pk-dot" aria-hidden="true"></span><b>${p.charge==='무료'?'무료 주차장':h1!=null?`1시간 약 ${esc(won(h1))}`:esc(feeLine(p))}</b> <span class="muted">· ${esc(KIND_LABEL[now.kind])} ${esc(o.label)}${p.spaces?` · ${n(p.spaces)}면`:''}</span></p>
 <div class="pk-actions"><a href="${esc(mapUrl(p))}" rel="noopener" target="_blank">🧭 길찾기</a>${p.tel?`<a class="sub" href="tel:${esc(p.tel.replace(/[^0-9]/g,''))}">📞 관리기관 전화</a>`:''}</div>
 <section><h2>주차 요금</h2>${p.charge==='무료'?'<p><b class="pk-free">무료</b> 주차장이에요.</p>':`<table class="pk-feetable"><tbody>
@@ -120,6 +121,8 @@ export default {
   async fetch(req:Request,env:Env,ctx:ExecutionContext):Promise<Response>{
     const url=new URL(req.url),p=url.searchParams;
     try{
+      if(url.pathname==='/api/fav'){const ids=[...new Set((p.get('ids')??'').split(','))].filter(x=>/^[0-9A-Za-z-]{2,40}$/.test(x)).slice(0,20);const now=kstNow();
+        return json({items:ids.map(get).filter((x):x is Lot=>!!x).map(x=>{const o=openNow(x,now),w=feeFor(x,60);return {id:x.id,state:o.open?'open':'closed',label:x.charge==='무료'?'무료 주차장':w!=null?`1시간 약 ${won(w)}`:o.label,line:o.label};})},200,60);}
       if(url.pathname==='/api/near'){const lat=num(p.get('lat')),lon=num(p.get('lon'));if(lat===null||lon===null)return json({error:'lat/lon'},400,0);
         const r=near(lat,lon,Math.max(.2,Math.min(20,num(p.get('km'))??1)),Math.max(1,Math.min(100,num(p.get('limit'))??30)),undefined,p.get('free')==='1');
         return json({total:r.total,items:r.items.map(x=>({...slim(x),km:x.km}))},200,300);}

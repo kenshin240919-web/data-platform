@@ -5,6 +5,7 @@
 import raw from '../data/pharmacies.json';
 import weatherRegions from '../../weather/data/regions.json';
 import {DAY_LABEL,esc,eun,hm,km,kstNow,late,pharmacyPath,SITE,statusOf,sunday,holidayOpen,weekLine,type Card,type Pharmacy} from '../lib/fmt';
+import {actionsHtml} from '../../../packages/ui/src/actions';
 
 interface Env{ASSETS:Fetcher}
 type Data={status:{updated_at:string;count:number};items:Pharmacy[]};
@@ -70,7 +71,7 @@ function detailHtml(p:Pharmacy,nearby:Card[]){
   const ldTag=(d:unknown)=>`<script type="application/ld+json">${JSON.stringify(d).replace(/</g,'\\u003c')}</script>`;
   const map=p.lat!=null?`https://map.kakao.com/link/to/${encodeURIComponent(p.name)},${p.lat},${p.lon}`:p.address?`https://map.kakao.com/?q=${encodeURIComponent(p.address)}`:null;
   return `<nav class="crumbs"><a href="/">홈</a> › <a href="/region">지역별 약국</a> › <a href="/region/${esc(p.region)}">${esc(p.region_name)}</a> › ${esc(p.name)}</nav>
-<div class="ph-head"><h1>${esc(p.name)}</h1><p>${esc([p.region_name,p.address].filter(Boolean).join(' · '))}</p></div>
+<div class="ph-head"><h1>${esc(p.name)}</h1><p>${esc([p.region_name,p.address].filter(Boolean).join(' · '))}</p></div>${actionsHtml({id:p.id,name:p.name,sub:p.region_name,url:pharmacyPath(p.id)})}
 <p class="ph-answer ${s.state}"><span class="ph-dot" aria-hidden="true"></span><b>${esc(s.label)}</b>${s.today?` <span class="muted">· 오늘 ${esc(s.today)}</span>`:''}</p>
 <div class="ph-actions">${p.tel?`<a href="tel:${esc(p.tel.replace(/[^0-9]/g,''))}">📞 전화하기</a>`:''}${map?`<a class="sub" href="${esc(map)}" rel="noopener" target="_blank">🧭 길찾기</a>`:''}</div>
 <section><h2>요일별 운영 시간</h2><table class="ph-hours"><tbody>${days.map(d=>{const h=p.hours[d];return `<tr${d===todayKey?' class="today"':''}><th>${DAY_LABEL[d]}${d===todayKey?' (오늘)':''}</th><td>${h?`${esc(hm(h[0]))} ~ ${esc(hm(h[1]))}`:'<span class="muted">휴무</span>'}</td></tr>`;}).join('')}</tbody></table>
@@ -110,6 +111,8 @@ export default {
   async fetch(req:Request,env:Env,ctx:ExecutionContext):Promise<Response>{
     const url=new URL(req.url),p=url.searchParams;
     try{
+      if(url.pathname==='/api/fav'){const ids=[...new Set((p.get('ids')??'').split(','))].filter(x=>/^[0-9A-Za-z-]{2,40}$/.test(x)).slice(0,20);const now=kstNow();
+        return json({items:ids.map(get).filter((x):x is Pharmacy=>!!x).map(x=>{const s=statusOf(x,now);return {id:x.id,state:s.state,label:s.label,line:x.region_name};})},200,60);}
       if(url.pathname==='/api/near'){const lat=num(p.get('lat')),lon=num(p.get('lon'));if(lat===null||lon===null)return json({error:'lat/lon'},400,0);
         const cond=p.get('cond');return json(near(lat,lon,Math.max(.3,Math.min(20,num(p.get('km'))??2)),cond&&TESTS[cond]?cond:null,Math.max(1,Math.min(50,num(p.get('limit'))??20))));}
       if(url.pathname==='/api/search'){const q=flat(p.get('q')??'').slice(0,30);if(!q)return json({total:0,items:[]});

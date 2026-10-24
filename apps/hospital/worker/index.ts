@@ -4,6 +4,7 @@
 // (Secret DATA_GO_KR_KEY), cached per 시도 for 5 minutes in KV guidejung-cache (keys hospital:*).
 import weatherRegions from '../../weather/data/regions.json';
 import {CONDITIONS,DAY_LABEL,deptLabel,esc,eun,hm,hospitalPath,km,kstNow,SITE,statusOf,weekLine,type Card,type Hospital} from '../lib/fmt';
+import {actionsHtml} from '../../../packages/ui/src/actions';
 
 interface Env{ASSETS:Fetcher;DB:D1Database;CACHE:KVNamespace;DATA_GO_KR_KEY?:string}
 const json=(d:unknown,status=200,maxAge=60)=>new Response(JSON.stringify(d),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':`public, max-age=${maxAge}`,'access-control-allow-origin':'*'}});
@@ -115,7 +116,7 @@ function detailHtml(h:Hospital,nearby:Card[],bed:Bed|null){
   const days=['1','2','3','4','5','6','7','8'];
   return `<nav class="crumbs"><a href="/">홈</a> › <a href="/region">지역별 병원</a> › <a href="/region/${esc(h.region)}">${esc(h.region_name)}</a> › ${esc(h.name)}</nav>
 <div class="hp-head"><h1>${esc(h.name)}</h1><p>${esc([h.div,h.region_name,h.address].filter(Boolean).join(' · '))}</p>
-${depts.length?`<div class="hp-tags">${depts.map(d=>`<span>${esc(d)}</span>`).join('')}</div>`:''}</div>
+${depts.length?`<div class="hp-tags">${depts.map(d=>`<span>${esc(d)}</span>`).join('')}</div>`:''}</div>${actionsHtml({id:h.id,name:h.name,sub:[h.div,h.region_name].filter(Boolean).join(' · '),url:hospitalPath(h.id)})}
 <p class="hp-answer ${s.state}"><span class="hp-dot" aria-hidden="true"></span><b>${esc(s.label)}</b>${s.today?` <span class="muted">· 오늘 ${esc(s.today)}</span>`:''}</p>
 ${h.er?`<div class="hp-er-box">🚑 <b>응급실 운영</b>${bed?.beds!=null?` · 지금 응급실 남은 병상 <strong>${bed.beds}</strong>${bed.updated?` <small class="muted">(${esc(bed.updated)} 기준)</small>`:''}`:''}${h.er_tel?` · <a href="tel:${esc(h.er_tel.replace(/[^0-9]/g,''))}">응급실 ${esc(h.er_tel)}</a>`:''}</div>`:''}
 <div class="hp-actions">${h.tel?`<a href="tel:${esc(h.tel.replace(/[^0-9]/g,''))}">📞 전화하기</a>`:''}${map?`<a class="sub" href="${esc(map)}" rel="noopener" target="_blank">🧭 길찾기</a>`:''}</div>
@@ -176,6 +177,9 @@ export default {
   async fetch(req:Request,env:Env,ctx:ExecutionContext):Promise<Response>{
     const url=new URL(req.url),p=url.searchParams;
     try{
+      if(url.pathname==='/api/fav'){const ids=[...new Set((p.get('ids')??'').split(','))].filter(x=>/^[0-9A-Za-z-]{2,40}$/.test(x)).slice(0,20);const now=kstNow();
+        const rows=ids.length?(await env.DB.prepare(`SELECT id,card FROM hospitals WHERE id IN (${ids.map(()=>'?').join(',')})`).bind(...ids).all<{id:string;card:string}>()).results:[];
+        return json({items:rows.map(r=>{const c=JSON.parse(r.card) as Card,s=statusOf(c,now);return {id:r.id,state:s.state,label:s.label,line:[c.div,...c.depts.slice(0,2).map(deptLabel)].filter(Boolean).join(' · ')};})},200,60);}
       if(url.pathname==='/api/near'){const lat=num(p.get('lat')),lon=num(p.get('lon'));if(lat===null||lon===null)return json({error:'lat/lon'},400,0);
         const cond=p.get('cond');
         return json(await near(env,lat,lon,Math.max(.3,Math.min(20,num(p.get('km'))??2)),deptOk(p.get('dept')),cond&&(cond==='open'||COND_COL[cond])?cond:null,Math.max(1,Math.min(100,num(p.get('limit'))??30))));}

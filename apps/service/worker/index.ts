@@ -7,6 +7,7 @@ import raw from '../data/centers.json';
 import weatherRegions from '../../weather/data/regions.json';
 import {brand} from '../lib/brands';
 import {centerPath,distKm,esc,eun,hoursLine,KIND_LABEL,KINDS,km,kstNow,mapUrl,openNow,REPAIR_INFO,SITE,slim,years,type Center,type Kind} from '../lib/fmt';
+import {actionsHtml} from '../../../packages/ui/src/actions';
 
 interface Env{ASSETS:Fetcher;KAKAO_REST_KEY?:string}
 type Data={status:{updated_at:string;count:number};items:Center[]};
@@ -89,7 +90,7 @@ function detailHtml(p:Center,groups:[string,(Center&{km:number})[]][]){
     ['휴무일',p.off],['세차 요금',p.fee],['검사 종류',p.kind==='inspect'?p.tags.join(' · '):null],['업태',p.kind==='emission'?p.tags.join(' · '):null],
     [p.kind==='emission'?'인허가일':'등록일',p.since?`${p.since}${y?` (${y}년째)`:''}`:null],['관리기관',p.org],['기준일',p.ref],['지역',p.region_name]];
   return `<nav class="crumbs"><a href="/">홈</a> › <a href="/region">지역별</a> › <a href="/region/${esc(p.region)}">${esc(p.region_name)}</a> › ${esc(p.name)}</nav>
-<div class="sv-head"><h1>${K.icon} ${esc(p.name)}</h1><p>${esc([p.region_name,K.title,p.sub].filter(Boolean).join(' · '))}</p></div>
+<div class="sv-head"><h1>${K.icon} ${esc(p.name)}</h1><p>${esc([p.region_name,K.title,p.sub].filter(Boolean).join(' · '))}</p></div>${actionsHtml()}
 <p class="sv-answer ${o?(o.open?'open':'closed'):''}">${o?`<span class="sv-dot" aria-hidden="true"></span><b>${esc(o.label)}</b> <span class="muted">· ${esc(KIND_LABEL[now.kind])}</span>`:`<b>${esc(subInfo??K.desc)}</b>`}${addr?` <span class="muted">· ${esc(addr)}</span>`:''}</p>
 <div class="sv-actions">${p.tel?`<a href="tel:${esc(p.tel.replace(/[^0-9]/g,''))}">📞 전화하기</a>`:''}<a class="${p.tel?'sub':''}" href="${esc(mapUrl(p))}" rel="noopener" target="_blank">🧭 길찾기</a>${p.kind==='inspect'?'<a class="sub" href="/inspection">🗓️ 과태료 계산기</a>':''}</div>
 ${p.kind==='inspect'&&p.tags.length?`<section><h2>이곳에서 받을 수 있는 검사</h2><div class="sv-tags">${p.tags.map(t=>`<span>${esc(t)}</span>`).join('')}</div></section>`:''}

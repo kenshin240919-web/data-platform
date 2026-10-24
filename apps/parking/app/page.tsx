@@ -5,6 +5,7 @@ import {Faq,breadcrumbLd,JsonLd} from '@guidejung/ui/seo';
 import {Connect,genericFor} from '@guidejung/ui/network';
 import {NearPark} from './_components/NearPark';
 import {n,nation,refMonth,regions,sidos,SITE,status,updated} from '../lib/data';
+import {FavList} from '@guidejung/ui/favlist';
 
 export const metadata:Metadata={alternates:{canonical:'/'}};
 export default function Home(){
@@ -13,6 +14,7 @@ export default function Home(){
   return <div className="page pk-home">
     <section className="pk-hero"><h1>여기 주차 어디 해?</h1>
       <p>지자체가 등록한 전국 주차장 <b>{n(status.count)}곳</b>(대부분 공영)에서 가까운 곳과 싼 곳을 찾아 드려요. 무료 {n(nation.free)}곳{nation.hour!=null&&<> · 유료 1시간 보통 {n(nation.hour)}원</>}.</p></section>
+    <FavList hint="주차장 상세에서 ☆ 즐겨찾기를 누르면 여기서 바로 요금·운영 여부를 볼 수 있어요."/>
     <NearPark/>
     <AdSlot/>
     <section><h2>무료 주차장 많은 지역</h2>

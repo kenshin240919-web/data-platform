@@ -6,6 +6,7 @@ import {Faq,breadcrumbLd,JsonLd} from '@guidejung/ui/seo';
 import {Connect,linksNear} from '@guidejung/ui/network';
 import {StationList} from '../../_components/StationList';
 import {brandName,diff,eun,fresh,md,mapUrl,nation,nearby,PROD_LABEL,rankIn,regionOf,SITE,slim,station,stations,updated,won,type Prod} from '../../../lib/data';
+import {Actions} from '@guidejung/ui/favlist';
 
 export const dynamicParams=false;
 export function generateStaticParams(){return stations.map(s=>({id:s.id}));}
@@ -23,6 +24,7 @@ export default async function StationPage({params}:P){
   return <div className="page" id="station-detail">
     <nav className="crumbs"><Link href="/">홈</Link> › {r?<><Link href="/region">지역별 휘발유</Link> › <Link href={`/region/${r.code}`}>{r.label}</Link> › </>:null}{s.name}</nav>
     <div className="oi-head"><h1>{s.name}</h1><p>{s.self&&<span className="oi-tag self">셀프</span>}{s.brand&&<span className="oi-tag">{brandName(s.brand)}</span>}{s.address}</p></div>
+    <Actions fav={{id:s.id,name:s.name,sub:s.address??'',url:`/station/${s.id}`}}/>
     <div className="oi-avg">{prods(s).map(p=><div key={p}><span>{PROD_LABEL[p]}</span><b>{won(s.prices[p])}</b>
       {p==='B027'&&ra&&g?<small className={g>ra?'up':'down'}>{r?.name} 평균 {diff(g-ra)}</small>:p==='D047'&&nation.D047?.price&&s.prices.D047?<small className={s.prices.D047>nation.D047.price?'up':'down'}>전국 평균 {diff(s.prices.D047-nation.D047.price)}</small>:null}</div>)}
       {rank&&<div><span>{r?.name} 휘발유 최저가 순위</span><b>{rank}위</b><small>{r?.items.length}곳 중</small></div>}</div>
