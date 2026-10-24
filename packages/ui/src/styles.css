@@ -51,4 +51,4 @@
 .gj-network-brand{color:#d4f563;font-size:13px;margin-right:6px;white-space:nowrap}
 @media(max-width:480px){.gj-network-brand{display:none}}
 
-.region-group{font-size:20px;margin:26px 0 12px}
+.region-group{font-size:20px;margin:26px 0 12px}.parking-near{margin:-15px 0 30px;padding:14px 16px;border-radius:12px;background:#f0f5ff;border:1px solid #dce6f9;display:flex;flex-direction:column;gap:4px}.parking-near a{font-weight:700;color:var(--blue)}.parking-near .parking-nearest{font-weight:500;color:var(--ink);font-size:14px}

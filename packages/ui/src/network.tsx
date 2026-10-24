@@ -2,6 +2,7 @@
 // Server-safe (no hooks). Data: weather regions (시군구 centres) and traffic routes/rest areas (static snapshots).
 import weatherRegions from '../../../apps/weather/data/regions.json';
 import traffic from '../../../apps/traffic/data/snapshot.json';
+import oilAreas from '../../../apps/oil/data/areas.json';
 
 export type Site='trip'|'weather'|'traffic'|'charge'|'academy'|'school'|'pharmacy'|'hospital'|'oil'|'parking'|'service';
 // brand: 사이트 이름(로고·탭 제목), tagline: 부제(질문형 후킹). 10/17 사용자 결정: "내근처" 시리즈.
@@ -38,11 +39,14 @@ export function Connect({title='함께 보면 좋은 정보',items}:{title?:stri
 
 type WR={code:string;sido:string;sidoShort:string;name:string;lat:number;lon:number};
 const regions=weatherRegions as WR[];
+// 주유소 사이트는 오피넷 시군구 코드를 써서 이름으로 맞춤('수원시 장안구' → 수원시).
+const OIL=new Map((oilAreas as {name:string;sigungu:{code:string;name:string}[]}[]).flatMap(a=>a.sigungu.map(g=>[`${a.name} ${g.name}`,g.code] as const)));
+const oilCode=(r:WR)=>OIL.get(`${r.sidoShort} ${r.name}`)??OIL.get(`${r.sidoShort} ${r.name.split(' ')[0]}`)??null;
 const dist=(aLat:number,aLon:number,bLat:number,bLon:number)=>{const x=(bLon-aLon)*Math.cos(aLat*Math.PI/180);return Math.sqrt((bLat-aLat)**2+x**2)*111;};
 /** Nearest 시군구 (weather code; charge folds only 일반구 like "수원시 장안구" into the city code). */
 export function nearArea(lat:number,lon:number){
   const r=regions.reduce((a,b)=>dist(lat,lon,b.lat,b.lon)<dist(lat,lon,a.lat,a.lon)?b:a);
-  return {weather:r.code,charge:r.name.includes(' ')?r.code.slice(0,4)+'0':r.code,label:r.name.startsWith(r.sidoShort)?r.name:`${r.sidoShort} ${r.name}`,lat:r.lat,lon:r.lon,sidoShort:r.sidoShort};
+  return {weather:r.code,charge:r.name.includes(' ')?r.code.slice(0,4)+'0':r.code,oil:oilCode(r),label:r.name.startsWith(r.sidoShort)?r.name:`${r.sidoShort} ${r.name}`,lat:r.lat,lon:r.lon,sidoShort:r.sidoShort};
 }
 
 type Route={no:string;name:string;pts?:[number,number][]};type Rest={code:string;name:string;lat:number;lng:number;dir:string};
@@ -58,17 +62,41 @@ export function nearRests(lat:number,lon:number,n=2,maxKm=40){
   return rests.map(r=>({r,d:dist(lat,lon,r.lat,r.lng)})).filter(x=>x.d<=maxKm).sort((a,b)=>a.d-b.d).slice(0,n).map(({r,d})=>({code:r.code,name:r.name,km:Math.round(d)}));
 }
 
-/** Standard links for a spot: its weather, chargers, the road to get there, things to do nearby. */
+/** Which sister sites matter most from each site (사이트 간 순환): first ones are shown first, up to MAX_LINKS. */
+const ORDER:Record<Site,Site[]>={
+  trip:['parking','weather','oil','charge','traffic','pharmacy','hospital'],
+  weather:['trip','parking','traffic','oil','charge','pharmacy','hospital'],
+  traffic:['oil','service','parking','trip','charge','weather'],
+  charge:['trip','parking','weather','service','traffic','academy'],
+  academy:['parking','hospital','pharmacy','school','trip','weather'],
+  school:['academy','hospital','pharmacy','parking','weather','trip'],
+  pharmacy:['hospital','parking','weather','trip','academy','school'],
+  hospital:['pharmacy','parking','weather','trip','academy','school'],
+  oil:['service','charge','parking','traffic','trip','weather'],
+  parking:['trip','oil','charge','service','weather','pharmacy'],
+  service:['oil','parking','charge','traffic','weather','trip'],
+};
+const MAX_LINKS=7;
+/** Standard links for a spot: the sister sites' pages for the same 시군구 (or the spot itself), in the order that fits the current site. */
 export function linksNear(lat:number,lon:number,skip:Site){
-  const a=nearArea(lat,lon);const rd=nearRoad(lat,lon);const out:Link_[]=[];
-  if(skip!=='weather')out.push({icon:'🌤️',title:`${a.label} 날씨`,desc:'지금 날씨·주말 예보·미세먼지',href:`${W}/region/${a.weather}`});
-  if(skip!=='trip')out.push({icon:'🚗',title:`${a.label} 근처 가볼만한곳`,desc:'20km 안 여행지·축제를 가까운 순으로',href:`${T}/search?lat=${lat.toFixed(4)}&lon=${lon.toFixed(4)}&radius_km=20`});
-  if(skip!=='charge')out.push({icon:'⚡',title:`${a.label} 전기차 충전소`,desc:'지금 비어 있는 충전기',href:`${C}/region/${a.charge}`});
-  if(skip!=='traffic'&&rd)out.push({icon:'🛣️',title:`${rd.name} 실시간 상황`,desc:`가까운 고속도로(약 ${rd.km}km) 정체·CCTV`,href:`${R}/road/${rd.no}`});
-  // 여행(아이와 갈 곳·지역)·날씨·충전소 → 근처 학원(학부모 동선). 고속도로 휴게소에서는 맥락이 달라 넣지 않음.
-  if(skip!=='academy'&&skip!=='traffic')out.push({icon:'🎓',title:`${a.label} 근처 학원·학원비`,desc:'3km 안 학원과 교육청 공개 수강료',href:`${SITES.academy.url}/search?lat=${lat.toFixed(4)}&lon=${lon.toFixed(4)}&km=3`});
-  if(skip!=='traffic')for(const r of nearRests(lat,lon,1))out.push({icon:'🍜',title:r.name,desc:`약 ${r.km}km · 대표 음식·기름값`,href:`${R}/rest/${r.code}`});
-  return out;
+  const a=nearArea(lat,lon);const rd=nearRoad(lat,lon);const ll=`lat=${lat.toFixed(4)}&lon=${lon.toFixed(4)}`;
+  // 약국·병원·주차장·서비스센터·학교·학원 지역 페이지는 날씨 지역표 코드(일반구는 시 코드) = charge 코드와 같음.
+  const by:Partial<Record<Site,Link_[]>>={
+    weather:[{icon:'🌤️',title:`${a.label} 날씨`,desc:'지금 날씨·주말 예보·미세먼지',href:`${W}/region/${a.weather}`}],
+    trip:[{icon:'🚗',title:`${a.label} 근처 가볼만한곳`,desc:'20km 안 여행지·축제를 가까운 순으로',href:`${T}/search?${ll}&radius_km=20`}],
+    charge:[{icon:'⚡',title:`${a.label} 전기차 충전소`,desc:'지금 비어 있는 충전기',href:`${C}/region/${a.charge}`}],
+    traffic:[...(rd?[{icon:'🛣️',title:`${rd.name} 실시간 상황`,desc:`가까운 고속도로(약 ${rd.km}km) 정체·CCTV`,href:`${R}/road/${rd.no}`}]:[]),
+      // 고속도로·주유소 사이트에서는 휴게소도 함께
+      ...(skip==='traffic'||skip==='oil'||skip==='trip'?nearRests(lat,lon,1).map(r=>({icon:'🍜',title:r.name,desc:`약 ${r.km}km · 대표 음식·기름값`,href:`${R}/rest/${r.code}`})):[])],
+    academy:[{icon:'🎓',title:`${a.label} 근처 학원·학원비`,desc:'3km 안 학원과 교육청 공개 수강료',href:`${SITES.academy.url}/search?${ll}&km=3`}],
+    school:[{icon:'🏫',title:`${a.label} 학교 급식·학사일정`,desc:'초·중·고 오늘 급식과 D-day',href:`${SITES.school.url}/region/${a.charge}`}],
+    pharmacy:[{icon:'💊',title:`${a.label} 지금 문 연 약국`,desc:'영업 중·심야·일요일 약국',href:`${SITES.pharmacy.url}/region/${a.charge}`}],
+    hospital:[{icon:'🏥',title:`${a.label} 지금 진료하는 병원`,desc:'소아과·내과 야간·주말 진료, 응급실',href:`${SITES.hospital.url}/region/${a.charge}`}],
+    oil:a.oil?[{icon:'⛽',title:`${a.label} 기름값 싼 주유소`,desc:'오늘 휘발유·경유 최저가 순',href:`${SITES.oil.url}/region/${a.oil}`}]:[],
+    parking:[{icon:'🅿️',title:`${a.label} 공영·무료 주차장`,desc:'무료 주차장과 1시간 예상 요금 싼 순',href:`${SITES.parking.url}/region/${a.charge}`}],
+    service:[{icon:'🔧',title:`${a.label} 자동차 정비소·검사소`,desc:'정비소·검사소·세차장, 맡기기 전 체크리스트',href:`${SITES.service.url}/region/${a.charge}`}],
+  };
+  return ORDER[skip].filter(k=>k!==skip&&!SITES[k].hidden).flatMap(k=>by[k]??[]).slice(0,MAX_LINKS);
 }
 /** Links for a 시군구 by weather code (weather·charge region pages). */
 export function linksForCode(code:string,skip:Site){
