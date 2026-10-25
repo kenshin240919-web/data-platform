@@ -93,7 +93,7 @@ def main():
     if prev:
         for s in prev['items']:
             if s.get('address') and s.get('lat') is not None:
-                cache[s['address']] = [s['lat'], s['lon']]
+                cache[s['address']] = [s['lat'], s['lon'], s.get('geo_at') or '']
     if kakao:
         A.OUT = ROOT / 'runtime/school'  # geocode() saves its progress here
         A.OUT.mkdir(parents=True, exist_ok=True)
@@ -101,7 +101,9 @@ def main():
     regions = A.weather_regions()
     for s in items:
         v = cache.get(s['address'] or '')
-        s['lat'], s['lon'] = v if isinstance(v, list) else (None, None)
+        s['lat'], s['lon'] = v[:2] if isinstance(v, list) else (None, None)
+        if isinstance(v, list) and len(v) > 2 and v[2]:
+            s['geo_at'] = v[2]  # 카카오 좌표를 확인한 날(30일마다 다시 확인)
         hit = A.region_code(s['office'], zone_of(s['address']), regions) or A.nearest_region(s, regions)
         if hit:
             sido = next((r['sidoShort'] for r in regions if r['code'][:2] == hit[0][:2]), OFFICES[s['office']])

@@ -218,8 +218,9 @@ def main():
             uniq.append(p)
     items = uniq
     for p in items:
-        if p['lat'] is None and prev_by_id.get(p['id'], {}).get('lat') is not None:
-            p['lat'], p['lon'] = prev_by_id[p['id']]['lat'], prev_by_id[p['id']]['lon']
+        if p['lat'] is None and prev_by_id.get(p['id'], {}).get('lat') is not None:  # 원본에 좌표가 없어 카카오로 받았던 곳
+            q = prev_by_id[p['id']]
+            p['lat'], p['lon'], p['geo_at'] = q['lat'], q['lon'], q.get('geo_at') or ''
     kakao = os.environ.get('KAKAO_REST_KEY', '').strip()
     if kakao:
         K.geocode(items, kakao)

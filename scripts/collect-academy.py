@@ -3,13 +3,14 @@
 The NEIS 학원교습소정보 API (acaInsTiInfo) returns one row per 교습과정, so rows are grouped by the 지정번호
 (ACA_ASNUM) into one academy. Closed academies are not in the response: an id that disappears is dropped.
 Addresses have no coordinates; they are geocoded with Kakao Local (address search) and kept in a cache so later runs
-only look up new addresses.
+only look up new addresses. Kakao's operating policy only allows cached data that is kept up to date, so every cached
+coordinate is looked up again after REFRESH_DAYS (old entries without a date are spread over that period).
 
 Runs daily in GitHub Actions (.github/workflows/academy-collect.yml); runtime/academy is kept in the Actions cache.
 Usage: NEIS_API_KEY=... KAKAO_REST_KEY=... python scripts/collect-academy.py [--minutes N] [--no-geocode]
-Writes runtime/academy/full.json (all academies) and runtime/academy/geo.json (address → [lat, lon]).
+Writes runtime/academy/full.json (all academies) and runtime/academy/geo.json (address → [lat, lon, checked date]).
 """
-import json, os, re, sys, time, urllib.error, urllib.parse, urllib.request
+import json, os, re, sys, time, urllib.error, urllib.parse, urllib.request, zlib
 from collections import Counter, defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
@@ -26,6 +27,8 @@ NEIS = 'https://open.neis.go.kr/hub/acaInsTiInfo'
 KAKAO = 'https://dapi.kakao.com/v2/local/search/address.json'
 GEO_THREADS = 8
 MISS_RETRY_DAYS = 30  # an address Kakao did not find is tried again after this many days
+REFRESH_DAYS = 30  # 카카오 운영정책: 캐시한 데이터는 최신으로 유지 → 받은 좌표도 30일마다 다시 확인
+REFRESH_MAX = 5000  # 한 번에 다시 확인할 최대 주소 수(새 주소가 먼저)
 
 # 과목: matched against course and fee names (first match wins per name, a name can carry several subjects).
 SUBJECTS = [
@@ -212,13 +215,24 @@ def build(rows):
     return items
 
 
+def refresh_due(key, checked, today):
+    """True when a Kakao coordinate checked on `checked` (YYYY-MM-DD, or empty for entries saved before dates were kept)
+    should be looked up again. Undated entries come due on one day in REFRESH_DAYS, picked from the key."""
+    if checked:
+        return (today - datetime.fromisoformat(checked).date()).days >= REFRESH_DAYS
+    return (zlib.crc32(key.encode()) + today.toordinal()) % REFRESH_DAYS == 0
+
+
 def geocode(items, key, cache, deadline):
     today = datetime.now(KST).date()
     def due(a):
         v = cache.get(a)
         return v is None or (isinstance(v, dict) and (today - datetime.fromisoformat(v['miss']).date()).days >= MISS_RETRY_DAYS)
-    todo = sorted({a['address'] for a in items if a['address'] and due(a['address'])})
-    log(f'좌표 변환 대상 주소 {len(todo):,}곳 (저장된 주소 {len(cache):,}곳)')
+    addrs = {a['address'] for a in items if a['address']}
+    todo = sorted(a for a in addrs if due(a))
+    old = sorted(a for a in addrs if isinstance(cache.get(a), list) and refresh_due(a, (cache[a][2:] or [''])[0], today))
+    log(f'좌표 변환 대상 주소 {len(todo):,}곳 + 다시 확인 {min(len(old), REFRESH_MAX):,}/{len(old):,}곳 (저장된 주소 {len(cache):,}곳)')
+    todo += old[:REFRESH_MAX]
     stop = {'why': None}
     def one(addr):
         if stop['why'] or time.time() > deadline:
@@ -231,9 +245,11 @@ def geocode(items, key, cache, deadline):
                 return
             docs = d.get('documents') or []
             if docs:
-                cache[addr] = [round(float(docs[0]['y']), 6), round(float(docs[0]['x']), 6)]
+                cache[addr] = [round(float(docs[0]['y']), 6), round(float(docs[0]['x']), 6), today.isoformat()]
                 return
-        cache[addr] = {'miss': today.isoformat()}
+        v = cache.get(addr)
+        # 다시 확인에서 못 찾으면 같은 주소의 이전 좌표를 두고 확인한 날만 바꾼다(위치 정보를 갑자기 잃지 않게).
+        cache[addr] = [v[0], v[1], today.isoformat()] if isinstance(v, list) else {'miss': today.isoformat()}
     done = 0
     with ThreadPoolExecutor(GEO_THREADS) as pool:
         for i in range(0, len(todo), 2000):
@@ -326,7 +342,7 @@ def main():
         geocode(items, kakao_key, cache, deadline)
     for a in items:
         v = cache.get(a['address'] or '')
-        a['lat'], a['lon'] = (v if isinstance(v, list) else (None, None))
+        a['lat'], a['lon'] = (v[:2] if isinstance(v, list) else (None, None))
         if a['lat'] is None:
             a['rank'] -= 30  # 지도·거리에 못 나오는 곳은 뒤로
     regions, misses = weather_regions(), Counter()

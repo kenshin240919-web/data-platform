@@ -4,7 +4,8 @@ About 19,000 rows (17,800 lots after merging rows with the same 관리번호; 95
 like the pharmacy list: apps/parking/data/parkings.json is committed and both the static pages and the Worker import it.
 Fees are kept as numbers (기본시간·기본요금·추가단위) so the site can compute '2시간 세우면 얼마' (apps/parking/lib/fmt.ts).
 Region codes are the weather site's 시군구 codes (same rules as scripts/collect-pharmacy.py / collect-academy.py).
-Lots without coordinates (about 4%) keep the coordinates of the previous run or get them from Kakao (KAKAO_REST_KEY, optional).
+Lots without coordinates (about 4%) keep the coordinates of the previous run or get them from Kakao (KAKAO_REST_KEY, optional);
+Kakao coordinates carry geo_at (checked date) and are looked up again every 30 days (Kakao policy: keep cached data up to date).
 Runs daily in GitHub Actions (.github/workflows/parking-collect.yml).
 Usage: DATA_GO_KR_KEY=... [KAKAO_REST_KEY=...] python scripts/collect-parking.py [--force]
 """
@@ -125,16 +126,21 @@ def build(rows, regions, prev_by_id):
              'charge': charge, 'fee': fee(r, charge), 'days': txt(r.get('operDay')), 'hours': hours(r), 'pay': txt(r.get('metpay')),
              'note': txt(r.get('spcmnt')), 'org': txt(r.get('institutionNm')), 'tel': txt(r.get('phoneNumber')),
              'dis': (r.get('pwdbsPpkZoneYn') or '').strip().upper() == 'Y', 'ref': txt(r.get('referenceDate'))}
-        if p['lat'] is None and prev_by_id.get(pid, {}).get('lat') is not None:
-            p['lat'], p['lon'] = prev_by_id[pid]['lat'], prev_by_id[pid]['lon']
+        if p['lat'] is None and prev_by_id.get(pid, {}).get('lat') is not None:  # 원본에 좌표가 없어 카카오로 받았던 곳
+            p['lat'], p['lon'], p['geo_at'] = prev_by_id[pid]['lat'], prev_by_id[pid]['lon'], prev_by_id[pid].get('geo_at') or ''
         out.append(p)
     log('뺀 주차장', dict(skipped), '· 중복 관리번호로 합친 행', f'{len(rows) - len(best):,}')
     return out
 
 
 def geocode(items, key):
-    todo = [p for p in items if p['lat'] is None and (p['addr'] or p['jibun'])][:GEO_LIMIT]
-    log(f'좌표 없는 주차장 {sum(1 for p in items if p["lat"] is None):,}곳 · 이번에 변환 {len(todo):,}곳')
+    """Kakao coordinates for lots the source gives none; ones taken from Kakao carry geo_at (checked date) and are looked
+    up again after A.REFRESH_DAYS (카카오 운영정책: 캐시한 데이터는 최신으로 유지)."""
+    today = datetime.now(KST).date()
+    new = [p for p in items if p['lat'] is None and (p['addr'] or p['jibun'])]
+    old = [p for p in items if 'geo_at' in p and p['lat'] is not None and A.refresh_due(p['id'], p['geo_at'], today)]
+    todo = (new + old)[:GEO_LIMIT]
+    log(f'좌표 없는 곳 {len(new):,} · 카카오 좌표 다시 확인 {len(old):,} · 이번에 {len(todo):,}곳')
     got = 0
     for p in todo:
         for q in dict.fromkeys(x for x in (p['addr'], p['jibun'], re.sub(r'\s*[(,].*$', '', p['addr'] or '')) if x):
@@ -149,6 +155,8 @@ def geocode(items, key):
                 p['lat'], p['lon'] = round(float(docs[0]['y']), 6), round(float(docs[0]['x']), 6)
                 got += 1
                 break
+        if p['lat'] is not None:
+            p['geo_at'] = today.isoformat()  # 다시 확인에서 못 찾으면 같은 주소의 이전 좌표를 두고 확인한 날만 바꿈
     log(f'좌표 변환 성공 {got:,}곳')
 
 
