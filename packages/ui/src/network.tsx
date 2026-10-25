@@ -21,13 +21,13 @@ export const SITES:Record<Site,{url:string;icon:string;name:string;brand:string;
   oil:{url:'https://oil.guidejung.com',icon:'⛽',name:'주유소',brand:'내근처 주유소',tagline:'기름값 제일 싼 곳 어디?'},
   parking:{url:'https://parking.guidejung.com',icon:'🅿️',name:'주차장',brand:'내근처 주차장',tagline:'여기 주차 어디 해?'},
   service:{url:'https://service.guidejung.com',icon:'🔧',name:'정비소',brand:'내근처 서비스센터',tagline:'고장 났다, 어디로 가지?'},
-  near:{url:'https://near.guidejung.com',icon:'📍',name:'모아보기',brand:'내근처',tagline:'내 근처에 뭐가 있지?',hidden:true},
+  near:{url:'https://near.guidejung.com',icon:'📍',name:'모아보기',brand:'내근처',tagline:'내 근처에 뭐가 있지?'},
 };
 const {trip:T,weather:W,traffic:R,charge:C}=Object.fromEntries(Object.entries(SITES).map(([k,v])=>[k,v.url])) as Record<Site,string>;
 
 /** 모든 페이지 맨 위: 내근처 사이트 바로가기 한 줄(hidden 사이트는 자기 사이트에서만 보임). */
 export function NetworkBar({current}:{current:Site}){
-  return <><nav className="gj-network" aria-label="내근처 서비스"><div><b className="gj-network-brand">📍 내근처</b>{(Object.keys(SITES) as Site[]).filter(k=>!SITES[k].hidden||k===current).map(k=>k===current
+  return <><nav className="gj-network" aria-label="내근처 서비스"><div>{current==='near'?<b className="gj-network-brand">📍 내근처</b>:<a className="gj-network-brand" href={SITES.near.url}>📍 내근처</a>}{(Object.keys(SITES) as Site[]).filter(k=>!SITES[k].hidden||k===current).map(k=>k===current
     ?<span key={k} className="on" aria-current="page">{SITES[k].icon} {SITES[k].name}</span>
     :<a key={k} href={SITES[k].url}>{SITES[k].icon} {SITES[k].name}</a>)}</div></nav><InstallHint brand={SITES[current].brand}/><script dangerouslySetInnerHTML={{__html:ACTIONS_JS}}/></>;
 }
