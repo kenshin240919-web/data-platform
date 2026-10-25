@@ -4,6 +4,8 @@ import { ClarityScript } from '@guidejung/ui/clarity-script';
 import { GaScript } from '@guidejung/ui/ga-script';
 import '@guidejung/ui/styles';
 import './near.css';
+import '@guidejung/ui/dark';
+import './near.dark.css';
 import { Shell } from './_components/Shell';
 import { JsonLd, siteLd } from '@guidejung/ui/seo';
 import { SITES } from '@guidejung/ui/network';
