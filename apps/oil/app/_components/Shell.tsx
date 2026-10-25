@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import {NetworkBar,CHARGE_URL,TRAFFIC_URL} from '@guidejung/ui/network';
+import {Contact,NetworkBar,CHARGE_URL,TRAFFIC_URL} from '@guidejung/ui/network';
 export function Shell({children}:{children:React.ReactNode}){
   return <>
     <NetworkBar current="oil"/>
@@ -12,7 +12,7 @@ export function Shell({children}:{children:React.ReactNode}){
     <footer>
       <div><Link href="/" className="footer-brand">⛽ 내근처 주유소</Link><p>오늘 휘발유·경유 최저가 주유소</p></div>
       <div className="footer-links"><Link href="/about">서비스 소개</Link><Link href="/data-policy">데이터·출처 안내</Link><Link href="/privacy">개인정보 안내</Link><a href={TRAFFIC_URL}>내근처 고속도로</a><a href={CHARGE_URL}>내근처 충전소</a></div>
-      <p className="muted small">© {new Date().getFullYear()} GuideJung Data · 출처: 한국석유공사 오피넷. 가격은 하루 한 번 받은 값으로 실제 판매 가격과 다를 수 있어요.</p>
+      <p className="muted small">© {new Date().getFullYear()} GuideJung Data · <Contact/> · 출처: 한국석유공사 오피넷. 가격은 하루 한 번 받은 값으로 실제 판매 가격과 다를 수 있어요.</p>
     </footer>
   </>;
 }

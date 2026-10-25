@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import {NetworkBar,TRAFFIC_URL} from '@guidejung/ui/network';
+import {Contact,NetworkBar,TRAFFIC_URL} from '@guidejung/ui/network';
 import {TRIP,WEATHER} from '../../lib/regions';
 export function Shell({children}:{children:React.ReactNode}){
   return <>
@@ -13,7 +13,7 @@ export function Shell({children}:{children:React.ReactNode}){
     <footer>
       <div><Link href="/" className="footer-brand">⚡ 내근처 충전소</Link><p>전국 전기차 충전소 위치와 실시간 이용 가능 여부</p></div>
       <div className="footer-links"><Link href="/about">서비스 소개</Link><Link href="/data-policy">데이터·출처 안내</Link><Link href="/privacy">개인정보 안내</Link><a href={TRIP}>내근처 여행</a><a href={WEATHER}>내근처 날씨</a><a href={TRAFFIC_URL}>내근처 고속도로</a></div>
-      <p className="muted small">© {new Date().getFullYear()} GuideJung Data · 출처: 한국환경공단 전기자동차 충전소 정보(공공데이터포털). 상태는 운영기관 전송 시각 기준이며 실제와 다를 수 있습니다.</p>
+      <p className="muted small">© {new Date().getFullYear()} GuideJung Data · <Contact/> · 출처: 한국환경공단 전기자동차 충전소 정보(공공데이터포털). 상태는 운영기관 전송 시각 기준이며 실제와 다를 수 있습니다.</p>
     </footer>
   </>;
 }

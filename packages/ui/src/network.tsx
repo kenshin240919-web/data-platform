@@ -27,6 +27,9 @@ export const SITES:Record<Site,{url:string;icon:string;name:string;brand:string;
 const {trip:T,weather:W,traffic:R,charge:C}=Object.fromEntries(Object.entries(SITES).map(([k,v])=>[k,v.url])) as Record<Site,string>;
 
 /** 모든 페이지 맨 위: 내근처 사이트 바로가기 한 줄(hidden 사이트는 자기 사이트에서만 보임). */
+/** 운영자 정보: 네이버 검색광고 비즈채널 심사에 사이트 하단 담당자·이메일이 필요함. */
+export function Contact(){return <>담당자: 가이드정 · 문의: <a href="mailto:kenshin240919@gmail.com">kenshin240919@gmail.com</a></>;}
+
 export function NetworkBar({current}:{current:Site}){
   return <><nav className="gj-network" aria-label="내근처 서비스"><div>{current==='near'?<b className="gj-network-brand">📍 내근처</b>:<a className="gj-network-brand" href={SITES.near.url}>📍 내근처</a>}{(Object.keys(SITES) as Site[]).filter(k=>!SITES[k].hidden||k===current).map(k=>k===current
     ?<span key={k} className="on" aria-current="page">{SITES[k].icon} {SITES[k].name}</span>

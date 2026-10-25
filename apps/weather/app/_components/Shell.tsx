@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import {TRIP} from '../../lib/regions';
 import {WarningBar} from './Warnings';
-import {NetworkBar,CHARGE_URL,TRAFFIC_URL} from '@guidejung/ui/network';
+import {Contact,NetworkBar,CHARGE_URL,TRAFFIC_URL} from '@guidejung/ui/network';
 
 export function Shell({children}:{children:React.ReactNode}){
   return <>
@@ -16,7 +16,7 @@ export function Shell({children}:{children:React.ReactNode}){
     <footer>
       <div><Link href="/" className="footer-brand">🌤️ 내근처 날씨</Link><p>전국 시군구 날씨·미세먼지·주간 예보</p></div>
       <div className="footer-links"><Link href="/about">서비스 소개</Link><Link href="/data-policy">데이터·출처 안내</Link><Link href="/privacy">개인정보 안내</Link><a href={TRIP}>내근처 여행</a><a href={TRAFFIC_URL}>내근처 고속도로</a><a href={CHARGE_URL}>내근처 충전소</a></div>
-      <p className="muted small">© {new Date().getFullYear()} GuideJung Data · 출처: 기상청, 한국환경공단 에어코리아. 예보는 발표 이후 바뀔 수 있습니다.</p>
+      <p className="muted small">© {new Date().getFullYear()} GuideJung Data · <Contact/> · 출처: 기상청, 한국환경공단 에어코리아. 예보는 발표 이후 바뀔 수 있습니다.</p>
     </footer>
   </>;
 }
