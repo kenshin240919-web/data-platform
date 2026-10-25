@@ -1,0 +1,40 @@
+name: Near deploy
+# Deploys near.guidejung.com (Worker guidejung-near, 내근처 모아보기) with wrangler from GitHub Actions (not connected to Cloudflare
+# Workers Builds). Secrets: CLOUDFLARE_API_TOKEN (github-d1: Workers Scripts edit …), CLOUDFLARE_ACCOUNT_ID.
+# Runs when the near app (or what it imports) changes on main, or by hand. No data of its own (live numbers come from the sister sites' APIs).
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/near/**'
+      - 'apps/weather/data/**'
+      - 'apps/traffic/data/**'
+      - 'apps/oil/data/areas.json'
+      - 'packages/**'
+      - 'scripts/prune-rsc.mjs'
+      - 'package.json'
+      - 'package-lock.json'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: near-deploy
+  cancel-in-progress: true
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Build and deploy
+        run: npx wrangler deploy -c apps/near/wrangler.jsonc
