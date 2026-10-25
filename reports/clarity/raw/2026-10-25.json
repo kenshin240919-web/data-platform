@@ -1,0 +1,7154 @@
+{
+ "date": "2026-10-25",
+ "window": "last 24h",
+ "sites": {
+  "trip": {
+   "all": [
+    {
+     "metricName": "DeadClickCount",
+     "information": [
+      {
+       "sessionsCount": 10,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "ExcessiveScroll",
+     "information": [
+      {
+       "sessionsCount": 10,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "RageClickCount",
+     "information": [
+      {
+       "sessionsCount": 10,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "QuickbackClick",
+     "information": [
+      {
+       "sessionsCount": 10,
+       "sessionsWithMetricPercentage": 10,
+       "sessionsWithoutMetricPercentage": 90,
+       "pagesViews": 4,
+       "subTotal": 4
+      }
+     ]
+    },
+    {
+     "metricName": "ScriptErrorCount",
+     "information": [
+      {
+       "sessionsCount": 10,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "ErrorClickCount",
+     "information": [
+      {
+       "sessionsCount": 10,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "ScrollDepth",
+     "information": [
+      {
+       "averageScrollDepth": 53.33
+      }
+     ]
+    },
+    {
+     "metricName": "Traffic",
+     "information": [
+      {
+       "totalSessionCount": 10,
+       "totalBotSessionCount": 3,
+       "distinctUserCount": 10,
+       "pagesPerSessionPercentage": 1.5
+      }
+     ]
+    },
+    {
+     "metricName": "EngagementTime",
+     "information": [
+      {
+       "totalTime": 87,
+       "activeTime": 66
+      }
+     ]
+    },
+    {
+     "metricName": "Browser",
+     "information": [
+      {
+       "name": "Chrome",
+       "sessionsCount": 4
+      },
+      {
+       "name": "ChromeMobile",
+       "sessionsCount": 3
+      },
+      {
+       "name": "Other",
+       "sessionsCount": 2
+      },
+      {
+       "name": "SamsungInternet",
+       "sessionsCount": 1
+      }
+     ]
+    },
+    {
+     "metricName": "Device",
+     "information": [
+      {
+       "name": "Mobile",
+       "sessionsCount": 6
+      },
+      {
+       "name": "PC",
+       "sessionsCount": 3
+      },
+      {
+       "name": "Tablet",
+       "sessionsCount": 1
+      }
+     ]
+    },
+    {
+     "metricName": "OS",
+     "information": [
+      {
+       "name": "Android",
+       "sessionsCount": 7
+      },
+      {
+       "name": "Windows",
+       "sessionsCount": 3
+      }
+     ]
+    },
+    {
+     "metricName": "Country",
+     "information": [
+      {
+       "name": "Korea, Republic of",
+       "sessionsCount": 7
+      },
+      {
+       "name": "China",
+       "sessionsCount": 3
+      }
+     ]
+    },
+    {
+     "metricName": "PageTitle",
+     "information": [
+      {
+       "name": "내근처 여행 | 오늘 어디가? 내 주변 가볼만한곳·맛집·숙소",
+       "sessionsCount": 4
+      },
+      {
+       "name": "경기도 성남시 분당구 가볼만한곳·축제 | 내근처 여행",
+       "sessionsCount": 1
+      },
+      {
+       "name": "광화문 | 내근처 여행",
+       "sessionsCount": 1
+      },
+      {
+       "name": "도심 속 바다축제 | 내근처 여행",
+       "sessionsCount": 1
+      },
+      {
+       "name": "목포 동부시장 | 내근처 여행",
+       "sessionsCount": 1
+      },
+      {
+       "name": "비 오는 날 실내 여행 | 내근처 여행",
+       "sessionsCount": 1
+      },
+      {
+       "name": "성균관 명륜당 | 내근처 여행",
+       "sessionsCount": 1
+      },
+      {
+       "name": "울산 들꽃학습원 | 내근처 여행",
+       "sessionsCount": 1
+      },
+      {
+       "name": "전국 축제·행사 | 내근처 여행",
+       "sessionsCount": 1
+      },
+      {
+       "name": "태양은가득히 펜션 | 내근처 여행",
+       "sessionsCount": 1
+      }
+     ]
+    },
+    {
+     "metricName": "ReferrerUrl",
+     "information": [
+      {
+       "name": "m.search.daum.net",
+       "sessionsCount": 3
+      },
+      {
+       "name": "m.search.naver.com",
+       "sessionsCount": 2
+      },
+      {
+       "name": "parking.guidejung.com",
+       "sessionsCount": 1
+      },
+      {
+       "name": "service.guidejung.com",
+       "sessionsCount": 1
+      },
+      {
+       "name": "trip.guidejung.com",
+       "sessionsCount": 1
+      }
+     ]
+    },
+    {
+     "metricName": "PopularPages",
+     "information": [
+      {
+       "url": "https://trip.guidejung.com/",
+       "visitsCount": 4
+      },
+      {
+       "url": "https://trip.guidejung.com/festival",
+       "visitsCount": 1
+      },
+      {
+       "url": "https://trip.guidejung.com/festival/d3e0e9d2-f715-5186-9862-218e2de3ea2c",
+       "visitsCount": 1
+      },
+      {
+       "url": "https://trip.guidejung.com/indoor",
+       "visitsCount": 1
+      },
+      {
+       "url": "https://trip.guidejung.com/place/8d6d100c-4bb0-5e5c-bde0-5d76cd72d6bd",
+       "visitsCount": 1
+      },
+      {
+       "url": "https://trip.guidejung.com/place/95878dd7-c5b6-55f3-b937-6b489d888deb",
+       "visitsCount": 1
+      },
+      {
+       "url": "https://trip.guidejung.com/place/c2dbccdd-c1de-569b-b631-1e8b5bc9dbb3",
+       "visitsCount": 1
+      },
+      {
+       "url": "https://trip.guidejung.com/region/a33051b1-8e23-55c6-a1f8-68319b9cd7f5",
+       "visitsCount": 1
+      },
+      {
+       "url": "https://trip.guidejung.com/shop/7f9ee80e-6241-50da-8a6c-1d423d7ce86e",
+       "visitsCount": 1
+      },
+      {
+       "url": "https://trip.guidejung.com/stay/b5899b0c-6b16-5d1f-9761-7dd5e305ea91",
+       "visitsCount": 1
+      }
+     ]
+    }
+   ],
+   "url": [
+    {
+     "metricName": "DeadClickCount",
+     "information": [
+      {
+       "sessionsCount": 4,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/stay/b5899b0c-6b16-5d1f-9761-7dd5e305ea91"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/festival/d3e0e9d2-f715-5186-9862-218e2de3ea2c"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/place/95878dd7-c5b6-55f3-b937-6b489d888deb"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/place/8d6d100c-4bb0-5e5c-bde0-5d76cd72d6bd"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/place/c2dbccdd-c1de-569b-b631-1e8b5bc9dbb3"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/indoor"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/region/a33051b1-8e23-55c6-a1f8-68319b9cd7f5"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/festival"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/shop/7f9ee80e-6241-50da-8a6c-1d423d7ce86e"
+      }
+     ]
+    },
+    {
+     "metricName": "ExcessiveScroll",
+     "information": [
+      {
+       "sessionsCount": 4,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/stay/b5899b0c-6b16-5d1f-9761-7dd5e305ea91"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/festival/d3e0e9d2-f715-5186-9862-218e2de3ea2c"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/place/95878dd7-c5b6-55f3-b937-6b489d888deb"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/place/8d6d100c-4bb0-5e5c-bde0-5d76cd72d6bd"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/place/c2dbccdd-c1de-569b-b631-1e8b5bc9dbb3"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/indoor"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/region/a33051b1-8e23-55c6-a1f8-68319b9cd7f5"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/festival"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/shop/7f9ee80e-6241-50da-8a6c-1d423d7ce86e"
+      }
+     ]
+    },
+    {
+     "metricName": "RageClickCount",
+     "information": [
+      {
+       "sessionsCount": 4,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/stay/b5899b0c-6b16-5d1f-9761-7dd5e305ea91"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/festival/d3e0e9d2-f715-5186-9862-218e2de3ea2c"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/place/95878dd7-c5b6-55f3-b937-6b489d888deb"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/place/8d6d100c-4bb0-5e5c-bde0-5d76cd72d6bd"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/place/c2dbccdd-c1de-569b-b631-1e8b5bc9dbb3"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/indoor"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/region/a33051b1-8e23-55c6-a1f8-68319b9cd7f5"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/festival"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/shop/7f9ee80e-6241-50da-8a6c-1d423d7ce86e"
+      }
+     ]
+    },
+    {
+     "metricName": "QuickbackClick",
+     "information": [
+      {
+       "sessionsCount": 4,
+       "sessionsWithMetricPercentage": 25,
+       "sessionsWithoutMetricPercentage": 75,
+       "pagesViews": 2,
+       "subTotal": 2,
+       "Url": "https://trip.guidejung.com/"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/stay/b5899b0c-6b16-5d1f-9761-7dd5e305ea91"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/festival/d3e0e9d2-f715-5186-9862-218e2de3ea2c"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 100,
+       "sessionsWithoutMetricPercentage": 0,
+       "pagesViews": 1,
+       "subTotal": 1,
+       "Url": "https://trip.guidejung.com/place/95878dd7-c5b6-55f3-b937-6b489d888deb"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/place/8d6d100c-4bb0-5e5c-bde0-5d76cd72d6bd"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/place/c2dbccdd-c1de-569b-b631-1e8b5bc9dbb3"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/indoor"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/region/a33051b1-8e23-55c6-a1f8-68319b9cd7f5"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 100,
+       "sessionsWithoutMetricPercentage": 0,
+       "pagesViews": 1,
+       "subTotal": 1,
+       "Url": "https://trip.guidejung.com/festival"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/shop/7f9ee80e-6241-50da-8a6c-1d423d7ce86e"
+      }
+     ]
+    },
+    {
+     "metricName": "ScriptErrorCount",
+     "information": [
+      {
+       "sessionsCount": 4,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/stay/b5899b0c-6b16-5d1f-9761-7dd5e305ea91"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/festival/d3e0e9d2-f715-5186-9862-218e2de3ea2c"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/place/95878dd7-c5b6-55f3-b937-6b489d888deb"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/place/8d6d100c-4bb0-5e5c-bde0-5d76cd72d6bd"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/place/c2dbccdd-c1de-569b-b631-1e8b5bc9dbb3"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/indoor"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/region/a33051b1-8e23-55c6-a1f8-68319b9cd7f5"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/festival"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/shop/7f9ee80e-6241-50da-8a6c-1d423d7ce86e"
+      }
+     ]
+    },
+    {
+     "metricName": "ErrorClickCount",
+     "information": [
+      {
+       "sessionsCount": 4,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/stay/b5899b0c-6b16-5d1f-9761-7dd5e305ea91"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/festival/d3e0e9d2-f715-5186-9862-218e2de3ea2c"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/place/95878dd7-c5b6-55f3-b937-6b489d888deb"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/place/8d6d100c-4bb0-5e5c-bde0-5d76cd72d6bd"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/place/c2dbccdd-c1de-569b-b631-1e8b5bc9dbb3"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/indoor"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/region/a33051b1-8e23-55c6-a1f8-68319b9cd7f5"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/festival"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://trip.guidejung.com/shop/7f9ee80e-6241-50da-8a6c-1d423d7ce86e"
+      }
+     ]
+    },
+    {
+     "metricName": "ScrollDepth",
+     "information": [
+      {
+       "averageScrollDepth": 68.33,
+       "Url": "https://trip.guidejung.com/"
+      },
+      {
+       "averageScrollDepth": 60,
+       "Url": "https://trip.guidejung.com/stay/b5899b0c-6b16-5d1f-9761-7dd5e305ea91"
+      },
+      {
+       "averageScrollDepth": 53,
+       "Url": "https://trip.guidejung.com/festival/d3e0e9d2-f715-5186-9862-218e2de3ea2c"
+      },
+      {
+       "averageScrollDepth": 9,
+       "Url": "https://trip.guidejung.com/place/95878dd7-c5b6-55f3-b937-6b489d888deb"
+      },
+      {
+       "averageScrollDepth": 38,
+       "Url": "https://trip.guidejung.com/place/8d6d100c-4bb0-5e5c-bde0-5d76cd72d6bd"
+      },
+      {
+       "averageScrollDepth": 57,
+       "Url": "https://trip.guidejung.com/place/c2dbccdd-c1de-569b-b631-1e8b5bc9dbb3"
+      },
+      {
+       "averageScrollDepth": 53,
+       "Url": "https://trip.guidejung.com/indoor"
+      },
+      {
+       "averageScrollDepth": 20,
+       "Url": "https://trip.guidejung.com/region/a33051b1-8e23-55c6-a1f8-68319b9cd7f5"
+      },
+      {
+       "averageScrollDepth": 32,
+       "Url": "https://trip.guidejung.com/festival"
+      },
+      {
+       "averageScrollDepth": 68,
+       "Url": "https://trip.guidejung.com/shop/7f9ee80e-6241-50da-8a6c-1d423d7ce86e"
+      }
+     ]
+    },
+    {
+     "metricName": "Traffic",
+     "information": [
+      {
+       "totalSessionCount": 4,
+       "totalBotSessionCount": 1,
+       "distinctUserCount": 4,
+       "pagesPerSessionPercentage": 2.25,
+       "Url": "https://trip.guidejung.com/"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 1,
+       "Url": "https://trip.guidejung.com/stay/b5899b0c-6b16-5d1f-9761-7dd5e305ea91"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 6,
+       "Url": "https://trip.guidejung.com/festival/d3e0e9d2-f715-5186-9862-218e2de3ea2c"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 6,
+       "Url": "https://trip.guidejung.com/place/95878dd7-c5b6-55f3-b937-6b489d888deb"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 1,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 1,
+       "Url": "https://trip.guidejung.com/place/8d6d100c-4bb0-5e5c-bde0-5d76cd72d6bd"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 1,
+       "Url": "https://trip.guidejung.com/place/c2dbccdd-c1de-569b-b631-1e8b5bc9dbb3"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 1,
+       "Url": "https://trip.guidejung.com/indoor"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 1,
+       "Url": "https://trip.guidejung.com/region/a33051b1-8e23-55c6-a1f8-68319b9cd7f5"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 1,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 6,
+       "Url": "https://trip.guidejung.com/festival"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 1,
+       "Url": "https://trip.guidejung.com/shop/7f9ee80e-6241-50da-8a6c-1d423d7ce86e"
+      },
+      {
+       "totalSessionCount": 0,
+       "totalBotSessionCount": 1,
+       "distinctUserCount": 0,
+       "pagesPerSessionPercentage": null,
+       "Url": "https://trip.guidejung.com/region/73778d3e-45ec-507f-91ba-cfd905135e09"
+      }
+     ]
+    },
+    {
+     "metricName": "EngagementTime",
+     "information": [
+      {
+       "totalTime": 142,
+       "activeTime": 139,
+       "Url": "https://trip.guidejung.com/"
+      },
+      {
+       "totalTime": 9,
+       "activeTime": 8,
+       "Url": "https://trip.guidejung.com/stay/b5899b0c-6b16-5d1f-9761-7dd5e305ea91"
+      },
+      {
+       "totalTime": 11,
+       "activeTime": 11,
+       "Url": "https://trip.guidejung.com/festival/d3e0e9d2-f715-5186-9862-218e2de3ea2c"
+      },
+      {
+       "totalTime": 1,
+       "activeTime": 1,
+       "Url": "https://trip.guidejung.com/place/95878dd7-c5b6-55f3-b937-6b489d888deb"
+      },
+      {
+       "totalTime": 19,
+       "activeTime": 19,
+       "Url": "https://trip.guidejung.com/place/8d6d100c-4bb0-5e5c-bde0-5d76cd72d6bd"
+      },
+      {
+       "totalTime": 244,
+       "activeTime": 44,
+       "Url": "https://trip.guidejung.com/place/c2dbccdd-c1de-569b-b631-1e8b5bc9dbb3"
+      },
+      {
+       "totalTime": 1,
+       "activeTime": 1,
+       "Url": "https://trip.guidejung.com/indoor"
+      },
+      {
+       "totalTime": 0,
+       "activeTime": 0,
+       "Url": "https://trip.guidejung.com/region/a33051b1-8e23-55c6-a1f8-68319b9cd7f5"
+      },
+      {
+       "totalTime": 3,
+       "activeTime": 3,
+       "Url": "https://trip.guidejung.com/festival"
+      },
+      {
+       "totalTime": 14,
+       "activeTime": 14,
+       "Url": "https://trip.guidejung.com/shop/7f9ee80e-6241-50da-8a6c-1d423d7ce86e"
+      }
+     ]
+    }
+   ],
+   "device": [
+    {
+     "metricName": "DeadClickCount",
+     "information": [
+      {
+       "sessionsCount": 6,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Mobile"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Tablet"
+      },
+      {
+       "sessionsCount": 3,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "ExcessiveScroll",
+     "information": [
+      {
+       "sessionsCount": 6,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Mobile"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Tablet"
+      },
+      {
+       "sessionsCount": 3,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "RageClickCount",
+     "information": [
+      {
+       "sessionsCount": 6,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Mobile"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Tablet"
+      },
+      {
+       "sessionsCount": 3,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "QuickbackClick",
+     "information": [
+      {
+       "sessionsCount": 6,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Mobile"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 100,
+       "sessionsWithoutMetricPercentage": 0,
+       "pagesViews": 4,
+       "subTotal": 4,
+       "Device": "Tablet"
+      },
+      {
+       "sessionsCount": 3,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "ScriptErrorCount",
+     "information": [
+      {
+       "sessionsCount": 6,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Mobile"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Tablet"
+      },
+      {
+       "sessionsCount": 3,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "ErrorClickCount",
+     "information": [
+      {
+       "sessionsCount": 6,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Mobile"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Tablet"
+      },
+      {
+       "sessionsCount": 3,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "ScrollDepth",
+     "information": [
+      {
+       "averageScrollDepth": 69.5,
+       "Device": "Mobile"
+      },
+      {
+       "averageScrollDepth": 48.5,
+       "Device": "Tablet"
+      },
+      {
+       "averageScrollDepth": 30.67,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "Traffic",
+     "information": [
+      {
+       "totalSessionCount": 6,
+       "totalBotSessionCount": 2,
+       "distinctUserCount": 6,
+       "pagesPerSessionPercentage": 1,
+       "Device": "Mobile"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 6,
+       "Device": "Tablet"
+      },
+      {
+       "totalSessionCount": 3,
+       "totalBotSessionCount": 1,
+       "distinctUserCount": 3,
+       "pagesPerSessionPercentage": 1,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "EngagementTime",
+     "information": [
+      {
+       "totalTime": 129,
+       "activeTime": 94,
+       "Device": "Mobile"
+      },
+      {
+       "totalTime": 91,
+       "activeTime": 91,
+       "Device": "Tablet"
+      },
+      {
+       "totalTime": 1,
+       "activeTime": 1,
+       "Device": "PC"
+      }
+     ]
+    }
+   ]
+  },
+  "weather": {
+   "all": [
+    {
+     "metricName": "DeadClickCount",
+     "information": [
+      {
+       "sessionsCount": 6,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "ExcessiveScroll",
+     "information": [
+      {
+       "sessionsCount": 6,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "RageClickCount",
+     "information": [
+      {
+       "sessionsCount": 6,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "QuickbackClick",
+     "information": [
+      {
+       "sessionsCount": 6,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "ScriptErrorCount",
+     "information": [
+      {
+       "sessionsCount": 6,
+       "sessionsWithMetricPercentage": 16.67,
+       "sessionsWithoutMetricPercentage": 83.33,
+       "pagesViews": 1,
+       "subTotal": 1
+      }
+     ]
+    },
+    {
+     "metricName": "ErrorClickCount",
+     "information": [
+      {
+       "sessionsCount": 6,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "ScrollDepth",
+     "information": [
+      {
+       "averageScrollDepth": 37.17
+      }
+     ]
+    },
+    {
+     "metricName": "Traffic",
+     "information": [
+      {
+       "totalSessionCount": 6,
+       "totalBotSessionCount": 3,
+       "distinctUserCount": 6,
+       "pagesPerSessionPercentage": 1
+      }
+     ]
+    },
+    {
+     "metricName": "EngagementTime",
+     "information": [
+      {
+       "totalTime": 1,
+       "activeTime": 1
+      }
+     ]
+    },
+    {
+     "metricName": "Browser",
+     "information": [
+      {
+       "name": "Chrome",
+       "sessionsCount": 6
+      }
+     ]
+    },
+    {
+     "metricName": "Device",
+     "information": [
+      {
+       "name": "PC",
+       "sessionsCount": 6
+      }
+     ]
+    },
+    {
+     "metricName": "OS",
+     "information": [
+      {
+       "name": "Windows",
+       "sessionsCount": 6
+      }
+     ]
+    },
+    {
+     "metricName": "Country",
+     "information": [
+      {
+       "name": "China",
+       "sessionsCount": 6
+      }
+     ]
+    },
+    {
+     "metricName": "PageTitle",
+     "information": [
+      {
+       "name": "강원 강릉시 날씨 - 오늘·내일·주간 예보, 미세먼지 | 내근처 날씨",
+       "sessionsCount": 1
+      },
+      {
+       "name": "기온별 옷차림 - 오늘 뭐 입지? | 내근처 날씨",
+       "sessionsCount": 1
+      },
+      {
+       "name": "내근처 날씨 | 오늘 날씨 어때? 지금 날씨·미세먼지·주간 예보",
+       "sessionsCount": 1
+      },
+      {
+       "name": "대전 서구 날씨 - 오늘·내일·주간 예보, 미세먼지 | 내근처 날씨",
+       "sessionsCount": 1
+      },
+      {
+       "name": "세종특별자치시 날씨 - 오늘·내일·주간 예보, 미세먼지 | 내근처 날씨",
+       "sessionsCount": 1
+      },
+      {
+       "name": "이번 주말 날씨 - 전국 맑은 곳 순위 | 내근처 날씨",
+       "sessionsCount": 1
+      }
+     ]
+    },
+    {
+     "metricName": "ReferrerUrl",
+     "information": []
+    },
+    {
+     "metricName": "PopularPages",
+     "information": [
+      {
+       "url": "https://weather.guidejung.com/",
+       "visitsCount": 1
+      },
+      {
+       "url": "https://weather.guidejung.com/region/30170",
+       "visitsCount": 1
+      },
+      {
+       "url": "https://weather.guidejung.com/region/36",
+       "visitsCount": 1
+      },
+      {
+       "url": "https://weather.guidejung.com/region/51150",
+       "visitsCount": 1
+      },
+      {
+       "url": "https://weather.guidejung.com/wear",
+       "visitsCount": 1
+      },
+      {
+       "url": "https://weather.guidejung.com/weekend",
+       "visitsCount": 1
+      }
+     ]
+    }
+   ],
+   "url": [
+    {
+     "metricName": "DeadClickCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://weather.guidejung.com/region/30170"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://weather.guidejung.com/wear"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://weather.guidejung.com/region/36"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://weather.guidejung.com/region/51150"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://weather.guidejung.com/weekend"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://weather.guidejung.com/"
+      }
+     ]
+    },
+    {
+     "metricName": "ExcessiveScroll",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://weather.guidejung.com/region/30170"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://weather.guidejung.com/wear"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://weather.guidejung.com/region/36"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://weather.guidejung.com/region/51150"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://weather.guidejung.com/weekend"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://weather.guidejung.com/"
+      }
+     ]
+    },
+    {
+     "metricName": "RageClickCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://weather.guidejung.com/region/30170"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://weather.guidejung.com/wear"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://weather.guidejung.com/region/36"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://weather.guidejung.com/region/51150"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://weather.guidejung.com/weekend"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://weather.guidejung.com/"
+      }
+     ]
+    },
+    {
+     "metricName": "QuickbackClick",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://weather.guidejung.com/region/30170"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://weather.guidejung.com/wear"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://weather.guidejung.com/region/36"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://weather.guidejung.com/region/51150"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://weather.guidejung.com/weekend"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://weather.guidejung.com/"
+      }
+     ]
+    },
+    {
+     "metricName": "ScriptErrorCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://weather.guidejung.com/region/30170"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://weather.guidejung.com/wear"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 100,
+       "sessionsWithoutMetricPercentage": 0,
+       "pagesViews": 1,
+       "subTotal": 1,
+       "Url": "https://weather.guidejung.com/region/36"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://weather.guidejung.com/region/51150"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://weather.guidejung.com/weekend"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://weather.guidejung.com/"
+      }
+     ]
+    },
+    {
+     "metricName": "ErrorClickCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://weather.guidejung.com/region/30170"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://weather.guidejung.com/wear"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://weather.guidejung.com/region/36"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://weather.guidejung.com/region/51150"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://weather.guidejung.com/weekend"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://weather.guidejung.com/"
+      }
+     ]
+    },
+    {
+     "metricName": "ScrollDepth",
+     "information": [
+      {
+       "averageScrollDepth": 47,
+       "Url": "https://weather.guidejung.com/region/30170"
+      },
+      {
+       "averageScrollDepth": 27,
+       "Url": "https://weather.guidejung.com/wear"
+      },
+      {
+       "averageScrollDepth": 55,
+       "Url": "https://weather.guidejung.com/region/36"
+      },
+      {
+       "averageScrollDepth": 17,
+       "Url": "https://weather.guidejung.com/region/51150"
+      },
+      {
+       "averageScrollDepth": 46,
+       "Url": "https://weather.guidejung.com/weekend"
+      },
+      {
+       "averageScrollDepth": 31,
+       "Url": "https://weather.guidejung.com/"
+      }
+     ]
+    },
+    {
+     "metricName": "Traffic",
+     "information": [
+      {
+       "totalSessionCount": 0,
+       "totalBotSessionCount": 1,
+       "distinctUserCount": 0,
+       "pagesPerSessionPercentage": null,
+       "Url": "https://weather.guidejung.com/region/31170"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 1,
+       "Url": "https://weather.guidejung.com/region/30170"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 1,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 1,
+       "Url": "https://weather.guidejung.com/wear"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 1,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 1,
+       "Url": "https://weather.guidejung.com/region/36"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 1,
+       "Url": "https://weather.guidejung.com/region/51150"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 1,
+       "Url": "https://weather.guidejung.com/weekend"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 1,
+       "Url": "https://weather.guidejung.com/"
+      }
+     ]
+    },
+    {
+     "metricName": "EngagementTime",
+     "information": [
+      {
+       "totalTime": 4,
+       "activeTime": 4,
+       "Url": "https://weather.guidejung.com/region/30170"
+      },
+      {
+       "totalTime": 0,
+       "activeTime": 0,
+       "Url": "https://weather.guidejung.com/wear"
+      },
+      {
+       "totalTime": 2,
+       "activeTime": 2,
+       "Url": "https://weather.guidejung.com/region/36"
+      },
+      {
+       "totalTime": 0,
+       "activeTime": 0,
+       "Url": "https://weather.guidejung.com/region/51150"
+      },
+      {
+       "totalTime": 1,
+       "activeTime": 1,
+       "Url": "https://weather.guidejung.com/weekend"
+      },
+      {
+       "totalTime": 1,
+       "activeTime": 1,
+       "Url": "https://weather.guidejung.com/"
+      }
+     ]
+    }
+   ],
+   "device": [
+    {
+     "metricName": "DeadClickCount",
+     "information": [
+      {
+       "sessionsCount": 6,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "ExcessiveScroll",
+     "information": [
+      {
+       "sessionsCount": 6,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "RageClickCount",
+     "information": [
+      {
+       "sessionsCount": 6,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "QuickbackClick",
+     "information": [
+      {
+       "sessionsCount": 6,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "ScriptErrorCount",
+     "information": [
+      {
+       "sessionsCount": 6,
+       "sessionsWithMetricPercentage": 16.67,
+       "sessionsWithoutMetricPercentage": 83.33,
+       "pagesViews": 1,
+       "subTotal": 1,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "ErrorClickCount",
+     "information": [
+      {
+       "sessionsCount": 6,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "ScrollDepth",
+     "information": [
+      {
+       "averageScrollDepth": 37.17,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "Traffic",
+     "information": [
+      {
+       "totalSessionCount": 0,
+       "totalBotSessionCount": 3,
+       "distinctUserCount": 0,
+       "pagesPerSessionPercentage": null,
+       "Device": "Mobile"
+      },
+      {
+       "totalSessionCount": 6,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 6,
+       "pagesPerSessionPercentage": 1,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "EngagementTime",
+     "information": [
+      {
+       "totalTime": 1,
+       "activeTime": 1,
+       "Device": "PC"
+      }
+     ]
+    }
+   ]
+  },
+  "traffic": {
+   "all": [
+    {
+     "metricName": "DeadClickCount",
+     "information": [
+      {
+       "sessionsCount": 0,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "ExcessiveScroll",
+     "information": [
+      {
+       "sessionsCount": 0,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "RageClickCount",
+     "information": [
+      {
+       "sessionsCount": 0,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "QuickbackClick",
+     "information": [
+      {
+       "sessionsCount": 0,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "ScriptErrorCount",
+     "information": [
+      {
+       "sessionsCount": 0,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "ErrorClickCount",
+     "information": [
+      {
+       "sessionsCount": 0,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "ScrollDepth",
+     "information": [
+      {
+       "averageScrollDepth": null
+      }
+     ]
+    },
+    {
+     "metricName": "Traffic",
+     "information": [
+      {
+       "totalSessionCount": 0,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 0,
+       "pagesPerSessionPercentage": null
+      }
+     ]
+    },
+    {
+     "metricName": "EngagementTime",
+     "information": [
+      {
+       "totalTime": null,
+       "activeTime": null
+      }
+     ]
+    },
+    {
+     "metricName": "Browser",
+     "information": []
+    },
+    {
+     "metricName": "Device",
+     "information": []
+    },
+    {
+     "metricName": "OS",
+     "information": []
+    },
+    {
+     "metricName": "Country",
+     "information": []
+    },
+    {
+     "metricName": "PageTitle",
+     "information": []
+    },
+    {
+     "metricName": "ReferrerUrl",
+     "information": []
+    },
+    {
+     "metricName": "PopularPages",
+     "information": []
+    }
+   ],
+   "url": [
+    {
+     "metricName": "DeadClickCount",
+     "information": []
+    },
+    {
+     "metricName": "ExcessiveScroll",
+     "information": []
+    },
+    {
+     "metricName": "RageClickCount",
+     "information": []
+    },
+    {
+     "metricName": "QuickbackClick",
+     "information": []
+    },
+    {
+     "metricName": "ScriptErrorCount",
+     "information": []
+    },
+    {
+     "metricName": "ErrorClickCount",
+     "information": []
+    },
+    {
+     "metricName": "ScrollDepth",
+     "information": []
+    },
+    {
+     "metricName": "Traffic",
+     "information": []
+    },
+    {
+     "metricName": "EngagementTime",
+     "information": []
+    }
+   ],
+   "device": [
+    {
+     "metricName": "DeadClickCount",
+     "information": []
+    },
+    {
+     "metricName": "ExcessiveScroll",
+     "information": []
+    },
+    {
+     "metricName": "RageClickCount",
+     "information": []
+    },
+    {
+     "metricName": "QuickbackClick",
+     "information": []
+    },
+    {
+     "metricName": "ScriptErrorCount",
+     "information": []
+    },
+    {
+     "metricName": "ErrorClickCount",
+     "information": []
+    },
+    {
+     "metricName": "ScrollDepth",
+     "information": []
+    },
+    {
+     "metricName": "Traffic",
+     "information": []
+    },
+    {
+     "metricName": "EngagementTime",
+     "information": []
+    }
+   ]
+  },
+  "charge": {
+   "all": [
+    {
+     "metricName": "DeadClickCount",
+     "information": [
+      {
+       "sessionsCount": 5,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "ExcessiveScroll",
+     "information": [
+      {
+       "sessionsCount": 5,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "RageClickCount",
+     "information": [
+      {
+       "sessionsCount": 5,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "QuickbackClick",
+     "information": [
+      {
+       "sessionsCount": 5,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "ScriptErrorCount",
+     "information": [
+      {
+       "sessionsCount": 5,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "ErrorClickCount",
+     "information": [
+      {
+       "sessionsCount": 5,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "ScrollDepth",
+     "information": [
+      {
+       "averageScrollDepth": 45
+      }
+     ]
+    },
+    {
+     "metricName": "Traffic",
+     "information": [
+      {
+       "totalSessionCount": 5,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 5,
+       "pagesPerSessionPercentage": 1
+      }
+     ]
+    },
+    {
+     "metricName": "EngagementTime",
+     "information": [
+      {
+       "totalTime": 3,
+       "activeTime": 3
+      }
+     ]
+    },
+    {
+     "metricName": "Browser",
+     "information": [
+      {
+       "name": "Chrome",
+       "sessionsCount": 4
+      },
+      {
+       "name": "ChromeMobile",
+       "sessionsCount": 1
+      }
+     ]
+    },
+    {
+     "metricName": "Device",
+     "information": [
+      {
+       "name": "PC",
+       "sessionsCount": 4
+      },
+      {
+       "name": "Mobile",
+       "sessionsCount": 1
+      }
+     ]
+    },
+    {
+     "metricName": "OS",
+     "information": [
+      {
+       "name": "Windows",
+       "sessionsCount": 3
+      },
+      {
+       "name": "Android",
+       "sessionsCount": 1
+      },
+      {
+       "name": "Linux",
+       "sessionsCount": 1
+      }
+     ]
+    },
+    {
+     "metricName": "Country",
+     "information": [
+      {
+       "name": "China",
+       "sessionsCount": 3
+      },
+      {
+       "name": "Korea, Republic of",
+       "sessionsCount": 1
+      },
+      {
+       "name": "United States",
+       "sessionsCount": 1
+      }
+     ]
+    },
+    {
+     "metricName": "PageTitle",
+     "information": [
+      {
+       "name": "개인정보 안내 | 내근처 충전소",
+       "sessionsCount": 1
+      },
+      {
+       "name": "내근처 충전소 | 지금 바로 충전 가능한 전기차 충전소",
+       "sessionsCount": 1
+      },
+      {
+       "name": "서울 도봉구 전기차 충전소 - 실시간 이용 가능 충전기 | 내근처 충전소",
+       "sessionsCount": 1
+      },
+      {
+       "name": "전남광주통합특별시 전기차 충전소 - 실시간 이용 가능 충전기 | 내근처 충전소",
+       "sessionsCount": 1
+      },
+      {
+       "name": "충청북도 전기차 충전소 - 실시간 이용 가능 충전기 | 내근처 충전소",
+       "sessionsCount": 1
+      }
+     ]
+    },
+    {
+     "metricName": "ReferrerUrl",
+     "information": [
+      {
+       "name": "m.search.daum.net",
+       "sessionsCount": 1
+      }
+     ]
+    },
+    {
+     "metricName": "PopularPages",
+     "information": [
+      {
+       "url": "https://charge.guidejung.com/",
+       "visitsCount": 1
+      },
+      {
+       "url": "https://charge.guidejung.com/privacy",
+       "visitsCount": 1
+      },
+      {
+       "url": "https://charge.guidejung.com/region/11320",
+       "visitsCount": 1
+      },
+      {
+       "url": "https://charge.guidejung.com/region/12",
+       "visitsCount": 1
+      },
+      {
+       "url": "https://charge.guidejung.com/region/43",
+       "visitsCount": 1
+      }
+     ]
+    }
+   ],
+   "url": [
+    {
+     "metricName": "DeadClickCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://charge.guidejung.com/region/43"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://charge.guidejung.com/privacy"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://charge.guidejung.com/"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://charge.guidejung.com/region/11320"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://charge.guidejung.com/region/12"
+      }
+     ]
+    },
+    {
+     "metricName": "ExcessiveScroll",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://charge.guidejung.com/region/43"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://charge.guidejung.com/privacy"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://charge.guidejung.com/"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://charge.guidejung.com/region/11320"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://charge.guidejung.com/region/12"
+      }
+     ]
+    },
+    {
+     "metricName": "RageClickCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://charge.guidejung.com/region/43"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://charge.guidejung.com/privacy"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://charge.guidejung.com/"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://charge.guidejung.com/region/11320"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://charge.guidejung.com/region/12"
+      }
+     ]
+    },
+    {
+     "metricName": "QuickbackClick",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://charge.guidejung.com/region/43"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://charge.guidejung.com/privacy"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://charge.guidejung.com/"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://charge.guidejung.com/region/11320"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://charge.guidejung.com/region/12"
+      }
+     ]
+    },
+    {
+     "metricName": "ScriptErrorCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://charge.guidejung.com/region/43"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://charge.guidejung.com/privacy"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://charge.guidejung.com/"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://charge.guidejung.com/region/11320"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://charge.guidejung.com/region/12"
+      }
+     ]
+    },
+    {
+     "metricName": "ErrorClickCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://charge.guidejung.com/region/43"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://charge.guidejung.com/privacy"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://charge.guidejung.com/"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://charge.guidejung.com/region/11320"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://charge.guidejung.com/region/12"
+      }
+     ]
+    },
+    {
+     "metricName": "ScrollDepth",
+     "information": [
+      {
+       "averageScrollDepth": 51,
+       "Url": "https://charge.guidejung.com/region/43"
+      },
+      {
+       "averageScrollDepth": 70,
+       "Url": "https://charge.guidejung.com/privacy"
+      },
+      {
+       "averageScrollDepth": 45,
+       "Url": "https://charge.guidejung.com/"
+      },
+      {
+       "averageScrollDepth": 15,
+       "Url": "https://charge.guidejung.com/region/11320"
+      },
+      {
+       "averageScrollDepth": 44,
+       "Url": "https://charge.guidejung.com/region/12"
+      }
+     ]
+    },
+    {
+     "metricName": "Traffic",
+     "information": [
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 1,
+       "Url": "https://charge.guidejung.com/region/43"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 1,
+       "Url": "https://charge.guidejung.com/privacy"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 1,
+       "Url": "https://charge.guidejung.com/"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 1,
+       "Url": "https://charge.guidejung.com/region/11320"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 1,
+       "Url": "https://charge.guidejung.com/region/12"
+      }
+     ]
+    },
+    {
+     "metricName": "EngagementTime",
+     "information": [
+      {
+       "totalTime": 0,
+       "activeTime": 0,
+       "Url": "https://charge.guidejung.com/region/43"
+      },
+      {
+       "totalTime": 0,
+       "activeTime": 0,
+       "Url": "https://charge.guidejung.com/privacy"
+      },
+      {
+       "totalTime": 3,
+       "activeTime": 3,
+       "Url": "https://charge.guidejung.com/"
+      },
+      {
+       "totalTime": 12,
+       "activeTime": 12,
+       "Url": "https://charge.guidejung.com/region/11320"
+      },
+      {
+       "totalTime": 1,
+       "activeTime": 1,
+       "Url": "https://charge.guidejung.com/region/12"
+      }
+     ]
+    }
+   ],
+   "device": [
+    {
+     "metricName": "DeadClickCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Mobile"
+      },
+      {
+       "sessionsCount": 4,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "ExcessiveScroll",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Mobile"
+      },
+      {
+       "sessionsCount": 4,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "RageClickCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Mobile"
+      },
+      {
+       "sessionsCount": 4,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "QuickbackClick",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Mobile"
+      },
+      {
+       "sessionsCount": 4,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "ScriptErrorCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Mobile"
+      },
+      {
+       "sessionsCount": 4,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "ErrorClickCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Mobile"
+      },
+      {
+       "sessionsCount": 4,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "ScrollDepth",
+     "information": [
+      {
+       "averageScrollDepth": 15,
+       "Device": "Mobile"
+      },
+      {
+       "averageScrollDepth": 52.5,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "Traffic",
+     "information": [
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 1,
+       "Device": "Mobile"
+      },
+      {
+       "totalSessionCount": 4,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 4,
+       "pagesPerSessionPercentage": 1,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "EngagementTime",
+     "information": [
+      {
+       "totalTime": 12,
+       "activeTime": 12,
+       "Device": "Mobile"
+      },
+      {
+       "totalTime": 1,
+       "activeTime": 1,
+       "Device": "PC"
+      }
+     ]
+    }
+   ]
+  },
+  "academy": {
+   "all": [
+    {
+     "metricName": "DeadClickCount",
+     "information": [
+      {
+       "sessionsCount": 0,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "ExcessiveScroll",
+     "information": [
+      {
+       "sessionsCount": 0,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "RageClickCount",
+     "information": [
+      {
+       "sessionsCount": 0,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "QuickbackClick",
+     "information": [
+      {
+       "sessionsCount": 0,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "ScriptErrorCount",
+     "information": [
+      {
+       "sessionsCount": 0,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "ErrorClickCount",
+     "information": [
+      {
+       "sessionsCount": 0,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "ScrollDepth",
+     "information": [
+      {
+       "averageScrollDepth": null
+      }
+     ]
+    },
+    {
+     "metricName": "Traffic",
+     "information": [
+      {
+       "totalSessionCount": 0,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 0,
+       "pagesPerSessionPercentage": null
+      }
+     ]
+    },
+    {
+     "metricName": "EngagementTime",
+     "information": [
+      {
+       "totalTime": null,
+       "activeTime": null
+      }
+     ]
+    },
+    {
+     "metricName": "Browser",
+     "information": []
+    },
+    {
+     "metricName": "Device",
+     "information": []
+    },
+    {
+     "metricName": "OS",
+     "information": []
+    },
+    {
+     "metricName": "Country",
+     "information": []
+    },
+    {
+     "metricName": "PageTitle",
+     "information": []
+    },
+    {
+     "metricName": "ReferrerUrl",
+     "information": []
+    },
+    {
+     "metricName": "PopularPages",
+     "information": []
+    }
+   ],
+   "url": [
+    {
+     "metricName": "DeadClickCount",
+     "information": []
+    },
+    {
+     "metricName": "ExcessiveScroll",
+     "information": []
+    },
+    {
+     "metricName": "RageClickCount",
+     "information": []
+    },
+    {
+     "metricName": "QuickbackClick",
+     "information": []
+    },
+    {
+     "metricName": "ScriptErrorCount",
+     "information": []
+    },
+    {
+     "metricName": "ErrorClickCount",
+     "information": []
+    },
+    {
+     "metricName": "ScrollDepth",
+     "information": []
+    },
+    {
+     "metricName": "Traffic",
+     "information": []
+    },
+    {
+     "metricName": "EngagementTime",
+     "information": []
+    }
+   ],
+   "device": [
+    {
+     "metricName": "DeadClickCount",
+     "information": []
+    },
+    {
+     "metricName": "ExcessiveScroll",
+     "information": []
+    },
+    {
+     "metricName": "RageClickCount",
+     "information": []
+    },
+    {
+     "metricName": "QuickbackClick",
+     "information": []
+    },
+    {
+     "metricName": "ScriptErrorCount",
+     "information": []
+    },
+    {
+     "metricName": "ErrorClickCount",
+     "information": []
+    },
+    {
+     "metricName": "ScrollDepth",
+     "information": []
+    },
+    {
+     "metricName": "Traffic",
+     "information": []
+    },
+    {
+     "metricName": "EngagementTime",
+     "information": []
+    }
+   ]
+  },
+  "school": {
+   "all": [
+    {
+     "metricName": "DeadClickCount",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "ExcessiveScroll",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "RageClickCount",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "QuickbackClick",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "ScriptErrorCount",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "ErrorClickCount",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "ScrollDepth",
+     "information": [
+      {
+       "averageScrollDepth": 33.5
+      }
+     ]
+    },
+    {
+     "metricName": "Traffic",
+     "information": [
+      {
+       "totalSessionCount": 2,
+       "totalBotSessionCount": 1,
+       "distinctUserCount": 2,
+       "pagesPerSessionPercentage": 1
+      }
+     ]
+    },
+    {
+     "metricName": "EngagementTime",
+     "information": [
+      {
+       "totalTime": 2,
+       "activeTime": 2
+      }
+     ]
+    },
+    {
+     "metricName": "Browser",
+     "information": [
+      {
+       "name": "Chrome",
+       "sessionsCount": 2
+      }
+     ]
+    },
+    {
+     "metricName": "Device",
+     "information": [
+      {
+       "name": "PC",
+       "sessionsCount": 2
+      }
+     ]
+    },
+    {
+     "metricName": "OS",
+     "information": [
+      {
+       "name": "Linux",
+       "sessionsCount": 1
+      },
+      {
+       "name": "Windows",
+       "sessionsCount": 1
+      }
+     ]
+    },
+    {
+     "metricName": "Country",
+     "information": [
+      {
+       "name": "United States",
+       "sessionsCount": 1
+      },
+      {
+       "name": "China",
+       "sessionsCount": 1
+      }
+     ]
+    },
+    {
+     "metricName": "PageTitle",
+     "information": [
+      {
+       "name": "내 학교 | 오늘 급식 뭐야? 우리 학교 급식·학사일정·시간표",
+       "sessionsCount": 2
+      }
+     ]
+    },
+    {
+     "metricName": "ReferrerUrl",
+     "information": []
+    },
+    {
+     "metricName": "PopularPages",
+     "information": [
+      {
+       "url": "https://school.guidejung.com/",
+       "visitsCount": 2
+      }
+     ]
+    }
+   ],
+   "url": [
+    {
+     "metricName": "DeadClickCount",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://school.guidejung.com/"
+      }
+     ]
+    },
+    {
+     "metricName": "ExcessiveScroll",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://school.guidejung.com/"
+      }
+     ]
+    },
+    {
+     "metricName": "RageClickCount",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://school.guidejung.com/"
+      }
+     ]
+    },
+    {
+     "metricName": "QuickbackClick",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://school.guidejung.com/"
+      }
+     ]
+    },
+    {
+     "metricName": "ScriptErrorCount",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://school.guidejung.com/"
+      }
+     ]
+    },
+    {
+     "metricName": "ErrorClickCount",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://school.guidejung.com/"
+      }
+     ]
+    },
+    {
+     "metricName": "ScrollDepth",
+     "information": [
+      {
+       "averageScrollDepth": 33.5,
+       "Url": "https://school.guidejung.com/"
+      }
+     ]
+    },
+    {
+     "metricName": "Traffic",
+     "information": [
+      {
+       "totalSessionCount": 2,
+       "totalBotSessionCount": 1,
+       "distinctUserCount": 2,
+       "pagesPerSessionPercentage": 1,
+       "Url": "https://school.guidejung.com/"
+      }
+     ]
+    },
+    {
+     "metricName": "EngagementTime",
+     "information": [
+      {
+       "totalTime": 2,
+       "activeTime": 2,
+       "Url": "https://school.guidejung.com/"
+      }
+     ]
+    }
+   ],
+   "device": [
+    {
+     "metricName": "DeadClickCount",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "ExcessiveScroll",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "RageClickCount",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "QuickbackClick",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "ScriptErrorCount",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "ErrorClickCount",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "ScrollDepth",
+     "information": [
+      {
+       "averageScrollDepth": 33.5,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "Traffic",
+     "information": [
+      {
+       "totalSessionCount": 2,
+       "totalBotSessionCount": 1,
+       "distinctUserCount": 2,
+       "pagesPerSessionPercentage": 1,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "EngagementTime",
+     "information": [
+      {
+       "totalTime": 2,
+       "activeTime": 2,
+       "Device": "PC"
+      }
+     ]
+    }
+   ]
+  },
+  "pharmacy": {
+   "all": [
+    {
+     "metricName": "DeadClickCount",
+     "information": [
+      {
+       "sessionsCount": 6,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "ExcessiveScroll",
+     "information": [
+      {
+       "sessionsCount": 6,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "RageClickCount",
+     "information": [
+      {
+       "sessionsCount": 6,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "QuickbackClick",
+     "information": [
+      {
+       "sessionsCount": 6,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "ScriptErrorCount",
+     "information": [
+      {
+       "sessionsCount": 6,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "ErrorClickCount",
+     "information": [
+      {
+       "sessionsCount": 6,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "ScrollDepth",
+     "information": [
+      {
+       "averageScrollDepth": 36.11
+      }
+     ]
+    },
+    {
+     "metricName": "Traffic",
+     "information": [
+      {
+       "totalSessionCount": 6,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 4,
+       "pagesPerSessionPercentage": 1.5
+      }
+     ]
+    },
+    {
+     "metricName": "EngagementTime",
+     "information": [
+      {
+       "totalTime": 347,
+       "activeTime": 16
+      }
+     ]
+    },
+    {
+     "metricName": "Browser",
+     "information": [
+      {
+       "name": "MobileSafari",
+       "sessionsCount": 3
+      },
+      {
+       "name": "Other",
+       "sessionsCount": 2
+      },
+      {
+       "name": "Chrome",
+       "sessionsCount": 1
+      }
+     ]
+    },
+    {
+     "metricName": "Device",
+     "information": [
+      {
+       "name": "Mobile",
+       "sessionsCount": 5
+      },
+      {
+       "name": "PC",
+       "sessionsCount": 1
+      }
+     ]
+    },
+    {
+     "metricName": "OS",
+     "information": [
+      {
+       "name": "IOS",
+       "sessionsCount": 3
+      },
+      {
+       "name": "Android",
+       "sessionsCount": 2
+      },
+      {
+       "name": "Linux",
+       "sessionsCount": 1
+      }
+     ]
+    },
+    {
+     "metricName": "Country",
+     "information": [
+      {
+       "name": "Korea, Republic of",
+       "sessionsCount": 5
+      },
+      {
+       "name": "United States",
+       "sessionsCount": 1
+      }
+     ]
+    },
+    {
+     "metricName": "PageTitle",
+     "information": [
+      {
+       "name": "내근처 약국 | 지금 문 연 약국 어디? 심야·일요일·공휴일 약국",
+       "sessionsCount": 5
+      },
+      {
+       "name": "가야하나로약국 운영 시간·지금 영업 | 내근처 약국",
+       "sessionsCount": 2
+      }
+     ]
+    },
+    {
+     "metricName": "ReferrerUrl",
+     "information": [
+      {
+       "name": "m.search.naver.com",
+       "sessionsCount": 4
+      },
+      {
+       "name": "pharmacy.guidejung.com",
+       "sessionsCount": 2
+      }
+     ]
+    },
+    {
+     "metricName": "PopularPages",
+     "information": [
+      {
+       "url": "https://pharmacy.guidejung.com/",
+       "visitsCount": 5
+      },
+      {
+       "url": "https://pharmacy.guidejung.com/pharmacy/C1201410",
+       "visitsCount": 2
+      }
+     ]
+    }
+   ],
+   "url": [
+    {
+     "metricName": "DeadClickCount",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://pharmacy.guidejung.com/pharmacy/C1201410"
+      },
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://pharmacy.guidejung.com/#google_vignette"
+      },
+      {
+       "sessionsCount": 5,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://pharmacy.guidejung.com/"
+      }
+     ]
+    },
+    {
+     "metricName": "ExcessiveScroll",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://pharmacy.guidejung.com/pharmacy/C1201410"
+      },
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://pharmacy.guidejung.com/#google_vignette"
+      },
+      {
+       "sessionsCount": 5,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://pharmacy.guidejung.com/"
+      }
+     ]
+    },
+    {
+     "metricName": "RageClickCount",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://pharmacy.guidejung.com/pharmacy/C1201410"
+      },
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://pharmacy.guidejung.com/#google_vignette"
+      },
+      {
+       "sessionsCount": 5,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://pharmacy.guidejung.com/"
+      }
+     ]
+    },
+    {
+     "metricName": "QuickbackClick",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://pharmacy.guidejung.com/pharmacy/C1201410"
+      },
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://pharmacy.guidejung.com/#google_vignette"
+      },
+      {
+       "sessionsCount": 5,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://pharmacy.guidejung.com/"
+      }
+     ]
+    },
+    {
+     "metricName": "ScriptErrorCount",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://pharmacy.guidejung.com/pharmacy/C1201410"
+      },
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://pharmacy.guidejung.com/#google_vignette"
+      },
+      {
+       "sessionsCount": 5,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://pharmacy.guidejung.com/"
+      }
+     ]
+    },
+    {
+     "metricName": "ErrorClickCount",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://pharmacy.guidejung.com/pharmacy/C1201410"
+      },
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://pharmacy.guidejung.com/#google_vignette"
+      },
+      {
+       "sessionsCount": 5,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://pharmacy.guidejung.com/"
+      }
+     ]
+    },
+    {
+     "metricName": "ScrollDepth",
+     "information": [
+      {
+       "averageScrollDepth": 30.5,
+       "Url": "https://pharmacy.guidejung.com/pharmacy/C1201410"
+      },
+      {
+       "averageScrollDepth": 30,
+       "Url": "https://pharmacy.guidejung.com/#google_vignette"
+      },
+      {
+       "averageScrollDepth": 40.8,
+       "Url": "https://pharmacy.guidejung.com/"
+      }
+     ]
+    },
+    {
+     "metricName": "Traffic",
+     "information": [
+      {
+       "totalSessionCount": 2,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 2,
+       "Url": "https://pharmacy.guidejung.com/pharmacy/C1201410"
+      },
+      {
+       "totalSessionCount": 2,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 2.5,
+       "Url": "https://pharmacy.guidejung.com/#google_vignette"
+      },
+      {
+       "totalSessionCount": 5,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 4,
+       "pagesPerSessionPercentage": 1.6,
+       "Url": "https://pharmacy.guidejung.com/"
+      }
+     ]
+    },
+    {
+     "metricName": "EngagementTime",
+     "information": [
+      {
+       "totalTime": 833,
+       "activeTime": 5,
+       "Url": "https://pharmacy.guidejung.com/pharmacy/C1201410"
+      },
+      {
+       "totalTime": 8,
+       "activeTime": 8,
+       "Url": "https://pharmacy.guidejung.com/#google_vignette"
+      },
+      {
+       "totalTime": 79,
+       "activeTime": 14,
+       "Url": "https://pharmacy.guidejung.com/"
+      }
+     ]
+    }
+   ],
+   "device": [
+    {
+     "metricName": "DeadClickCount",
+     "information": [
+      {
+       "sessionsCount": 5,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Mobile"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "ExcessiveScroll",
+     "information": [
+      {
+       "sessionsCount": 5,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Mobile"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "RageClickCount",
+     "information": [
+      {
+       "sessionsCount": 5,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Mobile"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "QuickbackClick",
+     "information": [
+      {
+       "sessionsCount": 5,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Mobile"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "ScriptErrorCount",
+     "information": [
+      {
+       "sessionsCount": 5,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Mobile"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "ErrorClickCount",
+     "information": [
+      {
+       "sessionsCount": 5,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Mobile"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "ScrollDepth",
+     "information": [
+      {
+       "averageScrollDepth": 34.75,
+       "Device": "Mobile"
+      },
+      {
+       "averageScrollDepth": 47,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "Traffic",
+     "information": [
+      {
+       "totalSessionCount": 5,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 3,
+       "pagesPerSessionPercentage": 1.6,
+       "Device": "Mobile"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 1,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "EngagementTime",
+     "information": [
+      {
+       "totalTime": 416,
+       "activeTime": 19,
+       "Device": "Mobile"
+      },
+      {
+       "totalTime": 2,
+       "activeTime": 2,
+       "Device": "PC"
+      }
+     ]
+    }
+   ]
+  },
+  "hospital": {
+   "all": [
+    {
+     "metricName": "DeadClickCount",
+     "information": [
+      {
+       "sessionsCount": 4,
+       "sessionsWithMetricPercentage": 25,
+       "sessionsWithoutMetricPercentage": 75,
+       "pagesViews": 1,
+       "subTotal": 1
+      }
+     ]
+    },
+    {
+     "metricName": "ExcessiveScroll",
+     "information": [
+      {
+       "sessionsCount": 4,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "RageClickCount",
+     "information": [
+      {
+       "sessionsCount": 4,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "QuickbackClick",
+     "information": [
+      {
+       "sessionsCount": 4,
+       "sessionsWithMetricPercentage": 50,
+       "sessionsWithoutMetricPercentage": 50,
+       "pagesViews": 3,
+       "subTotal": 3
+      }
+     ]
+    },
+    {
+     "metricName": "ScriptErrorCount",
+     "information": [
+      {
+       "sessionsCount": 4,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "ErrorClickCount",
+     "information": [
+      {
+       "sessionsCount": 4,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "ScrollDepth",
+     "information": [
+      {
+       "averageScrollDepth": 46.45
+      }
+     ]
+    },
+    {
+     "metricName": "Traffic",
+     "information": [
+      {
+       "totalSessionCount": 4,
+       "totalBotSessionCount": 1,
+       "distinctUserCount": 3,
+       "pagesPerSessionPercentage": 2.75
+      }
+     ]
+    },
+    {
+     "metricName": "EngagementTime",
+     "information": [
+      {
+       "totalTime": 165,
+       "activeTime": 64
+      }
+     ]
+    },
+    {
+     "metricName": "Browser",
+     "information": [
+      {
+       "name": "MobileSafari",
+       "sessionsCount": 2
+      },
+      {
+       "name": "Other",
+       "sessionsCount": 1
+      },
+      {
+       "name": "SamsungInternet",
+       "sessionsCount": 1
+      }
+     ]
+    },
+    {
+     "metricName": "Device",
+     "information": [
+      {
+       "name": "Mobile",
+       "sessionsCount": 4
+      }
+     ]
+    },
+    {
+     "metricName": "OS",
+     "information": [
+      {
+       "name": "Android",
+       "sessionsCount": 2
+      },
+      {
+       "name": "IOS",
+       "sessionsCount": 2
+      }
+     ]
+    },
+    {
+     "metricName": "Country",
+     "information": [
+      {
+       "name": "Korea, Republic of",
+       "sessionsCount": 4
+      }
+     ]
+    },
+    {
+     "metricName": "PageTitle",
+     "information": [
+      {
+       "name": "내근처 병원 | 지금 진료하는 병원 어디? 야간·주말·응급실",
+       "sessionsCount": 3
+      },
+      {
+       "name": "병원 찾기 | 내근처 병원",
+       "sessionsCount": 1
+      },
+      {
+       "name": "뷰티온의원파주운정점 진료 시간·지금 진료 중 | 내근처 병원",
+       "sessionsCount": 1
+      },
+      {
+       "name": "서울365외과의원 진료 시간·지금 진료 중 | 내근처 병원",
+       "sessionsCount": 1
+      },
+      {
+       "name": "성모윌병원 진료 시간·지금 진료 중 | 내근처 병원",
+       "sessionsCount": 1
+      },
+      {
+       "name": "오늘도365의원 진료 시간·지금 진료 중 | 내근처 병원",
+       "sessionsCount": 1
+      },
+      {
+       "name": "응급실 · 내 주변 응급실과 실시간 남은 병상 | 내근처 병원",
+       "sessionsCount": 1
+      }
+     ]
+    },
+    {
+     "metricName": "ReferrerUrl",
+     "information": [
+      {
+       "name": "hospital.guidejung.com",
+       "sessionsCount": 3
+      },
+      {
+       "name": "m.search.naver.com",
+       "sessionsCount": 3
+      }
+     ]
+    },
+    {
+     "metricName": "PopularPages",
+     "information": [
+      {
+       "url": "https://hospital.guidejung.com/",
+       "visitsCount": 3
+      },
+      {
+       "url": "https://hospital.guidejung.com/er",
+       "visitsCount": 1
+      },
+      {
+       "url": "https://hospital.guidejung.com/hospital/A2115807",
+       "visitsCount": 1
+      },
+      {
+       "url": "https://hospital.guidejung.com/hospital/A2117369",
+       "visitsCount": 1
+      },
+      {
+       "url": "https://hospital.guidejung.com/hospital/A2119637",
+       "visitsCount": 1
+      },
+      {
+       "url": "https://hospital.guidejung.com/hospital/A2119895",
+       "visitsCount": 1
+      },
+      {
+       "url": "https://hospital.guidejung.com/search",
+       "visitsCount": 1
+      }
+     ]
+    }
+   ],
+   "url": [
+    {
+     "metricName": "DeadClickCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://hospital.guidejung.com/hospital/A2119895"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://hospital.guidejung.com/hospital/A2117369"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://hospital.guidejung.com/er"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://hospital.guidejung.com/hospital/A2115807"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://hospital.guidejung.com/hospital/A2119637"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://hospital.guidejung.com/search?dept=derma"
+      },
+      {
+       "sessionsCount": 3,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://hospital.guidejung.com/"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 100,
+       "sessionsWithoutMetricPercentage": 0,
+       "pagesViews": 1,
+       "subTotal": 1,
+       "Url": "https://hospital.guidejung.com/#google_vignette"
+      }
+     ]
+    },
+    {
+     "metricName": "ExcessiveScroll",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://hospital.guidejung.com/hospital/A2119895"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://hospital.guidejung.com/hospital/A2117369"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://hospital.guidejung.com/er"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://hospital.guidejung.com/hospital/A2115807"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://hospital.guidejung.com/hospital/A2119637"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://hospital.guidejung.com/search?dept=derma"
+      },
+      {
+       "sessionsCount": 3,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://hospital.guidejung.com/"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://hospital.guidejung.com/#google_vignette"
+      }
+     ]
+    },
+    {
+     "metricName": "RageClickCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://hospital.guidejung.com/hospital/A2119895"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://hospital.guidejung.com/hospital/A2117369"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://hospital.guidejung.com/er"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://hospital.guidejung.com/hospital/A2115807"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://hospital.guidejung.com/hospital/A2119637"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://hospital.guidejung.com/search?dept=derma"
+      },
+      {
+       "sessionsCount": 3,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://hospital.guidejung.com/"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://hospital.guidejung.com/#google_vignette"
+      }
+     ]
+    },
+    {
+     "metricName": "QuickbackClick",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 100,
+       "sessionsWithoutMetricPercentage": 0,
+       "pagesViews": 1,
+       "subTotal": 1,
+       "Url": "https://hospital.guidejung.com/hospital/A2119895"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://hospital.guidejung.com/hospital/A2117369"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://hospital.guidejung.com/er"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://hospital.guidejung.com/hospital/A2115807"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://hospital.guidejung.com/hospital/A2119637"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 100,
+       "sessionsWithoutMetricPercentage": 0,
+       "pagesViews": 1,
+       "subTotal": 1,
+       "Url": "https://hospital.guidejung.com/search?dept=derma"
+      },
+      {
+       "sessionsCount": 3,
+       "sessionsWithMetricPercentage": 33.33,
+       "sessionsWithoutMetricPercentage": 66.67,
+       "pagesViews": 1,
+       "subTotal": 1,
+       "Url": "https://hospital.guidejung.com/"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://hospital.guidejung.com/#google_vignette"
+      }
+     ]
+    },
+    {
+     "metricName": "ScriptErrorCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://hospital.guidejung.com/hospital/A2119895"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://hospital.guidejung.com/hospital/A2117369"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://hospital.guidejung.com/er"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://hospital.guidejung.com/hospital/A2115807"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://hospital.guidejung.com/hospital/A2119637"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://hospital.guidejung.com/search?dept=derma"
+      },
+      {
+       "sessionsCount": 3,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://hospital.guidejung.com/"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://hospital.guidejung.com/#google_vignette"
+      }
+     ]
+    },
+    {
+     "metricName": "ErrorClickCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://hospital.guidejung.com/hospital/A2119895"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://hospital.guidejung.com/hospital/A2117369"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://hospital.guidejung.com/er"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://hospital.guidejung.com/hospital/A2115807"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://hospital.guidejung.com/hospital/A2119637"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://hospital.guidejung.com/search?dept=derma"
+      },
+      {
+       "sessionsCount": 3,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://hospital.guidejung.com/"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://hospital.guidejung.com/#google_vignette"
+      }
+     ]
+    },
+    {
+     "metricName": "ScrollDepth",
+     "information": [
+      {
+       "averageScrollDepth": 38,
+       "Url": "https://hospital.guidejung.com/hospital/A2119895"
+      },
+      {
+       "averageScrollDepth": 46,
+       "Url": "https://hospital.guidejung.com/hospital/A2117369"
+      },
+      {
+       "averageScrollDepth": 4,
+       "Url": "https://hospital.guidejung.com/er"
+      },
+      {
+       "averageScrollDepth": 16,
+       "Url": "https://hospital.guidejung.com/hospital/A2115807"
+      },
+      {
+       "averageScrollDepth": 59,
+       "Url": "https://hospital.guidejung.com/hospital/A2119637"
+      },
+      {
+       "averageScrollDepth": 91,
+       "Url": "https://hospital.guidejung.com/search?dept=derma"
+      },
+      {
+       "averageScrollDepth": 45.33,
+       "Url": "https://hospital.guidejung.com/"
+      },
+      {
+       "averageScrollDepth": 60.5,
+       "Url": "https://hospital.guidejung.com/#google_vignette"
+      }
+     ]
+    },
+    {
+     "metricName": "Traffic",
+     "information": [
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 4,
+       "Url": "https://hospital.guidejung.com/hospital/A2119895"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 4,
+       "Url": "https://hospital.guidejung.com/hospital/A2117369"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 1,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 5,
+       "Url": "https://hospital.guidejung.com/er"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 5,
+       "Url": "https://hospital.guidejung.com/hospital/A2115807"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 1,
+       "Url": "https://hospital.guidejung.com/hospital/A2119637"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 4,
+       "Url": "https://hospital.guidejung.com/search?dept=derma"
+      },
+      {
+       "totalSessionCount": 3,
+       "totalBotSessionCount": 1,
+       "distinctUserCount": 3,
+       "pagesPerSessionPercentage": 3.3333333333333335,
+       "Url": "https://hospital.guidejung.com/"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 5,
+       "Url": "https://hospital.guidejung.com/#google_vignette"
+      }
+     ]
+    },
+    {
+     "metricName": "EngagementTime",
+     "information": [
+      {
+       "totalTime": 13,
+       "activeTime": 13,
+       "Url": "https://hospital.guidejung.com/hospital/A2119895"
+      },
+      {
+       "totalTime": 13,
+       "activeTime": 13,
+       "Url": "https://hospital.guidejung.com/hospital/A2117369"
+      },
+      {
+       "totalTime": 29,
+       "activeTime": 29,
+       "Url": "https://hospital.guidejung.com/er"
+      },
+      {
+       "totalTime": 3,
+       "activeTime": 3,
+       "Url": "https://hospital.guidejung.com/hospital/A2115807"
+      },
+      {
+       "totalTime": 470,
+       "activeTime": 73,
+       "Url": "https://hospital.guidejung.com/hospital/A2119637"
+      },
+      {
+       "totalTime": 28,
+       "activeTime": 28,
+       "Url": "https://hospital.guidejung.com/search?dept=derma"
+      },
+      {
+       "totalTime": 23,
+       "activeTime": 21,
+       "Url": "https://hospital.guidejung.com/"
+      },
+      {
+       "totalTime": 31,
+       "activeTime": 31,
+       "Url": "https://hospital.guidejung.com/#google_vignette"
+      }
+     ]
+    }
+   ],
+   "device": [
+    {
+     "metricName": "DeadClickCount",
+     "information": [
+      {
+       "sessionsCount": 4,
+       "sessionsWithMetricPercentage": 25,
+       "sessionsWithoutMetricPercentage": 75,
+       "pagesViews": 1,
+       "subTotal": 1,
+       "Device": "Mobile"
+      }
+     ]
+    },
+    {
+     "metricName": "ExcessiveScroll",
+     "information": [
+      {
+       "sessionsCount": 4,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Mobile"
+      }
+     ]
+    },
+    {
+     "metricName": "RageClickCount",
+     "information": [
+      {
+       "sessionsCount": 4,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Mobile"
+      }
+     ]
+    },
+    {
+     "metricName": "QuickbackClick",
+     "information": [
+      {
+       "sessionsCount": 4,
+       "sessionsWithMetricPercentage": 50,
+       "sessionsWithoutMetricPercentage": 50,
+       "pagesViews": 3,
+       "subTotal": 3,
+       "Device": "Mobile"
+      }
+     ]
+    },
+    {
+     "metricName": "ScriptErrorCount",
+     "information": [
+      {
+       "sessionsCount": 4,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Mobile"
+      }
+     ]
+    },
+    {
+     "metricName": "ErrorClickCount",
+     "information": [
+      {
+       "sessionsCount": 4,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Mobile"
+      }
+     ]
+    },
+    {
+     "metricName": "ScrollDepth",
+     "information": [
+      {
+       "averageScrollDepth": 46.45,
+       "Device": "Mobile"
+      }
+     ]
+    },
+    {
+     "metricName": "Traffic",
+     "information": [
+      {
+       "totalSessionCount": 4,
+       "totalBotSessionCount": 1,
+       "distinctUserCount": 3,
+       "pagesPerSessionPercentage": 2.75,
+       "Device": "Mobile"
+      }
+     ]
+    },
+    {
+     "metricName": "EngagementTime",
+     "information": [
+      {
+       "totalTime": 165,
+       "activeTime": 64,
+       "Device": "Mobile"
+      }
+     ]
+    }
+   ]
+  },
+  "oil": {
+   "all": [
+    {
+     "metricName": "DeadClickCount",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "ExcessiveScroll",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "RageClickCount",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "QuickbackClick",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "ScriptErrorCount",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "ErrorClickCount",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "ScrollDepth",
+     "information": [
+      {
+       "averageScrollDepth": 15.5
+      }
+     ]
+    },
+    {
+     "metricName": "Traffic",
+     "information": [
+      {
+       "totalSessionCount": 2,
+       "totalBotSessionCount": 2,
+       "distinctUserCount": 2,
+       "pagesPerSessionPercentage": 1
+      }
+     ]
+    },
+    {
+     "metricName": "EngagementTime",
+     "information": [
+      {
+       "totalTime": 14,
+       "activeTime": 13
+      }
+     ]
+    },
+    {
+     "metricName": "Browser",
+     "information": [
+      {
+       "name": "Other",
+       "sessionsCount": 1
+      },
+      {
+       "name": "Chrome",
+       "sessionsCount": 1
+      }
+     ]
+    },
+    {
+     "metricName": "Device",
+     "information": [
+      {
+       "name": "Mobile",
+       "sessionsCount": 1
+      },
+      {
+       "name": "Tablet",
+       "sessionsCount": 1
+      }
+     ]
+    },
+    {
+     "metricName": "OS",
+     "information": [
+      {
+       "name": "Android",
+       "sessionsCount": 2
+      }
+     ]
+    },
+    {
+     "metricName": "Country",
+     "information": [
+      {
+       "name": "Korea, Republic of",
+       "sessionsCount": 2
+      }
+     ]
+    },
+    {
+     "metricName": "PageTitle",
+     "information": [
+      {
+       "name": "내근처 주유소 | 기름값 제일 싼 곳 어디? 오늘 휘발유·경유 최저가",
+       "sessionsCount": 2
+      }
+     ]
+    },
+    {
+     "metricName": "ReferrerUrl",
+     "information": [
+      {
+       "name": "m.search.naver.com",
+       "sessionsCount": 1
+      },
+      {
+       "name": "trip.guidejung.com",
+       "sessionsCount": 1
+      }
+     ]
+    },
+    {
+     "metricName": "PopularPages",
+     "information": [
+      {
+       "url": "https://oil.guidejung.com/",
+       "visitsCount": 2
+      }
+     ]
+    }
+   ],
+   "url": [
+    {
+     "metricName": "DeadClickCount",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://oil.guidejung.com/"
+      }
+     ]
+    },
+    {
+     "metricName": "ExcessiveScroll",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://oil.guidejung.com/"
+      }
+     ]
+    },
+    {
+     "metricName": "RageClickCount",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://oil.guidejung.com/"
+      }
+     ]
+    },
+    {
+     "metricName": "QuickbackClick",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://oil.guidejung.com/"
+      }
+     ]
+    },
+    {
+     "metricName": "ScriptErrorCount",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://oil.guidejung.com/"
+      }
+     ]
+    },
+    {
+     "metricName": "ErrorClickCount",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://oil.guidejung.com/"
+      }
+     ]
+    },
+    {
+     "metricName": "ScrollDepth",
+     "information": [
+      {
+       "averageScrollDepth": 15.5,
+       "Url": "https://oil.guidejung.com/"
+      }
+     ]
+    },
+    {
+     "metricName": "Traffic",
+     "information": [
+      {
+       "totalSessionCount": 0,
+       "totalBotSessionCount": 1,
+       "distinctUserCount": 0,
+       "pagesPerSessionPercentage": null,
+       "Url": "http://localhost:8799/"
+      },
+      {
+       "totalSessionCount": 2,
+       "totalBotSessionCount": 1,
+       "distinctUserCount": 2,
+       "pagesPerSessionPercentage": 1,
+       "Url": "https://oil.guidejung.com/"
+      },
+      {
+       "totalSessionCount": 0,
+       "totalBotSessionCount": 1,
+       "distinctUserCount": 0,
+       "pagesPerSessionPercentage": null,
+       "Url": "http://localhost:8799/station/A0000004"
+      }
+     ]
+    },
+    {
+     "metricName": "EngagementTime",
+     "information": [
+      {
+       "totalTime": 14,
+       "activeTime": 13,
+       "Url": "https://oil.guidejung.com/"
+      }
+     ]
+    }
+   ],
+   "device": [
+    {
+     "metricName": "DeadClickCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Mobile"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Tablet"
+      }
+     ]
+    },
+    {
+     "metricName": "ExcessiveScroll",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Mobile"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Tablet"
+      }
+     ]
+    },
+    {
+     "metricName": "RageClickCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Mobile"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Tablet"
+      }
+     ]
+    },
+    {
+     "metricName": "QuickbackClick",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Mobile"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Tablet"
+      }
+     ]
+    },
+    {
+     "metricName": "ScriptErrorCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Mobile"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Tablet"
+      }
+     ]
+    },
+    {
+     "metricName": "ErrorClickCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Mobile"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Tablet"
+      }
+     ]
+    },
+    {
+     "metricName": "ScrollDepth",
+     "information": [
+      {
+       "averageScrollDepth": 14,
+       "Device": "Mobile"
+      },
+      {
+       "averageScrollDepth": 17,
+       "Device": "Tablet"
+      }
+     ]
+    },
+    {
+     "metricName": "Traffic",
+     "information": [
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 1,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 1,
+       "Device": "Mobile"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 1,
+       "Device": "Tablet"
+      },
+      {
+       "totalSessionCount": 0,
+       "totalBotSessionCount": 1,
+       "distinctUserCount": 0,
+       "pagesPerSessionPercentage": null,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "EngagementTime",
+     "information": [
+      {
+       "totalTime": 6,
+       "activeTime": 4,
+       "Device": "Mobile"
+      },
+      {
+       "totalTime": 22,
+       "activeTime": 22,
+       "Device": "Tablet"
+      }
+     ]
+    }
+   ]
+  },
+  "parking": {
+   "all": [
+    {
+     "metricName": "DeadClickCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "ExcessiveScroll",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "RageClickCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "QuickbackClick",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "ScriptErrorCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "ErrorClickCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "ScrollDepth",
+     "information": [
+      {
+       "averageScrollDepth": 45
+      }
+     ]
+    },
+    {
+     "metricName": "Traffic",
+     "information": [
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 1,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 3
+      }
+     ]
+    },
+    {
+     "metricName": "EngagementTime",
+     "information": [
+      {
+       "totalTime": 16,
+       "activeTime": 14
+      }
+     ]
+    },
+    {
+     "metricName": "Browser",
+     "information": [
+      {
+       "name": "Chrome",
+       "sessionsCount": 1
+      }
+     ]
+    },
+    {
+     "metricName": "Device",
+     "information": [
+      {
+       "name": "Tablet",
+       "sessionsCount": 1
+      }
+     ]
+    },
+    {
+     "metricName": "OS",
+     "information": [
+      {
+       "name": "Android",
+       "sessionsCount": 1
+      }
+     ]
+    },
+    {
+     "metricName": "Country",
+     "information": [
+      {
+       "name": "Korea, Republic of",
+       "sessionsCount": 1
+      }
+     ]
+    },
+    {
+     "metricName": "PageTitle",
+     "information": [
+      {
+       "name": "서울 동작구 주차장 16곳 · 공영·무료 주차장 요금 | 내근처 주차장",
+       "sessionsCount": 1
+      }
+     ]
+    },
+    {
+     "metricName": "ReferrerUrl",
+     "information": [
+      {
+       "name": "trip.guidejung.com",
+       "sessionsCount": 1
+      }
+     ]
+    },
+    {
+     "metricName": "PopularPages",
+     "information": [
+      {
+       "url": "https://parking.guidejung.com/region/11590",
+       "visitsCount": 1
+      }
+     ]
+    }
+   ],
+   "url": [
+    {
+     "metricName": "DeadClickCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://parking.guidejung.com/region/11590"
+      }
+     ]
+    },
+    {
+     "metricName": "ExcessiveScroll",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://parking.guidejung.com/region/11590"
+      }
+     ]
+    },
+    {
+     "metricName": "RageClickCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://parking.guidejung.com/region/11590"
+      }
+     ]
+    },
+    {
+     "metricName": "QuickbackClick",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://parking.guidejung.com/region/11590"
+      }
+     ]
+    },
+    {
+     "metricName": "ScriptErrorCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://parking.guidejung.com/region/11590"
+      }
+     ]
+    },
+    {
+     "metricName": "ErrorClickCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://parking.guidejung.com/region/11590"
+      }
+     ]
+    },
+    {
+     "metricName": "ScrollDepth",
+     "information": [
+      {
+       "averageScrollDepth": 45,
+       "Url": "https://parking.guidejung.com/region/11590"
+      }
+     ]
+    },
+    {
+     "metricName": "Traffic",
+     "information": [
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 1,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 3,
+       "Url": "https://parking.guidejung.com/region/11590"
+      }
+     ]
+    },
+    {
+     "metricName": "EngagementTime",
+     "information": [
+      {
+       "totalTime": 16,
+       "activeTime": 14,
+       "Url": "https://parking.guidejung.com/region/11590"
+      }
+     ]
+    }
+   ],
+   "device": [
+    {
+     "metricName": "DeadClickCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Tablet"
+      }
+     ]
+    },
+    {
+     "metricName": "ExcessiveScroll",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Tablet"
+      }
+     ]
+    },
+    {
+     "metricName": "RageClickCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Tablet"
+      }
+     ]
+    },
+    {
+     "metricName": "QuickbackClick",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Tablet"
+      }
+     ]
+    },
+    {
+     "metricName": "ScriptErrorCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Tablet"
+      }
+     ]
+    },
+    {
+     "metricName": "ErrorClickCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Tablet"
+      }
+     ]
+    },
+    {
+     "metricName": "ScrollDepth",
+     "information": [
+      {
+       "averageScrollDepth": 45,
+       "Device": "Tablet"
+      }
+     ]
+    },
+    {
+     "metricName": "Traffic",
+     "information": [
+      {
+       "totalSessionCount": 0,
+       "totalBotSessionCount": 1,
+       "distinctUserCount": 0,
+       "pagesPerSessionPercentage": null,
+       "Device": "Mobile"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 3,
+       "Device": "Tablet"
+      }
+     ]
+    },
+    {
+     "metricName": "EngagementTime",
+     "information": [
+      {
+       "totalTime": 16,
+       "activeTime": 14,
+       "Device": "Tablet"
+      }
+     ]
+    }
+   ]
+  },
+  "service": {
+   "all": [
+    {
+     "metricName": "DeadClickCount",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "ExcessiveScroll",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "RageClickCount",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "QuickbackClick",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 50,
+       "sessionsWithoutMetricPercentage": 50,
+       "pagesViews": 1,
+       "subTotal": 1
+      }
+     ]
+    },
+    {
+     "metricName": "ScriptErrorCount",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "ErrorClickCount",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "ScrollDepth",
+     "information": [
+      {
+       "averageScrollDepth": 29.33
+      }
+     ]
+    },
+    {
+     "metricName": "Traffic",
+     "information": [
+      {
+       "totalSessionCount": 2,
+       "totalBotSessionCount": 1,
+       "distinctUserCount": 2,
+       "pagesPerSessionPercentage": 1.5
+      }
+     ]
+    },
+    {
+     "metricName": "EngagementTime",
+     "information": [
+      {
+       "totalTime": 7,
+       "activeTime": 7
+      }
+     ]
+    },
+    {
+     "metricName": "Browser",
+     "information": [
+      {
+       "name": "Chrome",
+       "sessionsCount": 2
+      }
+     ]
+    },
+    {
+     "metricName": "Device",
+     "information": [
+      {
+       "name": "Tablet",
+       "sessionsCount": 1
+      },
+      {
+       "name": "PC",
+       "sessionsCount": 1
+      }
+     ]
+    },
+    {
+     "metricName": "OS",
+     "information": [
+      {
+       "name": "Android",
+       "sessionsCount": 1
+      },
+      {
+       "name": "Windows",
+       "sessionsCount": 1
+      }
+     ]
+    },
+    {
+     "metricName": "Country",
+     "information": [
+      {
+       "name": "Korea, Republic of",
+       "sessionsCount": 1
+      },
+      {
+       "name": "China",
+       "sessionsCount": 1
+      }
+     ]
+    },
+    {
+     "metricName": "PageTitle",
+     "information": [
+      {
+       "name": "내근처 서비스센터 | 고장 났다, 어디로 가지? 내 주변 자동차 정비소·검사소",
+       "sessionsCount": 2
+      }
+     ]
+    },
+    {
+     "metricName": "ReferrerUrl",
+     "information": [
+      {
+       "name": "service.guidejung.com",
+       "sessionsCount": 1
+      },
+      {
+       "name": "trip.guidejung.com",
+       "sessionsCount": 1
+      }
+     ]
+    },
+    {
+     "metricName": "PopularPages",
+     "information": [
+      {
+       "url": "https://service.guidejung.com/",
+       "visitsCount": 2
+      }
+     ]
+    }
+   ],
+   "url": [
+    {
+     "metricName": "DeadClickCount",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://service.guidejung.com/"
+      }
+     ]
+    },
+    {
+     "metricName": "ExcessiveScroll",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://service.guidejung.com/"
+      }
+     ]
+    },
+    {
+     "metricName": "RageClickCount",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://service.guidejung.com/"
+      }
+     ]
+    },
+    {
+     "metricName": "QuickbackClick",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 50,
+       "sessionsWithoutMetricPercentage": 50,
+       "pagesViews": 1,
+       "subTotal": 1,
+       "Url": "https://service.guidejung.com/"
+      }
+     ]
+    },
+    {
+     "metricName": "ScriptErrorCount",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://service.guidejung.com/"
+      }
+     ]
+    },
+    {
+     "metricName": "ErrorClickCount",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://service.guidejung.com/"
+      }
+     ]
+    },
+    {
+     "metricName": "ScrollDepth",
+     "information": [
+      {
+       "averageScrollDepth": 29.33,
+       "Url": "https://service.guidejung.com/"
+      }
+     ]
+    },
+    {
+     "metricName": "Traffic",
+     "information": [
+      {
+       "totalSessionCount": 2,
+       "totalBotSessionCount": 1,
+       "distinctUserCount": 2,
+       "pagesPerSessionPercentage": 1.5,
+       "Url": "https://service.guidejung.com/"
+      }
+     ]
+    },
+    {
+     "metricName": "EngagementTime",
+     "information": [
+      {
+       "totalTime": 7,
+       "activeTime": 7,
+       "Url": "https://service.guidejung.com/"
+      }
+     ]
+    }
+   ],
+   "device": [
+    {
+     "metricName": "DeadClickCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Tablet"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "ExcessiveScroll",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Tablet"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "RageClickCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Tablet"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "QuickbackClick",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 100,
+       "sessionsWithoutMetricPercentage": 0,
+       "pagesViews": 1,
+       "subTotal": 1,
+       "Device": "Tablet"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "ScriptErrorCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Tablet"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "ErrorClickCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Tablet"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "ScrollDepth",
+     "information": [
+      {
+       "averageScrollDepth": 33.5,
+       "Device": "Tablet"
+      },
+      {
+       "averageScrollDepth": 21,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "Traffic",
+     "information": [
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 2,
+       "Device": "Tablet"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 1,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 1,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "EngagementTime",
+     "information": [
+      {
+       "totalTime": 15,
+       "activeTime": 15,
+       "Device": "Tablet"
+      },
+      {
+       "totalTime": 0,
+       "activeTime": 0,
+       "Device": "PC"
+      }
+     ]
+    }
+   ]
+  },
+  "near": {
+   "all": [
+    {
+     "metricName": "DeadClickCount",
+     "information": [
+      {
+       "sessionsCount": 8,
+       "sessionsWithMetricPercentage": 12.5,
+       "sessionsWithoutMetricPercentage": 87.5,
+       "pagesViews": 1,
+       "subTotal": 1
+      }
+     ]
+    },
+    {
+     "metricName": "ExcessiveScroll",
+     "information": [
+      {
+       "sessionsCount": 8,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "RageClickCount",
+     "information": [
+      {
+       "sessionsCount": 8,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "QuickbackClick",
+     "information": [
+      {
+       "sessionsCount": 8,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "ScriptErrorCount",
+     "information": [
+      {
+       "sessionsCount": 8,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "ErrorClickCount",
+     "information": [
+      {
+       "sessionsCount": 8,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "ScrollDepth",
+     "information": [
+      {
+       "averageScrollDepth": 50.1
+      }
+     ]
+    },
+    {
+     "metricName": "Traffic",
+     "information": [
+      {
+       "totalSessionCount": 8,
+       "totalBotSessionCount": 6,
+       "distinctUserCount": 8,
+       "pagesPerSessionPercentage": 1.25
+      }
+     ]
+    },
+    {
+     "metricName": "EngagementTime",
+     "information": [
+      {
+       "totalTime": 55,
+       "activeTime": 14
+      }
+     ]
+    },
+    {
+     "metricName": "Browser",
+     "information": [
+      {
+       "name": "Chrome",
+       "sessionsCount": 5
+      },
+      {
+       "name": "Edge",
+       "sessionsCount": 2
+      },
+      {
+       "name": "MobileSafari",
+       "sessionsCount": 1
+      }
+     ]
+    },
+    {
+     "metricName": "Device",
+     "information": [
+      {
+       "name": "PC",
+       "sessionsCount": 7
+      },
+      {
+       "name": "Mobile",
+       "sessionsCount": 1
+      }
+     ]
+    },
+    {
+     "metricName": "OS",
+     "information": [
+      {
+       "name": "Windows",
+       "sessionsCount": 4
+      },
+      {
+       "name": "Linux",
+       "sessionsCount": 2
+      },
+      {
+       "name": "IOS",
+       "sessionsCount": 1
+      },
+      {
+       "name": "MacOSX",
+       "sessionsCount": 1
+      }
+     ]
+    },
+    {
+     "metricName": "Country",
+     "information": [
+      {
+       "name": "United States",
+       "sessionsCount": 5
+      },
+      {
+       "name": "Korea, Republic of",
+       "sessionsCount": 2
+      },
+      {
+       "name": "Netherlands",
+       "sessionsCount": 1
+      }
+     ]
+    },
+    {
+     "metricName": "PageTitle",
+     "information": [
+      {
+       "name": "내근처 | 내 근처에 뭐가 있지? 날씨·문 연 약국·병원·최저가 주유소·무료 주차장 한 번에",
+       "sessionsCount": 7
+      },
+      {
+       "name": "겨울 오기 전 차량 점검, 내 주변 정비소부터 | 내근처",
+       "sessionsCount": 1
+      },
+      {
+       "name": "새해 첫 해돋이, 어디서 몇 시에 볼까? | 내근처",
+       "sessionsCount": 1
+      }
+     ]
+    },
+    {
+     "metricName": "ReferrerUrl",
+     "information": [
+      {
+       "name": "near.guidejung.com",
+       "sessionsCount": 1
+      }
+     ]
+    },
+    {
+     "metricName": "PopularPages",
+     "information": [
+      {
+       "url": "https://near.guidejung.com/",
+       "visitsCount": 6
+      },
+      {
+       "url": "http://near.guidejung.com/",
+       "visitsCount": 1
+      },
+      {
+       "url": "https://near.guidejung.com/season/new-year",
+       "visitsCount": 1
+      },
+      {
+       "url": "https://near.guidejung.com/season/winter-car",
+       "visitsCount": 1
+      }
+     ]
+    }
+   ],
+   "url": [
+    {
+     "metricName": "DeadClickCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://near.guidejung.com/season/new-year"
+      },
+      {
+       "sessionsCount": 6,
+       "sessionsWithMetricPercentage": 16.67,
+       "sessionsWithoutMetricPercentage": 83.33,
+       "pagesViews": 1,
+       "subTotal": 1,
+       "Url": "https://near.guidejung.com/"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://near.guidejung.com/season/winter-car"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "http://near.guidejung.com/"
+      }
+     ]
+    },
+    {
+     "metricName": "ExcessiveScroll",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://near.guidejung.com/season/new-year"
+      },
+      {
+       "sessionsCount": 6,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://near.guidejung.com/"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://near.guidejung.com/season/winter-car"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "http://near.guidejung.com/"
+      }
+     ]
+    },
+    {
+     "metricName": "RageClickCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://near.guidejung.com/season/new-year"
+      },
+      {
+       "sessionsCount": 6,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://near.guidejung.com/"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://near.guidejung.com/season/winter-car"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "http://near.guidejung.com/"
+      }
+     ]
+    },
+    {
+     "metricName": "QuickbackClick",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://near.guidejung.com/season/new-year"
+      },
+      {
+       "sessionsCount": 6,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://near.guidejung.com/"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://near.guidejung.com/season/winter-car"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "http://near.guidejung.com/"
+      }
+     ]
+    },
+    {
+     "metricName": "ScriptErrorCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://near.guidejung.com/season/new-year"
+      },
+      {
+       "sessionsCount": 6,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://near.guidejung.com/"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://near.guidejung.com/season/winter-car"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "http://near.guidejung.com/"
+      }
+     ]
+    },
+    {
+     "metricName": "ErrorClickCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://near.guidejung.com/season/new-year"
+      },
+      {
+       "sessionsCount": 6,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://near.guidejung.com/"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://near.guidejung.com/season/winter-car"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "http://near.guidejung.com/"
+      }
+     ]
+    },
+    {
+     "metricName": "ScrollDepth",
+     "information": [
+      {
+       "averageScrollDepth": 26,
+       "Url": "https://near.guidejung.com/season/new-year"
+      },
+      {
+       "averageScrollDepth": 57.57,
+       "Url": "https://near.guidejung.com/"
+      },
+      {
+       "averageScrollDepth": 41,
+       "Url": "https://near.guidejung.com/season/winter-car"
+      },
+      {
+       "averageScrollDepth": 31,
+       "Url": "http://near.guidejung.com/"
+      }
+     ]
+    },
+    {
+     "metricName": "Traffic",
+     "information": [
+      {
+       "totalSessionCount": 0,
+       "totalBotSessionCount": 2,
+       "distinctUserCount": 0,
+       "pagesPerSessionPercentage": null,
+       "Url": "http://localhost:8798/season/suneung"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 2,
+       "Url": "https://near.guidejung.com/season/new-year"
+      },
+      {
+       "totalSessionCount": 0,
+       "totalBotSessionCount": 2,
+       "distinctUserCount": 0,
+       "pagesPerSessionPercentage": null,
+       "Url": "http://localhost:8798/season/winter-car"
+      },
+      {
+       "totalSessionCount": 6,
+       "totalBotSessionCount": 3,
+       "distinctUserCount": 6,
+       "pagesPerSessionPercentage": 1.1666666666666667,
+       "Url": "https://near.guidejung.com/"
+      },
+      {
+       "totalSessionCount": 0,
+       "totalBotSessionCount": 2,
+       "distinctUserCount": 0,
+       "pagesPerSessionPercentage": null,
+       "Url": "https://near.guidejung.com/situation/sick-kid"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 2,
+       "Url": "https://near.guidejung.com/season/winter-car"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 1,
+       "Url": "http://near.guidejung.com/"
+      },
+      {
+       "totalSessionCount": 0,
+       "totalBotSessionCount": 2,
+       "distinctUserCount": 0,
+       "pagesPerSessionPercentage": null,
+       "Url": "http://localhost:8798/season/new-year"
+      },
+      {
+       "totalSessionCount": 0,
+       "totalBotSessionCount": 1,
+       "distinctUserCount": 0,
+       "pagesPerSessionPercentage": null,
+       "Url": "https://near.guidejung.com/?gtm_latency=1"
+      }
+     ]
+    },
+    {
+     "metricName": "EngagementTime",
+     "information": [
+      {
+       "totalTime": 5,
+       "activeTime": 5,
+       "Url": "https://near.guidejung.com/season/new-year"
+      },
+      {
+       "totalTime": 71,
+       "activeTime": 16,
+       "Url": "https://near.guidejung.com/"
+      },
+      {
+       "totalTime": 6,
+       "activeTime": 6,
+       "Url": "https://near.guidejung.com/season/winter-car"
+      },
+      {
+       "totalTime": 8,
+       "activeTime": 8,
+       "Url": "http://near.guidejung.com/"
+      }
+     ]
+    }
+   ],
+   "device": [
+    {
+     "metricName": "DeadClickCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Mobile"
+      },
+      {
+       "sessionsCount": 7,
+       "sessionsWithMetricPercentage": 14.29,
+       "sessionsWithoutMetricPercentage": 85.71000000000001,
+       "pagesViews": 1,
+       "subTotal": 1,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "ExcessiveScroll",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Mobile"
+      },
+      {
+       "sessionsCount": 7,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "RageClickCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Mobile"
+      },
+      {
+       "sessionsCount": 7,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "QuickbackClick",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Mobile"
+      },
+      {
+       "sessionsCount": 7,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "ScriptErrorCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Mobile"
+      },
+      {
+       "sessionsCount": 7,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "ErrorClickCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Mobile"
+      },
+      {
+       "sessionsCount": 7,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "ScrollDepth",
+     "information": [
+      {
+       "averageScrollDepth": 100,
+       "Device": "Mobile"
+      },
+      {
+       "averageScrollDepth": 44.56,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "Traffic",
+     "information": [
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 1,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 1,
+       "Device": "Mobile"
+      },
+      {
+       "totalSessionCount": 7,
+       "totalBotSessionCount": 5,
+       "distinctUserCount": 7,
+       "pagesPerSessionPercentage": 1.2857142857142858,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "EngagementTime",
+     "information": [
+      {
+       "totalTime": 4,
+       "activeTime": 4,
+       "Device": "Mobile"
+      },
+      {
+       "totalTime": 63,
+       "activeTime": 16,
+       "Device": "PC"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}
