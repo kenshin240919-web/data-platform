@@ -16,7 +16,7 @@ const GRADE=['','좋음','보통','나쁨','매우 나쁨'];
 export async function weather(a:Area){
   const d=await get<{now?:{temp?:number};daily?:{date:string;min:number;max:number;am:{sky:string;pop:number};pm:{sky:string;pop:number}}[];air?:{pm10Grade?:number;pm25Grade?:number}}>(`${U.weather}/api/weather?code=${a.w}`,12000);
   if(!d)return null;const t=d.daily?.[0];const g=Math.max(d.air?.pm10Grade??0,d.air?.pm25Grade??0);
-  return {temp:d.now?.temp??null,min:t?.min??null,max:t?.max??null,sky:t?.pm.sky??t?.am.sky??null,pop:t?Math.max(t.am.pop,t.pm.pop):null,air:GRADE[g]||null,weekend:d.daily?.slice(0,7)??[]};
+  return {temp:d.now?.temp??null,min:t?.min??null,max:t?.max??null,sky:t?.pm.sky??t?.am.sky??null,pop:t?Math.max(t.am.pop,t.pm.pop):null,air:GRADE[g]||null,weekend:d.daily??[]};
 }
 export const pharmacyOpen=(lat:number,lon:number,km=2)=>get<Near<{id:string;name:string}>>(`${U.pharmacy}/api/near?${ll(lat,lon)}&km=${km}&cond=open&limit=3`);
 export const hospitalOpen=(lat:number,lon:number,km=2,dept?:string)=>get<Near<{id:string;name:string;div:string|null}>>(`${U.hospital}/api/near?${ll(lat,lon)}&km=${km}&cond=open&limit=3${dept?`&dept=${dept}`:''}`);
@@ -33,7 +33,7 @@ export async function chargers(a:Area){
   for(const s of d.stations)for(const c of s.chargers){const isFast=c.kw!=null?c.kw>=30:!['02','08'].includes(c.type);if(isFast){fast++;if(c.stat===2)ok++;}}
   return {stations:d.stations.length,fast,ok};
 }
-export const trip=(lat:number,lon:number,extra='',km=20)=>get<{total?:number;items:{id:string;name:string;kind:string;region_name?:string}[]}>(`${U.trip}/api/search?${ll(lat,lon)}&radius_km=${km}&limit=3${extra}`);
+export const trip=(lat:number,lon:number,extra='',km=20,limit=3)=>get<{total?:number;items:{id:string;name:string;kind:string;region_name?:string}[]}>(`${U.trip}/api/search?${ll(lat,lon)}&radius_km=${km}&limit=${limit}${extra}`);
 export const repair=(lat:number,lon:number,kind='repair',km=2)=>get<Near<{id:string;name:string;sub?:string}>>(`${U.service}/api/near?${ll(lat,lon)}&kind=${kind}&km=${km}&limit=3`);
 const PATH:Record<string,string>={place:'place',festival:'festival',food:'food',stay:'stay',shop:'shop',course:'course'};
 export const tripPath=(i:{id:string;kind:string})=>`${U.trip}/${PATH[i.kind]??'place'}/${i.id}`;

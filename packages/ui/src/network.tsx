@@ -4,6 +4,7 @@ import weatherRegions from '../../../apps/weather/data/regions.json';
 import traffic from '../../../apps/traffic/data/snapshot.json';
 import oilAreas from '../../../apps/oil/data/areas.json';
 import {InstallHint} from './install';
+import {SeasonBanner} from './season';
 import {ACTIONS_JS} from './actions';
 
 export type Site='trip'|'weather'|'traffic'|'charge'|'academy'|'school'|'pharmacy'|'hospital'|'oil'|'parking'|'service'|'near';
@@ -29,7 +30,7 @@ const {trip:T,weather:W,traffic:R,charge:C}=Object.fromEntries(Object.entries(SI
 export function NetworkBar({current}:{current:Site}){
   return <><nav className="gj-network" aria-label="내근처 서비스"><div>{current==='near'?<b className="gj-network-brand">📍 내근처</b>:<a className="gj-network-brand" href={SITES.near.url}>📍 내근처</a>}{(Object.keys(SITES) as Site[]).filter(k=>!SITES[k].hidden||k===current).map(k=>k===current
     ?<span key={k} className="on" aria-current="page">{SITES[k].icon} {SITES[k].name}</span>
-    :<a key={k} href={SITES[k].url}>{SITES[k].icon} {SITES[k].name}</a>)}</div></nav><InstallHint brand={SITES[current].brand}/><script dangerouslySetInnerHTML={{__html:ACTIONS_JS}}/></>;
+    :<a key={k} href={SITES[k].url}>{SITES[k].icon} {SITES[k].name}</a>)}</div></nav><SeasonBanner site={current}/><InstallHint brand={SITES[current].brand}/><script dangerouslySetInnerHTML={{__html:ACTIONS_JS}}/></>;
 }
 
 export type Link_={icon:string;title:string;desc:string;href:string};

@@ -7,6 +7,9 @@
 - [아이 아플 때](https://near.guidejung.com/situation/sick-kid): 지금 진료 중인 소아청소년과·문 연 약국·응급실 병상, 119·달빛어린이병원 안내
 - [주말 나들이](https://near.guidejung.com/situation/weekend): 주말 날씨·주말 행사·가볼만한곳·최저가 주유소
 - [차 고장 났을 때](https://near.guidejung.com/situation/car-trouble): 2차 사고 예방 대피 순서, 한국도로공사 1588-2504, 가까운 정비소·검사소
+- [2027학년도 수능날(2026-11-19)](https://near.guidejung.com/season/suneung): 시험일·시간·성적 통지일, 출근 시간 조정·시험장 차량 통제·듣기평가 소음 통제(교육부 발표), 내 주변 날씨·문 연 약국
+- [겨울철 차량 점검](https://near.guidejung.com/season/winter-car): 배터리·타이어·냉각수·워셔액 점검 순서, 내 주변 정비소·검사소
+- [새해 해돋이](https://near.guidejung.com/season/new-year): 2027년 1월 1일 지역별 해 뜨는 시각(계산값), 내 주변 해돋이 명소·숙소
 
 ## 내근처 시리즈
 - 여행 https://trip.guidejung.com · 날씨 https://weather.guidejung.com · 고속도로 https://traffic.guidejung.com · 충전소 https://charge.guidejung.com

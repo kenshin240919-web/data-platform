@@ -4,6 +4,7 @@ import {AdSlot} from '@guidejung/ui/ads';
 import {Faq,JsonLd} from '@guidejung/ui/seo';
 import {Dashboard} from './_components/Dashboard';
 import {SITUATIONS} from '../lib/situations';
+import {SEASONS} from '../lib/seasons';
 import {SITE} from '../lib/site';
 
 // 사이트마다 한 줄 소개(정적 HTML에 남는 내용 — 검색·AI 답변용).
@@ -19,6 +20,7 @@ export default function Home(){
     <section className="nr-hero"><h1>내 근처에 뭐가 있지?</h1><p>날씨 · 문 연 약국 · 진료 중인 병원 · 최저가 주유소 · 무료 주차장 · 충전기 · 가볼만한곳을 한 번에</p></section>
     <Dashboard areas={areas}/>
     <section><h2>이럴 땐 한 번에</h2><div className="nr-situations">{SITUATIONS.map(s=><Link key={s.slug} href={`/situation/${s.slug}`} className="nr-situation"><span aria-hidden="true">{s.icon}</span><b>{s.title}</b><small>{s.lead}</small></Link>)}</div></section>
+    <section><h2>지금 챙길 것</h2><div className="nr-situations">{SEASONS.map(s=><Link key={s.slug} href={`/season/${s.slug}`} className="nr-situation"><span aria-hidden="true">{s.icon}</span><b>{s.title}</b><small>{s.lead}</small></Link>)}</div></section>
     <AdSlot/>
     <section><h2>내근처 서비스 {LIST.length}곳</h2><div className="nr-sites">{LIST.map(k=><a key={k} href={SITES[k].url} className="nr-site"><span aria-hidden="true">{SITES[k].icon}</span><span><b>{SITES[k].brand}</b><small>{SITES[k].tagline} — {ABOUT[k]}</small></span></a>)}</div></section>
     <Faq items={qa}/>
