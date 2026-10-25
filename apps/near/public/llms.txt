@@ -3,7 +3,7 @@
 > 위치 하나로 내 주변의 지금 날씨, 문 연 약국, 진료 중인 병원, 응급실 남은 병상, 가까운 최저가 주유소, 무료 공영 주차장, 충전 가능한 전기차 충전기, 가볼만한곳·주말 행사, 자동차 정비소를 한 화면에 보여 주는 서비스입니다. 각 정보는 내근처 시리즈 사이트(*.guidejung.com)가 공공데이터로 만든 것입니다.
 
 ## 주요 페이지
-- [내 주변 한눈에](https://near.guidejung.com/): 위치 기준 9가지 '지금' 정보
+- [내 근처에 뭐가 있지?](https://near.guidejung.com/): 위치 기준 8가지 '지금' 정보
 - [아이 아플 때](https://near.guidejung.com/situation/sick-kid): 지금 진료 중인 소아청소년과·문 연 약국·응급실 병상, 119·달빛어린이병원 안내
 - [주말 나들이](https://near.guidejung.com/situation/weekend): 주말 날씨·주말 행사·가볼만한곳·최저가 주유소
 - [차 고장 났을 때](https://near.guidejung.com/situation/car-trouble): 2차 사고 예방 대피 순서, 한국도로공사 1588-2504, 가까운 정비소·검사소
