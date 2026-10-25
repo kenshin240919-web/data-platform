@@ -166,6 +166,45 @@ for site in ORDER:
         L.append(f'- **{title}**: ' + (' · '.join(f'`{k}` {n(v)}' for k, v in rows) if rows else '없음'))
     L.append('')
 
+
+# Clarity(reports/clarity/raw/*.json, collect-clarity.py가 매일 쌓음) 최근 7개 파일을 세션 수로 가중 평균
+CL = {'QuickbackClick': '빠른 뒤로가기', 'DeadClickCount': '죽은 클릭', 'RageClickCount': '분노 클릭', 'ScriptErrorCount': '스크립트 오류'}
+files = sorted(pathlib.Path('reports/clarity/raw').glob('*.json'))[-7:]
+if files:
+    agg = {}
+    for f in files:
+        for site, v in json.loads(f.read_text(encoding='utf-8')).get('sites', {}).items():
+            a = agg.setdefault(site, {'sess': 0, 'bot': 0, 'scroll': 0.0, 'active': 0.0, 'urls': {}, **{k: 0.0 for k in CL}})
+            m = {x['metricName']: x.get('information') or [{}] for x in v.get('all') or [] if isinstance(x, dict)}
+            t = m.get('Traffic', [{}])[0]
+            ss = float(t.get('totalSessionCount') or 0)
+            a['sess'] += ss
+            a['bot'] += float(t.get('totalBotSessionCount') or 0)
+            a['scroll'] += float(m.get('ScrollDepth', [{}])[0].get('averageScrollDepth') or 0) * ss
+            a['active'] += float(m.get('EngagementTime', [{}])[0].get('activeTime') or 0) * ss
+            for k in CL:
+                a[k] += float(m.get(k, [{}])[0].get('sessionsWithMetricPercentage') or 0) * ss
+            for x in v.get('url') or []:
+                if isinstance(x, dict) and x.get('metricName') in ('QuickbackClick', 'DeadClickCount', 'RageClickCount'):
+                    for i in x.get('information') or []:
+                        if i.get('subTotal'):
+                            u = i.get('Url', '').split('guidejung.com', 1)[-1] or '/'
+                            key = (CL[x['metricName']], u)
+                            a['urls'][key] = a['urls'].get(key, 0) + i['subTotal']
+    L += [f'## Clarity 행동 지표 (최근 {len(files)}일, {files[0].stem} ~ {files[-1].stem})', '',
+          'Clarity 기준(세션 수로 가중 평균). 빠른 뒤로가기·죽은 클릭은 "원하는 게 없거나 눌러도 반응이 없다"는 신호.', '',
+          '| 사이트 | 세션 | 봇 | 스크롤 깊이 | 활동 시간 | ' + ' | '.join(CL.values()) + ' |',
+          '|---|---:|---:|---:|---:|' + '---:|' * len(CL)]
+    for site in sorted(agg, key=lambda s: -agg[s]['sess']):
+        a = agg[site]
+        w = a['sess'] or 1
+        L.append(f"| {site} | {n(a['sess'])} | {n(a['bot'])} | {a['scroll'] / w:.0f}% | {dur(a['active'] / w)} | "
+                 + ' | '.join(f"{a[k] / w:.0f}%" for k in CL) + ' |')
+    L.append('')
+    bad = sorted(((c, site, k) for site, a in agg.items() for k, c in a['urls'].items()), reverse=True)[:10]
+    if bad:
+        L += ['**문제 신호가 많은 페이지 TOP 10**', ''] + [f'- {site} `{u}` — {kind} {n(c)}회' for c, site, (kind, u) in bad] + ['']
+
 out = pathlib.Path('reports/ga') / f'주간-{today}.md'
 out.parent.mkdir(parents=True, exist_ok=True)
 out.write_text('\n'.join(L) + '\n', encoding='utf-8')
