@@ -28,7 +28,7 @@ export async function cheapOil(lat:number,lon:number,km=3){
 export const freeParking=(lat:number,lon:number,km=1)=>get<Near<{id:string;name:string}>>(`${U.parking}/api/near?${ll(lat,lon)}&km=${km}&limit=50&free=1`);
 export const parking=(lat:number,lon:number,km=1)=>get<Near<{id:string;name:string;charge:string}>>(`${U.parking}/api/near?${ll(lat,lon)}&km=${km}&limit=50`);
 export async function chargers(a:Area){
-  const d=await get<{stations:{chargers:{kw:number|null;type:string;stat:number}[]}[]}>(`${U.charge}/api/stations?code=${a.c}`,15000);
+  const d=await get<{stations:{chargers:{kw:number|null;type:string;stat:number}[]}[]}>(`${U.charge}/api/stations?code=${a.c}`,40000)  // 처음 보는 지역은 충전 API를 기다려 30초 넘게 걸릴 수 있음;
   if(!d)return null;let fast=0,ok=0;
   for(const s of d.stations)for(const c of s.chargers){const isFast=c.kw!=null?c.kw>=30:!['02','08'].includes(c.type);if(isFast){fast++;if(c.stat===2)ok++;}}
   return {stations:d.stations.length,fast,ok};
