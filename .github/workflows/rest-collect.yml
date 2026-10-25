@@ -1,0 +1,37 @@
+name: Rest collect
+# Daily list for rest.guidejung.com (내근처 휴식): LOCALDATA 목욕장업·의료유사업(안마)·미용업(피부미용) 파일
+# (scripts/collect-rest.py). apps/rest/data/places.json is committed to main only when it changed
+# (rest-deploy.yml deploys after this run). Secrets: KAKAO_REST_KEY (좌표 없는 곳만).
+on:
+  schedule:
+    - cron: '7 20 * * *' # 05:07 KST
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: rest-collect
+  cancel-in-progress: false
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Collect
+        env:
+          KAKAO_REST_KEY: ${{ secrets.KAKAO_REST_KEY }}
+        run: python scripts/collect-rest.py
+      - name: Commit rest list
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add apps/rest/data/places.json
+          if git diff --cached --quiet; then echo 'no change'; exit 0; fi
+          git commit -m 'rest: 휴식 업소 목록 갱신'
+          for i in 1 2 3; do git pull --rebase origin main && git push origin HEAD:main && exit 0; sleep 10; done
+          exit 1
