@@ -21,3 +21,4 @@ Disallow: /api/
 
 # Site summary for AI: https://near.guidejung.com/llms.txt
 Sitemap: https://near.guidejung.com/sitemap.xml
+#DaumWebMasterTool:0c3fc953f0d30032e55a9de7b093d1ea05657751ac8014fa9592662fd9691305:kHsTc7yt7rZFR+42wFNLLw==
