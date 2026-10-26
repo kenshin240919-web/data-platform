@@ -1,0 +1,28 @@
+{
+ "name": "내근처 동물병원",
+ "short_name": "내근처 동물병원",
+ "description": "내근처 동물병원 — 우리 아이 아플 때 어디로?",
+ "lang": "ko",
+ "start_url": "/?source=pwa",
+ "scope": "/",
+ "display": "standalone",
+ "background_color": "#ffffff",
+ "theme_color": "#c2410c",
+ "icons": [
+  {
+   "src": "/icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png"
+  },
+  {
+   "src": "/icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png"
+  },
+  {
+   "src": "/icon.svg",
+   "sizes": "any",
+   "type": "image/svg+xml"
+  }
+ ]
+}

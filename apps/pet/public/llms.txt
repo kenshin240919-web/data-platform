@@ -1,0 +1,14 @@
+# 내근처 동물병원 (pet.guidejung.com)
+
+> 내 주변 동물병원·24시 동물병원(이름 기준), 지금 문 연 동물약국, 펫호텔·애견 유치원, 애견·고양이 카페, 펫택시를 가까운 순으로 보여 주는 서비스입니다. 출처는 행정안전부 지방행정 인허가데이터(동물병원·동물약국·동물위탁관리업·동물전시업·동물운송업)이며 영업 중으로 신고된 곳만 매일 갱신합니다. 동물약국 영업 시간은 국립중앙의료원 약국 정보입니다.
+
+## 주요 페이지
+- [24시 동물병원](https://pet.guidejung.com/24h): 이름에 '24'가 든 동물병원 전국 목록(시도별)
+- [동물병원](https://pet.guidejung.com/hospital), [동물약국](https://pet.guidejung.com/pharmacy), [펫호텔·유치원](https://pet.guidejung.com/hotel), [애견·고양이 카페](https://pet.guidejung.com/cafe), [펫택시](https://pet.guidejung.com/taxi): 전국 수·내 주변·많은 지역
+- [우리 아이 아플 때](https://pet.guidejung.com/guide): 동물병원 가기 전 순서, 업종별 차이
+- [지역별](https://pet.guidejung.com/region): 시군구 `/region/{시군구코드}`, 종류별 `/region/{코드}/hospital|pharmacy|hotel|cafe|taxi`
+- 상세 `/place/{id}`: 이름·종류·주소·전화·개설일, 동물약국은 요일별 영업 시간·지금 상태, 근처 24시 동물병원
+
+## 데이터 안내
+- 동물병원 진료 시간·진료 과목·가격·후기는 공공데이터에 없어 표시하지 않습니다(상세에서 네이버 지도 검색 링크·전화로 안내).
+- '24시 동물병원'은 병원 이름에 '24'가 들어간 곳입니다. 실제 야간 진료 여부는 병원에 확인해야 합니다.

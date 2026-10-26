@@ -1,0 +1,19 @@
+// Cloudflare Worker for pet.guidejung.com (내근처 동물병원), separate from the other sites.
+// Run from the repo root: npx wrangler deploy -c apps/pet/wrangler.jsonc (builds with npm run build:pet).
+// Static pages: ./out. Worker: /api/*, 상세 /place/{id}, sitemap index. The list ships with the Worker (data/places.json).
+{
+  "name": "guidejung-pet",
+  "main": "worker/index.ts",
+  "compatibility_date": "2025-09-01",
+  "build": { "command": "npm run build:pet" },
+  "assets": {
+    "directory": "./out",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    "run_worker_first": ["/api/*", "/place/*", "/sitemap.xml", "/sitemap-places-*"]
+  },
+  // The list is imported as text and parsed on first use (a large object literal slows the Worker start).
+  "rules": [{ "type": "Text", "globs": ["**/data/places.json"], "fallthrough": true }],
+  "observability": { "enabled": true },
+  "routes": [{ "pattern": "pet.guidejung.com", "custom_domain": true }]
+}
