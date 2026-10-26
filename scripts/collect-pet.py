@@ -67,11 +67,12 @@ def tel_of(raw, addr):
 SHELTER_API = 'https://apis.data.go.kr/1543061/animalShelterSrvc_v2/shelterInfo_v2'
 
 
-def api_items(url, key, extra=None):
-    """농림축산검역본부 오픈API 전체 쪽(1,000건씩). 실패하면 None."""
+def api_items(url, key, extra=None, rows=1000):
+    """농림축산검역본부 오픈API 전체 쪽. 실패하면 None. 보호센터·분실동물은 1,000건을 달라고 하면 일부만 주고 다음 쪽이 비어
+    (10/26: 861곳 중 338·330건 중 149) 100건씩 받음."""
     out, page, total = [], 1, None
     while total is None or len(out) < total:
-        q = urllib.parse.urlencode({'serviceKey': key, 'pageNo': page, 'numOfRows': 1000, '_type': 'json', **(extra or {})})
+        q = urllib.parse.urlencode({'serviceKey': key, 'pageNo': page, 'numOfRows': rows, '_type': 'json', **(extra or {})})
         st, d = S.A.http_json(f'{url}?{q}', timeout=90)
         try:
             body = d['response']['body']
@@ -97,7 +98,7 @@ def hhmm(v):
 
 def shelters(key, prev_by_id):
     """동물보호센터(구조·보호소) 목록 → kind 'shelter'. 받지 못하면 지난번 목록을 그대로 씀."""
-    rows = api_items(SHELTER_API, key) if key else None
+    rows = api_items(SHELTER_API, key, rows=100) if key else None
     if rows is None:
         old = [p for p in prev_by_id.values() if p['kind'] == 'shelter']
         log(f'  동물보호센터: 이번에 받지 못해 지난 목록 {len(old):,}곳 유지')

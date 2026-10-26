@@ -93,7 +93,7 @@ def place_many(items, regions):
 
 def lost(key, regions):
     today = datetime.now(P.KST)
-    rows = P.api_items(f'{BASE}/lossInfoService/lossInfo', key, {'bgnde': (today - timedelta(days=30)).strftime('%Y%m%d'), 'endde': today.strftime('%Y%m%d')})
+    rows = P.api_items(f'{BASE}/lossInfoService/lossInfo', key, {'bgnde': (today - timedelta(days=30)).strftime('%Y%m%d'), 'endde': today.strftime('%Y%m%d')}, rows=100)
     if rows is None:
         return None
     out = []
