@@ -11,9 +11,10 @@ Sources (지방행정 인허가데이터 LOCALDATA files, no application needed;
 - animal_transport   동물운송업(펫택시) 영업 ~2,400
 Only 영업/정상 rows; EPSG:5174 → WGS84 (collect-rest.py tm5174); rows without coordinates keep the previous run's or get
 them from Kakao (KAKAO_REST_KEY, optional, 30-day refresh). Region codes are the weather site's 시군구 codes.
-Usage: [KAKAO_REST_KEY=...] python scripts/collect-pet.py [--force]
+- 동물보호센터: 농림축산검역본부 동물보호센터 정보 조회서비스(DATA_GO_KR_KEY, 10/26 활용신청) — 운영 시간·좌표, 받지 못하면 지난 목록
+Usage: [DATA_GO_KR_KEY=...] [KAKAO_REST_KEY=...] python scripts/collect-pet.py [--force]
 """
-import importlib.util, json, math, os, re, sys
+import importlib.util, json, math, os, re, sys, urllib.parse
 from collections import Counter, defaultdict
 from datetime import datetime
 from pathlib import Path
@@ -61,6 +62,65 @@ def tel_of(raw, addr):
     if d.startswith('0') and 10 <= len(d) <= 11:
         return f'{d[:3]}-{d[3:-4]}-{d[-4:]}'
     return raw
+
+
+SHELTER_API = 'https://apis.data.go.kr/1543061/animalShelterSrvc_v2/shelterInfo_v2'
+
+
+def api_items(url, key, extra=None):
+    """농림축산검역본부 오픈API 전체 쪽(1,000건씩). 실패하면 None."""
+    out, page, total = [], 1, None
+    while total is None or len(out) < total:
+        q = urllib.parse.urlencode({'serviceKey': key, 'pageNo': page, 'numOfRows': 1000, '_type': 'json', **(extra or {})})
+        st, d = S.A.http_json(f'{url}?{q}', timeout=90)
+        try:
+            body = d['response']['body']
+        except (TypeError, KeyError):
+            log(f'  API {url.rsplit("/", 1)[-1]} 쪽 {page}: {st} {str(d)[:200]}')
+            return None
+        it = (body.get('items') or {}) if isinstance(body.get('items'), dict) else {}
+        it = it.get('item') or []
+        it = it if isinstance(it, list) else [it]
+        total = int(body.get('totalCount') or 0)
+        out += it
+        if not it:
+            break
+        page += 1
+    return out
+
+
+def hhmm(v):
+    s = re.sub(r'\D', '', v or '')
+    return f'{s[:2]}:{s[2:4]}' if len(s) == 4 else None
+
+
+def shelters(key, prev_by_id):
+    """동물보호센터(구조·보호소) 목록 → kind 'shelter'. 받지 못하면 지난번 목록을 그대로 씀."""
+    rows = api_items(SHELTER_API, key) if key else None
+    if rows is None:
+        old = [p for p in prev_by_id.values() if p['kind'] == 'shelter']
+        log(f'  동물보호센터: 이번에 받지 못해 지난 목록 {len(old):,}곳 유지')
+        return [dict(p, tags=list(p.get('tags') or [])) for p in old]
+    out = []
+    for r in rows:
+        name, rid = txt(r.get('careNm')), txt(r.get('careRegNo'))
+        if not name or not rid:
+            continue
+        lat, lon = S.coord(r.get('lat'), r.get('lng'))
+        p = S.base('shelter', rid, name, txt(r.get('careAddr')), None, lat, lon, tel_of(txt(r.get('careTel')), txt(r.get('careAddr'))), txt(r.get('orgNm')), txt(r.get('dataStdDt')))
+        p['id'] = f"s-{re.sub(r'[^0-9A-Za-z]', '', rid)[:24]}"
+        wk = (hhmm(r.get('weekOprStime')), hhmm(r.get('weekOprEtime')))
+        we = (hhmm(r.get('weekendOprStime')), hhmm(r.get('weekendOprEtime')))
+        p['sub'] = '동물보호센터'
+        p['open'] = ' · '.join(x for x in ((f'평일 {wk[0]}~{wk[1]}' if all(wk) else None), (f'주말 {we[0]}~{we[1]}' if all(we) else None)) if x) or None
+        off = txt(r.get('closeDay'))
+        p['off'] = off if off and off not in ('0', '없음') else None
+        p['since'] = txt(r.get('dsignationDate'))
+        p['tags'] = [t for t in (txt(r.get('divisionNm')), txt(r.get('saveTrgtAnimal'))) if t]
+        p['org'] = txt(r.get('orgNm'))
+        out.append(p)
+    log(f'  동물보호센터: {len(out):,}곳 (좌표 {sum(1 for p in out if p["lat"] is not None):,})')
+    return out
 
 
 def norm(s):
@@ -174,7 +234,7 @@ def main():
             if p['id'] not in ids:
                 ids.add(p['id'])
                 items.append(p)
-    items = merge(items)
+    items = merge(items) + shelters(os.environ.get('DATA_GO_KR_KEY', '').strip(), prev_by_id)
     for p in items:
         if p['lat'] is None and prev_by_id.get(p['id'], {}).get('lat') is not None:  # 원본에 좌표가 없어 카카오로 받았던 곳
             q = prev_by_id[p['id']]

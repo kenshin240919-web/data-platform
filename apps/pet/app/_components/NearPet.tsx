@@ -13,7 +13,7 @@ export function NearPet({kind}:{kind?:Kind}){
   const main=kind??'hospital';
   useEffect(()=>{setNight(offHours());},[]);
   useEffect(()=>{if(!pos)return;let live=true;const ll=`lat=${pos.lat.toFixed(4)}&lon=${pos.lon.toFixed(4)}`;
-    const rare=kind==='cafe'||kind==='taxi';  // 카페·펫택시는 드물어 넓게
+    const rare=kind==='cafe'||kind==='taxi'||kind==='shelter';  // 카페·펫택시·보호센터는 드물어 넓게
     const steps=rare?(pos.precise?[3,10,30,50]:[10,30,50]):pos.precise?[2,5,10,20]:[5,10,20,30];
     const load=(i:number):Promise<void>=>fetch(`/api/near?${ll}&km=${steps[i]}&per=${kind?60:15}${kind?`&kind=${kind}`:''}`).then(x=>x.json()).then((d:Res):Promise<void>|void=>{if(!live)return;
       if((d.counts[main]??0)<(kind?3:2)&&i<steps.length-1)return load(i+1);setRes(d);setRadius(steps[i]);});

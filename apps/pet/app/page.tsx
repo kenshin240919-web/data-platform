@@ -4,9 +4,10 @@ import {Faq,breadcrumbLd,JsonLd} from '@guidejung/ui/seo';
 import {Connect,genericFor} from '@guidejung/ui/network';
 import {FavList} from '@guidejung/ui/favlist';
 import {NearPet} from './_components/NearPet';
+import {NearAnimals} from './_components/Animals';
 import {Ad} from './_components/Ad';
 import {HoursNote,KindCards,KindGuide,SickGuide} from './_components/Guide';
-import {is24,KINDS,n,nation,places,placePath,regions,sidos,SITE,status,updated} from '../lib/data';
+import {animals,is24,KINDS,lostAnimals,n,nation,places,placePath,regions,sidos,SITE,status,updated} from '../lib/data';
 
 export const metadata:Metadata={alternates:{canonical:'/'}};
 export default function Home(){
@@ -16,13 +17,14 @@ export default function Home(){
   const fresh=places.filter(p=>p.kind==='hospital'&&p.since).sort((a,b)=>b.since!.localeCompare(a.since!)).slice(0,6);
   return <div className="page pt-home">
     <section className="pt-hero"><h1>우리 아이 아플 때 어디로?</h1>
-      <p>지자체에 신고된 동물병원 <b>{n(k.hospital)}곳</b>(24시 {n(nation.h24)}곳) · 동물약국 {n(k.pharmacy)}곳 · 펫호텔·유치원 {n(k.hotel)}곳 · 애견·고양이 카페 {n(k.cafe)}곳 · 펫택시 {n(k.taxi)}곳을 가까운 순으로 찾아 드려요.</p></section>
+      <p>지자체에 신고된 동물병원 <b>{n(k.hospital)}곳</b>(24시 {n(nation.h24)}곳) · 동물약국 {n(k.pharmacy)}곳 · 동물보호센터 {n(k.shelter)}곳(보호 중 {n(animals.length)}마리) · 펫호텔·유치원 {n(k.hotel)}곳 · 애견·고양이 카페 {n(k.cafe)}곳 · 펫택시 {n(k.taxi)}곳을 가까운 순으로 찾아 드려요.</p></section>
     <FavList hint="병원 상세에서 ☆ 즐겨찾기를 누르면 우리 아이 병원을 여기서 바로 볼 수 있어요."/>
     <NearPet/>
-    <div className="pt-jump"><Link href="/24h">🚨 24시 동물병원 <small>{n(nation.h24)}</small></Link><Link href="/pharmacy">💊 지금 문 연 동물약국</Link><Link href="/hotel">🏨 펫호텔 <small>{n(k.hotel)}</small></Link><Link href="/taxi">🚕 펫택시 <small>{n(k.taxi)}</small></Link><Link href="/guide">🚑 아플 때 순서</Link></div>
+    <div className="pt-jump"><Link href="/24h">🚨 24시 동물병원 <small>{n(nation.h24)}</small></Link><Link href="/pharmacy">💊 지금 문 연 동물약국</Link><Link href="/hotel">🏨 펫호텔 <small>{n(k.hotel)}</small></Link><Link href="/taxi">🚕 펫택시 <small>{n(k.taxi)}</small></Link><Link href="/adopt">🐾 보호 중인 아이들 <small>{n(animals.length)}</small></Link><Link href="/lost">🔎 실종 동물 <small>{n(lostAnimals.length)}</small></Link><Link href="/guide">🚑 아플 때 순서</Link></div>
     <Ad/>
     <KindCards counts={k} h24={nation.h24}/>
     <SickGuide/>
+    {animals.length>0&&<NearAnimals/>}
     {fresh.length>0&&<section><h2>🆕 새로 문 연 동물병원</h2><div className="pt-cards">{fresh.map(p=><a key={p.id} className="pt-card pt-card-main" href={placePath(p.id)}><span className="pt-kind" aria-hidden="true">{KINDS[p.kind].icon}</span><span className="pt-card-body"><b>{p.name}</b><small>{p.region_name} · {p.since} 개설</small></span></a>)}</div></section>}
     <HoursNote/>
     <section><h2>24시 동물병원 많은 지역</h2><ol className="pt-rank">{top24.map(r=><li key={r.id}><Link href={`/region/${r.id}/hospital`}><b>{r.name}</b><span>{n(r.h24)}곳</span></Link></li>)}</ol></section>

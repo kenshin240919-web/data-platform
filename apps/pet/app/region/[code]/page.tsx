@@ -4,9 +4,10 @@ import {notFound} from 'next/navigation';
 import {Faq,breadcrumbLd,JsonLd} from '@guidejung/ui/seo';
 import {Connect,linksNear} from '@guidejung/ui/network';
 import {PlaceList} from '../../_components/PlaceList';
+import {AnimalGrid} from '../../_components/Animals';
 import {Ad} from '../../_components/Ad';
 import {HoursNote} from '../../_components/Guide';
-import {COND_MIN,is24,KIND_ORDER,KINDS,n,ordered,region,regions,placePath,SITE,slim,updated} from '../../../lib/data';
+import {animalsIn,animalsUpdated,lostIn,COND_MIN,is24,KIND_ORDER,KINDS,n,ordered,region,regions,placePath,SITE,slim,updated} from '../../../lib/data';
 
 export const dynamicParams=false;
 export function generateStaticParams(){return regions.map(r=>({code:r.id}));}
@@ -27,12 +28,15 @@ export default async function RegionPage({params}:P){
     <div className="pt-jump">{KIND_ORDER.filter(k=>r.kinds[k]>=COND_MIN).map(k=><Link key={k} href={`/region/${r.id}/${k}`}>{KINDS[k].icon} {r.zone} {KINDS[k].label} <small>{n(r.kinds[k])}</small></Link>)}</div>
     <section><h2>{r.name} 목록</h2><PlaceList items={list.map(slim)}/>
       <noscript><ul>{list.slice(0,300).map(p=><li key={p.id}><a href={placePath(p.id)}>{p.name}</a> · {KINDS[p.kind].label}{p.sub?` · ${p.sub}`:''}</li>)}</ul></noscript></section>
+    {animalsIn(r.id).length>0&&<section><h2>🐾 {r.name} 보호소에서 기다리는 아이들 <span className="muted">{n(animalsIn(r.id).length)}마리</span></h2><AnimalGrid items={animalsIn(r.id)} limit={8}/><p className="muted small">{animalsUpdated()} 기준 · 농림축산검역본부 국가동물보호정보시스템</p></section>}
+    {lostIn(r.id).length>0&&<section><h2>🔎 {r.name} 최근 실종 동물 <span className="muted">{n(lostIn(r.id).length)}마리</span></h2><AnimalGrid items={lostIn(r.id)} lost limit={4}/></section>}
     <Ad/>
     <HoursNote/>
     <Faq items={([
       [`${r.name}에 동물병원은 몇 곳인가요?`,`${updated()} 기준 영업 중으로 신고된 동물병원은 ${n(r.kinds.hospital)}곳입니다.`],
       [`${r.name}에 24시 동물병원이 있나요?`,h24.length?`이름에 ‘24’가 든 동물병원이 ${n(h24.length)}곳 있습니다: ${h24.slice(0,5).map(p=>p.name).join(', ')}. 가기 전에 전화로 진료 여부를 확인하세요.`:'이름에 ‘24’가 든 동물병원은 없습니다. 가까운 지역의 24시 동물병원을 확인하세요.'],
       [`${r.name} 동물약국은 몇 곳인가요?`,ph.length?`동물용 의약품 판매를 신고한 약국은 ${n(ph.length)}곳이고, 그중 ${n(ph.filter(p=>p.hours).length)}곳은 영업 시간을 보여 드립니다.`:''],
+      [`${r.name} 보호소에 보호 중인 동물은?`,animalsIn(r.id).length?`${animalsUpdated()} 기준 ${n(animalsIn(r.id).length)}마리가 보호 중입니다.`:''],
       [`${r.name}에서 가장 오래된 동물병원은?`,old?`개설 신고일 기준 ${old.name}(${old.since})입니다.`:''],
     ] as [string,string][]).filter(([,a])=>a)}/>
     <Connect items={linksNear(r.lat,r.lon,'pet')}/>

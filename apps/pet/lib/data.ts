@@ -1,6 +1,7 @@
 // Static build data: apps/pet/data/places.json (scripts/collect-pet.py, daily). Server components only.
 import raw from '../data/places.json';
-import {KIND_ORDER,is24,type Place,type Kind} from './fmt';
+import animalsRaw from '../data/animals.json';
+import {KIND_ORDER,is24,type Animal,type Place,type Kind} from './fmt';
 export * from './fmt';
 
 type Status={updated_at:string;count:number;kinds:Record<Kind,number>;h24:number;with_hours:number};
@@ -21,5 +22,16 @@ export const sidos=[...new Set(regions.map(r=>r.sido))].map(name=>{const rs=regi
 export const nation={kinds:places.reduce((a,p)=>(a[p.kind]++,a),zero()),h24:places.filter(is24).length,withHours:places.filter(p=>p.hours).length};
 export const subsOf=(items:Place[])=>Object.entries(items.reduce((a,p)=>(p.sub&&(a[p.sub]=(a[p.sub]??0)+1),a),{} as Record<string,number>)).sort((a,b)=>b[1]-a[1]);
 export const updated=()=>{const d=new Date(status.updated_at);return `${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()}`;};
-/** 정렬: 동물병원(24시 먼저) → 동물약국(영업 시간 있는 곳 먼저) → 펫호텔 → 카페 → 펫택시, 같은 종류는 오래된 순(인허가일). */
+/** 정렬: 동물병원(24시 먼저) → 동물약국(영업 시간 있는 곳 먼저) → 보호센터 → 펫호텔 → 카페 → 펫택시, 같은 종류는 오래된 순(인허가일). */
 export const ordered=(items:Place[])=>[...items].sort((a,b)=>KIND_ORDER.indexOf(a.kind)-KIND_ORDER.indexOf(b.kind)||+is24(b)-+is24(a)||+!!b.hours-+!!a.hours||(a.since??'9').localeCompare(b.since??'9'));
+
+// 보호 중인 구조동물·분실 신고(scripts/collect-pet-animals.py, 매일). 공고 마감이 가까운 순.
+const AD=animalsRaw as unknown as {status:{updated_at:string;animals:number;lost:number};animals:Animal[];lost:Animal[]};
+export const animalStatus=AD.status;
+export const animals=AD.animals;
+export const lostAnimals=AD.lost;
+const group=(list:Animal[])=>{const m=new Map<string,Animal[]>();for(const a of list)(m.get(a.region)??m.set(a.region,[]).get(a.region)!).push(a);return m;};
+const animalsBy=group(animals),lostBy=group(lostAnimals);
+export const animalsIn=(region:string)=>animalsBy.get(region)??[];
+export const lostIn=(region:string)=>lostBy.get(region)??[];
+export const animalsUpdated=()=>{const d=new Date(AD.status.updated_at);return `${d.getMonth()+1}월 ${d.getDate()}일`;};

@@ -1,5 +1,6 @@
 name: Pet collect
 # Daily list for pet.guidejung.com (내근처 동물병원): LOCALDATA 동물병원·동물약국·동물위탁관리업·동물전시업·동물운송업 파일
+# + 동물보호센터·구조동물·분실동물(농림축산검역본부 API, scripts/collect-pet-animals.py → animals.json)
 # (scripts/collect-pet.py) + 동물약국 영업 시간은 apps/pharmacy/data/pharmacies.json(약국 수집 04:27 뒤). apps/pet/data/places.json is
 # committed to main only when it changed (pet-deploy.yml deploys after this run). Secrets: KAKAO_REST_KEY (좌표 없는 곳만).
 on:
@@ -25,13 +26,18 @@ jobs:
       - name: Collect
         env:
           KAKAO_REST_KEY: ${{ secrets.KAKAO_REST_KEY }}
+          DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
         run: python scripts/collect-pet.py
+      - name: Collect animals
+        env:
+          DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
+        run: python scripts/collect-pet-animals.py
       - name: Commit pet list
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add apps/pet/data/places.json
+          git add apps/pet/data/places.json apps/pet/data/animals.json
           if git diff --cached --quiet; then echo 'no change'; exit 0; fi
-          git commit -m 'pet: 반려동물 장소 목록 갱신'
+          git commit -m 'pet: 반려동물 장소·보호 동물 목록 갱신'
           for i in 1 2 3; do git pull --rebase origin main && git push origin HEAD:main && exit 0; sleep 10; done
           exit 1

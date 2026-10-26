@@ -66,3 +66,13 @@
 .pt-state{display:inline-flex;align-items:center;gap:4px}.pt-state .pt-dot{width:8px;height:8px}
 .pt-answer .pt-dot{margin-right:8px;vertical-align:1px}
 .pt-kindcard.h24{border-color:#fecdd3;background:#fff1f2}
+/* 보호 중인 아이들·실종 동물 사진 카드 */
+.pt-animals{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin:10px 0}
+.pt-animal{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:white;min-width:0}.pt-animal:hover{border-color:#fdba74}
+.pt-photo{position:relative;display:flex;align-items:center;justify-content:center;aspect-ratio:1/1;background:var(--pt-soft);font-size:42px}
+.pt-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.pt-photo em{position:absolute;left:8px;bottom:8px;background:#1f2937cc;color:#fff;font-style:normal;font-size:11px;font-weight:700;border-radius:6px;padding:2px 6px}.pt-photo em.soon{background:#be123c}.pt-photo em.lost{background:#1d4ed8}
+.pt-animal-body{display:flex;flex-direction:column;padding:8px 10px 10px;min-width:0}.pt-animal-body b{font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pt-animal-body small{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pt-animal-hero{display:grid;grid-template-columns:minmax(0,360px) 1fr;gap:18px;align-items:start}.pt-animal-hero img{width:100%;border-radius:16px;display:block}
+@media (max-width:640px){.pt-animals{grid-template-columns:repeat(2,minmax(0,1fr))}.pt-animal-hero{grid-template-columns:1fr}}

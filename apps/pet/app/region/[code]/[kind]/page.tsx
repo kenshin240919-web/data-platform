@@ -12,7 +12,7 @@ export const dynamicParams=false;
 export function generateStaticParams(){return regions.flatMap(r=>KIND_ORDER.filter(k=>r.kinds[k]>=COND_MIN).map(k=>({code:r.id,kind:k})));}
 type P={params:Promise<{code:string;kind:string}>};
 const get=async(params:P['params'])=>{const {code,kind}=await params;const r=region(code);const k=kind as Kind;return r&&KINDS[k]?{r,k,items:ordered(r.items.filter(p=>p.kind===k))}:null;};
-const TITLE:Record<Kind,string>={hospital:'동물병원',pharmacy:'동물약국',hotel:'펫호텔·애견 유치원',cafe:'애견·고양이 카페',taxi:'펫택시'};
+const TITLE:Record<Kind,string>={hospital:'동물병원',pharmacy:'동물약국',shelter:'동물보호센터',hotel:'펫호텔·애견 유치원',cafe:'애견·고양이 카페',taxi:'펫택시'};
 export async function generateMetadata({params}:P):Promise<Metadata>{
   const x=await get(params);if(!x)return {};
   const h=x.items.filter(is24).length;

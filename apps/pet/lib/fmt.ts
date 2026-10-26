@@ -7,24 +7,36 @@ export const BRAND='내근처 동물병원';
 export const TAGLINE='우리 아이 아플 때 어디로?';
 export const PHARMACY_SITE='https://pharmacy.guidejung.com';
 
-export type Kind='hospital'|'pharmacy'|'hotel'|'cafe'|'taxi';
+export type Kind='hospital'|'pharmacy'|'shelter'|'hotel'|'cafe'|'taxi';
 export type Hours=Record<string,[string,string]>;
 /** LOCALDATA 인허가 원문: 이름·주소·전화·인허가일. 동물병원 진료 시간은 공공데이터에 없음(지어내지 않음 — '24시'는 이름 기준).
  * hours·ph: 동물약국 중 약국 사이트 데이터(국립중앙의료원)와 맞춘 곳만. region: weather 시군구 코드. */
 export type Place={id:string;kind:Kind;name:string;sub:string|null;addr:string|null;jibun:string|null;lat:number|null;lon:number|null;tel:string|null;
-  since:string|null;tags:string[];ref:string|null;region:string;region_name:string;hours?:Hours;ph?:string};
+  since:string|null;tags:string[];ref:string|null;region:string;region_name:string;hours?:Hours;ph?:string;open?:string;off?:string;org?:string};
+/** 보호 중인 구조동물(adopt)·분실 신고 동물(lost) — 농림축산검역본부 국가동물보호정보시스템. 신고자 이름·전화는 없음(받지 않음). */
+export type Animal={id:string;up?:string;kind?:string;color?:string;age?:string;weight?:string;sex?:string;neuter?:string;mark?:string;place?:string;found?:string;notice?:string;
+  from?:string;until?:string;photo?:string;shelter?:string;shelter_name?:string;shelter_tel?:string;org?:string;lat?:number;lon?:number;region:string;region_name:string;lost?:string;where?:string};
 export const KINDS:Record<Kind,{label:string;icon:string;title:string;desc:string;ld:string;src:string}>={
-  hospital:{label:'동물병원',icon:'🏥',title:'동물병원',desc:'시·군·구에 개설 신고한 동물병원(24시는 이름 기준)',ld:'VeterinaryCare',src:'동물병원'},
-  pharmacy:{label:'동물약국',icon:'💊',title:'동물약국',desc:'동물용 의약품 판매를 신고한 약국 — 지금 문 연 곳부터',ld:'Pharmacy',src:'동물약국'},
-  hotel:{label:'펫호텔·유치원',icon:'🏨',title:'펫호텔·유치원',desc:'동물위탁관리업으로 등록한 펫호텔·애견 유치원',ld:'LocalBusiness',src:'동물위탁관리업'},
-  cafe:{label:'애견·고양이 카페',icon:'☕',title:'애견·고양이 카페',desc:'동물전시업으로 등록한 애견·고양이 카페와 동물 체험 시설',ld:'LocalBusiness',src:'동물전시업'},
-  taxi:{label:'펫택시',icon:'🚕',title:'펫택시',desc:'동물운송업으로 등록한 반려동물 운송 업체',ld:'LocalBusiness',src:'동물운송업'},
+  hospital:{label:'동물병원',icon:'🏥',title:'동물병원',desc:'시·군·구에 개설 신고한 동물병원(24시는 이름 기준)',ld:'VeterinaryCare',src:'행정안전부 지방행정 인허가데이터(동물병원)'},
+  pharmacy:{label:'동물약국',icon:'💊',title:'동물약국',desc:'동물용 의약품 판매를 신고한 약국 — 지금 문 연 곳부터',ld:'Pharmacy',src:'행정안전부 지방행정 인허가데이터(동물약국)'},
+  shelter:{label:'동물보호센터',icon:'🏠',title:'동물보호센터',desc:'지자체가 지정한 유실·유기동물 보호센터 — 보호 중인 아이들',ld:'AnimalShelter',src:'농림축산검역본부 국가동물보호정보시스템(동물보호센터)'},
+  hotel:{label:'펫호텔·유치원',icon:'🏨',title:'펫호텔·유치원',desc:'동물위탁관리업으로 등록한 펫호텔·애견 유치원',ld:'LocalBusiness',src:'행정안전부 지방행정 인허가데이터(동물위탁관리업)'},
+  cafe:{label:'애견·고양이 카페',icon:'☕',title:'애견·고양이 카페',desc:'동물전시업으로 등록한 애견·고양이 카페와 동물 체험 시설',ld:'LocalBusiness',src:'행정안전부 지방행정 인허가데이터(동물전시업)'},
+  taxi:{label:'펫택시',icon:'🚕',title:'펫택시',desc:'동물운송업으로 등록한 반려동물 운송 업체',ld:'LocalBusiness',src:'행정안전부 지방행정 인허가데이터(동물운송업)'},
 };
-export const KIND_ORDER:Kind[]=['hospital','pharmacy','hotel','cafe','taxi'];
+export const KIND_ORDER:Kind[]=['hospital','pharmacy','shelter','hotel','cafe','taxi'];
 export const is24=(p:{sub:string|null})=>p.sub==='24시';
 export const n=(v:number)=>v.toLocaleString('ko-KR');
 export const esc=(s:unknown)=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]!);
 export const placePath=(id:string)=>`/place/${id}`;
+export const animalPath=(id:string)=>`/animal/${id}`;
+/** 사진은 http 주소라 Worker가 받아 https로 보여 줌. */
+export const photoPath=(id:string)=>`/photo/${id}`;
+export const ANIMAL_SITE='https://www.animal.go.kr';
+/** 공고 마감까지 남은 날(오늘 마감 0, 지남 음수). */
+export const daysLeft=(until?:string,now=Date.now())=>{if(!until)return null;const t=Date.UTC(+until.slice(0,4),+until.slice(5,7)-1,+until.slice(8,10));const d=new Date(now+9*3600e3);return Math.round((t-Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate()))/864e5);};
+export const ddayLabel=(until?:string)=>{const d=daysLeft(until);return d==null?null:d>0?`공고 마감 D-${d}`:d===0?'오늘 공고 마감':'공고 기간 지남';};
+export const animalTitle=(a:Animal)=>[a.kind??a.up,a.sex,a.age?.replace(/\((\d+일)\s*미만\)\(년생\)/,'년생($1 미만)').replace('(년생)','년생')].filter(Boolean).join(' · ');
 export const km=(v:number)=>v<1?`${Math.round(v*1000)}m`:`${v.toFixed(1)}km`;
 const jong=(w:string)=>{const t=w.trim(),c=(t[t.length-1]??'').charCodeAt(0)-0xac00;return c>=0&&c<11172&&c%28!==0;};
 export const eun=(w:string)=>w+(jong(w)?'은':'는');

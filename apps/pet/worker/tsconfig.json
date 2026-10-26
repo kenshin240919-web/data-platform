@@ -11,5 +11,5 @@
     "skipLibCheck": true,
     "isolatedModules": true
   },
-  "include": ["./**/*.ts", "../lib/fmt.ts", "../../pharmacy/lib/fmt.ts", "../data/places.json", "../../weather/data/regions.json"]
+  "include": ["./**/*.ts", "../lib/fmt.ts", "../../pharmacy/lib/fmt.ts", "../data/places.json", "../data/animals.json", "../../weather/data/regions.json"]
 }
