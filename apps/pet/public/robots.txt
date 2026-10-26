@@ -21,3 +21,4 @@ Disallow: /api/
 
 # Site summary for AI: https://pet.guidejung.com/llms.txt
 Sitemap: https://pet.guidejung.com/sitemap.xml
+#DaumWebMasterTool:7b731930a55dc24605955754978e62568976fbfca72fc93375305e5648866456:dSlZXvWuL7UAVoESNn1QCg==
