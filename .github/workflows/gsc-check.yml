@@ -1,0 +1,18 @@
+name: GSC check
+# One-off: Search Console 연결 시험(서비스 계정 ga-reader, 읽기만 — 속성·권한·사이트맵 상태·URL 검사 1~2건). 검색 실적 숫자는 출력 안 함.
+on: workflow_dispatch
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -q google-auth requests
+      - name: Check
+        env:
+          GA_SERVICE_ACCOUNT_JSON: ${{ secrets.GA_SERVICE_ACCOUNT_JSON }}
+        run: python scripts/gsc-check.py
