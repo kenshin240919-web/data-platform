@@ -2,7 +2,7 @@
  "date": "2026-10-26",
  "window": "last 24h",
  "sites": {
-  "rest": {
+  "pet": {
    "all": [
     {
      "metricName": "DeadClickCount",
