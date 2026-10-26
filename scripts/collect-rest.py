@@ -27,9 +27,12 @@ PREFIX = {'public_baths': 'b', 'medical_related_businesses': 'm', 'beauty_salons
 
 # 선정적이거나 성인 업소를 떠올리게 하는 이름(설계안 4장). 들어 있으면 목록에서 뺀다 — 사람이 로그를 보고 고친다.
 BLOCK = re.compile(r'스웨디시|swedish|건마|슈얼|출장|홈타이|1인샵|남성\s*전용|여성\s*전용|남성\s*전문|커플|아가씨|섹시|sexy|19금|성인|키스|vip\s*룸|힐링\s*타이|타이\s*마사지|마사지\s*룸', re.I)
+# 피부관리실 중 '24시 아로마·마사지'처럼 밤샘 영업을 앞세운 이름(성인 업소로 오해받기 쉬움, 애드센스 정책).
+NIGHT = re.compile(r'(24시|24h|심야|야간).*(아로마|스파|마사지|힐링|타이|테라피)|(아로마|스파|마사지|힐링|타이|테라피).*(24시|24h|심야|야간)', re.I)
 # 목욕장업 '기타' 중 1인·프라이빗이 아닌 곳(호텔·헬스장·복지관 등의 부대 목욕시설) — 찜질방·사우나로 둔다.
-NOT_PRIVATE = re.compile(r'호텔|모텔|리조트|콘도|피트니스|휘트니스|헬스|스포츠|체육|골프|수영|레저|클럽|복지|요양|병원|학교|대학|기숙|생활관|아파트|문화센터|청소년|노인|군인|부대|공단|공사|교회|스테이|펜션|캠핑|온천|대중|목욕탕|사우나|찜질|한증')
-PRIVATE_NAME = re.compile(r'1인|프라이빗|private|솔로|solo|세신|스크럽|scrub|독채|개인\s*탕|프라이빗')
+NOT_PRIVATE = re.compile(r'호텔|모텔|리조트|콘도|피트니스|휘트니스|헬스|스포츠|스포|체육|골프|수영|레저|레포츠|클럽|복지|요양|병원|학교|대학|기숙|생활관|아파트|문화센터|청소년|노인|군인|부대|공단|공사|교회|스테이|펜션|캠핑|온천|대중|목욕탕|목욕장|사우나|싸우나|찜질|한증|짐|gym|PT|크로스핏|필라테스|요가|점핑|다이어트|체형|발레|건강|숯|굴|황토|해수|유황|온열|광천|미네랄|오션|바덴|해모수|이비스|앰배서더|웰니스|센터|랜드|그라운드|스쿨|새마을|산업|농원|협동조합|에프앤에스|헤어|미용|탕$|탕\s|\(주\)|\(유\)|주식회사|유한회사', re.I)
+# 이름으로 1인·프라이빗이 분명한 곳('연세신촌'의 '세신'은 제외). 가족탕·개인욕탕도 일행끼리 쓰는 욕탕.
+PRIVATE_NAME = re.compile(r'1인|프라이빗|private|솔로|solo|(?<!연)세신|스크럽|scrub|독채|개인\s*탕|개인욕탕|가족탕|독탕', re.I)
 
 
 def tm5174(x, y):
@@ -113,7 +116,7 @@ def rows_of(src, skipped, seen):
         kind, sub = kind_of(src, r, name)
         if not kind:
             continue
-        if BLOCK.search(name) or (kind in ('anma', 'skin') and '1인' in name):
+        if BLOCK.search(name) or (kind in ('anma', 'skin') and '1인' in name) or (kind == 'skin' and NIGHT.search(name)):
             skipped[f'{kind} 이름 제외'] += 1
             seen.append(f'{kind}:{name}')
             continue
@@ -135,8 +138,13 @@ def merge(items):
     best = {}
     for p in sorted(items, key=lambda p: (order[p['kind']], p['src'] != 'public_baths')):
         best.setdefault(key(p), p)
-    log(f'같은 이름·주소로 합친 곳 {len(items) - len(best):,}')
-    return list(best.values())
+    out = list(best.values())
+    # 주소 표기가 조금 달라도 같은 시군구·같은 이름이 1인·프라이빗과 피부관리에 함께 있으면 1인·프라이빗만 남김(주소 앞 두 마디로 비교).
+    area = lambda p: ' '.join((p['addr'] or p['jibun'] or '').split(' ')[:2])
+    priv = {(re.sub(r'\s+', '', p['name']), area(p)) for p in out if p['kind'] == 'private'}
+    out = [p for p in out if not (p['kind'] == 'skin' and (re.sub(r'\s+', '', p['name']), area(p)) in priv)]
+    log(f'같은 이름·주소로 합친 곳 {len(items) - len(out):,}')
+    return out
 
 
 def main():
