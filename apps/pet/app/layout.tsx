@@ -12,7 +12,7 @@ import { SITES } from '@guidejung/ui/network';
 import { SITE } from '../lib/fmt';
 
 // GA·Clarity ID는 사용자에게 받아 넣음(비어 있으면 넣지 않음).
-const GA_ID='G-QWM4LNN23V',CLARITY_ID='';
+const GA_ID='G-QWM4LNN23V',CLARITY_ID='z3ob33o5cc';
 // 직접 만든 어두운 화면을 쓰도록 알림(휴대폰 브라우저가 색을 강제로 뒤집어 글자가 노랗게 보이던 것 방지).
 export const viewport:Viewport={colorScheme:'light dark'};
 export const metadata:Metadata={metadataBase:new URL(SITE),icons:{icon:'/icon.svg',apple:'/apple-touch-icon.png'},manifest:'/manifest.webmanifest',title:{default:'내근처 동물병원 | 우리 아이 아플 때 어디로? 24시 동물병원·동물약국',template:'%s | 내근처 동물병원'},
