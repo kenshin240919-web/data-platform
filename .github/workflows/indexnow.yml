@@ -1,0 +1,39 @@
+name: IndexNow
+# Daily: tell Bing·Naver·Yandex·Seznam (api.indexnow.org) about new / removed / changed pages of every 내근처 site
+# (scripts/indexnow.py). Needs no secret: the public key file https://{host}/{key}.txt ships in each app's public/.
+# The URL list of the last run is kept in the Actions cache (runtime/indexnow/state.json). 10/26 사용자 승인.
+on:
+  schedule:
+    - cron: '47 0 * * *' # 09:47 KST, after the night's collections and deploys
+  workflow_dispatch:
+    inputs:
+      dry:
+        description: '시험만(보내지 않음)'
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: indexnow
+  cancel-in-progress: false
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/cache/restore@v4
+        with:
+          path: runtime/indexnow
+          key: indexnow-state-${{ github.run_id }}
+          restore-keys: indexnow-state-
+      - name: Submit
+        run: python scripts/indexnow.py ${{ inputs.dry && '--dry' || '' }}
+      - uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: runtime/indexnow
+          key: indexnow-state-${{ github.run_id }}

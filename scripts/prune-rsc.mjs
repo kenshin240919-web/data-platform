@@ -1,7 +1,7 @@
 // Remove Next.js RSC payload files (all five sites: trip·weather·charge·traffic·academy) (*.txt, __next.*) from a static export to keep the asset count low
 // (Cloudflare Workers static assets have a file limit; academy had 10,443 .txt next to 2,089 pages).
 // Pages still work: the HTML carries its own payload, and a client navigation whose payload is missing
-// falls back to a normal page load. Root text files that are real content (robots.txt, ads.txt, llms.txt) stay.
+// falls back to a normal page load. Root text files that are real content (robots.txt, ads.txt, llms.txt, IndexNow key {32 hex}.txt) stay.
 // Usage: node scripts/prune-rsc.mjs <out dir>
 import {readdirSync,rmSync,rmdirSync,statSync} from 'node:fs';
 import {join} from 'node:path';
@@ -12,7 +12,7 @@ function walk(dir,top){
   for(const name of readdirSync(dir)){
     const p=join(dir,name);
     if(statSync(p).isDirectory()){if(name!=='_next')walk(p,false);try{rmdirSync(p);}catch{}continue;}  // rmdir only succeeds when empty
-    if(name.endsWith('.txt')&&!(top&&KEEP.has(name))){rmSync(p);removed++;}
+    if(name.endsWith('.txt')&&!(top&&(KEEP.has(name)||/^[0-9a-f]{32}\.txt$/.test(name)))){rmSync(p);removed++;}
   }
 }
 walk(root,true);
