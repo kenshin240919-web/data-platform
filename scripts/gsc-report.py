@@ -24,6 +24,7 @@ API = 'https://searchconsole.googleapis.com/webmasters/v3'
 INSPECT = 'https://searchconsole.googleapis.com/v1/urlInspection/index:inspect'
 KST = timezone(timedelta(hours=9))
 UA = {'User-Agent': 'Mozilla/5.0 (compatible; GuideJungGSC/1.0; +https://near.guidejung.com)'}
+CONTROL = 'https://guidejung.com/'
 VERDICT = {'PASS': '✅ 색인됨', 'NEUTRAL': '⏳ 아직', 'FAIL': '❌ 문제', 'PARTIAL': '⚠️ 일부'}
 
 
@@ -110,6 +111,10 @@ def main():
             t[0] += v == 'PASS'
             t[1] += 1
             lines.append(f"| {key} | {VERDICT.get(v, v or '-')} | {url} | {ix.get('coverageState', '-')} | {str(ix.get('lastCrawlTime', '-'))[:10]} |")
+    # 비교용: 오래된 본 사이트(WordPress) 첫 화면 — 읽기만. 이것도 '알려지지 않음'이면 API 결과를 의심.
+    r = requests.post(INSPECT, headers=H, timeout=60, json={'inspectionUrl': CONTROL, 'siteUrl': PROP, 'languageCode': 'ko-KR'})
+    ix = r.json().get('inspectionResult', {}).get('indexStatusResult', {}) if r.ok else {}
+    lines.append(f"| (비교용) | {VERDICT.get(ix.get('verdict', ''), ix.get('verdict', '-')) if r.ok else f'확인 실패 {r.status_code}'} | {CONTROL} | {ix.get('coverageState', '-')} | {str(ix.get('lastCrawlTime', '-'))[:10]} |")
     lines += ['', '## 사이트별 요약', '', '| 사이트 | 표본 중 색인됨 |', '|---|---|'] + [f'| {k} | {p}/{n} |' for k, (p, n) in tally.items()] + ['']
     out = ROOT / f'reports/gsc/주간-{now:%Y-%m-%d}.md'
     out.parent.mkdir(parents=True, exist_ok=True)
