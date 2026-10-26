@@ -2,7 +2,7 @@
 import {useEffect,useState} from 'react';
 import {AdSlot} from '@guidejung/ui/ads';
 import type {Region,WeatherResponse} from '../../lib/types';
-import {clothes,currentSky,dayLabel,feelsLike,hh,hourSky,pmGrade,rainStart,skyEmoji,summary,sunTimes,todayKST,uvGrade,weekendLine} from '../../lib/format';
+import {vsYesterday,clothes,currentSky,dayLabel,feelsLike,hh,hourSky,pmGrade,rainStart,skyEmoji,summary,sunTimes,todayKST,uvGrade,weekendLine} from '../../lib/format';
 import {remember} from './Recent';
 
 const TRIP='https://trip.guidejung.com';
@@ -34,10 +34,13 @@ export function WeatherPanel({region,label}:{region:Region;label:string}){
   const soon=w.hourly.filter((_,i)=>i%2===0).slice(0,7);
   // 실내 추천: rain likely in the next ~12 hours (not tomorrow morning) or bad air now.
   const indoor=soon.some(h=>(h.pop??0)>=60)||(worst?.level??0)>=3;
+  const vs=vsYesterday(w);
 
   return <div className="wx">
     <section className="wx-now" aria-label={`${label} 현재 날씨`}>
       <div className="wx-now-left">
+      {vs&&<p className={`wx-vs ${vs.kind}`}><span className="wx-vs-head"><span aria-hidden="true">{vs.icon}</span> {vs.head}{vs.feel&&<> · {vs.feel}</>}</span>
+        <span className="wx-vs-sub">{vs.sub}{vs.tip&&<> · {vs.tip}</>}</span></p>}
       <div className="wx-now-main">
         <span className="wx-icon" aria-hidden="true">{skyEmoji(sky,night)}</span>
         <div><div className="wx-temp">{temp!==null?`${temp}°`:'-'}</div><div className="wx-sky">{sky}{feel!==null&&<> · 체감 {feel}°</>}</div></div>

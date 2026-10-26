@@ -6,4 +6,4 @@ export type Hour={time:string;temp:number|null;sky:number|null;pty:number|null;p
 export type Day={date:string;min:number|null;max:number|null;am:{sky:string;pop:number|null};pm:{sky:string;pop:number|null};source:'short'|'mid'};
 export type Air={station:string;time:string;pm10:number|null;pm25:number|null;pm10Grade:number|null;pm25Grade:number|null;khai:number|null}|null;
 export type Uv={time:string;values:{offset:number;value:number}[]}|null;
-export type WeatherResponse={code:string;issued:{now:string|null;short:string|null;mid:string|null};now:Now;hourly:Hour[];daily:Day[];air:Air;uv:Uv;stale:boolean;errors:string[]};
+export type WeatherResponse={code:string;issued:{now:string|null;short:string|null;mid:string|null};now:Now;yesterday?:{time:string;temp:number|null}|null;hourly:Hour[];daily:Day[];air:Air;uv:Uv;stale:boolean;errors:string[]};

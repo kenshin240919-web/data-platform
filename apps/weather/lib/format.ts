@@ -79,3 +79,17 @@ export function sunTimes(lat:number,lon:number,date=new Date()){
   const fmt=(m:number)=>{const t=(Math.round(m+540)%1440+1440)%1440;return `${String(Math.floor(t/60)).padStart(2,'0')}:${String(t%60).padStart(2,'0')}`;};
   return {rise:fmt(720-4*(lon+ha)-eq),set:fmt(720-4*(lon-ha)-eq)};
 }
+/**
+ * 어제 이 시각과 비교(첫 화면 맨 위 한 줄): 지금 실황 기온 − 어제 같은 시각 실황 기온. 1도 미만 차이는 '비슷해요'.
+ * 느낌 말은 오늘 기온으로 고른다(같은 3도 차이라도 2도일 땐 '추워요', 20도일 땐 '선선해요').
+ */
+export function vsYesterday(w:WeatherResponse){
+  const t=w.now?.temp,y=w.yesterday?.temp;if(t==null||y==null||!w.now)return null;
+  const h=+w.now.time.slice(8,10);const when=h===0?'자정':h<12?`오전 ${h}시`:h===12?'낮 12시':`오후 ${h-12}시`;
+  const d=t-y,abs=Math.round(Math.abs(d));const sub=`어제 ${when} ${y}° → 오늘 ${t}°`;
+  if(Math.abs(d)<1)return {kind:'same' as const,icon:'🙂',head:'어제 이맘때와 비슷해요',feel:t<=5?'오늘도 추워요':t>=28?'오늘도 더워요':'',tip:'',sub};
+  if(d<0){const feel=abs>=5&&t<=17?'확 추워졌어요':t<=0?'많이 추워요':t<=10?'추워요':t<=17?'쌀쌀해요':t<=23?'선선해요':'조금 덜 더워요';
+    return {kind:'cold' as const,icon:t<=10?'🥶':'🍂',head:`어제보다 ${abs}° 낮아요`,feel,tip:abs>=3&&t<=20?'겉옷 하나 더 챙기세요':'',sub};}
+  const feel=t>=30?'무더워요':t>=25?'더워요':t>=18?'따뜻해요':t>=10?'포근해요':'덜 추워요';
+  return {kind:'warm' as const,icon:t>=25?'🥵':'🌤️',head:`어제보다 ${abs}° 높아요`,feel,tip:abs>=3&&t>=25?'옷을 가볍게 입으세요':abs>=3&&t<10?'그래도 아직 쌀쌀해요':'',sub};
+}

@@ -33,12 +33,12 @@ async function upstream(url:string,tries=3,timeout=8000):Promise<any>{
 /** Cache by key (which includes the issue time) in memory and in the colo cache; fall back to the last good value. */
 const inflight=new Map<string,Promise<any>>();
 /** Same key requested again while it is loading (many regions at once in the Cron) → one upstream call. */
-function cached<T>(env:Env,key:string,ttl:number,load:()=>Promise<T>):Promise<{value:T|null;stale:boolean;error?:string}>{
+function cached<T>(env:Env,key:string,ttl:number,load:()=>Promise<T>,kvTtl?:number):Promise<{value:T|null;stale:boolean;error?:string}>{
   const hit=memo.get(key);if(hit&&hit.until>Date.now())return Promise.resolve({value:hit.value as T,stale:false});
   let p=inflight.get(key);if(p)return p;
-  p=cachedLoad(env,key,ttl,load).finally(()=>inflight.delete(key));inflight.set(key,p);return p;
+  p=cachedLoad(env,key,ttl,load,kvTtl).finally(()=>inflight.delete(key));inflight.set(key,p);return p;
 }
-async function cachedLoad<T>(env:Env,key:string,ttl:number,load:()=>Promise<T>):Promise<{value:T|null;stale:boolean;error?:string}>{
+async function cachedLoad<T>(env:Env,key:string,ttl:number,load:()=>Promise<T>,kvTtl?:number):Promise<{value:T|null;stale:boolean;error?:string}>{
   const cache=(globalThis as any).caches?.default as Cache|undefined;const req=new Request(`https://cache.weather.internal/${encodeURIComponent(key)}`);
   if(cache){const c=await cache.match(req);if(c){const v=await c.json() as T;memo.set(key,{until:Date.now()+60e3,value:v});return {value:v,stale:false};}}
   // Shared copy for this issue time (the key holds the issue time, so any copy is current).
@@ -50,7 +50,7 @@ async function cachedLoad<T>(env:Env,key:string,ttl:number,load:()=>Promise<T>):
   try{
     const v=await load();
     memo.set(key,{until:Date.now()+Math.min(ttl,300)*1000,value:v});
-    if(env.CACHE&&v!==null)await env.CACHE.put(`weather:c:${key}`,JSON.stringify(v),{expirationTtl:Math.max(ttl*2,3600)}).catch(()=>undefined);
+    if(env.CACHE&&v!==null)await env.CACHE.put(`weather:c:${key}`,JSON.stringify(v),{expirationTtl:kvTtl??Math.max(ttl*2,3600)}).catch(()=>undefined);
     if(cache){
       const body=JSON.stringify(v);
       await cache.put(req,new Response(body,{headers:{'cache-control':`max-age=${ttl}`}}));
@@ -64,6 +64,26 @@ async function cachedLoad<T>(env:Env,key:string,ttl:number,load:()=>Promise<T>):
 }
 
 const items=(b:any)=>b?.response?.body?.items?.item??[];
+
+/**
+ * 초단기실황(지금 날씨). 기상청은 최근 23시간 자료만 주므로 '어제 이 시각' 비교용으로 KV 사본(weather:c:now:격자:시각)을
+ * 50시간 남겨 둔다 — Cron이 매시간 전국 격자(242곳)를 받아 두고, 다음 날 같은 시각 사본과 비교한다.
+ */
+const OBS_TTL=50*3600;
+let nowCalls=0;
+function nowcast(env:Env,nx:number,ny:number,b:{date:string;time:string},tries=3){
+  return cached(env,`now:${nx},${ny}:${b.date}${b.time}`,3600,async()=>{nowCalls++;
+    return parseNowcast(items(await upstream(`${API}/1360000/VilageFcstInfoService_2.0/getUltraSrtNcst?serviceKey=${env.DATA_GO_KR_KEY}&pageNo=1&dataType=JSON&numOfRows=20&base_date=${b.date}&base_time=${b.time}&nx=${nx}&ny=${ny}`,tries)));},OBS_TTL);
+}
+/** 'YYYYMMDDHHmm' 관측 시각 → 몇 시간 전/후 같은 형식. */
+function shiftObs(time:string,hours:number){const d=new Date(Date.UTC(+time.slice(0,4),+time.slice(4,6)-1,+time.slice(6,8),+time.slice(8,10))+hours*3600e3);
+  return {date:ymd(d),time:String(d.getUTCHours()).padStart(2,'0')+'00'};}
+/** 어제 같은 시각 실황(저장해 둔 사본만 — 기상청에는 이미 없음). */
+async function yesterdayObs(env:Env,nx:number,ny:number,time:string){
+  if(!env.CACHE)return null;const b=shiftObs(time,-24);
+  const v=await env.CACHE.get(`weather:c:now:${nx},${ny}:${b.date}${b.time}`,{type:'json',cacheTtl:3600}).catch(()=>null) as {time:string;temp:number|null}|null;
+  return v&&v.temp!==null?{time:v.time,temp:v.temp}:null;
+}
 
 /** 에어코리아 전국 측정소(약 670곳)를 한 번에 받아 1시간 캐시한다. 하루 500회 한도 안에서 지역·순위 화면이 함께 쓴다. */
 function nationalAir(env:Env){
@@ -114,7 +134,7 @@ async function weather(env:Env,r:Region):Promise<WeatherResponse>{
   const key=env.DATA_GO_KR_KEY;const q=`serviceKey=${key}&pageNo=1&dataType=JSON`;
   const nb=nowcastBase(),sb=shortBase(),mb=midBase(),t=kst();
   const [now,short,mid,air,uv]=await Promise.all([
-    cached(env,`now:${r.nx},${r.ny}:${nb.date}${nb.time}`,3600,async()=>parseNowcast(items(await upstream(`${API}/1360000/VilageFcstInfoService_2.0/getUltraSrtNcst?${q}&numOfRows=20&base_date=${nb.date}&base_time=${nb.time}&nx=${r.nx}&ny=${r.ny}`)))),
+    nowcast(env,r.nx,r.ny,nb),
     cached(env,`short:${r.nx},${r.ny}:${sb.date}${sb.time}`,3*3600,async()=>parseShort(items(await upstream(`${API}/1360000/VilageFcstInfoService_2.0/getVilageFcst?${q}&numOfRows=1500&base_date=${sb.date}&base_time=${sb.time}&nx=${r.nx}&ny=${r.ny}`)))),
     cached(env,`mid:${r.midLand},${r.midTa}:${mb}`,12*3600,async()=>{
       const [land,ta]=await Promise.all([
@@ -144,14 +164,39 @@ async function weather(env:Env,r:Region):Promise<WeatherResponse>{
   const shortDays=(short.value?.daily??[]).filter(d=>d.date===today||hoursOn(d.date)>=18||(hoursOn(d.date)>=6&&!midAll.some(m=>m.date===d.date)));
   const midDays=midAll.filter(d=>d.date>today&&!shortDays.some(s=>s.date===d.date));
   const todayKey=ymd(t.date)+String(t.h).padStart(2,'0')+'00';
+  const yesterday=now.value?.time&&now.value.temp!==null?await yesterdayObs(env,r.nx,r.ny,now.value.time):null;
   return {code:r.code,issued:{now:now.value?.time??null,short:short.value?`${sb.date}${sb.time}`:null,mid:mid.value?mb:null},
-    now:now.value??null,hourly:(short.value?.hourly??[]).filter(h=>h.time>=todayKey).slice(0,48),daily:[...shortDays,...midDays].sort((a,b)=>a.date.localeCompare(b.date)).slice(0,11),
+    now:now.value??null,yesterday,hourly:(short.value?.hourly??[]).filter(h=>h.time>=todayKey).slice(0,48),daily:[...shortDays,...midDays].sort((a,b)=>a.date.localeCompare(b.date)).slice(0,11),
     air:airOut,uv:uv.value??null,stale:[now,short,mid].some(x=>x.stale),errors:[now,short,mid,air,uv].map(x=>x.error).filter((e):e is string=>!!e).map(e=>e.replace(key,'***'))};
 }
 
 const json=(body:unknown,status=200,maxAge=300)=>new Response(JSON.stringify(body),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':`public, max-age=${maxAge}`,'access-control-allow-origin':'*'}});
 
 const BATCH=32;
+const grids=[...new Map(regions.map(r=>[`${r.nx},${r.ny}`,{nx:r.nx,ny:r.ny}])).values()];
+const OBS_PER=128,OBS_BUDGET=6500;
+type ObsCursor={base:string;back:number;cur:number;day:string;used:number};
+/**
+ * Cron: 전국 격자 실황을 매시간 받아 둔다('어제 이 시각' 비교, 방문자도 기상청을 기다리지 않음). 틱당 최대 128곳.
+ * ① 22시간 전 시각(기상청은 약 24시간 뒤 지움 — 여유 2시간) 사본이 없는 격자 먼저 — 처음 배포한 날만 실제 호출이 생기고, 하루 호출이
+ *    '남은 시간 × 242 + 지금까지'가 6,500을 넘지 않을 때만 ② 이번 시각 전 격자.
+ */
+async function obsPass(env:Env){
+  const kv=env.CACHE!;const nb=nowcastBase(),t=kst(),day=ymd(t.date),base=nb.date+nb.time;
+  const old=await kv.get('weather:obs',{type:'json'}).catch(()=>null) as ObsCursor|null;
+  const c:ObsCursor=old&&old.base===base?old:{base,back:0,cur:0,day,used:old&&old.day===day?old.used:0};
+  if(c.day!==day){c.day=day;c.used=0;}
+  const start=nowCalls;let left=OBS_PER;
+  const run=async(list:{nx:number;ny:number}[],b:{date:string;time:string},tries:number)=>{
+    for(let j=0;j<list.length;j+=8)await Promise.allSettled(list.slice(j,j+8).map(g=>nowcast(env,g.nx,g.ny,b,tries)));};
+  if(c.back<grids.length&&c.used+(24-t.h)*grids.length<OBS_BUDGET){
+    const part=grids.slice(c.back,c.back+left);await run(part,shiftObs(base,-22),1);c.back+=part.length;left-=part.length;}
+  else c.back=grids.length;
+  if(left>0&&c.cur<grids.length){const part=grids.slice(c.cur,c.cur+left);await run(part,nb,2);c.cur+=part.length;}
+  c.used+=nowCalls-start;
+  await kv.put('weather:obs',JSON.stringify(c));
+  return c;
+}
 /** Cron (5분마다): 특보·미세먼지, then the next 32 시군구 after each 단기예보 issue (all 256 in about 40 minutes, 8 passes a day). */
 async function scheduled(env:Env,now:number){
   const kv=env.CACHE;if(!kv){return;}
@@ -165,7 +210,8 @@ async function scheduled(env:Env,now:number){
   let fails=0;
   for(let j=0;j<part.length;j+=8)fails+=(await Promise.allSettled(part.slice(j,j+8).map(r=>regionWeather(env,r,undefined,true)))).filter(x=>x.status==='rejected').length;
   await kv.put('weather:cursor',JSON.stringify({key:k,i:i+part.length}));
-  await kv.put('weather:cron',JSON.stringify({at:now,done:Date.now(),key:k,from:i,count:part.length,fails,total:regions.length}));
+  const obs=await obsPass(env).catch(e=>({err:String((e as Error)?.message??e).slice(0,200)}));
+  await kv.put('weather:cron',JSON.stringify({at:now,done:Date.now(),key:k,from:i,count:part.length,fails,total:regions.length,obs}));
 }
 
 export default {
@@ -198,8 +244,8 @@ export default {
       return new Response(JSON.stringify(Number.isFinite(lat)&&Number.isFinite(lon)&&cf.country==='KR'?{lat,lon,city:cf.city??''}:{}),{headers:{'content-type':'application/json; charset=utf-8','cache-control':'private, no-store'}});}
     // Health of the shared cache: last Cron run and how far the region pass has got.
     if(url.pathname==='/api/status'){const kv=env.CACHE;if(!kv)return json({kv:false},200,0);
-      const [cron,cursor]=await Promise.all(['weather:cron','weather:cursor'].map(k=>kv.get(k,{type:'json'}).catch(()=>null)));
-      return json({kv:true,issue:issueKey(),pass:slowKey(),cron:cron?{...cron,ageSec:Math.round((Date.now()-cron.at)/1000)}:null,cursor},200,0);}
+      const [cron,cursor,obs]=await Promise.all(['weather:cron','weather:cursor','weather:obs'].map(k=>kv.get(k,{type:'json'}).catch(()=>null)));
+      return json({kv:true,issue:issueKey(),pass:slowKey(),cron:cron?{...cron,ageSec:Math.round((Date.now()-cron.at)/1000)}:null,cursor,obs,grids:grids.length},200,0);}
     if(url.pathname.startsWith('/api/'))return json({error:'not found'},404,3600);
     return env.ASSETS.fetch(req);
   },
