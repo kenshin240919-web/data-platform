@@ -13,7 +13,7 @@ SITES = {
     'G-WN326BYC7E': 'trip', 'G-MFS9C8WXBV': 'weather', 'G-1S5MH65EE3': 'traffic',
     'G-2DF9TG7EP5': 'charge', 'G-2GK6W3WQ5C': 'academy', 'G-FLG82C9D1P': 'school',
     'G-6LD4WJJCTH': 'pharmacy', 'G-NB6822FH1B': 'hospital', 'G-45BQ6EFDMZ': 'oil',
-    'G-NXZWMSBESF': 'parking', 'G-KKTGJHYGKE': 'service', 'G-E02X7KDB7H': 'near',
+    'G-NXZWMSBESF': 'parking', 'G-KKTGJHYGKE': 'service', 'G-E02X7KDB7H': 'near', 'G-M9FGX8WRZJ': 'rest', 'G-QWM4LNN23V': 'pet',
 }
 
 raw = os.environ.get('GA_SERVICE_ACCOUNT_JSON', '')
