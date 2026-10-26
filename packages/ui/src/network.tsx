@@ -24,7 +24,7 @@ export const SITES:Record<Site,{url:string;icon:string;name:string;brand:string;
   service:{url:'https://service.guidejung.com',icon:'🔧',name:'정비소',brand:'내근처 서비스센터',tagline:'고장 났다, 어디로 가지?'},
   near:{url:'https://near.guidejung.com',icon:'📍',name:'모아보기',brand:'내근처',tagline:'내 근처에 뭐가 있지?'},
   rest:{url:'https://rest.guidejung.com',icon:'♨️',name:'휴식',brand:'내근처 휴식',tagline:'오늘 어디서 쉬지?'},
-  pet:{url:'https://pet.guidejung.com',icon:'🐾',name:'동물병원',brand:'내근처 동물병원',tagline:'우리 아이 아플 때 어디로?',hidden:true},
+  pet:{url:'https://pet.guidejung.com',icon:'🐾',name:'동물병원',brand:'내근처 동물병원',tagline:'우리 아이 아플 때 어디로?'},
 };
 const {trip:T,weather:W,traffic:R,charge:C}=Object.fromEntries(Object.entries(SITES).map(([k,v])=>[k,v.url])) as Record<Site,string>;
 
