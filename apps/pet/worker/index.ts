@@ -199,12 +199,16 @@ async function animalPage(a:Animal,url:URL,env:Env,ctx:ExecutionContext){
 /** 사진: 원본(http://openapi.animal.go.kr/…)을 받아 그대로 돌려줌(https 페이지에서 섞인 콘텐츠로 막히지 않게). 하루 캐시. */
 async function photo(id:string){
   const a=animal(id);if(!a?.photo)return new Response('not found',{status:404});
-  for(const u of [a.photo.replace(/^http:/,'https:'),a.photo]){
-    try{const r=await fetch(u,{cf:{cacheTtl:86400,cacheEverything:true},headers:{'user-agent':'Mozilla/5.0 (compatible; GuideJungPet/1.0; +https://pet.guidejung.com)'}} as RequestInit);
-      const type=r.headers.get('content-type')??'';
-      if(r.ok&&/^image\//.test(type))return new Response(r.body,{headers:{'content-type':type,'cache-control':'public, max-age=86400'}});}catch{}
+  // 원본은 파일 내려받기 주소라 content-type이 이미지가 아닐 수 있음 → 확장자로 정함. 실패하면 x-photo-error에 이유.
+  const ext=a.photo.match(/\.(jpe?g|png|gif|webp)(?:$|\?)/i)?.[1].toLowerCase();
+  const guess=ext?`image/${ext==='jpg'?'jpeg':ext}`:'image/jpeg';
+  const tried:string[]=[];
+  for(const u of [a.photo,a.photo.replace(/^http:/,'https:')]){
+    try{const r=await fetch(u,{cf:{cacheTtl:86400,cacheEverything:true},headers:{'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36','referer':'https://www.animal.go.kr/'}} as RequestInit);
+      const type=r.headers.get('content-type')??'';tried.push(`${u.slice(0,5)} ${r.status} ${type}`);
+      if(r.ok&&!/text\/html|json|xml/.test(type))return new Response(r.body,{headers:{'content-type':/^image\//.test(type)?type:guess,'cache-control':'public, max-age=86400'}});}catch(e){tried.push(`${u.slice(0,5)} ${String(e).slice(0,80)}`);}
   }
-  return new Response('unavailable',{status:502,headers:{'cache-control':'public, max-age=600'}});
+  return new Response('unavailable',{status:502,headers:{'cache-control':'public, max-age=600','x-photo-error':tried.join(' | ').replace(/[^\x20-\x7e]/g,'')}});
 }
 let centers:Map<string,WR>|null=null;
 const center=(code:string)=>(centers??=new Map(WREG.map(r=>[r.code,r]))).get(code)??WREG.find(r=>r.code.slice(0,4)===code.slice(0,4));
