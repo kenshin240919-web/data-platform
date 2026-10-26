@@ -68,8 +68,8 @@ SHELTER_API = 'https://apis.data.go.kr/1543061/animalShelterSrvc_v2/shelterInfo_
 
 
 def api_items(url, key, extra=None, rows=1000):
-    """농림축산검역본부 오픈API 전체 쪽. 실패하면 None. 보호센터·분실동물은 1,000건을 달라고 하면 일부만 주고 다음 쪽이 비어
-    (10/26: 861곳 중 338·330건 중 149) 100건씩 받음."""
+    """농림축산검역본부 오픈API 전체 쪽(빈 쪽이 나오면 멈춤). 실패하면 None. 10/26 확인: 보호센터·분실동물은 totalCount(861·330)보다
+    적게 줌(1,000건씩·100건씩 모두 338·149건, 원인 미확인 — 운영 중인 곳·공개된 신고만 주는 것으로 추정)."""
     out, page, total = [], 1, None
     while total is None or len(out) < total:
         q = urllib.parse.urlencode({'serviceKey': key, 'pageNo': page, 'numOfRows': rows, '_type': 'json', **(extra or {})})
