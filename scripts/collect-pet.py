@@ -83,7 +83,8 @@ def api_items(url, key, extra=None):
         it = it if isinstance(it, list) else [it]
         total = int(body.get('totalCount') or 0)
         out += it
-        if not it:
+        log(f'  API {url.rsplit("/", 1)[-1]} {extra or ""} 쪽 {page}: {len(it):,}건 · 전체 {total:,}')
+        if not it or page >= 50:
             break
         page += 1
     return out

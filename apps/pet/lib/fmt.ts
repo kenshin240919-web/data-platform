@@ -35,7 +35,7 @@ export const photoPath=(id:string)=>`/photo/${id}`;
 export const ANIMAL_SITE='https://www.animal.go.kr';
 /** 공고 마감까지 남은 날(오늘 마감 0, 지남 음수). */
 export const daysLeft=(until?:string,now=Date.now())=>{if(!until)return null;const t=Date.UTC(+until.slice(0,4),+until.slice(5,7)-1,+until.slice(8,10));const d=new Date(now+9*3600e3);return Math.round((t-Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate()))/864e5);};
-export const ddayLabel=(until?:string)=>{const d=daysLeft(until);return d==null?null:d>0?`공고 마감 D-${d}`:d===0?'오늘 공고 마감':'공고 기간 지남';};
+export const ddayLabel=(until?:string)=>{const d=daysLeft(until);return d==null?null:d>0?`공고 마감 D-${d}`:d===0?'오늘 공고 마감':'공고 끝 · 입양 문의';};
 export const animalTitle=(a:Animal)=>[a.kind??a.up,a.sex,a.age?.replace(/\((\d+일)\s*미만\)\(년생\)/,'년생($1 미만)').replace('(년생)','년생')].filter(Boolean).join(' · ');
 export const km=(v:number)=>v<1?`${Math.round(v*1000)}m`:`${v.toFixed(1)}km`;
 const jong=(w:string)=>{const t=w.trim(),c=(t[t.length-1]??'').charCodeAt(0)-0xac00;return c>=0&&c<11172&&c%28!==0;};

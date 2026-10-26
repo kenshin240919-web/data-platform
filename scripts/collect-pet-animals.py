@@ -43,15 +43,21 @@ def kind_label(full, up):
 
 def protected(key, shelters, regions):
     today = datetime.now(P.KST)
-    rows = P.api_items(f'{BASE}/abandonmentPublicService_v2/abandonmentPublic_v2', key,
-                       {'state': 'protect', 'bgnde': (today - timedelta(days=90)).strftime('%Y%m%d'), 'endde': today.strftime('%Y%m%d')})
-    if rows is None:
-        return None
-    out, miss = [], Counter()
+    # state: notice(공고 중 — 원래 보호자를 기다리는 기간) + protect(공고가 끝나고 보호 중 — 입양 문의)
+    rows = []
+    for state in ('notice', 'protect'):
+        got = P.api_items(f'{BASE}/abandonmentPublicService_v2/abandonmentPublic_v2', key,
+                          {'state': state, 'bgnde': (today - timedelta(days=90)).strftime('%Y%m%d'), 'endde': today.strftime('%Y%m%d')})
+        if got is None:
+            return None
+        rows += got
+    log('처리 상태', dict(Counter(r.get('processState') for r in rows)))
+    out, miss, seen = [], Counter(), set()
     for r in rows:
         aid = re.sub(r'\D', '', r.get('desertionNo') or '')
-        if not aid or r.get('processState') != '보호중':
+        if not aid or aid in seen or r.get('processState') not in ('공고중', '보호중'):
             continue
+        seen.add(aid)
         sh = shelters.get(f"s-{re.sub(r'[^0-9A-Za-z]', '', r.get('careRegNo') or '')[:24]}")
         if not sh:
             miss['보호소 목록에 없음'] += 1
