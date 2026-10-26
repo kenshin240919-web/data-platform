@@ -8,7 +8,7 @@ import {animalPath,animalTitle,ddayLabel,daysLeft,km,n,photoPath,type Animal} fr
 export function AnimalCard({a,lost}:{a:Animal&{km?:number};lost?:boolean}){
   const d=lost?null:daysLeft(a.until),label=lost?(a.lost?`${a.lost.slice(5).replace('-','/')} 실종`:null):ddayLabel(a.until);
   const body=<>
-    <span className="pt-photo">{a.photo?<img src={photoPath(a.id)} alt={`${lost?'실종':'보호 중인'} ${a.kind??a.up??'동물'}`} loading="lazy" decoding="async"/>:<span aria-hidden="true">🐾</span>}
+    <span className="pt-photo">{a.photo?<img src={photoPath(a.id)} alt={`${lost?'실종':'보호 중인'} ${a.kind??a.up??'동물'}`} loading="lazy" decoding="async" onError={e=>e.currentTarget.remove()}/>:<span aria-hidden="true">🐾</span>}
       {label&&<em className={d!=null&&d>=0&&d<=3?'soon':lost?'lost':''}>{label}</em>}</span>
     <span className="pt-animal-body"><b>{animalTitle(a)||'정보 확인 중'}</b>
       <small>{a.km!=null&&<span className="pt-km">{km(a.km)}</span>}{lost?a.where:(a.region_name+(a.color?` · ${a.color}`:''))}</small>
