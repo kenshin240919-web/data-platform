@@ -22,6 +22,7 @@
     "build:parking": "npm run build -w @guidejung/parking",
     "build:near": "npm run build -w @guidejung/near",
     "build:service": "npm run build -w @guidejung/service",
+    "build:rest": "npm run build -w @guidejung/rest",
     "build:hospital": "npm run build -w @guidejung/hospital"
   },
   "devDependencies": {

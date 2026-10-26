@@ -164,6 +164,7 @@ def main():
         K.geocode(items, kakao)
     for p in items:
         p.pop('src', None)
+        p.pop('hours', None)  # 공공데이터에 영업 시간 없음
     # 좌표 변환 확인: 주소로 정한 시군구와 좌표로 가장 가까운 시군구 중심이 같은 비율(같은 시도 기준).
     placed = K.place(items, regions)
     chk = [p for p in placed if p['lat'] is not None and 'geo_at' not in p][:3000]

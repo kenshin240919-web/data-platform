@@ -7,7 +7,7 @@ import {InstallHint} from './install';
 import {SeasonBanner} from './season';
 import {ACTIONS_JS} from './actions';
 
-export type Site='trip'|'weather'|'traffic'|'charge'|'academy'|'school'|'pharmacy'|'hospital'|'oil'|'parking'|'service'|'near';
+export type Site='trip'|'weather'|'traffic'|'charge'|'academy'|'school'|'pharmacy'|'hospital'|'oil'|'parking'|'service'|'near'|'rest';
 // brand: 사이트 이름(로고·탭 제목), tagline: 부제(질문형 후킹). 10/17 사용자 결정: "내근처" 시리즈.
 // hidden: 아직 배포 전인 사이트(그 사이트 자신의 연결 바에만 보임).
 export const SITES:Record<Site,{url:string;icon:string;name:string;brand:string;tagline:string;hidden?:boolean}>={
@@ -23,6 +23,7 @@ export const SITES:Record<Site,{url:string;icon:string;name:string;brand:string;
   parking:{url:'https://parking.guidejung.com',icon:'🅿️',name:'주차장',brand:'내근처 주차장',tagline:'여기 주차 어디 해?'},
   service:{url:'https://service.guidejung.com',icon:'🔧',name:'정비소',brand:'내근처 서비스센터',tagline:'고장 났다, 어디로 가지?'},
   near:{url:'https://near.guidejung.com',icon:'📍',name:'모아보기',brand:'내근처',tagline:'내 근처에 뭐가 있지?'},
+  rest:{url:'https://rest.guidejung.com',icon:'♨️',name:'휴식',brand:'내근처 휴식',tagline:'오늘 어디서 쉬지?',hidden:true},
 };
 const {trip:T,weather:W,traffic:R,charge:C}=Object.fromEntries(Object.entries(SITES).map(([k,v])=>[k,v.url])) as Record<Site,string>;
 
@@ -86,6 +87,7 @@ const ORDER:Record<Site,Site[]>={
   parking:['trip','oil','charge','service','weather','pharmacy'],
   service:['oil','parking','charge','traffic','weather','trip'],
   near:['weather','pharmacy','hospital','parking','oil','trip','charge'],
+  rest:['parking','trip','weather','pharmacy','hospital','oil'],
 };
 const MAX_LINKS=7;
 /** Standard links for a spot: the sister sites' pages for the same 시군구 (or the spot itself), in the order that fits the current site. */
@@ -105,6 +107,7 @@ export function linksNear(lat:number,lon:number,skip:Site){
     hospital:[{icon:'🏥',title:`${a.label} 지금 진료하는 병원`,desc:'소아과·내과 야간·주말 진료, 응급실',href:`${SITES.hospital.url}/region/${a.charge}`}],
     oil:a.oil?[{icon:'⛽',title:`${a.label} 기름값 싼 주유소`,desc:'오늘 휘발유·경유 최저가 순',href:`${SITES.oil.url}/region/${a.oil}`}]:[],
     parking:[{icon:'🅿️',title:`${a.label} 공영·무료 주차장`,desc:'무료 주차장과 1시간 예상 요금 싼 순',href:`${SITES.parking.url}/region/${a.charge}`}],
+    rest:[{icon:'♨️',title:`${a.label} 찜질방·목욕탕`,desc:'찜질방·사우나·1인 목욕·세신샵',href:`${SITES.rest.url}/region/${a.charge}`}],
     service:[{icon:'🔧',title:`${a.label} 자동차 정비소·검사소`,desc:'정비소·검사소·세차장, 맡기기 전 체크리스트',href:`${SITES.service.url}/region/${a.charge}`}],
   };
   return ORDER[skip].filter(k=>k!==skip&&!SITES[k].hidden).flatMap(k=>by[k]??[]).slice(0,MAX_LINKS);
@@ -128,6 +131,7 @@ export const GENERIC:Record<Site,Link_>={
   parking:{icon:'🅿️',title:'내 주변 공영·무료 주차장',desc:'1시간·2시간 예상 요금 싼 순',href:SITES.parking.url},
   service:{icon:'🔧',title:'내 주변 자동차 정비소·검사소',desc:'정비 맡기기 전 체크리스트·검사 과태료 계산',href:SITES.service.url},
   near:{icon:'📍',title:'내 근처에 뭐가 있지?',desc:'날씨·문 연 약국·병원·주유소·주차장을 한 화면에',href:SITES.near.url},
+  rest:{icon:'♨️',title:'내 주변 찜질방·목욕탕',desc:'찜질방·사우나·1인 목욕탕·세신샵',href:SITES.rest.url},
 };
 export const genericFor=(skip:Site)=>(Object.keys(GENERIC) as Site[]).filter(k=>k!==skip&&!SITES[k].hidden).map(k=>GENERIC[k]);
 export {T as TRIP_URL,W as WEATHER_URL,R as TRAFFIC_URL,C as CHARGE_URL};

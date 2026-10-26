@@ -27,6 +27,7 @@ SITES = {  # 측정 ID → (사이트, 주소)
     'G-NXZWMSBESF': ('parking', 'parking.guidejung.com'),
     'G-KKTGJHYGKE': ('service', 'service.guidejung.com'),
     'G-E02X7KDB7H': ('near', 'near.guidejung.com'),
+    'G-M9FGX8WRZJ': ('rest', 'rest.guidejung.com'),
 }
 ORDER = [v[0] for v in SITES.values()]
 THIS = {'startDate': '7daysAgo', 'endDate': 'yesterday'}
