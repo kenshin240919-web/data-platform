@@ -1,0 +1,44 @@
+name: Rest deploy
+# Deploys rest.guidejung.com (Worker guidejung-rest) with wrangler from GitHub Actions (not connected to Cloudflare
+# Workers Builds). Secrets: CLOUDFLARE_API_TOKEN (github-d1: Workers Scripts edit …), CLOUDFLARE_ACCOUNT_ID.
+# Runs when the rest app (or what it imports) changes on main, after the daily list commit, or by hand (10/26 사용자 승인).
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/rest/**'
+      - 'apps/weather/data/**'
+      - 'apps/traffic/data/**'
+      - 'packages/**'
+      - 'scripts/prune-rsc.mjs'
+      - 'package.json'
+      - 'package-lock.json'
+  # 매일 목록 커밋은 GITHUB_TOKEN으로 push돼 push 이벤트가 안 생김 → 수집 작업이 끝나면 따로 배포.
+  workflow_run:
+    workflows: ['Rest collect']
+    types: [completed]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: rest-deploy
+  cancel-in-progress: true
+jobs:
+  deploy:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Build and deploy
+        run: npx wrangler deploy -c apps/rest/wrangler.jsonc
