@@ -1,0 +1,45 @@
+name: GSC weekly
+# 매주 월요일 Search Console 점검(scripts/gsc-report.py): 내근처 사이트 사이트맵 없거나 깨진 것 제출 + 사이트맵 상태 + 색인 표본(URL 검사)
+# → reports/gsc/주간-YYYY-MM-DD.md main 커밋(실행 기록은 reports/gsc/last-run.log). 10/26 사용자 승인.
+# Secret: GA_SERVICE_ACCOUNT_JSON(서비스 계정 ga-reader, Search Console 도메인 속성 '전체' 권한). 무료(Search Console API).
+on:
+  schedule:
+    - cron: '3 23 * * 0' # 월요일 08:03 KST
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['scripts/gsc-report.py']
+permissions:
+  contents: write
+concurrency:
+  group: gsc-weekly
+  cancel-in-progress: false
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -q google-auth requests
+      - name: Report
+        env:
+          GA_SERVICE_ACCOUNT_JSON: ${{ secrets.GA_SERVICE_ACCOUNT_JSON }}
+        run: |
+          mkdir -p reports/gsc
+          set -o pipefail
+          python scripts/gsc-report.py 2>&1 | tee reports/gsc/last-run.log
+      - name: Commit report
+        if: always()
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add reports/gsc
+          if git diff --cached --quiet; then echo 'no change'; exit 0; fi
+          git commit -m 'Search Console 주간 점검'
+          for i in 1 2 3; do git pull --rebase origin main && git push origin HEAD:main && exit 0; sleep 10; done
+          exit 1
