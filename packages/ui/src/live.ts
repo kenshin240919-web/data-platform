@@ -3,7 +3,7 @@
 //  ① 📝 네이버 블로그 후기  <section class="gj-blog" data-q data-must>  — 보이기 직전에 near.guidejung.com/api/blog
 //  ② ☕ 걸어서 갈 곳        <section class="gj-around" data-lat data-lon data-cats data-r> — 보이기 직전에 /api/around(카카오 카테고리)
 //  ③ 🧭 길안내 앱 고르기    map.kakao.com/link/to/… 링크를 누르면(휴대폰) 카카오맵·카카오내비·네이버지도·T맵 중 고르기
-//  ④ 🗺️ 지도로 보기        한 페이지에 좌표 있는 곳이 2곳 넘으면 카카오맵으로(누를 때만 지도를 불러옴) — KAKAO_APPS map 앱 사이트만
+//  ④ 🗺️ 지도로 보기        (표시를 누르면 상세가 있는 곳은 '자세히 보기'만 — 길찾기는 상세에서) 한 페이지에 좌표 있는 곳이 2곳 넘으면 카카오맵으로(누를 때만 지도를 불러옴) — KAKAO_APPS map 앱 사이트만
 //  ⑤ 💬 카카오톡 공유      .gj-kakao 버튼(늘 넣고, 키 없는 사이트는 html.gj-nokakao로 숨김)
 // 카카오·네이버 결과는 저장하지 않는다(브라우저에서 보여 주기만). 방문자 위치는 이 기능들로 서버에 보내지 않는다(장소 좌표만).
 
@@ -84,7 +84,7 @@ o.querySelector('.gj-map-top button').onclick=function(){o.remove();document.doc
 var pick=o.querySelector('.gj-map-pick');
 maps().then(function(M){var m=new M.Map(o.querySelector('.gj-map-canvas'),{center:new M.LatLng(P[0].lat,P[0].lon),level:5}),bd=new M.LatLngBounds();
 P.forEach(function(p){var ll=new M.LatLng(p.lat,p.lon);bd.extend(ll);var mk=new M.Marker({position:ll,map:m,title:p.name});
-M.event.addListener(mk,'click',function(){pick.innerHTML='<b>'+e(p.name)+'</b><span>'+(p.url?'<a href="'+e(p.url)+'">자세히 보기</a>':'')+'<a href="https://map.kakao.com/link/to/'+encodeURIComponent(p.name)+','+p.lat+','+p.lon+'">🧭 길찾기</a></span>';m.panTo(ll)})});
+M.event.addListener(mk,'click',function(){pick.innerHTML='<b>'+e(p.name)+'</b><span>'+(p.url?'<a href="'+e(p.url)+'">자세히 보기</a>':'<a href="https://map.kakao.com/link/to/'+encodeURIComponent(p.name)+','+p.lat+','+p.lon+'">🧭 길찾기</a>')+'</span>';m.panTo(ll)})});
 try{var me=JSON.parse(localStorage.getItem('gj.pos')||'null');if(me&&Date.now()-me.at<18e5){var c=document.createElement('div');c.className='gj-map-me';c.title='내 위치';new M.CustomOverlay({position:new M.LatLng(me.lat,me.lon),content:c,map:m});bd.extend(new M.LatLng(me.lat,me.lon))}}catch(x){}
 m.setBounds(bd,40,20,40,20)}).catch(function(){pick.innerHTML='<b>지도를 불러오지 못했어요.</b>'})}
 /* ⑤ 카카오톡 공유 */
