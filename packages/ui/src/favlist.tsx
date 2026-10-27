@@ -7,8 +7,9 @@ type Fav={id:string;name:string;sub?:string;url:string};
 type Live={id:string;state?:'open'|'soon'|'closed'|null;label?:string;line?:string};
 
 /** 공유·즐겨찾기 버튼(정적 페이지용). 동작은 ACTIONS_JS(NetworkBar). */
-export function Actions({fav}:{fav?:FavInfo}){
-  return <div className="gj-actions"><button type="button" className="gj-kakao">💬 카카오톡 공유</button><button type="button" className="gj-share">📤 공유하기</button>
+/** go: 길찾기 버튼(카카오맵 link/to — 휴대폰에서는 live.ts가 카카오맵·네이버·T맵 고르기 창을 띄움). */
+export function Actions({fav,go}:{fav?:FavInfo;go?:{name:string;lat:number;lon:number}}){
+  return <div className="gj-actions">{go&&<a className="gj-go" href={`https://map.kakao.com/link/to/${encodeURIComponent(go.name)},${go.lat},${go.lon}`} target="_blank" rel="noopener">🧭 길찾기</a>}<button type="button" className="gj-kakao">💬 카카오톡 공유</button><button type="button" className="gj-share">📤 공유하기</button>
     {fav&&<button type="button" className="gj-fav" data-id={fav.id} data-name={fav.name} data-sub={fav.sub??''} data-url={fav.url}><span className="on">★ 즐겨찾기됨</span><span className="off">☆ 즐겨찾기</span></button>}</div>;
 }
 

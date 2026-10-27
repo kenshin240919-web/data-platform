@@ -152,13 +152,13 @@ function detailHtml(a:Academy,near:Card[],ins:ReturnType<typeof insight>){
   const crumbs={'@context':'https://schema.org','@type':'BreadcrumbList',itemListElement:[['내근처 학원',SITE+'/'],['지역별 학원',SITE+'/region'],[a.region_name,`${SITE}/region/${a.region_id}`],[a.name,SITE+academyPath(a.id)]].map(([name,item],i)=>({'@type':'ListItem',position:i+1,name,item}))};
   const faqLd={'@context':'https://schema.org','@type':'FAQPage',mainEntity:faq.map(([q,x])=>({'@type':'Question',name:q,acceptedAnswer:{'@type':'Answer',text:x}}))};
   const ldTag=(d:unknown)=>`<script type="application/ld+json">${JSON.stringify(d).replace(/</g,'\\u003c')}</script>`;
-  const map=a.lat!=null?`https://map.kakao.com/link/map/${encodeURIComponent(a.name)},${a.lat},${a.lon}`:a.address?`https://map.kakao.com/?q=${encodeURIComponent(a.address)}`:null;
+  const map=a.lat!=null?`https://map.kakao.com/link/to/${encodeURIComponent(a.name)},${a.lat},${a.lon}`:a.address?`https://map.kakao.com/?q=${encodeURIComponent(a.address)}`:null;
   const subjectLinks=a.subjects.slice(0,3).map(k=>`<a class="sub" href="/region/${esc(a.region_id)}/${k}">${esc(a.region_name)} ${esc(SUBJECTS[k])} 학원 비교</a>`).join('');
   return `<nav class="crumbs"><a href="/">홈</a> › <a href="/region">지역별 학원</a> › <a href="/region/${esc(a.region_id)}">${esc(a.region_name)}</a> › ${esc(a.name)}</nav>
 <div class="ac-detail-head"><h1>${esc(a.name)}</h1><p>${esc([a.type,a.region_name].filter(Boolean).join(' · '))}</p>
 <div class="ac-tags">${[...subj,...grades].map(t=>`<span>${esc(t)}</span>`).join('')}</div></div>${actionsHtml()}
 <p class="ac-answer">${fee?`교육청에 공개된 수강료는 <b>${esc(fee)}</b>${okFees.length>1?`(과정 ${n(okFees.length)}개)`:''}이에요.`:'교육청에 공개된 수강료 금액이 없어요. 학원에 직접 문의해 주세요.'}</p>
-<div class="ac-actions"><button type="button" class="ac-pick-big" id="ac-pick" data-id="${esc(a.id)}" data-name="${esc(a.name)}">+ 비교에 담기</button>${map?`<a href="${esc(map)}" rel="noopener" target="_blank">🧭 지도·길찾기</a>`:''}${a.tel?`<a class="sub" href="tel:${esc(a.tel.replace(/[^0-9]/g,''))}">📞 전화</a>`:''}${subjectLinks}</div>
+<div class="ac-actions"><button type="button" class="ac-pick-big" id="ac-pick" data-id="${esc(a.id)}" data-name="${esc(a.name)}">+ 비교에 담기</button>${map?`<a href="${esc(map)}" rel="noopener" target="_blank">🧭 길찾기</a>`:''}${a.tel?`<a class="sub" href="tel:${esc(a.tel.replace(/[^0-9]/g,''))}">📞 전화</a>`:''}${subjectLinks}</div>
 ${ins.top}
 ${fees.length?`<section><h2>과정별 수강료</h2><ul class="ac-fees">${fees.map(f=>`<li><span>${esc(f.name)}</span><b>${esc(won(f.won))}</b></li>`).join('')}</ul><p class="muted small">교육청에 신고·공개된 인당 수강료(기간 표기 없음, 교재비 등 제외될 수 있음). 실제 수강료는 학원에 확인하세요.</p></section>`:''}
 ${blogHtml(`${a.name} ${a.region_name.split(' ').slice(-1)[0]}`,a.name.replace(/\s*[([].*$/,'').trim(),'📝 학부모·수강생 블로그 후기 · 네이버')}
