@@ -77,7 +77,7 @@ if(el.hasAttribute('data-gj-pt')){var v=el.getAttribute('data-gj-pt').split(',')
 else{p=parse(el.getAttribute('href'));if(!p)return;var c=el.closest('article,li,[class*=card]'),d=c&&c.querySelector('a[href^="/"],a[href^="'+location.origin+'"]');p.url=d?d.getAttribute('href'):null}
 if(!(p.lat>33&&p.lat<39)||out.length>=300)return;var id=p.lat.toFixed(5)+','+p.lon.toFixed(5);if(k[id])return;k[id]=1;out.push(p)});return out}
 var mb=null;function mapBtn(){if(!KEY||!MAP)return;var n=pts().length;if(n<2){if(mb)mb.hidden=true;return}
-if(!mb){mb=document.createElement('button');mb.type='button';mb.className='gj-map-btn';document.body.appendChild(mb);mb.addEventListener('click',openMap)}mb.hidden=false;mb.textContent='🗺️ 지도로 보기 ('+n+')'}
+if(!mb){mb=document.createElement('button');mb.type='button';mb.className='gj-map-btn';document.body.appendChild(mb);mb.addEventListener('click',openMap)}mb.hidden=false;mb.textContent='🗺️ 지도 '+n;mb.title='지도로 보기 ('+n+'곳)';mb.setAttribute('aria-label','지도로 보기, '+n+'곳')}
 function openMap(){var P=pts(),o=document.createElement('div');o.className='gj-map';o.innerHTML='<div class="gj-map-top"><b>🗺️ 지도로 보기 · '+P.length+'곳</b><button type="button">닫기 ✕</button></div><div class="gj-map-canvas"></div><div class="gj-map-pick"></div>';
 document.body.appendChild(o);document.documentElement.style.overflow='hidden';ga('map_open',{item_id:location.pathname,count:P.length});
 o.querySelector('.gj-map-top button').onclick=function(){o.remove();document.documentElement.style.overflow=''};

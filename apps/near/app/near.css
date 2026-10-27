@@ -22,3 +22,4 @@
 @media(max-width:900px){.nr-situations{grid-template-columns:1fr}.nr-sites,.nr-blocks{grid-template-columns:1fr}.header-note{display:none}}
 @media(max-width:600px){.nr-hero h1{font-size:25px}.nr-hero.top h1{font-size:20px}.nr-nav{gap:14px;overflow-x:auto;white-space:nowrap}.nr-cards{grid-template-columns:1fr;gap:10px}.nr-card-main{padding:12px 12px 8px}.nr-card-body b{font-size:20px}.nr-acts{padding:0 12px 10px 54px}.nr-quick{flex-wrap:nowrap;overflow-x:auto}.nr-quick a{white-space:nowrap}}
 .nr-dday{display:flex;align-items:baseline;gap:10px;margin:4px 0 10px}.nr-dday b{font-size:28px;color:var(--nr)}.nr-dday span{color:var(--muted)}.nr-table th{width:120px;color:var(--muted);font-weight:600}
+.nr-vs{display:block;font-size:15px;font-weight:800;color:#1d4ed8;line-height:1.4;word-break:keep-all;margin:2px 0}.nr-vs.warm{color:#c2410c}.nr-vs.same{color:#334155}.nr-vs-feel{white-space:nowrap}

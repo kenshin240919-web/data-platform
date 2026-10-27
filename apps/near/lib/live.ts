@@ -1,4 +1,6 @@
 // 자매 사이트 /api/* 를 브라우저에서 바로 부르는 작은 함수들(모두 CORS 허용). 하나가 실패해도 나머지 카드는 그대로 보이도록 null을 돌려준다.
+import {vsYesterday} from '../../weather/lib/format';
+import type {WeatherResponse} from '../../weather/lib/types';
 import {SITES,type Area} from '@guidejung/ui/network';
 import {fixKmNow} from '@guidejung/ui/geo';
 
@@ -15,9 +17,9 @@ export const nearestArea=(areas:Area[],lat:number,lon:number)=>areas.reduce((a,b
 type Near<T>={total:number;items:(T&{km:number})[]};
 const GRADE=['','좋음','보통','나쁨','매우 나쁨'];
 export async function weather(a:Area){
-  const d=await get<{now?:{temp?:number};daily?:{date:string;min:number;max:number;am:{sky:string;pop:number};pm:{sky:string;pop:number}}[];air?:{pm10Grade?:number;pm25Grade?:number}}>(`${U.weather}/api/weather?code=${a.w}`,12000);
+  const d=await get<{now?:{temp?:number;time?:string};yesterday?:{time:string;temp:number}|null;daily?:{date:string;min:number;max:number;am:{sky:string;pop:number};pm:{sky:string;pop:number}}[];air?:{pm10Grade?:number;pm25Grade?:number}}>(`${U.weather}/api/weather?code=${a.w}`,12000);
   if(!d)return null;const t=d.daily?.[0];const g=Math.max(d.air?.pm10Grade??0,d.air?.pm25Grade??0);
-  return {temp:d.now?.temp??null,min:t?.min??null,max:t?.max??null,sky:t?.pm.sky??t?.am.sky??null,pop:t?Math.max(t.am.pop,t.pm.pop):null,air:GRADE[g]||null,weekend:d.daily??[]};
+  return {temp:d.now?.temp??null,min:t?.min??null,max:t?.max??null,sky:t?.pm.sky??t?.am.sky??null,pop:t?Math.max(t.am.pop,t.pm.pop):null,air:GRADE[g]||null,weekend:d.daily??[],vs:vsYesterday(d as unknown as WeatherResponse)};
 }
 export const pharmacyOpen=(lat:number,lon:number,km=2)=>get<Near<{id:string;name:string}>>(`${U.pharmacy}/api/near?${ll(lat,lon)}&km=${km}&cond=open&limit=3`);
 export const hospitalOpen=(lat:number,lon:number,km=2,dept?:string)=>get<Near<{id:string;name:string;div:string|null}>>(`${U.hospital}/api/near?${ll(lat,lon)}&km=${km}&cond=open&limit=3${dept?`&dept=${dept}`:''}`);

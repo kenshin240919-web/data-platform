@@ -39,7 +39,7 @@ export function WeatherPanel({region,label}:{region:Region;label:string}){
   return <div className="wx">
     <section className="wx-now" aria-label={`${label} 현재 날씨`}>
       <div className="wx-now-left">
-      {vs&&<p className={`wx-vs ${vs.kind}`}><span className="wx-vs-head"><span aria-hidden="true">{vs.icon}</span> {vs.head}{vs.feel&&<> · {vs.feel}</>}</span>
+      {vs&&<p className={`wx-vs ${vs.kind}`}><span className="wx-vs-head"><span aria-hidden="true">{vs.icon}</span> {vs.head}{vs.feel&&<> · <span className="wx-vs-feel">{vs.feel}</span></>}</span>
         <span className="wx-vs-sub">{vs.sub}{vs.tip&&<> · {vs.tip}</>}</span></p>}
       <div className="wx-now-main">
         <span className="wx-icon" aria-hidden="true">{skyEmoji(sky,night)}</span>

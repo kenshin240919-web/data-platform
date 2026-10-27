@@ -8,6 +8,7 @@ on:
     paths:
       - 'apps/near/**'
       - 'apps/weather/data/**'
+      - 'apps/weather/lib/**'
       - 'apps/traffic/data/**'
       - 'apps/oil/data/areas.json'
       - 'packages/**'

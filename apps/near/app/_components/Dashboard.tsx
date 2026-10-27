@@ -8,7 +8,7 @@ import * as L from '../../lib/live';
 import {km,n} from '../../lib/site';
 
 type Act={label:string;href:string};
-type Card={icon:string;title:string;answer?:string;sub?:string;href:string;state?:'good'|'warn'|'none';badge?:string;acts?:Act[]};
+type Card={icon:string;title:string;answer?:string;vs?:{icon:string;head:string;feel:string;kind:string};sub?:string;href:string;state?:'good'|'warn'|'none';badge?:string;acts?:Act[]};
 type Res=Record<string,Card|null|undefined>;
 type Place={id:string;name:string;km:number;lat?:number;lon?:number;tel?:string|null};
 const U=L.SITE_URL;
@@ -29,7 +29,7 @@ export function Dashboard({areas}:{areas:Area[]}){
   useEffect(()=>{if(!pos||!a)return;let on=true;const {lat,lon}=pos;setRes({});
     const put=(k:string,v:Card|null)=>{if(on)setRes(r=>({...r,[k]:v}));};
     L.weather(a).then(w=>{if(!w)return put('weather',null);const rain=(w.pop??0)>=60,bad=w.air==='나쁨'||w.air==='매우 나쁨';
-      put('weather',{icon:'🌤️',title:`${a.n} 날씨`,answer:w.temp!=null?`지금 ${w.temp.toFixed(1)}°`:w.sky??'',badge:rain?'☔ 우산 챙기세요':bad?'😷 마스크 챙기세요':undefined,
+      put('weather',{icon:'🌤️',title:`${a.n} 날씨`,answer:w.temp!=null?`지금 ${w.temp.toFixed(1)}°`:w.sky??'',vs:w.vs??undefined,badge:rain?'☔ 우산 챙기세요':bad?'😷 마스크 챙기세요':undefined,
         sub:[w.min!=null&&w.max!=null?`오늘 ${w.min}~${w.max}°`:'',w.pop!=null?`비 ${w.pop}%`:'',w.air?`미세먼지 ${w.air}`:''].filter(Boolean).join(' · '),
         href:`${U.weather}/region/${a.w}`,state:rain||bad?'warn':'good',acts:[{label:'⏱️ 48시간 예보',href:`${U.weather}/region/${a.w}`},{label:'👕 옷차림',href:`${U.weather}/wear`}]});});
     widen([2,5,10],r=>L.pharmacyOpen(lat,lon,r)).then(x=>{if(!x)return put('pharmacy',null);const p=x.d.items[0] as Place|undefined;
@@ -66,7 +66,7 @@ export function Dashboard({areas}:{areas:Area[]}){
     <div className="nr-cards">{order.map(k=>{const c=res[k]===undefined||res[k]===null?base[k]:res[k]!;const loading=pos&&res[k]===undefined;
       return <div key={k} className={`nr-card ${c.state??''}`}>
         <a className="nr-card-main" href={c.href}><span className="nr-card-icon" aria-hidden="true">{c.icon}</span><span className="nr-card-body"><small className="nr-card-title">{c.title}</small>
-          <b>{loading?'불러오는 중…':c.answer??'바로 가기 →'}</b>{c.badge&&<span className="nr-badge">{c.badge}</span>}{c.sub&&<small className="nr-card-sub">{c.sub}</small>}{res[k]===null&&<small className="nr-card-sub">지금은 불러오지 못했어요 · 눌러서 보기</small>}</span><span className="nr-go" aria-hidden="true">›</span></a>
+          <b>{loading?'불러오는 중…':c.answer??'바로 가기 →'}</b>{c.vs&&<span className={`nr-vs ${c.vs.kind}`}>{c.vs.icon} {c.vs.head}{c.vs.feel&&<> · <span className="nr-vs-feel">{c.vs.feel}</span></>}</span>}{c.badge&&<span className="nr-badge">{c.badge}</span>}{c.sub&&<small className="nr-card-sub">{c.sub}</small>}{res[k]===null&&<small className="nr-card-sub">지금은 불러오지 못했어요 · 눌러서 보기</small>}</span><span className="nr-go" aria-hidden="true">›</span></a>
         {!!c.acts?.length&&<span className="nr-acts">{c.acts.map(x=><a key={x.label} href={x.href}{...(x.href.startsWith('https://map.')?{target:'_blank',rel:'noopener'}:{})}>{x.label}</a>)}</span>}
       </div>;})}</div>
     <div className="nr-quick" aria-label="자주 찾는 것"><b>바로 찾기</b>
