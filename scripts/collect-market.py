@@ -39,6 +39,9 @@ STD_API = 'https://api.data.go.kr/openapi/tn_pubr_public_trdit_mrkt_api'
 KAKAO_KW = 'https://dapi.kakao.com/v2/local/search/keyword.json'
 UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36'
 MISS_RETRY_DAYS = 14
+FIND_V = 2  # 찾는 규칙 버전 — 올리면 예전 규칙으로 못 찾은 곳을 바로 다시 찾음
+KAKAO_ADDR = 'https://dapi.kakao.com/v2/local/search/address.json'
+SUFFIX = re.compile(r'\s*(골목형\s*상점가|상점가|상가번영회|번영회|상인회|상권활성화구역|상권|지하상가|지하쇼핑센터|상가|시장)$')
 GEO_LIMIT = 6000  # 한 번에 카카오에 물어볼 시장 수(첫 실행 약 3,000곳 × 최대 3번)
 
 # 취급품목(가맹점이 직접 적은 자유 문장) → 품목 묶음. 앞에서부터 처음 맞는 것, 안 맞으면 가게 이름으로 한 번 더.
@@ -188,13 +191,40 @@ def std_index(rows):
     return idx
 
 
+def stem_of(name):
+    """'가락몰골목형상점가' → '가락몰', '용봉지구 골목형상점가' → '용봉지구', '부전상가시장' → '부전'(뒤 꼬리를 거듭 뗌, 두 글자 넘게 남을 때만)."""
+    s = re.sub(r'\s*제?\d+(지구|구역|층|단지).*$', '', base_name(name)).strip() or base_name(name)
+    while True:
+        t = SUFFIX.sub('', s).strip()
+        if t == s or len(norm(t)) < 2:
+            return s
+        s = t
+
+
+def dong_of(name):
+    """이름 속 동·읍·면('일곡동 골목형상점가', '보람동 …', '금호1동상가번영회') → '일곡동'."""
+    m = re.search(r'([가-힣]{1,4}\d?(?:동|읍|면))(?=[\s상골번]|$)', base_name(name))
+    if m and not re.search(r'(지하|자동|이동|운동)$', m[1]):
+        return m[1]
+    m = re.search(r'([가-힣]{2,3})지구', name)  # '용봉지구' → 용봉동
+    return f'{m[1]}동' if m else None
+
+
+def kakao(url, q, key):
+    return http_json(f'{url}?{urllib.parse.urlencode({"query": q, "size": 10})}', {'Authorization': f'KakaoAK {key}'}, timeout=20, tries=2)
+
+
 def kakao_find(name, sido, key):
-    """카카오 키워드 검색으로 시장·상점가 위치. 이름이 맞고(포함 관계) 같은 시도인 첫 곳. (결과, 상태) — 상태 'stop'이면 그만."""
+    """카카오 키워드 검색으로 시장·상점가 위치. 이름이 맞고(포함 관계) 같은 시도인 첫 곳.
+    못 찾으면 이름 속 동·읍·면 중심(geo 'dong', 대략). (결과, 상태) — 상태 'stop'이면 그만."""
+    stem = stem_of(name)
     want = [w for w in dict.fromkeys([norm(base_name(name)), norm(name)]) if len(w) >= 2]
+    st_n = norm(stem)
+    kind = re.compile(r'시장|상가|상점|몰|거리|센터|프라자|플라자|타운|골목')
     inner = re.search(r'[(（]([^)）]+)[)）]', name)
-    queries = [f'{sido} {base_name(name)}', base_name(name)] + ([inner[1]] if inner else [])
+    queries = [f'{sido} {base_name(name)}', base_name(name), f'{sido} {stem}', f'{sido} {stem}시장'] + ([inner[1]] if inner else [])
     for q in dict.fromkeys(x for x in queries if x.strip()):
-        st, d = http_json(f'{KAKAO_KW}?{urllib.parse.urlencode({"query": q, "size": 10})}', {'Authorization': f'KakaoAK {key}'}, timeout=20, tries=2)
+        st, d = kakao(KAKAO_KW, q, key)
         if st != 200:
             return None, 'stop' if st in (0, 401, 403, 429) else 'err'
         for doc in d.get('documents') or []:
@@ -202,9 +232,20 @@ def kakao_find(name, sido, key):
             pn = norm(doc.get('place_name'))
             if sido_of(addr) != sido or not pn:
                 continue
-            if any(w in pn or (len(pn) >= 3 and pn in w) for w in want):
+            # 줄인 이름('부전')은 짧으면 엉뚱한 곳('부전역')이 걸려서, 장소 이름이 시장·상가 같은 이름일 때만
+            if any(w in pn or (len(pn) >= 3 and pn in w) for w in want) or \
+                    (len(st_n) >= 2 and st_n in pn and (len(st_n) >= 4 or kind.search(pn))):
                 return {'lat': round(float(doc['y']), 6), 'lon': round(float(doc['x']), 6), 'addr': doc.get('road_address_name') or None,
                         'jibun': doc.get('address_name') or None, 'kname': doc.get('place_name')}, 'ok'
+    dong = dong_of(name)
+    if dong:
+        st, d = kakao(KAKAO_ADDR, dong if sido == '전남광주' else f'{sido} {dong}', key)
+        if st != 200:
+            return None, 'stop' if st in (0, 401, 403, 429) else 'err'
+        docs = [x for x in d.get('documents') or [] if x.get('address_type') in ('REGION', 'REGION_ADDR') and sido_of(x.get('address_name')) == sido]
+        if len(docs) == 1:  # 같은 이름 동이 시도 안에 여럿이면 어느 곳인지 몰라 쓰지 않음
+            x = docs[0]
+            return {'lat': round(float(x['y']), 6), 'lon': round(float(x['x']), 6), 'addr': None, 'jibun': x.get('address_name'), 'dong': dong}, 'ok'
     return None, 'miss'
 
 
@@ -276,7 +317,7 @@ def main():
         if m['geo'] is None:
             ck = f'{sido}|{name}'
             c = cache.get(ck)
-            due = c is None or ('miss' in c and (today - datetime.fromisoformat(c['miss']).date()).days >= MISS_RETRY_DAYS) \
+            due = c is None or ('miss' in c and (c.get('v', 1) < FIND_V or (today - datetime.fromisoformat(c['miss']).date()).days >= MISS_RETRY_DAYS)) \
                 or ('at' in c and A.refresh_due(ck, c['at'], today))
             if due and key and not stop and asked < GEO_LIMIT:
                 asked += 1
@@ -287,10 +328,10 @@ def main():
                 elif state == 'ok':
                     cache[ck] = {**got, 'at': today.isoformat()}
                 elif state == 'miss':
-                    cache[ck] = {'miss': today.isoformat(), **({k: c[k] for k in ('lat', 'lon', 'addr', 'jibun', 'kname')} if c and 'lat' in c else {})}
+                    cache[ck] = {'miss': today.isoformat(), 'v': FIND_V, **({k: c[k] for k in ('lat', 'lon', 'addr', 'jibun', 'kname')} if c and 'lat' in c else {})}
                 c = cache.get(ck)
             if c and c.get('lat') is not None:  # 다시 확인에서 못 찾으면 이전 좌표를 그대로(확인한 날만 바뀜)
-                m.update({k: c.get(k) for k in ('addr', 'jibun', 'lat', 'lon')}, geo='kakao')
+                m.update({k: c.get(k) for k in ('addr', 'jibun', 'lat', 'lon')}, geo='dong' if c.get('dong') else 'kakao')
         hit = region_of(m, regions) if m['geo'] else None
         if not hit:
             r = area_of(name, sido, regions)
@@ -344,7 +385,7 @@ def main():
         raise SystemExit(f'가맹점 수가 20% 넘게 줄어 멈춤({prev["status"]["count"]:,} → {len(stores):,}) — 확인 후 --force')
     status = {'updated_at': datetime.now(KST).isoformat(timespec='seconds'), 'base': base or (prev or {}).get('status', {}).get('base'),
               'count': len(stores), 'markets': len(out_markets), 'latest_year': int(latest) if latest else None,
-              'digital': sum(s[5] for s in stores), 'located': geo['std'] + geo['kakao'], 'std': bool(std), 'cats': dict(cats)}
+              'digital': sum(s[5] for s in stores), 'located': geo['std'] + geo['kakao'] + geo['dong'], 'std': bool(std), 'cats': dict(cats)}
     data = {'status': status, 'markets': out_markets, 'stores': stores}
     if prev and {k: v for k, v in prev.items() if k != 'status'} == {k: v for k, v in data.items() if k != 'status'}:
         log('바뀐 것 없음')

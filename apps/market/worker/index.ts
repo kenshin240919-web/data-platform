@@ -51,7 +51,7 @@ async function place(env:Env,s:StoreRow){
   const m=data().markets[s[2]];
   if(!env.KAKAO_REST_KEY)return {found:false,off:true};
   const loc=located(m);
-  const q=new URLSearchParams({query:loc?s[1]:`${m.name} ${s[1]}`,size:'10',...(loc?{x:String(m.lon),y:String(m.lat),radius:'1500',sort:'distance'}:{})});
+  const q=new URLSearchParams({query:loc?s[1]:`${m.name} ${s[1]}`,size:'10',...(loc?{x:String(m.lon),y:String(m.lat),radius:m.geo==='dong'?'3000':'1500',sort:'distance'}:{})});
   const r=await fetch(`https://dapi.kakao.com/v2/local/search/keyword.json?${q}`,{headers:{Authorization:`KakaoAK ${env.KAKAO_REST_KEY}`},signal:AbortSignal.timeout(6000)});
   if(!r.ok)return {found:false,error:r.status};
   const d=await r.json() as {documents?:Record<string,string>[]};

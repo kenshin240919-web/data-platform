@@ -33,8 +33,8 @@ export const sidoSlug=(s:string)=>SIDOS.find(x=>x[0]===s)?.[1]??'etc';
 export const sidoFull=(s:string)=>SIDOS.find(x=>x[0]===s)?.[2]??s;
 
 export type Std={mtype?:string;cycle?:string;stores?:string;goods?:string;toilet?:boolean;parking?:boolean;year?:string;tel?:string};
-/** 시장·상점가. geo: std(전통시장 표준데이터 좌표)·kakao(카카오 검색)·area(이름 속 시군구 중심 — 내 주변 검색엔 안 씀). */
-export type Market={id:string;name:string;sido:string;addr?:string;jibun?:string;lat?:number;lon?:number;geo?:'std'|'kakao'|'area';region?:string;region_name?:string;
+/** 시장·상점가. geo: std(전통시장 표준데이터 좌표)·kakao(카카오 검색)·dong(이름 속 동 중심, 대략)·area(이름 속 시군구 중심 — 내 주변 검색엔 안 씀). */
+export type Market={id:string;name:string;sido:string;addr?:string;jibun?:string;lat?:number;lon?:number;geo?:'std'|'kakao'|'dong'|'area';region?:string;region_name?:string;
   std?:Std;n:number;d:number;new:number;cats:Partial<Record<Cat,number>>};
 /** 가맹점 한 줄: [id, 이름, 시장 번호, 품목 묶음, 취급품목 원문, 디지털 가맹(1/0), 가맹 등록년도] — 모두 지류형 가맹. */
 export type StoreRow=[string,string,number,Cat,string|null,0|1,number|null];
@@ -46,7 +46,9 @@ export const pct=(a:number,b:number)=>b?Math.round(a/b*100):0;
 export const esc=(s:unknown)=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]!);
 export const marketPath=(id:string)=>`/market/${id}`;
 export const storePath=(id:string)=>`/store/${id}`;
-export const located=(m:Pick<Market,'geo'>)=>m.geo==='std'||m.geo==='kakao';
+/** 시장 자리 좌표(표준데이터·카카오 장소) — 동 중심은 아님. 길찾기·JSON-LD geo에만 */
+export const exact=(m:Pick<Market,'geo'>)=>m.geo==='std'||m.geo==='kakao';
+export const located=(m:Pick<Market,'geo'>)=>m.geo==='std'||m.geo==='kakao'||m.geo==='dong';
 export const km=(v:number)=>v<1?`${Math.round(v*1000)}m`:`${v.toFixed(1)}km`;
 export const distKm=(aLat:number,aLon:number,bLat:number,bLon:number)=>{const r=Math.PI/180,dLat=(bLat-aLat)*r,dLon=(bLon-aLon)*r;const h=Math.sin(dLat/2)**2+Math.cos(aLat*r)*Math.cos(bLat*r)*Math.sin(dLon/2)**2;return 12742*Math.asin(Math.sqrt(h));};
 export const mapUrl=(p:{name:string;lat?:number|null;lon?:number|null;addr?:string|null})=>p.lat!=null&&p.lon!=null?`https://map.kakao.com/link/to/${encodeURIComponent(p.name)},${p.lat},${p.lon}`:`https://map.kakao.com/?q=${encodeURIComponent(p.addr??p.name)}`;
