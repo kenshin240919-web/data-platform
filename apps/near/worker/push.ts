@@ -50,11 +50,12 @@ async function encrypt(sub:Sub,text:string){
   const rs=new Uint8Array([0,0,16,0]);  // 4096
   return cat(salt,rs,new Uint8Array([as.length]),as,ct);
 }
+// urgency high = FCM 높은 우선순위: 삼성 인터넷처럼 절전(잠자는 앱) 대상이 되기 쉬운 브라우저도 바로 깨워서 받게 함(normal이면 늦거나 안 옴).
 export type Msg={title:string;body:string;url:string;tag:string};
 /** 한 구독에 보내기. 404·410(구독 끝남)이면 'gone'. */
 export async function send(env:PushEnv,sub:Sub,msg:Msg):Promise<'ok'|'gone'|'fail'>{
   try{
-    const r=await fetch(sub.endpoint,{method:'POST',headers:{authorization:await vapidAuth(env,sub.endpoint),'content-encoding':'aes128gcm','content-type':'application/octet-stream',ttl:String(4*3600),urgency:'normal'},body:await encrypt(sub,JSON.stringify(msg))});
+    const r=await fetch(sub.endpoint,{method:'POST',headers:{authorization:await vapidAuth(env,sub.endpoint),'content-encoding':'aes128gcm','content-type':'application/octet-stream',ttl:String(4*3600),urgency:'high'},body:await encrypt(sub,JSON.stringify(msg))});
     return r.status===404||r.status===410?'gone':r.ok?'ok':'fail';
   }catch{return 'fail';}
 }
