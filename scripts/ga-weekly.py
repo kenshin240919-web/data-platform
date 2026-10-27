@@ -132,7 +132,7 @@ for site in ORDER:
         'pages': top(pid, 'pagePath', 'screenPageViews'),
         'landing': top(pid, 'landingPage', 'sessions'),
         'events': dict(top(pid, 'eventName', 'eventCount', 10, {'dimensionFilter': {'filter': {
-            'fieldName': 'eventName', 'inListFilter': {'values': ['share', 'favorite']}}}})),
+            'fieldName': 'eventName', 'inListFilter': {'values': ['share', 'favorite', 'install_hint', 'install_click', 'install_done']}}}})),
     }
 
 L = [f'# 내근처 GA 주간 보고서 ({start} ~ {end})', '',
@@ -142,14 +142,15 @@ sum_p = sum(d['prev']['activeUsers'] for d in data.values())
 sum_v = sum(d['this']['screenPageViews'] for d in data.values())
 L += [f'**전체**: 사용자 {n(sum_u)}명({pct(sum_u, sum_p)}) · 조회 {n(sum_v)}회 · 사이트 {len(data)}/{len(SITES)}', '']
 L += ['## 한눈에 보기', '',
-      '| 사이트 | 사용자 | 증감 | 신규 | 세션 | 조회 | 세션당 조회 | 1인 참여 시간 | 참여율 | 공유 | 즐겨찾기 |',
-      '|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|']
+      '| 사이트 | 사용자 | 증감 | 신규 | 세션 | 조회 | 세션당 조회 | 1인 참여 시간 | 참여율 | 공유 | 즐겨찾기 | 설치 안내 | 설치 누름 | 설치 |',
+      '|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|']
 for site in sorted(data, key=lambda s: -data[s]['this']['activeUsers']):
     t, p, e = data[site]['this'], data[site]['prev'], data[site]['events']
     spp = t['screenPageViews'] / t['sessions'] if t['sessions'] else 0
     L.append(f"| {site} | {n(t['activeUsers'])} | {pct(t['activeUsers'], p['activeUsers'])} | {n(t['newUsers'])} | "
              f"{n(t['sessions'])} | {n(t['screenPageViews'])} | {spp:.1f} | {dur(per_user(t))} | "
-             f"{t['engagementRate'] * 100:.0f}% | {n(e.get('share', 0))} | {n(e.get('favorite', 0))} |")
+             f"{t['engagementRate'] * 100:.0f}% | {n(e.get('share', 0))} | {n(e.get('favorite', 0))} | "
+             f"{n(e.get('install_hint', 0))} | {n(e.get('install_click', 0))} | {n(e.get('install_done', 0))} |")
 L.append('')
 
 for site in ORDER:

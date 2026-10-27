@@ -16,10 +16,10 @@ function ga(n,p){try{window.gtag&&window.gtag('event',n,p)}catch(e){}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mark);else mark();
 document.addEventListener('click',function(e){var t=e.target,b=t&&t.closest&&t.closest('.gj-share,.gj-fav');if(!b)return;e.preventDefault();
 if(b.classList.contains('gj-fav')){var id=b.getAttribute('data-id'),v=L(),i=v.findIndex(function(f){return f.id===id});
-if(i>=0){v.splice(i,1);ga('favorite',{action:'remove',item_id:id})}else{v.unshift({id:id,name:b.getAttribute('data-name'),sub:b.getAttribute('data-sub')||'',url:b.getAttribute('data-url'),at:Date.now()});ga('favorite',{action:'add',item_id:id})}
+if(i>=0){v.splice(i,1);ga('favorite',{action:'remove',item_id:id})}else{v.unshift({id:id,name:b.getAttribute('data-name'),sub:b.getAttribute('data-sub')||'',url:b.getAttribute('data-url'),at:Date.now()});ga('favorite',{action:'add',item_id:id});try{window.dispatchEvent(new CustomEvent('gj-moment',{detail:'fav'}))}catch(x){}}
 S(v);mark();return}
 var u=location.href.split('#')[0],d=document.querySelector('meta[name=description]'),x=d?d.getAttribute('content'):'';
-ga('share',{method:navigator.share?'native':'copy',item_id:location.pathname});
+ga('share',{method:navigator.share?'native':'copy',item_id:location.pathname});setTimeout(function(){try{window.dispatchEvent(new CustomEvent('gj-moment',{detail:'share'}))}catch(x){}},1500);
 if(navigator.share){navigator.share({title:document.title,text:x,url:u}).catch(function(){});return}
 var o=b.textContent,ok=function(){b.textContent='✅ 링크를 복사했어요';setTimeout(function(){b.textContent=o},1800)},no=function(){window.prompt('이 주소를 복사하세요',u)};
 if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(u).then(ok,no);else no()})})();`;

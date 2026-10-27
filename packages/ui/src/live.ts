@@ -90,7 +90,7 @@ m.setBounds(bd,40,20,40,20)}).catch(function(){pick.innerHTML='<b>지도를 불�
 /* ⑤ 카카오톡 공유 */
 document.addEventListener('click',function(ev){var b=ev.target&&ev.target.closest&&ev.target.closest('.gj-kakao');if(!b)return;ev.preventDefault();
 var u=location.href.split('#')[0],m=function(s){var x=document.querySelector(s);return x?x.getAttribute('content'):''},img=m('meta[property="og:image"]')||(location.origin+'/og.png');
-ga('share',{method:'kakao',item_id:location.pathname});
+ga('share',{method:'kakao',item_id:location.pathname});setTimeout(function(){try{window.dispatchEvent(new CustomEvent('gj-moment',{detail:'share'}))}catch(x){}},1500);
 kakao().then(function(K){K.Share.sendDefault({objectType:'feed',content:{title:document.title,description:m('meta[name=description]').slice(0,100),imageUrl:img,link:{mobileWebUrl:u,webUrl:u}},buttons:[{title:'자세히 보기',link:{mobileWebUrl:u,webUrl:u}}]})}).catch(function(){window.prompt('이 주소를 복사하세요',u)})});
 if(!KEY)document.documentElement.classList.add('gj-nokakao');
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',scan);else scan();
