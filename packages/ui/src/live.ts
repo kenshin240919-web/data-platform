@@ -7,12 +7,12 @@
 //  ⑤ 💬 카카오톡 공유      .gj-kakao 버튼(늘 넣고, 키 없는 사이트는 html.gj-nokakao로 숨김)
 // 카카오·네이버 결과는 저장하지 않는다(브라우저에서 보여 주기만). 방문자 위치는 이 기능들로 서버에 보내지 않는다(장소 좌표만).
 
-/** 카카오 JavaScript 키(브라우저용 공개 키 — 그 카카오 앱에 등록한 도메인에서만 동작). 카카오 앱 하나에 도메인이 10개까지라 사이트를 나눔.
- * map: 카카오맵 무료 쿼터 앱('내근처학원', 첫 번째로 카카오맵을 켠 앱)만 true — 다른 앱에서 지도를 쓰면 유료가 될 수 있음.
- * 목록에 없거나 키가 빈 사이트는 ④·⑤·카카오내비를 숨김(길안내 고르기는 카카오맵·네이버·T맵으로 동작). */
+/** 카카오 JavaScript 키(브라우저용 공개 키 — 키마다 등록한 'JS SDK 도메인'에서만 동작, 키 하나에 도메인 10개까지).
+ * 둘 다 카카오 앱 '내근처학원'(카카오맵 무료 쿼터 앱)의 키라 지도도 모두 무료 쿼터 안(10/27 사용자 등록).
+ * 목록에 없거나 키가 빈 사이트는 ④·⑤·카카오내비를 숨김(길안내 고르기는 카카오맵·네이버·T맵으로 동작). 새 사이트는 키에 도메인을 추가하고 여기에도. */
 export const KAKAO_APPS:{key:string;map:boolean;hosts:string[]}[]=[
-  {key:'cac688b824d2cb8e2ac694915275f714',map:true,hosts:['trip','pharmacy','hospital','oil','parking','charge','pet','rest','service','minwon']},
-  {key:'',map:false,hosts:['weather','traffic','academy','school','near']},
+  {key:'88ef8988f1ee3212281e2ea85a80c54d',map:true,hosts:['trip','pharmacy','hospital','oil','parking','charge','pet','rest','service','minwon']}, // 키 이름 '가이드정'
+  {key:'0972914c99ee9b4b415844e8c2ad7537',map:true,hosts:['weather','traffic','academy','school','near']}, // 키 이름 '내근처 공유'
 ];
 const KAKAO_BY_HOST=Object.fromEntries(KAKAO_APPS.flatMap(a=>a.key?a.hosts.map(h=>[h,[a.key,a.map?1:0]]):[]));
 export const NEAR_API='https://near.guidejung.com';
