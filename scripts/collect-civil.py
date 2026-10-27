@@ -51,6 +51,12 @@ def span(b, e):
     return [b, e] if b and e and b != e else None
 
 
+import time
+START = time.monotonic()
+BUDGET_MIN = float(os.environ.get('CIVIL_BUDGET_MIN') or 80)  # 이 시간이 지나면 받던 것을 멈추고 지금까지 것을 저장(다음 실행이 이어서)
+left = lambda: BUDGET_MIN * 60 - (time.monotonic() - START)
+
+
 def get(url, timeout=60):
     st, d = A.http_json(url, timeout=timeout)
     return d if st == 200 else None
@@ -61,7 +67,9 @@ def pages(path, key, rows=100, extra=None, threads=8):
     def one(page):
         q = urllib.parse.urlencode({'serviceKey': key, 'pageNo': page, 'numOfRows': rows, 'returnType': 'json', 'type': 'json', **(extra or {})})
         for _ in range(3):
-            d = get(f'{API}/{path}?{q}', 90)
+            if left() < 0:
+                return None
+            d = get(f'{API}/{path}?{q}', 40)
             try:
                 body = d['response']['body'] if 'response' in d else d['body']
                 it = (body.get('items') or {}).get('item') or []
@@ -125,7 +133,7 @@ def docs(key, prev, full):
         extra = {'cond[DAT_UPDT_PNT::GTE]': (datetime.fromisoformat(since) - timedelta(days=2)).strftime('%Y%m%d%H%M%S')}
     else:
         by = {}
-    rows = pages('1741000/kiosk_info/certificate_info', key, extra=extra, threads=8)
+    rows = pages('1741000/kiosk_info/certificate_info', key, extra=extra, threads=16)
     if rows is None:
         log('서류 목록을 받지 못해 지난 목록을 씁니다')
         return table, by, since
@@ -271,7 +279,9 @@ def main():
             p['lat'], p['lon'], p['geo_at'] = q['lat'], q['lon'], q.get('geo_at') or ''
     kakao = os.environ.get('KAKAO_REST_KEY', '').strip()
     if kakao:
-        K.GEO_LIMIT = 15000  # 첫 실행 약 12,600곳(발급기·주민센터·우체국), 이후는 새 주소만
+        # 첫 실행 약 12,600곳(발급기·주민센터·우체국)은 한 번에 다 못 해서 남은 시간만큼(약 0.25초/곳) — 나머지는 다음 실행이 이어서
+        K.GEO_LIMIT = max(0, min(15000, int(left() / 0.3) - 200))
+        log(f'좌표 변환 이번 한도 {K.GEO_LIMIT:,}곳 (남은 시간 {left() / 60:.0f}분)')
         K.geocode(items, kakao)
     placed = K.place(items, regions)
     items = [compact(p) for p in placed]
