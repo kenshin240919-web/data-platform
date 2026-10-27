@@ -310,7 +310,7 @@ def main():
     key = os.environ.get('KAKAO_REST_KEY')
     order = sorted(groups.items(), key=lambda x: -len(x[1]))
 
-    by_sido = defaultdict(list)  # 이름이 조금 다른 곳('포항죽도시장'·'죽도시장')은 줄인 이름이 서로 들어 있고 시도 안에서 하나뿐일 때만
+    by_sido = defaultdict(list)  # 이름이 조금 다른 곳('남대문로'·'남대문')은 줄인 이름이 서로 들어 있고 시도 안에서 하나뿐일 때만
     for (sd, _), v in std.items():
         if all(v is not x for _, x in by_sido[sd]):
             by_sido[sd].append((norm(stem_of(v['name'])), v))
@@ -320,7 +320,9 @@ def main():
         st = norm(stem_of(name))
         if hit or len(st) < 2:
             return hit
-        cand = [v for s, v in by_sido[sido] if s and (s == st or (len(s) >= 3 and s in st) or (len(st) >= 3 and st in s))]
+        # 짧은 쪽이 3글자 넘고 긴 쪽의 70% 넘게 겹칠 때만('사거리'가 '삼익사거리'·'지석사거리'에 다 붙던 것 막기)
+        near_ok = lambda a, b: len(a) >= 3 and a in b and len(a) / len(b) >= 0.7
+        cand = [v for s, v in by_sido[sido] if s and (s == st or near_ok(s, st) or near_ok(st, s))]
         return cand[0] if len(cand) == 1 else None
 
     def due(ck):
