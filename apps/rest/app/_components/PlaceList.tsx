@@ -1,17 +1,17 @@
 'use client';
 // 목록: 종류 칩(찜질방·1인 목욕·안마원·피부관리), 세부 칩(목욕탕·찜질방·한증막 / 세신샵 / 안마시술소 / 왁싱 …), 가까운 순.
-// 카드마다 📞 전화 · 🧭 길찾기 버튼(가격·영업 시간은 공공데이터에 없어 상세에서 네이버 지도로 안내).
+// 카드마다 📞 전화. 길찾기는 상세에서만(한 번 더 눌러 장소를 확인하게 — 클릭·체류). 가격·영업 시간은 공공데이터에 없어 상세에서 네이버 지도로 안내.
 import {useMemo,useState} from 'react';
-import {KIND_ORDER,KINDS,km,mapUrl,n,shopPath,sinceLine,telHref,type Kind,type Slim} from '../../lib/fmt';
+import {KIND_ORDER,KINDS,km,n,shopPath,sinceLine,telHref,type Kind,type Slim} from '../../lib/fmt';
 
 export function PlaceCard({p}:{p:Slim}){
   return <div className="rs-card">
-    <a className="rs-card-main" href={shopPath(p.id)}>
+    <a className="rs-card-main" data-gj-pt={p.lat!=null&&p.lon!=null?`${p.lat},${p.lon}`:undefined} data-gj-name={p.name} href={shopPath(p.id)}>
       <span className="rs-kind" aria-hidden="true">{KINDS[p.kind].icon}</span>
       <span className="rs-card-body"><b>{p.name}</b>
         <small>{p.km!=null&&<span className="rs-km">{km(p.km)}</span>}{p.sub&&<span className="rs-tag">{p.sub}</span>}{sinceLine(p.since)}</small>
         <small className="muted">{p.addr}</small></span></a>
-    <span className="rs-acts">{p.tel&&<a href={telHref(p.tel)} aria-label={`${p.name} 전화`}>📞</a>}<a href={mapUrl(p)} target="_blank" rel="noopener" aria-label={`${p.name} 길찾기`}>🧭</a></span>
+    {p.tel&&<span className="rs-acts"><a href={telHref(p.tel)} aria-label={`${p.name} 전화`}>📞</a></span>}
   </div>;
 }
 export function PlaceList({items,limit=30,empty='조건에 맞는 곳이 없어요.',kind:k0}:{items:Slim[];limit?:number;empty?:string;kind?:Kind|'all'}){

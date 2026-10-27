@@ -72,14 +72,14 @@ export function StationBoard({region,label,origin,snap,road,extra=[]}:{region:Ch
           <span className="ev-count"><b>{sum.ok}</b>/{sum.total}<small>사용 가능</small></span>
           <span className="ev-meta">{sum.fast>0&&<span className="tag fast">급속 {sum.fastOk}/{sum.fast}</span>}{sum.maxKw>0&&<span className="tag">최대 {sum.maxKw}kW</span>}{s.freeParking&&<span className="tag">무료 주차</span>}{is24h(s)&&<span className="tag">24시간</span>}{km!==null&&<span className="tag dist">{fmtKm(km)}</span>}</span>
         </button>
-        <nav className="ev-quick" aria-label={`${s.name} 바로가기`}>
-          <a className="go" href={`https://map.kakao.com/link/to/${encodeURIComponent(s.name)},${s.lat},${s.lng}`} target="_blank" rel="noopener noreferrer"><span aria-hidden="true">🧭</span>길찾기</a>
+        <nav data-gj-pt={`${s.lat},${s.lng}`} data-gj-name={s.name} className="ev-quick" aria-label={`${s.name} 바로가기`}>
           <a href={`${TRIP}/search?lat=${s.lat}&lon=${s.lng}&radius_km=3`}><span aria-hidden="true">🚗</span>갈 만한 곳</a>
           <a href={`${WEATHER}/region/${region.weather}`}><span aria-hidden="true">🌤️</span>날씨</a>
           <a href={road??TRAFFIC}><span aria-hidden="true">🛣️</span>고속도로</a>
         </nav>
         {isOpen&&<div className="ev-detail">
           <p className="small">{s.addr}</p>
+          <p className="ev-go"><a href={`https://map.kakao.com/link/to/${encodeURIComponent(s.name)},${s.lat},${s.lng}`} target="_blank" rel="noopener noreferrer">🧭 길찾기</a></p>
           <ul className="ev-chargers">{s.chargers.map(c=>{const st=STAT[c.stat]??STAT[9];return <li key={c.id} className={`st-${st.tone}`}><span>{c.id}번</span><span>{typeName(c.type)}{c.kw?` · ${c.kw}kW`:''}{isFast(c)?' · 급속':''}</span><b>{st.text}</b><small>{ago(c.upd)}</small></li>;})}</ul>
           <section className="gj-around gj-around-inline" data-lat={s.lat} data-lon={s.lng} data-cats="CE7,CS2,FD6" data-r="500" aria-label="충전하는 동안 걸어서 갈 곳"><h3>☕ 충전하는 동안 걸어서 갈 곳</h3></section>
           <dl className="ev-facts"><div><dt>이용시간</dt><dd>{s.useTime||'확인 필요'}</dd></div><div><dt>운영기관</dt><dd>{s.busi}{s.call&&<> · <a href={`tel:${s.call}`}>{s.call}</a></>}</dd></div><div><dt>주차</dt><dd>{s.freeParking?'무료 주차':'유료이거나 확인 필요'}</dd></div>{s.limited&&<div><dt>이용 제한</dt><dd>{s.limited}</dd></div>}</dl>

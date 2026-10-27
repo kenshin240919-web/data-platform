@@ -1,20 +1,20 @@
 'use client';
 // 목록: 종류 칩(동물병원·동물약국·펫호텔·카페·펫택시), 세부 칩(24시·동물메디컬센터 / 동물약국 / 고양이 카페 …), 가까운 순.
-// 동물약국은 영업 시간이 있으면 지금 상태(영업 중·곧 닫음·닫음)를 1분마다 다시 계산. 카드마다 📞 전화 · 🧭 길찾기.
+// 동물약국은 영업 시간이 있으면 지금 상태(영업 중·곧 닫음·닫음)를 1분마다 다시 계산. 카드마다 📞 전화(길찾기는 상세에서 — 한 번 더 눌러 장소를 확인한 뒤).
 import {useEffect,useMemo,useState} from 'react';
-import {KIND_ORDER,KINDS,km,mapUrl,n,placePath,sinceLine,stateOf,telHref,type Kind,type Slim} from '../../lib/fmt';
+import {KIND_ORDER,KINDS,km,n,placePath,sinceLine,stateOf,telHref,type Kind,type Slim} from '../../lib/fmt';
 
 const isOpen=(p:Slim)=>{const s=stateOf(p);return !!s&&s.state!=='closed';};
 function useTick(){const [t,setT]=useState(0);useEffect(()=>{setT(Date.now());const i=setInterval(()=>setT(Date.now()),60000);return ()=>clearInterval(i);},[]);return t;}
 export function PlaceCard({p,tick}:{p:Slim;tick?:number}){
   const st=tick?stateOf(p):null;
   return <div className={`pt-card${st?' '+st.state:''}`}>
-    <a className="pt-card-main" href={placePath(p.id)}>
+    <a className="pt-card-main" data-gj-pt={p.lat!=null&&p.lon!=null?`${p.lat},${p.lon}`:undefined} data-gj-name={p.name} href={placePath(p.id)}>
       <span className="pt-kind" aria-hidden="true">{KINDS[p.kind].icon}</span>
       <span className="pt-card-body"><b>{p.name}</b>
         <small>{p.km!=null&&<span className="pt-km">{km(p.km)}</span>}{p.sub&&<span className={p.sub==='24시'?'pt-tag h24':'pt-tag'}>{p.sub}</span>}{st?<span className="pt-state"><i className="pt-dot"/>{st.label}</span>:sinceLine(p.since)}</small>
         <small className="muted">{p.addr}</small></span></a>
-    <span className="pt-acts">{p.tel&&<a href={telHref(p.tel)} aria-label={`${p.name} 전화`}>📞</a>}<a href={mapUrl(p)} target="_blank" rel="noopener" aria-label={`${p.name} 길찾기`}>🧭</a></span>
+    {p.tel&&<span className="pt-acts"><a href={telHref(p.tel)} aria-label={`${p.name} 전화`}>📞</a></span>}
   </div>;
 }
 export function PlaceList({items,limit=30,empty='조건에 맞는 곳이 없어요.',kind:k0}:{items:Slim[];limit?:number;empty?:string;kind?:Kind|'all'}){

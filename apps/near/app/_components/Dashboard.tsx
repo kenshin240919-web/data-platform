@@ -1,6 +1,6 @@
 'use client';
 // 첫 화면 3초 답: 내 위치(또는 접속 지역) 하나로 자매 사이트의 '지금' 정보를 한 화면에.
-// 카드마다 큰 답 한 줄 + 바로 할 일 버튼(길찾기·전화·더 보기). 가까운 곳에 없으면 반경을 넓혀 가장 가까운 곳을 보여 준다(빈 카드 대신 답).
+// 카드마다 큰 답 한 줄 + 바로 할 일 버튼(전화·더 보기 — 길찾기는 상세에서). 가까운 곳에 없으면 반경을 넓혀 가장 가까운 곳을 보여 준다(빈 카드 대신 답).
 import {useEffect,useState} from 'react';
 import {LocateCard,PosNote,useMyPosition,here} from '@guidejung/ui/geo';
 import type {Area} from '@guidejung/ui/network';
@@ -12,7 +12,6 @@ type Card={icon:string;title:string;answer?:string;vs?:{icon:string;head:string;
 type Res=Record<string,Card|null|undefined>;
 type Place={id:string;name:string;km:number;lat?:number;lon?:number;tel?:string|null};
 const U=L.SITE_URL;
-const route=(p:Place)=>p.lat!=null&&p.lon!=null?{label:'🧭 길찾기',href:`https://map.kakao.com/link/to/${encodeURIComponent(p.name)},${p.lat},${p.lon}`}:null;
 const call=(p:Place)=>p.tel?{label:'📞 전화',href:`tel:${p.tel.replace(/[^0-9]/g,'')}`}:null;
 const acts=(...a:(Act|null|false|undefined)[])=>a.filter(Boolean) as Act[];
 
@@ -35,26 +34,26 @@ export function Dashboard({areas}:{areas:Area[]}){
     widen([2,5,10],r=>L.pharmacyOpen(lat,lon,r)).then(x=>{if(!x)return put('pharmacy',null);const p=x.d.items[0] as Place|undefined;
       put('pharmacy',{icon:'💊',title:'지금 문 연 약국',answer:x.d.total?`${x.r}km 안 ${n(x.d.total)}곳`:'10km 안에 없어요',badge:p?'지금 영업 중':undefined,
         sub:p?`가장 가까운 곳 ${p.name} · ${km(p.km)}`:'밤·휴일 약국은 지역 페이지에서',href:p?`${U.pharmacy}/pharmacy/${p.id}`:`${U.pharmacy}/region/${a.c}`,state:x.d.total?'good':'warn',
-        acts:p?acts(route(p),call(p),{label:'목록',href:`${U.pharmacy}/region/${a.c}`}):[{label:'🌙 밤·휴일 약국',href:`${U.pharmacy}/region/${a.c}`}]});});
+        acts:p?acts(call(p),{label:'목록',href:`${U.pharmacy}/region/${a.c}`}):[{label:'🌙 밤·휴일 약국',href:`${U.pharmacy}/region/${a.c}`}]});});
     widen([2,5,10],r=>L.hospitalOpen(lat,lon,r)).then(x=>{if(!x)return put('hospital',null);const p=x.d.items[0] as (Place&{div?:string|null})|undefined;
       put('hospital',{icon:'🏥',title:'지금 진료하는 병원',answer:x.d.total?`${x.r}km 안 ${n(x.d.total)}곳`:'10km 안에 없어요',badge:p?'지금 진료 중':undefined,
         sub:p?`가장 가까운 곳 ${p.name}${p.div?`(${p.div})`:''} · ${km(p.km)}`:'응급실은 24시간 — 남은 병상 보기',href:p?`${U.hospital}/hospital/${p.id}`:`${U.hospital}/er`,state:x.d.total?'good':'warn',
-        acts:acts(p&&route(p),p&&call(p),{label:'🚨 응급실',href:`${U.hospital}/er`})});});
+        acts:acts(p&&call(p),{label:'🚨 응급실',href:`${U.hospital}/er`})});});
     widen([3,5,10],r=>L.cheapOil(lat,lon,r)).then(x=>{if(!x)return put('oil',null);const b=x.d.best as (Place&{prices:{B027?:number|null}})|null;
       put('oil',{icon:'⛽',title:'가까운 최저가 주유소',answer:b?`휘발유 ${n(b.prices.B027!)}원`:'가격 정보 없음',sub:b?`${b.name} · ${x.r}km 안 가장 싼 곳 · ${km(b.km)}`:'',
-        href:b?`${U.oil}/station/${b.id}`:a.o?`${U.oil}/region/${a.o}`:U.oil,acts:acts(b&&route(b),{label:'경유 최저가',href:`${U.oil}/diesel`})});});
+        href:b?`${U.oil}/station/${b.id}`:a.o?`${U.oil}/region/${a.o}`:U.oil,acts:acts({label:'경유 최저가',href:`${U.oil}/diesel`})});});
     widen([1,3],r=>L.freeParking(lat,lon,r)).then(async x=>{if(!x)return put('parking',null);let p=x.d.items[0] as Place|undefined,free=!!p;
       if(!p){const any=await widen([1,3,5],r=>L.parking(lat,lon,r));p=any?.d.items[0] as Place|undefined;}  // 무료가 없으면 가장 가까운 주차장(유료)이라도
       put('parking',{icon:'🅿️',title:free?'무료 공영 주차장':'가까운 공영 주차장',answer:free?`${x.r}km 안 무료 ${n(x.d.total)}곳`:p?`무료는 없어요 · 유료 ${km(p.km)}`:'5km 안에 없어요',
         sub:p?`가장 가까운 곳 ${p.name} · ${km(p.km)}`:'시간별 예상 요금은 주차장 사이트에서',href:p?`${U.parking}/parking/${p.id}`:`${U.parking}/region/${a.c}`,state:free?'good':'none',
-        acts:acts(p&&route(p),{label:'💰 시간별 요금',href:U.parking})});});
+        acts:acts({label:'💰 시간별 요금',href:U.parking})});});
     L.chargers(a).then(d=>put('charge',d?{icon:'⚡',title:`${a.n} 전기차 충전`,answer:`급속 ${n(d.ok)}대 비어 있음`,badge:d.ok?'지금 충전 가능':undefined,sub:`충전소 ${n(d.stations)}곳 · 급속 ${n(d.fast)}대`,
       href:`${U.charge}/region/${a.c}`,state:d.ok?'good':'warn',acts:[{label:'📍 가까운 순 보기',href:U.charge}]}:null));
     L.trip(lat,lon,'&kind=place,festival',20).then(d=>{const i=d?.items[0];put('trip',d?{icon:'🚗',title:'가까운 가볼만한곳',answer:d.total?`20km 안 ${n(d.total)}곳`:'20km 안에 없어요',sub:i?`가까운 곳 ${i.name}`:'',
       href:i?L.tripPath(i):`${U.trip}/search?lat=${lat.toFixed(4)}&lon=${lon.toFixed(4)}&radius_km=20`,acts:[{label:'전체 보기',href:`${U.trip}/search?lat=${lat.toFixed(4)}&lon=${lon.toFixed(4)}&radius_km=20`},{label:'🍽️ 맛집',href:`${U.trip}/search?lat=${lat.toFixed(4)}&lon=${lon.toFixed(4)}&radius_km=5&kind=food`}]}:null);});
     widen([2,5,10],r=>L.repair(lat,lon,'repair',r)).then(x=>{if(!x)return put('service',null);const p=x.d.items[0] as (Place&{sub?:string})|undefined;
       put('service',{icon:'🔧',title:'자동차 정비소',answer:x.d.total?`${x.r}km 안 ${n(x.d.total)}곳`:'10km 안에 없어요',sub:p?`가장 가까운 곳 ${p.name}${p.sub?`(${p.sub})`:''} · ${km(p.km)}`:'',
-        href:p?`${U.service}/center/${p.id}`:`${U.service}/region/${a.c}`,acts:acts(p&&route(p),p&&call(p),{label:'🔍 검사소',href:`${U.service}/inspection`})});});
+        href:p?`${U.service}/center/${p.id}`:`${U.service}/region/${a.c}`,acts:acts(p&&call(p),{label:'🔍 검사소',href:`${U.service}/inspection`})});});
     return ()=>{on=false;};
   // eslint-disable-next-line react-hooks/exhaustive-deps
   },[pos?.lat,pos?.lon]);

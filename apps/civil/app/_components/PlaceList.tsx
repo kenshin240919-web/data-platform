@@ -1,7 +1,7 @@
 'use client';
 // 목록: 종류 칩, '지금 운영 중만' 칩, 가까운 순. 운영 상태는 1분마다 브라우저에서 다시 계산(무인민원발급기·우체국·여권·민원실).
 import {useEffect,useMemo,useState} from 'react';
-import {KIND_ORDER,KINDS,km,kstNow,mapUrl,n,placePath,stateOf,telHref,type Kind,type Slim} from '../../lib/fmt';
+import {KIND_ORDER,KINDS,km,kstNow,n,placePath,stateOf,telHref,type Kind,type Slim} from '../../lib/fmt';
 
 function useNow(){const [t,setT]=useState<ReturnType<typeof kstNow>|null>(null);useEffect(()=>{setT(kstNow());const i=setInterval(()=>setT(kstNow()),60e3);return ()=>clearInterval(i);},[]);return t;}
 export function State({p,now}:{p:Slim;now:ReturnType<typeof kstNow>|null}){
@@ -9,12 +9,12 @@ export function State({p,now}:{p:Slim;now:ReturnType<typeof kstNow>|null}){
 }
 export function PlaceCard({p,now}:{p:Slim;now:ReturnType<typeof kstNow>|null}){
   return <div className="cv-card">
-    <a className="cv-card-main" href={placePath(p.id)}>
+    <a className="cv-card-main" data-gj-pt={p.lat!=null&&p.lon!=null?`${p.lat},${p.lon}`:undefined} data-gj-name={p.name} href={placePath(p.id)}>
       <span className="cv-kind" aria-hidden="true">{KINDS[p.kind].icon}</span>
       <span className="cv-card-body"><b>{p.name}</b>
         <small>{p.km!=null&&<span className="cv-km">{km(p.km)}</span>}<State p={p} now={now}/>{p.kind==='kiosk'&&p.docs>0&&<span className="cv-tag">서류 {n(p.docs)}종</span>}{p.spot&&<span className="cv-tag">{p.spot}</span>}</small>
         <small className="muted">{p.addr}</small></span></a>
-    <span className="cv-acts">{p.tel&&<a href={telHref(p.tel)} aria-label={`${p.name} 전화`}>📞</a>}<a href={mapUrl(p)} target="_blank" rel="noopener" aria-label={`${p.name} 길찾기`}>🧭</a></span>
+    {p.tel&&<span className="cv-acts"><a href={telHref(p.tel)} aria-label={`${p.name} 전화`}>📞</a></span>}
   </div>;
 }
 export function PlaceList({items,limit=30,empty='조건에 맞는 곳이 없어요.',kind:k0}:{items:Slim[];limit?:number;empty?:string;kind?:Kind|'all'}){

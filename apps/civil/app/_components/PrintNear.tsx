@@ -17,7 +17,7 @@ export function PrintNear({compact=false}:{compact?:boolean}){
     {pos&&!items&&<p className="muted">찾는 중…</p>}
     {items&&!items.length&&<p className="muted">5km 안에서 찾지 못했어요. 가까운 편의점·주민센터 복사기도 확인해 보세요.</p>}
     {list.length>0&&<><p className="cv-answer">5km 안 <b>{n(items!.length)}곳</b> · 가장 가까운 곳 <b>{list[0].name}</b> {km(list[0].km)}</p>
-      <div className="cv-cards">{list.map(s=><div key={s.name+s.lat} className="cv-card"><a className="cv-card-main" href={`https://map.kakao.com/link/to/${encodeURIComponent(s.name)},${s.lat},${s.lon}`} target="_blank" rel="noopener">
+      <div className="cv-cards">{list.map(s=><div key={s.name+s.lat} className="cv-card"><a className="cv-card-main" data-gj-pt={`${s.lat},${s.lon}`} data-gj-name={s.name} href={s.url??`https://map.kakao.com/link/map/${encodeURIComponent(s.name)},${s.lat},${s.lon}`} target="_blank" rel="noopener">
         <span className="cv-kind" aria-hidden="true">📄</span><span className="cv-card-body"><b>{s.name}</b><small><span className="cv-km">{km(s.km)}</span>{s.cat&&<span className="cv-tag">{s.cat}</span>}</small><small className="muted">{s.addr}</small></span></a>
         <span className="cv-acts">{s.tel&&<a href={telHref(s.tel)} aria-label={`${s.name} 전화`}>📞</a>}<a href={`https://map.naver.com/p/search/${encodeURIComponent(s.name+' '+(s.addr??'').split(' ').slice(1,3).join(' '))}`} target="_blank" rel="noopener" aria-label={`${s.name} 네이버 지도`}>🟢</a></span></div>)}</div>
       <p className="muted small">카카오맵·네이버 지역 검색 결과를 실시간으로 보여 드려요(저장하지 않아요). 운영 시간·가격은 매장에 확인하세요.</p></>}
