@@ -1,13 +1,13 @@
 'use client';
 import Link from 'next/link';
-import {km,useMyPosition} from '@guidejung/ui/geo';
+import {type Pos,km,useMyPosition,here} from '@guidejung/ui/geo';
 import {roadName} from '../../lib/format';
 import type {RestLite} from './NearMe';
 
 const won=(s:string)=>Number(s.replace(/[^\d]/g,''))||0;
 /** Rest areas around the visitor (60km, at least 8 nearest); null when the position is unknown. */
-export function nearRests(rests:RestLite[],pos:{lat:number;lon:number}|null){
-  if(!pos)return null;const all=rests.map(r=>({r,d:km(pos.lat,pos.lon,r.lat,r.lng)})).sort((a,b)=>a.d-b.d);
+export function nearRests(rests:RestLite[],pos:Pos|null){
+  if(!pos)return null;const all=rests.map(r=>({r,d:km(here(pos).lat,here(pos).lon,r.lat,r.lng)})).sort((a,b)=>a.d-b.d);
   const within=all.filter(x=>x.d<=60);return (within.length>=8?within:all.slice(0,8));
 }
 const fmtKm=(d:number)=>d<10?`${d.toFixed(1)}km`:`${Math.round(d)}km`;

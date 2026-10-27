@@ -1,7 +1,7 @@
 'use client';
 // 상황별 페이지의 '지금 내 주변' 묶음. 위치 하나로 여러 사이트 API를 함께 불러 카드 목록으로 보여 준다.
 import {useEffect,useState} from 'react';
-import {LocateCard,useMyPosition} from '@guidejung/ui/geo';
+import {LocateCard,useMyPosition,here} from '@guidejung/ui/geo';
 import type {Area} from '@guidejung/ui/network';
 import * as L from '../../lib/live';
 import {km,n} from '../../lib/site';
@@ -62,7 +62,7 @@ async function blocks(kind:string,a:Area,lat:number,lon:number,put:(b:Block)=>vo
 
 export function SituationLive({kind,areas,day}:{kind:string;areas:Area[];day?:string}){
   const {pos,status,request}=useMyPosition();const [list,setList]=useState<Record<string,Block>>({});
-  const a=pos?L.nearestArea(areas,pos.lat,pos.lon):null;
+  const a=pos?L.nearestArea(areas,here(pos).lat,here(pos).lon):null;
   useEffect(()=>{if(!pos||!a)return;let on=true;setList({});blocks(kind,a,pos.lat,pos.lon,b=>{if(on)setList(l=>({...l,[b.key]:b}));},day);return ()=>{on=false;};
   // eslint-disable-next-line react-hooks/exhaustive-deps
   },[pos?.lat,pos?.lon,kind]);

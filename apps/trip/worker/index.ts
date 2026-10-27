@@ -87,6 +87,15 @@ async function sitemap(db:D1,path:string):Promise<Response|null>{
   return urlset(rows.map(r=>({loc:ORIGIN+detailPath(r),lastmod:r.updated})));
 }
 
+/** 같은 칸(약 2km — 브라우저는 칸 중심 좌표만 보냄)·같은 조건의 요청은 데이터센터 캐시에서 바로 돌려준다(응답의 max-age만큼). */
+async function edge(req:Request,ctx:{waitUntil:(p:Promise<unknown>)=>void}|undefined,make:()=>Promise<Response>):Promise<Response>{
+  const c=(globalThis as any).caches?.default as Cache|undefined;if(!c||req.method!=='GET')return make();
+  const hit=await c.match(req).catch(()=>undefined);if(hit)return hit;
+  const res=await make();const cc=res.headers.get('cache-control')??'';
+  if(res.status===200&&/max-age=[1-9]/.test(cc)&&!/no-store|private/.test(cc)){const p=c.put(req,res.clone()).catch(()=>undefined);if(ctx)ctx.waitUntil(p);else await p;}
+  return res;
+}
+
 export default {
   async fetch(req:Request,env:Env,ctx?:Ctx):Promise<Response>{
     const url=new URL(req.url);
@@ -104,7 +113,7 @@ export default {
     if(url.pathname==='/api/search'){
       if(!env.DB)return json({error:'database not bound'},503,0);
       const q:Query={};for(const k of QUERY_KEYS){const v=url.searchParams.get(k);if(v!==null&&v!=='')(q as Record<string,string>)[k]=v;}
-      try{return json(await search(env.DB,q),200,q.when?60:300);}catch(e){console.error('search',e);return json({error:'search failed'},500,0);}
+      return edge(req,ctx,async()=>{try{return json(await search(env.DB!,q),200,q.when?60:300);}catch(e){console.error('search',e);return json({error:'search failed'},500,0);}});
     }
     if(url.pathname==='/api/status'){
       if(!env.DB)return json({db:false},200,0);

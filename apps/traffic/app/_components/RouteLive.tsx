@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import {useEffect,useMemo,useState} from 'react';
 import {AdSlot} from '@guidejung/ui/ads';
-import {LocateCard,km,useMyPosition} from '@guidejung/ui/geo';
+import {LocateCard,km,useMyPosition,here as exactOf} from '@guidejung/ui/geo';
 import {dirLabel,roadName,type Route} from '../../lib/format';
 import type {Cctv,TrafficResponse} from '../../lib/types';
 import {CctvPlayer,cctvName,cctvRoad} from './CctvPlayer';
@@ -46,7 +46,7 @@ export function RouteLive({route}:{route:Route}){
   const jamE=segs.filter(s=>z(data,s.e)?.[1]===3).length,jamS=segs.filter(s=>z(data,s.s)?.[1]===3).length;
   const bad=segs.filter(s=>(z(data,s.e)?.[1]??0)>=2||(z(data,s.s)?.[1]??0)>=2)
     .sort((a,b)=>Math.min(...[z(data,a.e),z(data,a.s)].map(v=>v&&v[0]>0?v[0]:999))-Math.min(...[z(data,b.e),z(data,b.s)].map(v=>v&&v[0]>0?v[0]:999)));
-  const here=useMemo(()=>{if(!pos)return null;let k=-1,bd=Infinity;segs.forEach((s,i)=>{if(!s.mid)return;const d=km(pos.lat,pos.lon,s.mid[0],s.mid[1]);if(d<bd){bd=d;k=i;}});return k<0?null:{k,d:bd};},[pos,segs]);
+  const here=useMemo(()=>{if(!pos)return null;let k=-1,bd=Infinity;segs.forEach((s,i)=>{if(!s.mid)return;const d=km(exactOf(pos).lat,exactOf(pos).lon,s.mid[0],s.mid[1]);if(d<bd){bd=d;k=i;}});return k<0?null:{k,d:bd};},[pos,segs]);
   const card=(s:Seg)=><article key={s.i} className="tf-seg-card">
     <h3>{s.from} → {s.to}</h3>
     <div className="tf-seg-pills"><Speed t={data} id={s.s} label={`◀ ${L}`}/><Speed t={data} id={s.e} label={`${R} ▶`}/></div>
@@ -55,7 +55,7 @@ export function RouteLive({route}:{route:Route}){
   const near=here&&here.d<=30?segs.slice(Math.max(0,here.k-3),here.k+4):null;
   const nearBad=near?near.filter(s=>(z(data,s.e)?.[1]??0)>=2||(z(data,s.s)?.[1]??0)>=2).length:0;
   // Nearest CCTVs of this road to me, closest first.
-  const myCams=pos&&near?cams.map((c,k)=>({c,k,d:km(pos.lat,pos.lon,c.lat,c.lng)})).sort((a,b)=>a.d-b.d).slice(0,6):[];
+  const myCams=pos&&near?cams.map((c,k)=>({c,k,d:km(exactOf(pos).lat,exactOf(pos).lon,c.lat,c.lng)})).sort((a,b)=>a.d-b.d).slice(0,6):[];
   // The table starts around my 구간 (a few before it), otherwise at the route's start.
   const from=here&&here.d<=30?Math.max(0,here.k-4):0;const rows=all?segs:segs.slice(from,from+20);
   const where=pos?.precise?'내 위치':'접속 위치';

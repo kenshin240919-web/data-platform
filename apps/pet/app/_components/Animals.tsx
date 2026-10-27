@@ -2,7 +2,7 @@
 // 보호 중인 아이들·실종 동물 카드(사진은 Worker /photo/{id}가 https로 대신 받아 줌). NearAnimals: 내 위치 주변부터(보호소 좌표 기준,
 // 실종 동물은 시군구 중심 기준) 10→30→50→100km로 넓혀 12마리 이상. 개·고양이·기타 칩.
 import {useEffect,useMemo,useState} from 'react';
-import {LocateCard,useMyPosition} from '@guidejung/ui/geo';
+import {LocateCard,useMyPosition,fixKmNow} from '@guidejung/ui/geo';
 import {animalPath,animalTitle,ddayLabel,daysLeft,km,n,photoPath,type Animal} from '../../lib/fmt';
 
 export function AnimalCard({a,lost}:{a:Animal&{km?:number};lost?:boolean}){
@@ -31,7 +31,7 @@ export function NearAnimals({type='adopt',title}:{type?:'adopt'|'lost';title?:st
   const {pos,status,request}=useMyPosition();
   const [res,setRes]=useState<Res|null>(null);const [radius,setRadius]=useState(0);
   useEffect(()=>{if(!pos)return;let live=true;const steps=[10,30,50,100];
-    const load=(i:number):Promise<void>=>fetch(`/api/animals?type=${type}&lat=${pos.lat.toFixed(3)}&lon=${pos.lon.toFixed(3)}&km=${steps[i]}`).then(x=>x.json()).then((d:Res):Promise<void>|void=>{if(!live)return;
+    const load=(i:number):Promise<void>=>fetch(`/api/animals?type=${type}&lat=${pos.lat.toFixed(3)}&lon=${pos.lon.toFixed(3)}&km=${steps[i]}`).then(x=>x.json()).then(fixKmNow).then((d:Res):Promise<void>|void=>{if(!live)return;
       if(d.total<12&&i<steps.length-1)return load(i+1);setRes(d);setRadius(steps[i]);});
     load(0).catch(()=>{if(live)setRes({total:0,items:[]});});return ()=>{live=false;};},[pos?.lat,pos?.lon,type]); // eslint-disable-line react-hooks/exhaustive-deps
   const lost=type==='lost';

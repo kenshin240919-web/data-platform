@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import {useMemo,useState} from 'react';
-import {broadArea,LocateCard,km,nearest,useMyPosition} from '@guidejung/ui/geo';
+import {broadArea,LocateCard,km,nearest,useMyPosition,here} from '@guidejung/ui/geo';
 import {dirLabel,roadName,type Route} from '../../lib/format';
 import type {Cctv} from '../../lib/types';
 import {CctvPlayer,cctvName} from './CctvPlayer';
@@ -18,15 +18,15 @@ const fmtKm=(d:number)=>d<1?`${Math.round(d*1000)}m`:`${d.toFixed(d<10?1:0)}km`;
 export function NearMe({routes,rests,places}:{routes:Route[];rests:RestLite[];places:{code:string;charge:string;label:string;lat:number;lon:number}[]}){
   const {pos,status,request}=useMyPosition();const {data}=useTraffic();const cctv=useCctv();
   const [play,setPlay]=useState<{list:Cctv[];i:number}|null>(null);
-  const near=useMemo(()=>pos?rests.map(r=>({r,d:km(pos.lat,pos.lon,r.lat,r.lng)})).sort((a,b)=>a.d-b.d):[],[pos,rests]);
+  const near=useMemo(()=>pos?rests.map(r=>({r,d:km(here(pos).lat,here(pos).lon,r.lat,r.lng)})).sort((a,b)=>a.d-b.d):[],[pos,rests]);
   // Nearest roads by their own 구간 points (fallback: rest areas), each with the 구간 closest to me.
   const roads=useMemo(()=>{
     if(!pos)return [];
-    const list=routes.map(r=>{const segs=segments(r);let k=-1,d=Infinity;segs.forEach((s,i)=>{if(!s.mid)return;const x=km(pos.lat,pos.lon,s.mid[0],s.mid[1]);if(x<d){d=x;k=i;}});
+    const list=routes.map(r=>{const segs=segments(r);let k=-1,d=Infinity;segs.forEach((s,i)=>{if(!s.mid)return;const x=km(here(pos).lat,here(pos).lon,s.mid[0],s.mid[1]);if(x<d){d=x;k=i;}});
       if(k<0){const n=near.find(x=>x.r.routeNo===r.no);if(n)d=n.d+1;}return {r,segs,k,d};});
     return list.filter(x=>Number.isFinite(x.d)).sort((a,b)=>a.d-b.d).slice(0,3);
   },[pos,routes,near]);
-  const area=pos?nearest(places,pos.lat,pos.lon):undefined;const place=pos&&!pos.precise?broadArea(places,pos.lat,pos.lon):area?.label;
+  const area=pos?nearest(places,here(pos).lat,here(pos).lon):undefined;const place=pos&&!pos.precise?broadArea(places,here(pos).lat,here(pos).lon):area?.label;
   const where=pos?.precise?'내 근처':place?`${place} 부근`:'접속 위치 부근';
   return <section className="section tf-near">
     {!pos?.precise&&<LocateCard title="내 근처 고속도로 상황 보기" desc="가까운 고속도로의 구간별 속도·CCTV·휴게소를 먼저 보여 드려요" status={status} onClick={request} approxLabel={place}/>}
@@ -35,7 +35,7 @@ export function NearMe({routes,rests,places}:{routes:Route[];rests:RestLite[];pl
       <div className="tf-near-roads">{roads.map(({r,segs,k,d})=>{
         // Without city names (e.g. 순환선), the directions are named after the ICs at both ends of this short window.
         const win=k>=0?segs.slice(Math.max(0,k-1),k+2):[];
-        const cams=cctv.data?routeCctvs(cctv.data.items,r).map(c=>({c,d:km(pos.lat,pos.lon,c.lat,c.lng)})).filter(x=>x.d<=15).sort((a,b)=>a.d-b.d).slice(0,4):[];
+        const cams=cctv.data?routeCctvs(cctv.data.items,r).map(c=>({c,d:km(here(pos).lat,here(pos).lon,c.lat,c.lng)})).filter(x=>x.d<=15).sort((a,b)=>a.d-b.d).slice(0,4):[];
         const camList=cams.map(x=>x.c);
         return <article key={r.no} className="tf-near-card">
           <header><div><h3>{roadName(r)}</h3><span className="muted small">{k>=0?`${segs[k].from} 부근 · ${fmtKm(d)}`:`${r.start} ↔ ${r.end}`}</span></div><Link href={`/road/${r.no}`} className="tf-near-more">노선 전체 →</Link></header>

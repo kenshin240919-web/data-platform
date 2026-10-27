@@ -1,5 +1,6 @@
 'use client';
 // 학원 목록(브라우저에서 Worker /api/search 호출): 과목·학년 칩을 누르면 같은 화면이 바로 바뀌고, '더 보기'로 이어서 봄.
+import {fixKmNow} from '@guidejung/ui/geo';
 import {useEffect,useState} from 'react';
 import {GRADES,MAIN_SUBJECTS,SUBJECTS,type Card} from '../../lib/fmt';
 import {AcademyCard} from './AcademyCard';
@@ -18,7 +19,7 @@ export function LiveList({initial,query,chips=true,title,empty='조건에 맞는
     p.set('page',String(page));
     setBusy(true);setFailed(false);
     let live=true;
-    fetch('/api/search?'+p).then(r=>r.ok?r.json():Promise.reject()).then((d:Result)=>{if(!live)return;setTotal(d.total);setItems(old=>page===1?d.items:[...old,...d.items]);})
+    fetch('/api/search?'+p).then(r=>r.ok?r.json():Promise.reject()).then(fixKmNow).then((d:Result)=>{if(!live)return;setTotal(d.total);setItems(old=>page===1?d.items:[...old,...d.items]);})
       .catch(()=>{if(live)setFailed(true);}).finally(()=>{if(live)setBusy(false);});
     return ()=>{live=false;};
   },[key,page]); // eslint-disable-line react-hooks/exhaustive-deps

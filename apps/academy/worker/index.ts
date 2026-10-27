@@ -161,11 +161,20 @@ async function sitemap(url:URL,env:Env){
   return xml(`<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${results.map(r=>`<url><loc>${SITE}${academyPath(r.id)}</loc></url>`).join('')}</urlset>`);
 }
 
+/** 같은 칸(약 2km — 브라우저는 칸 중심 좌표만 보냄)·같은 조건의 요청은 데이터센터 캐시에서 바로 돌려준다(응답의 max-age만큼). */
+async function edge(req:Request,ctx:{waitUntil:(p:Promise<unknown>)=>void}|undefined,make:()=>Promise<Response>):Promise<Response>{
+  const c=(globalThis as any).caches?.default as Cache|undefined;if(!c||req.method!=='GET')return make();
+  const hit=await c.match(req).catch(()=>undefined);if(hit)return hit;
+  const res=await make();const cc=res.headers.get('cache-control')??'';
+  if(res.status===200&&/max-age=[1-9]/.test(cc)&&!/no-store|private/.test(cc)){const p=c.put(req,res.clone()).catch(()=>undefined);if(ctx)ctx.waitUntil(p);else await p;}
+  return res;
+}
+
 export default {
   async fetch(req:Request,env:Env,ctx:ExecutionContext):Promise<Response>{
     const url=new URL(req.url);
     try{
-      if(url.pathname==='/api/search')return await search(url,env);
+      if(url.pathname==='/api/search')return await edge(req,ctx,()=>search(url,env));
       if(url.pathname==='/api/where'){const cf=(req as any).cf??{};const lat=Number(cf.latitude),lon=Number(cf.longitude);
         return new Response(JSON.stringify(Number.isFinite(lat)&&Number.isFinite(lon)&&cf.country==='KR'?{lat,lon,city:cf.city??''}:{}),{headers:{'content-type':'application/json; charset=utf-8','cache-control':'private, no-store'}});}
       if(url.pathname==='/api/academies'){  // 비교함: ids=쉼표 목록(최대 4곳)

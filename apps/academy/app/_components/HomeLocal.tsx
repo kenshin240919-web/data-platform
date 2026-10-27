@@ -4,14 +4,14 @@
 // 주변에 학원이 없으면 가장 가까운 행정 중심점.
 import Link from 'next/link';
 import {useEffect,useState} from 'react';
-import {km,useMyPosition} from '@guidejung/ui/geo';
+import {km,useMyPosition,fixKmNow,here} from '@guidejung/ui/geo';
 import {man,n} from '../../lib/fmt';
 export type Area={id:string;name:string;lat:number;lon:number;count:number;math?:number;english?:number;korean?:number};
 export function HomeLocal({areas}:{areas:Area[]}){
   const {pos}=useMyPosition();const [id,setId]=useState<string|null>(null);
   useEffect(()=>{if(!pos)return;let live=true;
-    const near=areas.filter(x=>x.count>=20).reduce((x,y)=>km(pos.lat,pos.lon,y.lat,y.lon)<km(pos.lat,pos.lon,x.lat,x.lon)?y:x);setId(near.id);
-    fetch(`/api/search?lat=${pos.lat}&lon=${pos.lon}&km=2`).then(r=>r.ok?r.json():null).then(d=>{if(!live||!d?.items?.length)return;
+    const near=areas.filter(x=>x.count>=20).reduce((x,y)=>km(here(pos).lat,here(pos).lon,y.lat,y.lon)<km(here(pos).lat,here(pos).lon,x.lat,x.lon)?y:x);setId(near.id);
+    fetch(`/api/search?lat=${pos.lat}&lon=${pos.lon}&km=2`).then(r=>r.ok?r.json():null).then(fixKmNow).then(d=>{if(!live||!d?.items?.length)return;
       const c=new Map<string,number>();for(const it of d.items)if(it.region_id)c.set(it.region_id,(c.get(it.region_id)??0)+1);
       const best=[...c.entries()].sort((a,b)=>b[1]-a[1])[0]?.[0];if(best&&areas.some(a=>a.id===best))setId(best);}).catch(()=>{});
     return ()=>{live=false;};},[pos?.lat,pos?.lon]); // eslint-disable-line react-hooks/exhaustive-deps

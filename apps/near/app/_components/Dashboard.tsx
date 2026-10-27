@@ -2,7 +2,7 @@
 // 첫 화면 3초 답: 내 위치(또는 접속 지역) 하나로 자매 사이트의 '지금' 정보를 한 화면에.
 // 카드마다 큰 답 한 줄 + 바로 할 일 버튼(길찾기·전화·더 보기). 가까운 곳에 없으면 반경을 넓혀 가장 가까운 곳을 보여 준다(빈 카드 대신 답).
 import {useEffect,useState} from 'react';
-import {LocateCard,useMyPosition} from '@guidejung/ui/geo';
+import {LocateCard,useMyPosition,here} from '@guidejung/ui/geo';
 import type {Area} from '@guidejung/ui/network';
 import * as L from '../../lib/live';
 import {km,n} from '../../lib/site';
@@ -25,7 +25,7 @@ async function widen<T extends {total:number}>(radii:number[],f:(km:number)=>Pro
 
 export function Dashboard({areas}:{areas:Area[]}){
   const {pos,status,request}=useMyPosition();const [res,setRes]=useState<Res>({});
-  const a=pos?L.nearestArea(areas,pos.lat,pos.lon):null;
+  const a=pos?L.nearestArea(areas,here(pos).lat,here(pos).lon):null;
   useEffect(()=>{if(!pos||!a)return;let on=true;const {lat,lon}=pos;setRes({});
     const put=(k:string,v:Card|null)=>{if(on)setRes(r=>({...r,[k]:v}));};
     L.weather(a).then(w=>{if(!w)return put('weather',null);const rain=(w.pop??0)>=60,bad=w.air==='나쁨'||w.air==='매우 나쁨';

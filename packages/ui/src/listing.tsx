@@ -6,14 +6,14 @@ import type {Params,Region,Results} from './types';
 import {todayKST,type Query} from './search';
 import {Cards,SearchForm,labels,value} from './cards';
 import {AdSlot} from './ads';
-import {useMyPosition} from './geo';
+import {useMyPosition,fixKmNow} from './geo';
 
 /** Results from the trip Worker (/api/search on D1); the same query string is fetched once per change. */
 function useResults(qs:string,base=''){
   const [state,setState]=useState<{qs:string;results:Results|null;failed:boolean}>({qs:'',results:null,failed:false});
   useEffect(()=>{
     let live=true;
-    fetch(`${base}/api/search?${qs}`).then(r=>{if(!r.ok)throw new Error(String(r.status));return r.json() as Promise<Results>;})
+    fetch(`${base}/api/search?${qs}`).then(r=>{if(!r.ok)throw new Error(String(r.status));return r.json() as Promise<Results>;}).then(fixKmNow)
       .then(results=>{if(live)setState({qs,results,failed:false});},()=>{if(live)setState({qs,results:null,failed:true});});
     return ()=>{live=false;};
   },[qs,base]);

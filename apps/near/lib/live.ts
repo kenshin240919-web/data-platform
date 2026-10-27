@@ -1,11 +1,12 @@
 // 자매 사이트 /api/* 를 브라우저에서 바로 부르는 작은 함수들(모두 CORS 허용). 하나가 실패해도 나머지 카드는 그대로 보이도록 null을 돌려준다.
 import {SITES,type Area} from '@guidejung/ui/network';
+import {fixKmNow} from '@guidejung/ui/geo';
 
 const U=Object.fromEntries(Object.entries(SITES).map(([k,v])=>[k,v.url])) as Record<keyof typeof SITES,string>;
 export {U as SITE_URL};
 async function get<T>(url:string,ms=8000):Promise<T|null>{
   const c=new AbortController();const t=setTimeout(()=>c.abort(),ms);
-  try{const r=await fetch(url,{signal:c.signal});return r.ok?await r.json() as T:null;}catch{return null;}finally{clearTimeout(t);}
+  try{const r=await fetch(url,{signal:c.signal});return r.ok?fixKmNow(await r.json() as T):null;}catch{return null;}finally{clearTimeout(t);}
 }
 const ll=(lat:number,lon:number)=>`lat=${lat.toFixed(4)}&lon=${lon.toFixed(4)}`;
 const dist=(a:{lat:number;lon:number},lat:number,lon:number)=>{const x=(a.lon-lon)*Math.cos(lat*Math.PI/180);return Math.hypot(a.lat-lat,x)*111;};

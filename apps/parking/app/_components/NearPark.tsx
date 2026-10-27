@@ -1,7 +1,7 @@
 'use client';
 // 메인 3초 답: 내 위치(이미 허용 → 정확, 아니면 접속 위치) 주변 공영·무료 주차장 수와 가장 싼·가까운 곳.
 import {useEffect,useState} from 'react';
-import {LocateCard,useMyPosition} from '@guidejung/ui/geo';
+import {LocateCard,useMyPosition,fixKmNow,padKm,within} from '@guidejung/ui/geo';
 import {feeFor,km,lotPath,n,type Slim} from '../../lib/fmt';
 import {LotList} from './LotList';
 export function NearPark(){
@@ -10,7 +10,7 @@ export function NearPark(){
   useEffect(()=>{if(!pos)return;let live=true;
     // 가까이에 3곳이 안 되면 반경을 넓혀 다시(1 → 2 → 5km, 대략 위치는 3km부터).
     const steps=pos.precise?[1,2,5]:[3,6,10];
-    const load=(i:number):Promise<void>=>fetch(`/api/near?lat=${pos.lat.toFixed(4)}&lon=${pos.lon.toFixed(4)}&km=${steps[i]}&limit=60`).then(x=>x.json()).then((d:{items:Slim[]}):Promise<void>|void=>{if(!live)return;
+    const load=(i:number):Promise<void>=>fetch(`/api/near?lat=${pos.lat.toFixed(4)}&lon=${pos.lon.toFixed(4)}&km=${padKm(steps[i])}&limit=100`).then(x=>x.json()).then(fixKmNow).then(within(steps[i])).then((d:{items:Slim[]}):Promise<void>|void=>{if(!live)return;
       if(d.items.length<3&&i<steps.length-1)return load(i+1);setItems(d.items);setRadius(steps[i]);});
     load(0).catch(()=>{if(live)setItems([]);});return ()=>{live=false;};},[pos?.lat,pos?.lon,pos?.precise]); // eslint-disable-line react-hooks/exhaustive-deps
   const free=items?.filter(p=>p.charge==='무료')??[];

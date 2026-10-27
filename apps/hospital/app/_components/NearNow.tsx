@@ -1,7 +1,7 @@
 'use client';
 // 메인 3초 답: 내 위치 주변 지금 진료 중인 병원(과목 버튼으로 바꿈) + 가까운 응급실과 실시간 남은 병상.
 import {useEffect,useState} from 'react';
-import {LocateCard,useMyPosition} from '@guidejung/ui/geo';
+import {LocateCard,useMyPosition,fixKmNow,padKm,within} from '@guidejung/ui/geo';
 import {DEPTS,DEPT_ICON,hospitalPath,km,MAIN_DEPTS,statusOf,type Card} from '../../lib/fmt';
 import {StatusList,useNow} from './StatusList';
 type Er=Card&{beds:number|null;updated:string|null};
@@ -9,10 +9,10 @@ export function NearNow(){
   const {pos,status,request}=useMyPosition();const now=useNow();
   const [dept,setDept]=useState('');const [items,setItems]=useState<Card[]|null>(null);const [radius,setRadius]=useState(0);const [er,setEr]=useState<Er[]|null>(null);
   useEffect(()=>{if(!pos)return;let live=true;setItems(null);
-    const load=(k:number):Promise<void>=>fetch(`/api/near?lat=${pos.lat.toFixed(4)}&lon=${pos.lon.toFixed(4)}&km=${k}&limit=60${dept?`&dept=${dept}`:''}`).then(x=>x.json()).then((d:{items:Card[]}):Promise<void>|void=>{if(!live)return;
+    const load=(k:number):Promise<void>=>fetch(`/api/near?lat=${pos.lat.toFixed(4)}&lon=${pos.lon.toFixed(4)}&km=${padKm(k)}&limit=100${dept?`&dept=${dept}`:''}`).then(x=>x.json()).then(fixKmNow).then(within(k)).then((d:{items:Card[]}):Promise<void>|void=>{if(!live)return;
       const open=d.items.filter(p=>statusOf(p).state!=='closed').length;if(!open&&k<10)return load(k*2);setItems(d.items);setRadius(k);});
     load(pos.precise?2:5).catch(()=>{if(live)setItems([]);});return ()=>{live=false;};},[pos?.lat,pos?.lon,pos?.precise,dept]); // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(()=>{if(!pos)return;let live=true;fetch(`/api/er?lat=${pos.lat.toFixed(4)}&lon=${pos.lon.toFixed(4)}`).then(x=>x.json()).then(d=>{if(live)setEr(d.items);}).catch(()=>{if(live)setEr([]);});return ()=>{live=false;};},[pos?.lat,pos?.lon]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(()=>{if(!pos)return;let live=true;fetch(`/api/er?lat=${pos.lat.toFixed(4)}&lon=${pos.lon.toFixed(4)}`).then(x=>x.json()).then(fixKmNow).then(d=>{if(live)setEr(d.items);}).catch(()=>{if(live)setEr([]);});return ()=>{live=false;};},[pos?.lat,pos?.lon]); // eslint-disable-line react-hooks/exhaustive-deps
   const open=items&&now?items.filter(p=>statusOf(p,now).state!=='closed'):[];
   const first=open[0];const label=dept?DEPTS[dept]:'병원';
   return <section className="hp-near">

@@ -1,14 +1,14 @@
 'use client';
 // 내 주변 브랜드 서비스센터: 방문자 위치로 그때그때 카카오 로컬 검색(Worker /api/brand-near) — 결과는 저장하지 않음(카카오 API 조건).
 import {useEffect,useState} from 'react';
-import {LocateCard,useMyPosition} from '@guidejung/ui/geo';
+import {LocateCard,useMyPosition,fixKmNow} from '@guidejung/ui/geo';
 import {km} from '../../lib/fmt';
 type Place={name:string;addr:string|null;tel:string|null;km:number;url:string};
 export function BrandNear({slug,name,fallback}:{slug:string;name:string;fallback:string}){
   const {pos,status,request}=useMyPosition();
   const [res,setRes]=useState<{items:Place[]}|null|'error'>(null);
   useEffect(()=>{if(!pos)return;let live=true;setRes(null);
-    fetch(`/api/brand-near?brand=${slug}&lat=${pos.lat.toFixed(4)}&lon=${pos.lon.toFixed(4)}`).then(r=>r.ok?r.json():Promise.reject()).then(d=>{if(live)setRes(d);}).catch(()=>{if(live)setRes('error');});
+    fetch(`/api/brand-near?brand=${slug}&lat=${pos.lat.toFixed(4)}&lon=${pos.lon.toFixed(4)}`).then(r=>r.ok?r.json():Promise.reject()).then(fixKmNow).then(d=>{if(live)setRes(d);}).catch(()=>{if(live)setRes('error');});
     return ()=>{live=false;};},[pos?.lat,pos?.lon,slug]);
   const first=res&&res!=='error'?res.items[0]:undefined;
   return <section className="sv-near"><h2>📍 내 주변 {name} 센터</h2>

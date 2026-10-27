@@ -1,7 +1,7 @@
 'use client';
 // 메인 3초 답: 내 위치(이미 허용 → 정확, 아니면 접속 위치) 주변 정비소·검사소·세차장 수와 가장 가까운 곳.
 import {useEffect,useState} from 'react';
-import {LocateCard,useMyPosition} from '@guidejung/ui/geo';
+import {LocateCard,useMyPosition,fixKmNow,padKm,within} from '@guidejung/ui/geo';
 import {centerPath,KINDS,km,n,type Kind,type Slim} from '../../lib/fmt';
 import {CenterList} from './CenterList';
 export function NearCenter({kind}:{kind?:Kind}){
@@ -9,7 +9,7 @@ export function NearCenter({kind}:{kind?:Kind}){
   const [items,setItems]=useState<Slim[]|null>(null);const [radius,setRadius]=useState(0);
   useEffect(()=>{if(!pos)return;let live=true;
     const steps=pos.precise?[1,2,5,10]:[3,6,10,20];
-    const load=(i:number):Promise<void>=>fetch(`/api/near?lat=${pos.lat.toFixed(4)}&lon=${pos.lon.toFixed(4)}&km=${steps[i]}&limit=80${kind?`&kind=${kind}`:''}`).then(x=>x.json()).then((d:{items:Slim[]}):Promise<void>|void=>{if(!live)return;
+    const load=(i:number):Promise<void>=>fetch(`/api/near?lat=${pos.lat.toFixed(4)}&lon=${pos.lon.toFixed(4)}&km=${padKm(steps[i])}&limit=100${kind?`&kind=${kind}`:''}`).then(x=>x.json()).then(fixKmNow).then(within(steps[i])).then((d:{items:Slim[]}):Promise<void>|void=>{if(!live)return;
       if(d.items.filter(p=>p.kind==='repair'||kind).length<3&&i<steps.length-1)return load(i+1);setItems(d.items);setRadius(steps[i]);});
     load(0).catch(()=>{if(live)setItems([]);});return ()=>{live=false;};},[pos?.lat,pos?.lon,pos?.precise,kind]); // eslint-disable-line react-hooks/exhaustive-deps
   const count=(k:Kind)=>items?.filter(p=>p.kind===k).length??0;

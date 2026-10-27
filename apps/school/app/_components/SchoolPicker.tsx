@@ -1,14 +1,14 @@
 'use client';
 // 학교 고르기: 이름 검색(Worker /api/search) + 내 주변 학교(위치를 알면). 카드를 누르면 학교 페이지, ☆로 '내 학교' 저장.
 import {useEffect,useState} from 'react';
-import {LocateCard,useMyPosition} from '@guidejung/ui/geo';
+import {LocateCard,useMyPosition,fixKmNow} from '@guidejung/ui/geo';
 import {KIND_ICON,KIND_LABEL,schoolPath,type Card} from '../../lib/fmt';
 import {setMine,useMine} from './mine';
 
 function useSearch(params:string|null){
   const [res,setRes]=useState<{total:number;items:Card[]}|null>(null);const [busy,setBusy]=useState(false);
   useEffect(()=>{if(!params){setRes(null);return;}let live=true;setBusy(true);
-    const t=setTimeout(()=>fetch('/api/search?'+params).then(r=>r.ok?r.json():Promise.reject()).then(d=>{if(live)setRes(d);}).catch(()=>{if(live)setRes({total:0,items:[]});}).finally(()=>{if(live)setBusy(false);}),250);
+    const t=setTimeout(()=>fetch('/api/search?'+params).then(r=>r.ok?r.json():Promise.reject()).then(fixKmNow).then(d=>{if(live)setRes(d);}).catch(()=>{if(live)setRes({total:0,items:[]});}).finally(()=>{if(live)setBusy(false);}),250);
     return ()=>{live=false;clearTimeout(t);};},[params]);
   return {res,busy};
 }

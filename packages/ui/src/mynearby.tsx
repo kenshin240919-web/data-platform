@@ -4,7 +4,7 @@
 import {useEffect,useState} from 'react';
 import type {Place,Results} from './types';
 import {Cards} from './cards';
-import {broadArea,LocateCard,useMyPosition} from './geo';
+import {broadArea,LocateCard,useMyPosition,fixKmNow,here} from './geo';
 import {todayKST} from './search';
 
 const TABS=[['place','🏞️ 가볼만한곳'],['food','🍽️ 맛집'],['stay','🛏️ 숙소'],['festival','🎉 축제'],['shop','🛍️ 쇼핑'],['course','🧭 여행코스']] as const;
@@ -19,13 +19,13 @@ export function MyNearby({base=''}:{base?:string}){
     if(!pos)return;let live=true;
     const today=todayKST(),soon=new Date(Date.now()+(9*3600+90*86400)*1000).toISOString().slice(0,10);
     const q=(kind:string)=>`${base}/api/search?lat=${pos.lat}&lon=${pos.lon}&radius_km=20&limit=8&kind=${kind}${kind==='festival'?`&date_from=${today}&date_to=${soon}`:''}`;
-    Promise.all(TABS.map(([kind])=>fetch(q(kind)).then(r=>r.ok?r.json() as Promise<Results>:null).then(r=>({kind,items:(r?.items??[]) as Place[],total:r?.total??0})).catch(()=>({kind,items:[],total:0}))))
+    Promise.all(TABS.map(([kind])=>fetch(q(kind)).then(r=>r.ok?r.json() as Promise<Results>:null).then(fixKmNow).then(r=>({kind,items:(r?.items??[]) as Place[],total:r?.total??0})).catch(()=>({kind,items:[],total:0}))))
       .then(list=>{if(live)setGroups({key,list});});
     return ()=>{live=false;};
   },[key,base]);  // eslint-disable-line react-hooks/exhaustive-deps
   const list=groups?.key===key?groups.list.filter(g=>g.items.length):null;
   const active=list?.find(g=>g.kind===tab)??list?.[0];
-  const area=pos&&list?broadArea(list.flatMap(g=>g.items).filter(p=>p.latitude!=null).map(p=>({name:p.region_name,lat:p.latitude!,lon:p.longitude!})),pos.lat,pos.lon):undefined;
+  const area=pos&&list?broadArea(list.flatMap(g=>g.items).filter(p=>p.latitude!=null).map(p=>({name:p.region_name,lat:p.latitude!,lon:p.longitude!})),here(pos).lat,here(pos).lon):undefined;
   const more=(kind:string)=>`${base}/search?lat=${pos!.lat}&lon=${pos!.lon}&radius_km=20&kind=${kind}`;
   return <section className="my-nearby" aria-label="내 주변 여행 정보">
     {pos&&<div className="section-heading"><div><div className="eyebrow">NEAR ME · 20KM</div><h2>{pos.precise?'📍 내 위치 주변 여행 정보':`📍 ${area?`${area} 부근`:'접속 위치 주변'} 여행 정보`}</h2></div>{active&&<a href={more(active.kind)}>모두 보기</a>}</div>}
@@ -46,7 +46,7 @@ export function LocalSection({eyebrow,title,nearTitle,more,nearMore,query,nearQu
   useEffect(()=>{
     if(!near&&items)return;let live=true;
     const q=new URLSearchParams(Object.entries(near?{...nearQuery,lat:pos!.lat,lon:pos!.lon}:query).map(([k,v])=>[k,String(v)]));
-    fetch(`${base}/api/search?${q}`).then(r=>r.ok?r.json() as Promise<Results>:null).then(r=>{
+    fetch(`${base}/api/search?${q}`).then(r=>r.ok?r.json() as Promise<Results>:null).then(fixKmNow).then(r=>{
       // Nothing around the visitor: keep the nationwide cards rather than an empty section.
       if(live)setData({key,items:near&&!r?.items.length?(items??[]):(r?.items??[]) as Place[]});
     }).catch(()=>{});
