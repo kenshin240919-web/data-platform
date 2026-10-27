@@ -9,7 +9,7 @@ export function useNow(){const [now,setNow]=useState<ReturnType<typeof kstNow>|n
 export function HospitalCard({c,now}:{c:Card;now:ReturnType<typeof kstNow>|null}){
   const s=now?statusOf(c,now):null;
   return <div className={`hp-card ${s?.state??''}`}>
-    <a className="hp-card-main" href={hospitalPath(c.id)}><span className="hp-dot" aria-hidden="true"></span><span className="hp-card-body"><b>{c.name}</b>
+    <a className="hp-card-main" data-gj-pt={c.lat!=null&&c.lon!=null?`${c.lat},${c.lon}`:undefined} data-gj-name={c.name} href={hospitalPath(c.id)}><span className="hp-dot" aria-hidden="true"></span><span className="hp-card-body"><b>{c.name}</b>
       <small>{c.km!=null&&<>{km(c.km)} · </>}{s?s.label:weekLine(c)}{c.er&&' · 🚑 응급실'}</small>
       <small className="muted">{[c.div,...c.depts.slice(0,4).map(deptLabel)].filter(Boolean).join(' · ')}</small></span></a>
     {c.tel&&<a className="hp-tel" href={`tel:${c.tel.replace(/[^0-9]/g,'')}`} aria-label={`${c.name} 전화`}>📞</a>}

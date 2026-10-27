@@ -10,6 +10,7 @@ import raw from '../data/places.json';
 import weatherRegions from '../../weather/data/regions.json';
 import {ADS,DOCS,distKm,esc,eun,hoursLine,KIND_ORDER,KINDS,km,mapUrl,naverUrl,placePath,SITE,slim,stateOf,telHref,type Kind,type Place} from '../lib/fmt';
 import {actionsHtml} from '../../../packages/ui/src/actions';
+import {aroundHtml} from '../../../packages/ui/src/live';
 
 interface Env{ASSETS:Fetcher;DATA_GO_KR_KEY?:string;KAKAO_REST_KEY?:string;NAVER_HUB_CLIENT_ID?:string;NAVER_HUB_CLIENT_SECRET?:string}
 type Data={status:{updated_at:string;count:number};docs:[string,string][];items:Place[]};
@@ -137,6 +138,7 @@ ${p.kind==='cso'?`<section><h2>⏱️ 지금 대기 현황</h2><div id="cv-wait"
 ${p.kind==='kiosk'?`<section><h2>🧾 뗄 수 있는 서류 ${docs.length?`${n2(docs.length)}종`:''}</h2>${p.reg||p.fam?`<p>${[p.reg&&'✅ 등기사항증명서(부동산 등기부)',p.fam&&'✅ 가족관계증명서'].filter(Boolean).join(' · ')}</p>`:''}${byMenu.length?byMenu.map(([m,l])=>`<details${byMenu.length<4?' open':''}><summary><b>${esc(m)}</b> <span class="muted">${l.length}종</span></summary><ul class="cv-plain">${l.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></details>`).join(''):'<p class="muted">서류 목록을 아직 받지 못했어요.</p>'}<p class="cv-note">수수료는 서류·지자체마다 달라요. 주민등록등본 등 많은 서류는 정부24에서 온라인으로도 뗄 수 있어요.</p></section>`:''}
 ${groups.map(([title,list])=>list.length?`<section><h2>${esc(title)}</h2><div class="cv-cards">${list.map(cardHtml).join('')}</div></section>`:'').join('')}
 <p><a class="cv-more-link" href="/region/${esc(p.region)}">${esc(p.region_name)} 민원·서류 모두 보기 →</a></p>
+${p.lat!=null&&p.lon!=null?aroundHtml(p.lat,p.lon,'☕ 서류 떼고 걸어서 갈 곳','CE7,CS2,BK9,FD6'):''}
 <section><h2>정보</h2><dl class="cv-facts">${facts.filter(([,v])=>v).map(([k,v])=>`<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl></section>
 ${connectHtml(p)}
 <section class="gj-faq" aria-label="자주 묻는 질문"><h2>자주 묻는 질문</h2><dl>${faq.map(([q,x])=>`<div><dt>${esc(q)}</dt><dd>${esc(x)}</dd></div>`).join('')}</dl></section>

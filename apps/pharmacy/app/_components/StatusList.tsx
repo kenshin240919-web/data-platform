@@ -20,7 +20,7 @@ export function StatusList({items,initial='all',sortOpen=true,limit=40,empty='�
   return <div className="ph-list">
     <div className="ph-chips" role="group" aria-label="조건">{chips.map(([k,l])=><button type="button" key={k} className={f===k?'ph-chip on':'ph-chip'} aria-pressed={f===k} onClick={()=>{setF(k);setMore(limit);}}>{l} <small>{count(k).toLocaleString('ko-KR')}</small></button>)}</div>
     {!rows.length?<p className="muted">{empty}</p>:<div className="ph-cards">{rows.slice(0,more).map(({p,s})=><div key={p.id} className={`ph-card ${s?.state??''}`}>
-      <a className="ph-card-main" href={pharmacyPath(p.id)}><span className="ph-dot" aria-hidden="true"></span><span className="ph-card-body"><b>{p.name}</b>
+      <a className="ph-card-main" data-gj-pt={p.lat!=null&&p.lon!=null?`${p.lat},${p.lon}`:undefined} data-gj-name={p.name} href={pharmacyPath(p.id)}><span className="ph-dot" aria-hidden="true"></span><span className="ph-card-body"><b>{p.name}</b>
         <small>{p.km!=null&&<>{km(p.km)} · </>}{s?s.label:weekLine(p)}</small><small className="muted">{weekLine(p)}</small></span></a>
       {p.tel&&<a className="ph-tel" href={`tel:${p.tel.replace(/[^0-9]/g,'')}`} aria-label={`${p.name} 전화`}>📞</a>}
     </div>)}</div>}

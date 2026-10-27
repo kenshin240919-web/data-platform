@@ -1,0 +1,42 @@
+name: Trend weekly
+# 매주 월요일 네이버 검색어 트렌드로 시기 콘텐츠 주제 점검(scripts/trend-weekly.py) → reports/trend/주간-YYYY-MM-DD.md main 커밋.
+# Secrets: NAVER_HUB_CLIENT_ID, NAVER_HUB_CLIENT_SECRET (NAVER API HUB 앱 'near'). 무료(현재 한시적), 주 약 36회.
+on:
+  schedule:
+    - cron: '23 23 * * 0' # 월요일 08:23 KST
+  push:
+    branches: [main]
+    paths: ['scripts/trend-weekly.py']
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: trend-weekly
+  cancel-in-progress: false
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -q requests
+      - name: Report
+        env:
+          NAVER_HUB_CLIENT_ID: ${{ secrets.NAVER_HUB_CLIENT_ID }}
+          NAVER_HUB_CLIENT_SECRET: ${{ secrets.NAVER_HUB_CLIENT_SECRET }}
+        run: python scripts/trend-weekly.py
+      - name: Commit report
+        if: always()
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add reports/trend
+          if git diff --cached --quiet; then echo 'no change'; exit 0; fi
+          git commit -m '검색어 트렌드 주간 점검'
+          for i in 1 2 3; do git pull --rebase origin main && git push origin HEAD:main && exit 0; sleep 10; done
+          exit 1

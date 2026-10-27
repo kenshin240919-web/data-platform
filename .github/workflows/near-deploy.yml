@@ -38,3 +38,13 @@ jobs:
       - run: npm ci
       - name: Build and deploy
         run: npx wrangler deploy -c apps/near/wrangler.jsonc
+      # 공용 API(/api/blog 네이버 블로그 후기, /api/around 카카오 주변 장소)에 쓰는 키 — 값은 GitHub Secrets에만.
+      - name: Worker secrets
+        env:
+          NAVER_HUB_CLIENT_ID: ${{ secrets.NAVER_HUB_CLIENT_ID }}
+          NAVER_HUB_CLIENT_SECRET: ${{ secrets.NAVER_HUB_CLIENT_SECRET }}
+          KAKAO_REST_KEY: ${{ secrets.KAKAO_REST_KEY }}
+        run: |
+          for k in NAVER_HUB_CLIENT_ID NAVER_HUB_CLIENT_SECRET KAKAO_REST_KEY; do
+            if [ -n "${!k}" ]; then printf '%s' "${!k}" | npx wrangler secret put "$k" -c apps/near/wrangler.jsonc; fi
+          done

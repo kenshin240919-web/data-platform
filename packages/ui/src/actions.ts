@@ -1,11 +1,12 @@
 // 공유·즐겨찾기 버튼. 정적 페이지(React <Actions>, favlist.tsx)와 Worker 상세(actionsHtml 문자열)가 같은 표시를 쓰고,
 // 동작은 모든 페이지 맨 위 NetworkBar에 들어 있는 ACTIONS_JS 하나가 맡는다(Worker 상세는 하이드레이션이 없어서).
 // 즐겨찾기는 이 브라우저(localStorage gj.fav, 사이트마다 따로)에만 저장한다.
+import {KAKAO_JS_KEY} from './live';
 export type FavInfo={id:string;name:string;sub?:string;url:string};
 const attr=(s:string)=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]!));
 
 export function actionsHtml(fav?:FavInfo){
-  return `<div class="gj-actions"><button type="button" class="gj-share">📤 공유하기</button>${fav?`<button type="button" class="gj-fav" data-id="${attr(fav.id)}" data-name="${attr(fav.name)}" data-sub="${attr(fav.sub??'')}" data-url="${attr(fav.url)}"><span class="on">★ 즐겨찾기됨</span><span class="off">☆ 즐겨찾기</span></button>`:''}</div>`;
+  return `<div class="gj-actions">${KAKAO_JS_KEY?'<button type="button" class="gj-kakao">💬 카카오톡 공유</button>':''}<button type="button" class="gj-share">📤 공유하기</button>${fav?`<button type="button" class="gj-fav" data-id="${attr(fav.id)}" data-name="${attr(fav.name)}" data-sub="${attr(fav.sub??'')}" data-url="${attr(fav.url)}"><span class="on">★ 즐겨찾기됨</span><span class="off">☆ 즐겨찾기</span></button>`:''}</div>`;
 }
 /** 공유: 휴대폰은 기본 공유 창(카카오톡 등), 아니면 링크 복사. 즐겨찾기: 누를 때마다 넣고 빼기, 최대 20곳. GA 이벤트 share·favorite. */
 export const ACTIONS_JS=`(function(){if(window.__gjAct)return;window.__gjAct=1;var K='gj.fav';

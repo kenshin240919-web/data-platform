@@ -81,6 +81,7 @@ export function StationBoard({region,label,origin,snap,road,extra=[]}:{region:Ch
         {isOpen&&<div className="ev-detail">
           <p className="small">{s.addr}</p>
           <ul className="ev-chargers">{s.chargers.map(c=>{const st=STAT[c.stat]??STAT[9];return <li key={c.id} className={`st-${st.tone}`}><span>{c.id}번</span><span>{typeName(c.type)}{c.kw?` · ${c.kw}kW`:''}{isFast(c)?' · 급속':''}</span><b>{st.text}</b><small>{ago(c.upd)}</small></li>;})}</ul>
+          <section className="gj-around gj-around-inline" data-lat={s.lat} data-lon={s.lng} data-cats="CE7,CS2,FD6" data-r="500" aria-label="충전하는 동안 걸어서 갈 곳"><h3>☕ 충전하는 동안 걸어서 갈 곳</h3></section>
           <dl className="ev-facts"><div><dt>이용시간</dt><dd>{s.useTime||'확인 필요'}</dd></div><div><dt>운영기관</dt><dd>{s.busi}{s.call&&<> · <a href={`tel:${s.call}`}>{s.call}</a></>}</dd></div><div><dt>주차</dt><dd>{s.freeParking?'무료 주차':'유료이거나 확인 필요'}</dd></div>{s.limited&&<div><dt>이용 제한</dt><dd>{s.limited}</dd></div>}</dl>
         </div>}
       </li></Fragment>;})}</ul>

@@ -7,7 +7,7 @@ export function useNow(){const [now,setNow]=useState<ReturnType<typeof kstNow>|n
   useEffect(()=>{const f=()=>setNow(kstNow());f();const t=setInterval(f,60e3);return ()=>clearInterval(t);},[]);return now;}
 export function CenterCard({p,now}:{p:Slim;now:ReturnType<typeof kstNow>|null}){
   const o=now?openNow(p,now):null,y=years(p.since);
-  return <a className={`sv-card ${o?(o.open?'open':'closed'):''}`} href={centerPath(p.id)}>
+  return <a className={`sv-card ${o?(o.open?'open':'closed'):''}`} data-gj-pt={p.lat!=null&&p.lon!=null?`${p.lat},${p.lon}`:undefined} data-gj-name={p.name} href={centerPath(p.id)}>
     <span className="sv-kind" aria-hidden="true">{KINDS[p.kind].icon}</span>
     <span className="sv-card-body"><b>{p.name}</b>
       <small>{p.km!=null&&<>{km(p.km)} · </>}{p.sub&&<span className="sv-tag">{p.sub}</span>}{o?o.label:p.kind==='inspect'||p.hours.wk?hoursLine(p):KINDS[p.kind].label}</small>

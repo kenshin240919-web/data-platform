@@ -7,6 +7,7 @@ import raw from '../data/places.json';
 import weatherRegions from '../../weather/data/regions.json';
 import {ADS,distKm,esc,eun,ro,KIND_ORDER,KINDS,km,mapUrl,naverUrl,shopPath,sinceLine,SITE,slim,telHref,years,type Kind,type Place} from '../lib/fmt';
 import {actionsHtml} from '../../../packages/ui/src/actions';
+import {blogHtml} from '../../../packages/ui/src/live';
 
 interface Env{ASSETS:Fetcher}
 type Data={status:{updated_at:string;count:number};items:Place[]};
@@ -86,6 +87,7 @@ function detailHtml(p:Place,groups:[string,Near[]][]){
 <p class="rs-answer"><b>${esc(ABOUT[p.kind])}</b>${addr?` <span class="muted">· ${esc(addr)}</span>`:''}${p.since?` <span class="muted">· ${esc(sinceLine(p.since)??'')}</span>`:''}</p>
 <div class="rs-actions">${p.tel?`<a href="${esc(telHref(p.tel))}">📞 전화하기</a>`:''}<a class="${p.tel?'sub':''}" href="${esc(mapUrl(p))}" rel="noopener" target="_blank">🧭 길찾기</a><a class="naver" href="${esc(naverUrl(p))}" rel="noopener" target="_blank">🟢 네이버 지도에서 가격·예약 보기</a></div>
 <p class="rs-note">가격·예약·영업 시간은 공공데이터에 없어요. 네이버 지도나 전화로 확인하세요.</p>
+${p.kind==='sauna'||p.kind==='skin'?blogHtml(`${p.name} ${p.region_name.split(' ').slice(-1)[0]}`,p.name.replace(/\s*[([].*$/,'').trim(),'📝 다녀온 사람들 후기 · 네이버 블로그'):''}
 ${groups.map(([title,list])=>list.length?`<section><h2>${esc(title)}</h2><div class="rs-cards">${list.map(cardHtml).join('')}</div></section>`:'').join('')}
 <p><a class="rs-more-link" href="/region/${esc(p.region)}/${p.kind}">${esc(p.region_name)} ${esc(K.label)} 모두 보기 →</a></p>
 <section><h2>정보</h2><dl class="rs-facts">${facts.filter(([,v])=>v).map(([k,v])=>`<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl></section>

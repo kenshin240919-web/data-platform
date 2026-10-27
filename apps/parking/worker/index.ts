@@ -6,6 +6,7 @@ import raw from '../data/parkings.json';
 import weatherRegions from '../../weather/data/regions.json';
 import {allDay,distKm,esc,eun,feeFor,feeLine,hoursLine,km,kstNow,KIND_LABEL,lotPath,mapUrl,n,openNow,SITE,slim,won,type Lot} from '../lib/fmt';
 import {actionsHtml} from '../../../packages/ui/src/actions';
+import {aroundHtml} from '../../../packages/ui/src/live';
 
 interface Env{ASSETS:Fetcher}
 type Data={status:{updated_at:string;count:number};items:Lot[]};
@@ -84,6 +85,7 @@ ${TIMES.map(t=>{const w=feeFor(p,t);return w!=null?`<tr><th>${t<60?`${t}분`:`${
 <p class="muted small">지자체가 등록한 요금으로 계산한 예상 금액이에요. 할인(경차·친환경차 등)·시간대별 요금은 반영하지 않았어요.</p></section>
 <section><h2>운영 시간</h2><table class="pk-hours"><tbody>${(['wk','sat','hol'] as const).map(k=>{const h=p.hours[k];return `<tr${k===now.kind?' class="today"':''}><th>${KIND_LABEL[k]}${k===now.kind?' (오늘)':''}</th><td>${h?h[0]==='00:00'&&(h[1]==='23:59'||h[1]==='24:00')?'24시간':`${esc(h[0])} ~ ${esc(h[1])}`:'<span class="muted">운영 안 함</span>'}</td></tr>`;}).join('')}</tbody></table>${allDay(p)?'':''}</section>
 ${nearby.length?`<section><h2>근처 다른 주차장 <span class="muted">1시간 싼 순</span></h2><div class="pk-cards">${nearby.map(cardHtml).join('')}</div><p><a class="pk-more-link" href="/region/${esc(p.region)}">${esc(p.region_name)} 주차장 모두 보기 →</a></p></section>`:''}
+${p.lat!=null&&p.lon!=null?aroundHtml(p.lat,p.lon,'🚶 주차하고 걸어서 갈 곳','FD6,CE7,CS2,PM9'):''}
 <section><h2>주차장 정보</h2><dl class="pk-facts">${facts.filter(([,v])=>v).map(([k,v])=>`<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl></section>
 ${connectHtml(p)}
 <section class="gj-faq" aria-label="자주 묻는 질문"><h2>자주 묻는 질문</h2><dl>${faq.map(([q,x])=>`<div><dt>${esc(q)}</dt><dd>${esc(x)}</dd></div>`).join('')}</dl></section>
