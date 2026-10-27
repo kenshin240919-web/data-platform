@@ -16,6 +16,7 @@ Usage: [DATA_GO_KR_KEY=...] [KAKAO_REST_KEY=...] python scripts/collect-market.p
 """
 import csv, hashlib, importlib.util, io, json, os, re, sys, time, urllib.error, urllib.parse, urllib.request
 from collections import Counter, defaultdict
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from pathlib import Path
 
@@ -42,7 +43,9 @@ MISS_RETRY_DAYS = 14
 FIND_V = 2  # 찾는 규칙 버전 — 올리면 예전 규칙으로 못 찾은 곳을 바로 다시 찾음
 KAKAO_ADDR = 'https://dapi.kakao.com/v2/local/search/address.json'
 SUFFIX = re.compile(r'\s*(골목형\s*상점가|상점가|상가번영회|번영회|상인회|상권활성화구역|상권|지하상가|지하쇼핑센터|상가|시장)$')
-GEO_LIMIT = 6000  # 한 번에 카카오에 물어볼 시장 수(첫 실행 약 3,000곳 × 최대 3번)
+GEO_LIMIT = 6000
+GEO_WORKERS = 8  # 카카오에 동시에 묻는 수
+GEO_BUDGET = 40 * 60  # 카카오 검색에 쓰는 최대 시간(초) — 남은 곳은 다음 실행에서(Actions 제한 60분)  # 한 번에 카카오에 물어볼 시장 수(첫 실행 약 3,000곳 × 최대 3번)
 
 # 취급품목(가맹점이 직접 적은 자유 문장) → 품목 묶음. 앞에서부터 처음 맞는 것, 안 맞으면 가게 이름으로 한 번 더.
 # 화면 이름·아이콘은 apps/market/lib/fmt.ts CATS(같은 slug).
@@ -305,33 +308,56 @@ def main():
 
     cache, today = load_cache(), datetime.now(KST).date()
     key = os.environ.get('KAKAO_REST_KEY')
-    asked = stop = 0
+    order = sorted(groups.items(), key=lambda x: -len(x[1]))
+
+    def std_of(sido, name):
+        return std.get((sido, norm(name))) or std.get((sido, norm(base_name(name))))
+
+    def due(ck):
+        c = cache.get(ck)
+        return c is None or ('miss' in c and (c.get('v', 1) < FIND_V or (today - datetime.fromisoformat(c['miss']).date()).days >= MISS_RETRY_DAYS)) \
+            or ('at' in c and A.refresh_due(ck, c['at'], today))
+
+    todo = [(sido, name) for (sido, name), _ in order
+            if not ((s := std_of(sido, name)) and s['lat'] is not None) and due(f'{sido}|{name}')][:GEO_LIMIT] if key else []
+    asked, stop, t0 = 0, False, time.time()
+
+    def ask(item):
+        if stop or time.time() - t0 > GEO_BUDGET:
+            return item, None, 'skip'
+        return (item, *kakao_find(item[1], item[0], key))
+
+    for i in range(0, len(todo), 200):  # 200곳마다 캐시 저장(중간에 끊겨도 찾은 것은 남음)
+        with ThreadPoolExecutor(GEO_WORKERS) as ex:
+            for (sido, name), got, state in ex.map(ask, todo[i:i + 200]):
+                ck, c = f'{sido}|{name}', cache.get(f'{sido}|{name}')
+                if state == 'skip':
+                    continue
+                asked += 1
+                if state == 'stop':
+                    stop = True
+                elif state == 'ok':
+                    cache[ck] = {**got, 'at': today.isoformat()}
+                elif state == 'miss':
+                    cache[ck] = {'miss': today.isoformat(), 'v': FIND_V, **({k: c[k] for k in ('lat', 'lon', 'addr', 'jibun', 'kname', 'dong')} if c and 'lat' in c else {})}
+        CACHE.parent.mkdir(parents=True, exist_ok=True)
+        CACHE.write_text(json.dumps(cache, ensure_ascii=False), encoding='utf-8')
+        if stop or time.time() - t0 > GEO_BUDGET:
+            log('카카오 검색 중단(한도·키 확인)' if stop else f'카카오 검색 시간 끝 — 남은 {len(todo) - i - 200:,}곳은 다음 실행에서')
+            break
+    log(f'카카오 검색 {asked:,}곳 / 대상 {len(todo):,}곳 ({time.time() - t0:,.0f}초)')
+
     markets = []
-    for (sido, name), rs in sorted(groups.items(), key=lambda x: -len(x[1])):
+    for (sido, name), rs in order:
         m = {'id': hid(sido, name), 'name': name, 'sido': sido, 'addr': None, 'jibun': None, 'lat': None, 'lon': None, 'geo': None}
-        s = std.get((sido, norm(name))) or std.get((sido, norm(base_name(name))))
+        s = std_of(sido, name)
         if s and s['lat'] is not None:
             m.update({k: s[k] for k in ('addr', 'jibun', 'lat', 'lon')}, geo='std')
         if s:
             m['std'] = {k: v for k, v in s.items() if k not in ('name', 'addr', 'jibun', 'lat', 'lon') and v not in (None, '')}
-        if m['geo'] is None:
-            ck = f'{sido}|{name}'
-            c = cache.get(ck)
-            due = c is None or ('miss' in c and (c.get('v', 1) < FIND_V or (today - datetime.fromisoformat(c['miss']).date()).days >= MISS_RETRY_DAYS)) \
-                or ('at' in c and A.refresh_due(ck, c['at'], today))
-            if due and key and not stop and asked < GEO_LIMIT:
-                asked += 1
-                got, state = kakao_find(name, sido, key)
-                if state == 'stop':
-                    stop = 1
-                    log('카카오 검색 중단(한도·키 확인)')
-                elif state == 'ok':
-                    cache[ck] = {**got, 'at': today.isoformat()}
-                elif state == 'miss':
-                    cache[ck] = {'miss': today.isoformat(), 'v': FIND_V, **({k: c[k] for k in ('lat', 'lon', 'addr', 'jibun', 'kname')} if c and 'lat' in c else {})}
-                c = cache.get(ck)
-            if c and c.get('lat') is not None:  # 다시 확인에서 못 찾으면 이전 좌표를 그대로(확인한 날만 바뀜)
-                m.update({k: c.get(k) for k in ('addr', 'jibun', 'lat', 'lon')}, geo='dong' if c.get('dong') else 'kakao')
+        c = cache.get(f'{sido}|{name}')
+        if m['geo'] is None and c and c.get('lat') is not None:  # 다시 확인에서 못 찾으면 이전 좌표를 그대로(확인한 날만 바뀜)
+            m.update({k: c.get(k) for k in ('addr', 'jibun', 'lat', 'lon')}, geo='dong' if c.get('dong') else 'kakao')
         hit = region_of(m, regions) if m['geo'] else None
         if not hit:
             r = area_of(name, sido, regions)
@@ -346,9 +372,6 @@ def main():
             m['region'], m['region_name'] = code, region_name(code, nm, regions)
         m['rows'] = rs
         markets.append(m)
-    log(f'카카오 검색 {asked:,}곳')
-    CACHE.parent.mkdir(parents=True, exist_ok=True)
-    CACHE.write_text(json.dumps(cache, ensure_ascii=False), encoding='utf-8')
 
     stores, seen, cats = [], set(), Counter()
     latest = max((r['year'] for r in rows if r['year'].isdigit()), default='')
