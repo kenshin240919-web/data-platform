@@ -13,7 +13,9 @@ const TOPICS:[string,string,string][]=[['weather','🌤️ 매일 아침 7시 �
 const ga=(n:string,p:Record<string,unknown>={})=>{try{(window as {gtag?:(...a:unknown[])=>void}).gtag?.('event',n,p);}catch{}};
 const b64=(s:string)=>Uint8Array.from(atob(s.replace(/-/g,'+').replace(/_/g,'/')+'==='.slice((s.length+3)%4)),c=>c.charCodeAt(0));
 type Saved={w:string;t:string[]};
-let waiting=0;
+let waiting=0,asking=false;
+// 누르기 전에 서비스 워커 등록·공개 키를 미리 받아 둠 → 누르는 순간 바로 구독(허용 창)을 띄울 수 있게.
+const prep:{reg?:ServiceWorkerRegistration;key?:string}={};
 const browser=()=>{const u=navigator.userAgent;return /SamsungBrowser/.test(u)?'samsung':/EdgA?\//.test(u)?'edge':/Firefox|FxiOS/.test(u)?'firefox':/CriOS|Chrome\//.test(u)?'chrome':/Safari/.test(u)?'safari':'other';};
 const load=():Saved|null=>{try{return JSON.parse(localStorage.getItem(KEY)??'null');}catch{return null;}};
 
@@ -28,10 +30,12 @@ export function AlertSetup({areas}:{areas:Area[]}){
     if(!('serviceWorker' in navigator)||!('PushManager' in window)||!('Notification' in window)){
       setSt(isIos()&&!(navigator as {standalone?:boolean}).standalone?'ios-home':'unsupported');return;}
     if(Notification.permission==='denied'){setSt('denied');return;}
-    navigator.serviceWorker.getRegistration('/').then(r=>{r?.update().catch(()=>{});return r?.pushManager.getSubscription();}).then(sub=>{
-      // 등록은 남아 있는데 허용이 빠진 경우(삼성 인터넷에서 확인): 그대로면 도착한 알림을 브라우저가 버림 → '받는 중'으로 보이지 않게, 파란 상자로 다시 허용.
+    navigator.serviceWorker.register('/sw.js',{scope:'/'}).then(r=>{prep.reg=r;}).catch(()=>{});
+    fetch('/api/push/key').then(r=>r.json() as Promise<{key:string}>).then(d=>{prep.key=d.key;}).catch(()=>{});
+    navigator.serviceWorker.getRegistration('/').then(r=>r?.pushManager.getSubscription()).then(sub=>{
+      // 등록은 남아 있는데 허용이 빠진 경우(삼성 인터넷에서 확인): 그대로면 도착한 알림을 브라우저가 버림 → '받는 중'으로 보이지 않게, 맨 위 버튼으로 다시 허용.
       const ok=!!sub&&!!s&&Notification.permission==='granted';setSt(ok?'on':'off');
-      if(sub&&s&&!ok)setMsg('알림 허용이 빠져 있어요. 위 파란 상자를 눌러 ‘허용’을 눌러 주세요.');
+      if(sub&&s&&!ok)setMsg('알림 허용이 빠져 있어요. 맨 위 ‘🔔 우리 동네 알림 받기’를 누른 뒤 ‘허용’을 눌러 주세요. (또는 주소창 옆 사이트 아이콘 → 알림 ‘허용’)');
     }).catch(()=>setSt('off'));
     // 서비스 워커가 '받았다·띄웠다'를 알려 줌 → 도착 문제인지 휴대폰 알림 표시 설정 문제인지 구분.
     const onMsg=(e:MessageEvent)=>{const d=e.data as {gj?:string;ok?:boolean;error?:string;got?:boolean;v?:string};
@@ -49,23 +53,35 @@ export function AlertSetup({areas}:{areas:Area[]}){
   const area=areas.find(a=>a.w===w);
   const post=(path:string,body:unknown)=>fetch(`/api/push/${path}`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)}).then(r=>r.json() as Promise<{ok?:boolean;error?:string;result?:string}>);
   async function on(){
-    // 누르는 순간 허용 팝업부터(다른 일을 먼저 기다리면 삼성 인터넷·사파리가 '직접 누른 동작'이 아니라며 팝업을 막음).
-    const ask=Notification.permission==='granted'?Promise.resolve('granted' as NotificationPermission):Notification.requestPermission();
-    setSt('busy');setMsg('');
+    if(asking)return;
+    if(!area||!t.length){setMsg('아래에서 지역과 받을 알림을 고른 뒤 다시 눌러 주세요.');return;}
+    asking=true;setSt('busy');setMsg('');
     try{
-      const perm=await ask;if(perm!=='granted'){setSt(perm==='denied'?'denied':'off');ga('push_subscribe',{result:perm,browser:browser()});
-        // 팝업이 안 뜨고 바로 'default'로 끝나는 브라우저(삼성 인터넷 설정에서 사이트 알림 요청이 꺼진 경우 등) → 직접 켜는 길.
-        if(perm==='default'){setHelp(true);setMsg(browser()==='samsung'?'허용 창이 뜨지 않았어요. 주소창의 자물쇠(🔒) → 권한 → 알림 ‘허용’을 누르거나, 아래 1번 설정을 켠 뒤 다시 눌러 주세요.':'허용 창이 뜨지 않았어요. 주소창 왼쪽 아이콘 → 권한 → 알림 ‘허용’ 후 다시 눌러 주세요.');}
+      let sub:PushSubscription|null=null,perm:NotificationPermission=Notification.permission;
+      if(!isIos()&&prep.reg&&prep.key){
+        // 크롬·삼성 인터넷: 미리 준비해 둔 서비스 워커로 누르는 즉시 구독 → 허용 창 한 번(구독이 알림 허용까지 묻는다).
+        // 따로 requestPermission을 먼저 부르면 삼성 인터넷은 알림·푸시를 따로 물어 창이 두 번 떴음(10/27 사용자 확인).
+        sub=await prep.reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64(prep.key)}).catch(()=>null);
+        perm=Notification.permission;
+        if(perm==='default')perm=await Notification.requestPermission();
+      }else{
+        // 사파리: 누르는 순간 허용부터(다른 일을 먼저 기다리면 '직접 누른 동작'이 아니라며 막음).
+        perm=perm==='granted'?perm:await Notification.requestPermission();
+      }
+      if(perm!=='granted'){setSt(perm==='denied'?'denied':'off');ga('push_subscribe',{result:perm,browser:browser()});
+        if(perm==='default'){setHelp(true);setMsg('허용 창이 뜨지 않았어요. 주소창 옆 사이트 아이콘(🔒 또는 내근처 아이콘)을 눌러 → 알림 ‘허용’으로 바꾼 뒤 다시 눌러 주세요.');}
         return;}
-      if(!area||!t.length){setSt('off');setMsg('알림이 허용됐어요. 아래에서 지역과 받을 알림을 고른 뒤 한 번 더 눌러 주세요.');return;}
-      const reg=await navigator.serviceWorker.register('/sw.js',{scope:'/'});await navigator.serviceWorker.ready;
-      const {key}=await fetch('/api/push/key').then(r=>r.json() as Promise<{key:string}>);
-      const sub=await reg.pushManager.getSubscription()??await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64(key)});
+      if(!sub){
+        const reg=prep.reg??await navigator.serviceWorker.register('/sw.js',{scope:'/'});await navigator.serviceWorker.ready;
+        const key=prep.key??(await fetch('/api/push/key').then(r=>r.json() as Promise<{key:string}>)).key;
+        sub=await reg.pushManager.getSubscription()??await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64(key)});
+      }
       const r=await post('subscribe',{sub:sub.toJSON(),w:area.w,c:area.c,n:area.n,lat:area.lat,lon:area.lon,t});
       if(!r.ok)throw new Error(r.error??'subscribe');
       try{localStorage.setItem(KEY,JSON.stringify({w:area.w,t}));}catch{}
-      setSt('on');setMsg('등록됐어요. 아래 ‘시험 알림 보내기’로 바로 확인해 보세요.');ga('push_subscribe',{result:'granted',area:area.w,topics:t.join(',')});
+      setSt('on');setMsg('등록됐어요. 아래 ‘시험 알림 보내기’로 바로 확인해 보세요.');ga('push_subscribe',{result:'granted',area:area.w,topics:t.join(','),browser:browser()});
     }catch{setSt('off');setMsg('등록하지 못했어요. 잠시 뒤 다시 눌러 주세요.');}
+    finally{asking=false;}
   }
   /** 진단: 이 휴대폰의 알림 준비 상태(브라우저·권한·서비스 워커·구독). 알림이 안 올 때 캡처해 받기용 — 개인정보 없음. */
   async function inspect(){
@@ -82,7 +98,7 @@ export function AlertSetup({areas}:{areas:Area[]}){
   async function test(){
     setHelp(true);
     const sub=await inspect();if(!sub)return setSt('off');
-    if(Notification.permission!=='granted'){setSt('off');setMsg('알림 허용이 빠져 있어요. 위 파란 상자를 눌러 ‘허용’을 눌러 주세요.');return;}
+    if(Notification.permission!=='granted'){setSt('off');setMsg('알림 허용이 빠져 있어요. 맨 위 ‘🔔 우리 동네 알림 받기’를 누른 뒤 ‘허용’을 눌러 주세요. (또는 주소창 옆 사이트 아이콘 → 알림 ‘허용’)');return;}
     note('휴대폰 도착','기다리는 중…');note('알림 띄우기','-');
     const r=await post('test',{endpoint:sub.endpoint}).catch(()=>({ok:false,error:'network'})) as {ok?:boolean;error?:string;result?:string;status?:number};ga('push_test',{ok:!!r.ok,status:r.status??0,browser:browser()});
     note('서버 발송',`${r.ok?'✅':'❌'} ${r.result??r.error??''} (푸시 서버 응답 ${r.status??'-'})`);
@@ -103,7 +119,7 @@ export function AlertSetup({areas}:{areas:Area[]}){
     try{localStorage.removeItem(KEY);}catch{}setSt('off');setMsg('알림을 껐어요.');ga('push_unsub');
   }
   const ext=externalUrl(inapp());
-  // 맨 위 큰 파란 상자도 버튼: 아직이면 알림 받기, 받고 있으면 시험 알림.
+  // 맨 위 큰 '우리 동네 알림 받기' 상자도 버튼: 아직이면 알림 받기, 받고 있으면 시험 알림.
   const ready=st==='off'||st==='on';
   const hero=()=>{if(st==='off')on();else if(st==='on')test();else document.querySelector('.nr-alerts .gj-locate-help')?.scrollIntoView({behavior:'smooth',block:'center'});};
   return <>
@@ -134,6 +150,7 @@ export function AlertSetup({areas}:{areas:Area[]}){
     {msg&&<p className="nr-alert-msg">{msg}</p>}
     {(help||st==='on')&&<details className="nr-alert-help" open={help}><summary>알림이 안 보일 때</summary>
       {browser()==='samsung'?<ol>
+        <li>가장 쉬운 방법: 주소창 옆 <b>사이트 아이콘(🔒 또는 내근처 아이콘)</b>을 눌러 → <b>알림 ‘허용’</b></li>
         <li>삼성 인터넷 <b>메뉴(≡) → 설정 → 사이트 및 다운로드 → 알림</b>에서 ‘알림 허용’을 켜고, 목록에서 <b>near.guidejung.com</b>이 켜져 있는지 확인</li>
         <li>휴대폰 <b>설정 → 애플리케이션 → 삼성 인터넷 → 알림</b>에서 ‘알림 허용’ 켜기(‘사이트 알림’ 항목도)</li>
         <li>휴대폰 <b>설정 → 애플리케이션 → 삼성 인터넷 → 배터리</b>를 ‘제한 없음’으로(절전 때문에 늦거나 안 오는 경우)</li>
