@@ -7,6 +7,7 @@ type Banner={id:string;from:string;to:string;sites:string[];text:string;href:str
 const NEAR='https://near.guidejung.com';
 // 해마다 날짜와 문구만 바꾼다(주소는 그대로).
 export const SEASON_BANNERS:Banner[]=[
+  {id:'foliage-2026',from:'2026-10-27',to:'2026-11-12',sites:['trip','weather','traffic','parking','near'],text:'🍁 단풍 절정 — 내장산 11월 4일·한라산 11월 6일, 내 주변 단풍 명소',href:`${NEAR}/season/foliage`},
   {id:'suneung-2027',from:'2026-10-25',to:'2026-11-19',sites:['school','academy','weather','pharmacy','hospital','near'],text:'📝 11월 19일 수능날 — 당일 교통 안내·시험장 날씨·문 연 약국',href:`${NEAR}/season/suneung`},
   {id:'winter-car-2026',from:'2026-10-25',to:'2027-01-31',sites:['service','oil','charge','traffic','parking'],text:'❄️ 겨울 오기 전 차량 점검 — 배터리·타이어·냉각수, 내 주변 정비소',href:`${NEAR}/season/winter-car`},
   {id:'new-year-2027',from:'2026-12-15',to:'2027-01-01',sites:['trip','weather','traffic','near'],text:'🌅 새해 첫 해돋이 — 지역별 해 뜨는 시각·내 주변 명소',href:`${NEAR}/season/new-year`},

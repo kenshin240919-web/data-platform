@@ -19,7 +19,7 @@ export async function generateMetadata({params}:P):Promise<Metadata>{
 }
 // 새해 해돋이 표: 해돋이로 알려진 바닷가 지역과 시도 대표 지역(시군구 중심 좌표 계산값). 일반구가 있는 시는 첫 구.
 const SUN_AREAS=['강원 강릉시','경북 포항시','울산 울주군','부산 해운대구','제주 서귀포시','전남광주 여수시','강원 속초시','경북 울릉군','서울 중구','인천 제물포구','대전 중구','대구 중구','전남광주 동구','세종시','충북 청주시','충남 태안군','전북 전주시','경남 창원시','경기 수원시'];
-const STEPS_TITLE:Record<string,string>={suneung:'수능날 당일 안내','winter-car':'겨울 점검, 순서대로','new-year':'해돋이 준비, 순서대로'};
+const STEPS_TITLE:Record<string,string>={suneung:'수능날 당일 안내',foliage:'단풍 구경, 순서대로','winter-car':'겨울 점검, 순서대로','new-year':'해돋이 준비, 순서대로'};
 
 export default async function Page({params}:P){
   const s=season((await params).slug);if(!s)notFound();
@@ -32,7 +32,7 @@ export default async function Page({params}:P){
     <section className="nr-hero small"><h1>{s.icon} {s.h1}</h1><p>{s.lead}</p></section>
     {s.date&&<Dday iso={s.date.iso} label={s.date.label}/>}
     <Actions/>
-    {s.facts.length>0&&<section><h2>{s.title} 한눈에</h2><table className="nr-table"><tbody>{s.facts.map(([k,v])=><tr key={k}><th>{k}</th><td>{v}</td></tr>)}</tbody></table></section>}
+    {s.facts.length>0&&<section><h2>{s.slug==='foliage'?'산별 단풍 절정 예상일 (산림청 예측)':`${s.title} 한눈에`}</h2><table className="nr-table"><tbody>{s.facts.map(([k,v])=><tr key={k}><th>{k}</th><td>{v}</td></tr>)}</tbody></table></section>}
     {sun.length>0&&<section><h2>2027년 1월 1일 해 뜨는 시각 (계산값)</h2><table className="nr-table"><thead><tr><th>지역</th><th>해 뜨는 시각</th></tr></thead><tbody>{sun.map(r=><tr key={r.n}><td>{r.n}</td><td><b>{r.t}</b></td></tr>)}</tbody></table>
       <p className="muted small">지역(시군구) 중심 좌표로 계산한 값이에요. 바닷가·산 정상은 몇 분 다를 수 있어요.</p></section>}
     <SituationLive kind={s.slug} areas={AREAS} day={s.date?.iso}/>

@@ -12,7 +12,7 @@ const U=L.SITE_URL;
 const DAY=['일','월','화','수','목','금','토'];
 // 카드 순서는 응답이 오는 순서가 아니라 상황에 맞는 순서로 고정.
 const ORDER:Record<string,string[]>={'sick-kid':['ped','ph','er','pk'],weekend:['wx','fest','place','oil'],'car-trouble':['rp','in','oil','ev'],
-  suneung:['day','ph','hp','pk'],'winter-car':['cold','rp','in','oil','ev'],'new-year':['sun','spot','stay','oil']};
+  suneung:['day','ph','hp','pk'],foliage:['wx','spot','fest','oil'],'winter-car':['cold','rp','in','oil','ev'],'new-year':['sun','spot','stay','oil']};
 
 const ymdDay=(ymd:string)=>new Date(Date.UTC(+ymd.slice(0,4),+ymd.slice(4,6)-1,+ymd.slice(6,8))).getUTCDay();
 async function blocks(kind:string,a:Area,lat:number,lon:number,put:(b:Block)=>void,day?:string){
@@ -23,10 +23,18 @@ async function blocks(kind:string,a:Area,lat:number,lon:number,put:(b:Block)=>vo
     L.er(lat,lon).then(d=>put({key:'er',icon:'🚑',title:'가까운 응급실 · 지금 남은 병상',items:d?.items.map(e=>({name:e.name,sub:`${km(e.km)}${e.beds!=null?` · 남은 병상 ${n(e.beds)}`:' · 병상 정보 없음'}${e.er_tel?` · ☎ ${e.er_tel}`:''}`,href:`${U.hospital}/hospital/${e.id}`,tone:e.beds?'good':'warn'})),more:['응급실 모두 보기',`${U.hospital}/er`],empty:'응급실 정보를 불러오지 못했어요. 급하면 119에 전화하세요.'}));
     L.parking(lat,lon,1).then(d=>put({key:'pk',icon:'🅿️',title:'가까운 공영 주차장 (1km)',items:d?.items.slice(0,3).map(p=>({name:p.name,sub:`${km(p.km)} · ${p.charge}`,href:`${U.parking}/parking/${p.id}`})),more:['주차장 더 보기',`${U.parking}/region/${a.c}`],empty:'1km 안에 등록된 공영 주차장이 없어요.'}));
   }
-  if(kind==='weekend'){
+  if(kind==='weekend'||kind==='foliage'){
     L.weather(a).then(w=>{const days=(w?.weekend??[]).filter(d=>{const t=new Date(Date.UTC(+d.date.slice(0,4),+d.date.slice(4,6)-1,+d.date.slice(6,8))).getUTCDay();return t===0||t===6;}).slice(0,2);
       put({key:'wx',icon:'🌤️',title:`${a.n} 이번 주말 날씨`,items:w?days.map(d=>{const t=new Date(Date.UTC(+d.date.slice(0,4),+d.date.slice(4,6)-1,+d.date.slice(6,8))).getUTCDay();const pop=Math.max(d.am.pop,d.pm.pop);
         return {name:`${DAY[t]}요일 ${d.pm.sky??d.am.sky}`,sub:`${d.min}~${d.max}° · 비 올 확률 ${pop}%`,href:`${U.weather}/region/${a.w}`,tone:pop>=60?'warn':'good'};}):null,more:['주말 날씨 전국 보기',`${U.weather}/weekend`],empty:'주말 예보가 아직 없어요.'});});
+  }
+  if(kind==='foliage'){
+    const q='%EB%8B%A8%ED%92%8D';// 단풍
+    L.trip(lat,lon,`&kind=place&q=${q}`,100,15).then(d=>put({key:'spot',icon:'🍁',title:'내 주변 단풍 명소 (100km)',items:d?.items.filter(i=>!/도서관|전당|센터|학교|아파트|회관|극장|박물관|카페|식당/.test(i.name)).slice(0,5).map(i=>({name:i.name,sub:i.region_name,href:L.tripPath(i)})),more:['단풍 명소 더 보기',`${U.trip}/search?${ll}&radius_km=100&q=${q}`],empty:'100km 안에서 찾지 못했어요.'}));
+    L.trip(lat,lon,`&kind=festival&q=${q}`,100).then(d=>put({key:'fest',icon:'🎪',title:'단풍 축제·행사 (100km)',items:d?.items.map(i=>({name:i.name,sub:i.region_name,href:L.tripPath(i)})),more:['축제 더 보기',`${U.trip}/festival`],empty:'100km 안에 열리는 단풍 축제가 없어요.'}));
+    L.cheapOil(lat,lon,5).then(d=>put({key:'oil',icon:'⛽',title:'출발 전 최저가 주유소 (5km)',items:d?.best?[{name:d.best.name,sub:`휘발유 ${n(d.best.prices.B027!)}원 · ${km(d.best.km)}`,href:`${U.oil}/station/${d.best.id}`,tone:'good'}]:null,more:['주유소 더 보기',a.o?`${U.oil}/region/${a.o}`:U.oil]}));
+  }
+  if(kind==='weekend'){
     L.trip(lat,lon,'&kind=festival&when=weekend',50).then(d=>put({key:'fest',icon:'🎪',title:'이번 주말 행사 (50km)',items:d?.items.map(i=>({name:i.name,sub:i.region_name,href:L.tripPath(i)})),more:['주말 행사 더 보기',`${U.trip}/search?${ll}&radius_km=50&when=weekend&kind=festival`],empty:'50km 안에 이번 주말 행사가 없어요.'}));
     L.trip(lat,lon,'&kind=place',20).then(d=>put({key:'place',icon:'🚗',title:'가까운 가볼만한곳 (20km)',items:d?.items.map(i=>({name:i.name,sub:i.region_name,href:L.tripPath(i)})),more:['가볼만한곳 더 보기',`${U.trip}/search?${ll}&radius_km=20&kind=place`]}));
     L.cheapOil(lat,lon,5).then(d=>put({key:'oil',icon:'⛽',title:'출발 전 최저가 주유소 (5km)',items:d?.best?[{name:d.best.name,sub:`휘발유 ${n(d.best.prices.B027!)}원 · ${km(d.best.km)}`,href:`${U.oil}/station/${d.best.id}`,tone:'good'}]:null,more:['주유소 더 보기',a.o?`${U.oil}/region/${a.o}`:U.oil]}));
