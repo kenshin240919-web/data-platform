@@ -12,7 +12,7 @@
  * 목록에 없거나 키가 빈 사이트는 ④·⑤·카카오내비를 숨김(길안내 고르기는 카카오맵·네이버·T맵으로 동작). 새 사이트는 키에 도메인을 추가하고 여기에도. */
 export const KAKAO_APPS:{key:string;map:boolean;hosts:string[]}[]=[
   {key:'88ef8988f1ee3212281e2ea85a80c54d',map:true,hosts:['trip','pharmacy','hospital','oil','parking','charge','pet','rest','service','minwon']}, // 키 이름 '가이드정'
-  {key:'0972914c99ee9b4b415844e8c2ad7537',map:true,hosts:['weather','traffic','academy','school','near']}, // 키 이름 '내근처 공유'
+  {key:'0972914c99ee9b4b415844e8c2ad7537',map:true,hosts:['weather','traffic','academy','school','near','market']}, // 키 이름 '내근처 공유'
 ];
 const KAKAO_BY_HOST=Object.fromEntries(KAKAO_APPS.flatMap(a=>a.key?a.hosts.map(h=>[h,[a.key,a.map?1:0]]):[]));
 export const NEAR_API='https://near.guidejung.com';
