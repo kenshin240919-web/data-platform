@@ -1,7 +1,7 @@
 'use client';
 // 상황별 페이지의 '지금 내 주변' 묶음. 위치 하나로 여러 사이트 API를 함께 불러 카드 목록으로 보여 준다.
 import {useEffect,useState} from 'react';
-import {LocateCard,useMyPosition,here} from '@guidejung/ui/geo';
+import {LocateCard,PosNote,useMyPosition,here} from '@guidejung/ui/geo';
 import type {Area} from '@guidejung/ui/network';
 import * as L from '../../lib/live';
 import {km,n} from '../../lib/site';
@@ -68,7 +68,7 @@ export function SituationLive({kind,areas,day}:{kind:string;areas:Area[];day?:st
   },[pos?.lat,pos?.lon,kind]);
   return <section className="nr-live" aria-label="지금 내 주변">
     <p className="nr-where">{a?<>📍 <b>{a.n}</b> {pos?.precise?'내 위치':'접속 지역'} 기준 · 지금</>:status==='locating'?'위치 확인 중…':'위치를 알면 내 주변 기준으로 바로 찾아 드려요'}</p>
-    {!pos?.precise&&<LocateCard title="내 위치로 찾기" desc="가까운 순으로 정확하게 보여 드려요" status={status} onClick={request} approxLabel={pos&&a?a.n:undefined}/>}
+    <PosNote/>{!pos?.precise&&<LocateCard title="내 위치로 찾기" desc="가까운 순으로 정확하게 보여 드려요" status={status} onClick={request} approxLabel={pos&&a?a.n:undefined}/>}
     {pos&&!Object.keys(list).length&&<p className="muted">불러오는 중…</p>}
     <div className="nr-blocks">{(ORDER[kind]??[]).map(k=>list[k]).filter((b):b is Block=>!!b).map(b=><div key={b.key} className="nr-block"><h3>{b.icon} {b.title}</h3>
       {b.items==null?<p className="muted small">지금은 불러오지 못했어요.</p>:b.items.length?<ul>{b.items.map(i=><li key={i.href+i.name}><a className={i.tone??''} href={i.href}><b>{i.name}</b>{i.sub&&<small>{i.sub}</small>}</a></li>)}</ul>:<p className="muted small">{b.empty??'찾지 못했어요.'}</p>}

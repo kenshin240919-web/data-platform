@@ -2,7 +2,7 @@
 // 메인 3초 답: 내 위치(이미 허용 → 정확, 아니면 접속 위치) 주변 종류별 수와 가장 가까운 찜질방(또는 고른 종류).
 // /api/near?per= 는 종류마다 가까운 곳을 per개씩 + 종류별 전체 수(counts) — 피부관리실이 많아 다른 종류가 묻히지 않게.
 import {useEffect,useState} from 'react';
-import {LocateCard,useMyPosition,fixKmNow} from '@guidejung/ui/geo';
+import {LocateCard,PosNote,useMyPosition,fixKmNow} from '@guidejung/ui/geo';
 import {KIND_ORDER,KINDS,km,n,shopPath,type Kind,type Slim} from '../../lib/fmt';
 import {PlaceList} from './PlaceList';
 type Res={counts:Record<Kind,number>;items:Slim[]};
@@ -18,7 +18,7 @@ export function NearRest({kind}:{kind?:Kind}){
   const first=res?.items.find(p=>p.kind===main);
   const shown=KIND_ORDER.filter(k=>(!kind||k===kind)&&(res?.counts[k]??0)>0);
   return <section className="rs-near">
-    {!pos?.precise&&<LocateCard title={`내 위치 주변 ${kind?KINDS[kind].label:'찜질방·목욕탕'} 보기`} desc="가까운 순으로 보여 드려요" status={status} onClick={request} approxLabel={pos?'접속 지역':undefined}/>}
+    <PosNote/>{!pos?.precise&&<LocateCard title={`내 위치 주변 ${kind?KINDS[kind].label:'찜질방·목욕탕'} 보기`} desc="가까운 순으로 보여 드려요" status={status} onClick={request} approxLabel={pos?'접속 지역':undefined}/>}
     {pos&&!res&&<p className="rs-answer muted">내 주변 찾는 중…</p>}
     {res&&<>
       <p className="rs-answer">{shown.length?<>📍 {pos?.precise?'내 주변':'접속 위치 주변'} {radius}km 안 {shown.map((k,i)=><span key={k}>{i>0&&' · '}{KINDS[k].label} <b>{n(res.counts[k])}곳</b></span>)}

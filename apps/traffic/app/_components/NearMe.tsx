@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import {useMemo,useState} from 'react';
-import {broadArea,LocateCard,km,nearest,useMyPosition,here} from '@guidejung/ui/geo';
+import {broadArea,LocateCard,PosNote,km,nearest,useMyPosition,here} from '@guidejung/ui/geo';
 import {dirLabel,roadName,type Route} from '../../lib/format';
 import type {Cctv} from '../../lib/types';
 import {CctvPlayer,cctvName} from './CctvPlayer';
@@ -29,7 +29,7 @@ export function NearMe({routes,rests,places}:{routes:Route[];rests:RestLite[];pl
   const area=pos?nearest(places,here(pos).lat,here(pos).lon):undefined;const place=pos&&!pos.precise?broadArea(places,here(pos).lat,here(pos).lon):area?.label;
   const where=pos?.precise?'내 근처':place?`${place} 부근`:'접속 위치 부근';
   return <section className="section tf-near">
-    {!pos?.precise&&<LocateCard title="내 근처 고속도로 상황 보기" desc="가까운 고속도로의 구간별 속도·CCTV·휴게소를 먼저 보여 드려요" status={status} onClick={request} approxLabel={place}/>}
+    <PosNote/>{!pos?.precise&&<LocateCard title="내 근처 고속도로 상황 보기" desc="가까운 고속도로의 구간별 속도·CCTV·휴게소를 먼저 보여 드려요" status={status} onClick={request} approxLabel={place}/>}
     {pos&&<>
       <div className="section-heading"><div><div className="eyebrow">NEAR ME</div><h2>{where} 고속도로</h2></div></div>
       <div className="tf-near-roads">{roads.map(({r,segs,k,d})=>{

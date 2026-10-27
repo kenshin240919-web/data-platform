@@ -4,7 +4,7 @@
 import {useEffect,useState} from 'react';
 import type {Place,Results} from './types';
 import {Cards} from './cards';
-import {broadArea,LocateCard,useMyPosition,fixKmNow,here} from './geo';
+import {broadArea,LocateCard,PosNote,useMyPosition,fixKmNow,here} from './geo';
 import {todayKST} from './search';
 
 const TABS=[['place','🏞️ 가볼만한곳'],['food','🍽️ 맛집'],['stay','🛏️ 숙소'],['festival','🎉 축제'],['shop','🛍️ 쇼핑'],['course','🧭 여행코스']] as const;
@@ -29,7 +29,7 @@ export function MyNearby({base=''}:{base?:string}){
   const more=(kind:string)=>`${base}/search?lat=${pos!.lat}&lon=${pos!.lon}&radius_km=20&kind=${kind}`;
   return <section className="my-nearby" aria-label="내 주변 여행 정보">
     {pos&&<div className="section-heading"><div><div className="eyebrow">NEAR ME · 20KM</div><h2>{pos.precise?'📍 내 위치 주변 여행 정보':`📍 ${area?`${area} 부근`:'접속 위치 주변'} 여행 정보`}</h2></div>{active&&<a href={more(active.kind)}>모두 보기</a>}</div>}
-    {(!pos||!pos.precise)&&<LocateCard title={pos?'정확한 내 위치로 다시 찾기':'내 주변 20km 여행지·맛집·숙소'} desc="가까운 순으로 바로 보여 드려요" status={status} onClick={request} approxLabel={pos&&area?area:undefined}/>}
+    <PosNote/>{(!pos||!pos.precise)&&<LocateCard title={pos?'정확한 내 위치로 다시 찾기':'내 주변 20km 여행지·맛집·숙소'} desc="가까운 순으로 바로 보여 드려요" status={status} onClick={request} approxLabel={pos&&area?area:undefined}/>}
     {pos&&!list&&<div className="loading" role="status">주변 정보를 불러오고 있습니다.</div>}
     {list&&list.length===0&&<p className="notice">20km 안에 아직 등록된 정보가 없습니다. 아래에서 지역을 골라 보세요.</p>}
     {list&&active&&<><div className="near-labels" role="tablist">{list.map(g=><button key={g.kind} type="button" role="tab" aria-selected={g.kind===active.kind} className={`near-label${g.kind===active.kind?' on':''}`} onClick={()=>setTab(g.kind)}>{TABS.find(t=>t[0]===g.kind)![1]}<span>{Number(g.total).toLocaleString()}</span></button>)}</div>

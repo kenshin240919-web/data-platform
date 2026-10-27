@@ -1,7 +1,7 @@
 'use client';
 // 메인 3초 답: 내 위치(이미 허용 → 정확, 아니면 접속 위치) 주변 정비소·검사소·세차장 수와 가장 가까운 곳.
 import {useEffect,useState} from 'react';
-import {LocateCard,useMyPosition,fixKmNow,padKm,within} from '@guidejung/ui/geo';
+import {LocateCard,PosNote,useMyPosition,fixKmNow,padKm,within} from '@guidejung/ui/geo';
 import {centerPath,KINDS,km,n,type Kind,type Slim} from '../../lib/fmt';
 import {CenterList} from './CenterList';
 export function NearCenter({kind}:{kind?:Kind}){
@@ -15,7 +15,7 @@ export function NearCenter({kind}:{kind?:Kind}){
   const count=(k:Kind)=>items?.filter(p=>p.kind===k).length??0;
   const main=kind??'repair',first=items?.find(p=>p.kind===main);
   return <section className="sv-near">
-    {!pos?.precise&&<LocateCard title={`내 위치 주변 ${kind?KINDS[kind].label:'정비소·검사소'} 보기`} desc="가까운 순으로 보여 드려요" status={status} onClick={request} approxLabel={pos?'접속 지역':undefined}/>}
+    <PosNote/>{!pos?.precise&&<LocateCard title={`내 위치 주변 ${kind?KINDS[kind].label:'정비소·검사소'} 보기`} desc="가까운 순으로 보여 드려요" status={status} onClick={request} approxLabel={pos?'접속 지역':undefined}/>}
     {pos&&!items&&<p className="sv-answer muted">내 주변 찾는 중…</p>}
     {items&&<>
       <p className="sv-answer">{first?<>📍 {pos?.precise?'내 주변':'접속 위치 주변'} {radius}km 안 {kind?<>{KINDS[kind].label} <b>{n(count(kind))}곳</b></>:<>정비소 <b>{n(count('repair'))}곳</b> · 검사소 {n(count('inspect'))}곳 · 세차장 {n(count('wash'))}곳</>}

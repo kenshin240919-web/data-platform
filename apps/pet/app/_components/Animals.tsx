@@ -2,7 +2,7 @@
 // 보호 중인 아이들·실종 동물 카드(사진은 Worker /photo/{id}가 https로 대신 받아 줌). NearAnimals: 내 위치 주변부터(보호소 좌표 기준,
 // 실종 동물은 시군구 중심 기준) 10→30→50→100km로 넓혀 12마리 이상. 개·고양이·기타 칩.
 import {useEffect,useMemo,useState} from 'react';
-import {LocateCard,useMyPosition,fixKmNow} from '@guidejung/ui/geo';
+import {LocateCard,PosNote,useMyPosition,fixKmNow} from '@guidejung/ui/geo';
 import {animalPath,animalTitle,ddayLabel,daysLeft,km,n,photoPath,type Animal} from '../../lib/fmt';
 
 export function AnimalCard({a,lost}:{a:Animal&{km?:number};lost?:boolean}){
@@ -36,7 +36,7 @@ export function NearAnimals({type='adopt',title}:{type?:'adopt'|'lost';title?:st
     load(0).catch(()=>{if(live)setRes({total:0,items:[]});});return ()=>{live=false;};},[pos?.lat,pos?.lon,type]); // eslint-disable-line react-hooks/exhaustive-deps
   const lost=type==='lost';
   return <section className="pt-near-animals"><h2>{title??(lost?'🔎 내 주변 실종 동물':'🐾 내 주변 보호소에서 기다리는 아이들')}</h2>
-    {!pos?.precise&&<LocateCard title={lost?'내 위치 주변 실종 동물 보기':'내 위치 주변 보호 중인 아이들 보기'} desc="가까운 보호소부터 보여 드려요" status={status} onClick={request} approxLabel={pos?'접속 지역':undefined}/>}
+    <PosNote/>{!pos?.precise&&<LocateCard title={lost?'내 위치 주변 실종 동물 보기':'내 위치 주변 보호 중인 아이들 보기'} desc="가까운 보호소부터 보여 드려요" status={status} onClick={request} approxLabel={pos?'접속 지역':undefined}/>}
     {pos&&!res&&<p className="muted">찾는 중…</p>}
     {res&&(res.total?<><p className="pt-answer">📍 {radius}km 안 {lost?'최근 30일 실종 신고':'보호 중'} <b>{n(res.total)}마리</b>{!lost&&(()=>{const s=res.items.filter(a=>{const d=daysLeft(a.until);return d!=null&&d>=0&&d<=3;}).length;return s?<> · 공고 마감 3일 안 <b>{n(s)}마리</b></>:null;})()}</p>
       <AnimalGrid items={res.items} lost={lost}/></>:<p className="muted">100km 안에 {lost?'실종 신고가':'보호 중인 아이가'} 없어요.</p>)}

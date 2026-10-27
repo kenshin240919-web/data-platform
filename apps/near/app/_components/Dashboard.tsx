@@ -2,7 +2,7 @@
 // 첫 화면 3초 답: 내 위치(또는 접속 지역) 하나로 자매 사이트의 '지금' 정보를 한 화면에.
 // 카드마다 큰 답 한 줄 + 바로 할 일 버튼(길찾기·전화·더 보기). 가까운 곳에 없으면 반경을 넓혀 가장 가까운 곳을 보여 준다(빈 카드 대신 답).
 import {useEffect,useState} from 'react';
-import {LocateCard,useMyPosition,here} from '@guidejung/ui/geo';
+import {LocateCard,PosNote,useMyPosition,here} from '@guidejung/ui/geo';
 import type {Area} from '@guidejung/ui/network';
 import * as L from '../../lib/live';
 import {km,n} from '../../lib/site';
@@ -62,7 +62,7 @@ export function Dashboard({areas}:{areas:Area[]}){
   const base:Record<string,Card>={weather:{icon:'🌤️',title:'우리 동네 날씨',href:U.weather},pharmacy:{icon:'💊',title:'지금 문 연 약국',href:U.pharmacy},hospital:{icon:'🏥',title:'지금 진료하는 병원',href:U.hospital},oil:{icon:'⛽',title:'가까운 최저가 주유소',href:U.oil},parking:{icon:'🅿️',title:'무료 공영 주차장',href:U.parking},charge:{icon:'⚡',title:'전기차 충전',href:U.charge},trip:{icon:'🚗',title:'가까운 가볼만한곳',href:U.trip},service:{icon:'🔧',title:'자동차 정비소',href:U.service}};
   return <section className="nr-board" aria-label="내 주변 지금">
     <p className="nr-where">{a?<>📍 <b>{a.n}</b> {pos?.precise?'내 위치':'접속 지역'} 기준 · 지금</>:status==='locating'?'위치 확인 중…':'위치를 알면 우리 동네 정보로 바로 바꿔 드려요'}</p>
-    {!pos?.precise&&<LocateCard title="내 위치로 한 번에 보기" desc="날씨·문 연 약국·병원·최저가 주유소·무료 주차장을 내 주변 기준으로" status={status} onClick={request} approxLabel={pos&&a?a.n:undefined}/>}
+    <PosNote/>{!pos?.precise&&<LocateCard title="내 위치로 한 번에 보기" desc="날씨·문 연 약국·병원·최저가 주유소·무료 주차장을 내 주변 기준으로" status={status} onClick={request} approxLabel={pos&&a?a.n:undefined}/>}
     <div className="nr-cards">{order.map(k=>{const c=res[k]===undefined||res[k]===null?base[k]:res[k]!;const loading=pos&&res[k]===undefined;
       return <div key={k} className={`nr-card ${c.state??''}`}>
         <a className="nr-card-main" href={c.href}><span className="nr-card-icon" aria-hidden="true">{c.icon}</span><span className="nr-card-body"><small className="nr-card-title">{c.title}</small>

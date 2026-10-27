@@ -1,7 +1,7 @@
 'use client';
 // 메인 3초 답: 내 위치(이미 허용 → 정확, 아니면 접속 위치) 주변 지금 문 연 약국 수와 가장 가까운 곳.
 import {useEffect,useState} from 'react';
-import {LocateCard,useMyPosition,fixKmNow,padKm,within} from '@guidejung/ui/geo';
+import {LocateCard,PosNote,useMyPosition,fixKmNow,padKm,within} from '@guidejung/ui/geo';
 import {km,pharmacyPath,statusOf} from '../../lib/fmt';
 import {StatusList,useNow,type Item} from './StatusList';
 export function NearNow(){
@@ -15,7 +15,7 @@ export function NearNow(){
   const open=items&&now?items.filter(p=>statusOf(p,now).state!=='closed'):[];
   const first=open[0];
   return <section className="ph-near">
-    {!pos?.precise&&<LocateCard title="내 위치 주변 문 연 약국 보기" desc="가까운 순으로 지금 영업 중인 약국을 보여 드려요" status={status} onClick={request} approxLabel={pos?'접속 지역':undefined}/>}
+    <PosNote/>{!pos?.precise&&<LocateCard title="내 위치 주변 문 연 약국 보기" desc="가까운 순으로 지금 영업 중인 약국을 보여 드려요" status={status} onClick={request} approxLabel={pos?'접속 지역':undefined}/>}
     {pos&&!items&&<p className="ph-answer muted">내 주변 약국 찾는 중…</p>}
     {items&&now&&<>
       <p className={`ph-answer ${first?'open':'closed'}`}><span className="ph-dot" aria-hidden="true"></span>{first?<>📍 {pos?.precise?'내 주변':'접속 위치 주변'} {radius}km 안 <b>지금 문 연 약국 {open.length.toLocaleString('ko-KR')}곳</b> · 가장 가까운 곳 <a href={pharmacyPath(first.id)}><b>{first.name}</b></a> {first.km!=null&&km(first.km)} ({statusOf(first,now).label})</>

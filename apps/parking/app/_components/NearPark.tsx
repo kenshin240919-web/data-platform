@@ -1,7 +1,7 @@
 'use client';
 // 메인 3초 답: 내 위치(이미 허용 → 정확, 아니면 접속 위치) 주변 공영·무료 주차장 수와 가장 싼·가까운 곳.
 import {useEffect,useState} from 'react';
-import {LocateCard,useMyPosition,fixKmNow,padKm,within} from '@guidejung/ui/geo';
+import {LocateCard,PosNote,useMyPosition,fixKmNow,padKm,within} from '@guidejung/ui/geo';
 import {feeFor,km,lotPath,n,type Slim} from '../../lib/fmt';
 import {LotList} from './LotList';
 export function NearPark(){
@@ -17,7 +17,7 @@ export function NearPark(){
   const cheap=items?[...items].filter(p=>feeFor(p,60)!=null).sort((a,b)=>feeFor(a,60)!-feeFor(b,60)!||a.km!-b.km!)[0]:undefined;
   const first=items?.[0];
   return <section className="pk-near">
-    {!pos?.precise&&<LocateCard title="내 위치 주변 주차장 보기" desc="가까운 공영·무료 주차장과 예상 요금을 보여 드려요" status={status} onClick={request} approxLabel={pos?'접속 지역':undefined}/>}
+    <PosNote/>{!pos?.precise&&<LocateCard title="내 위치 주변 주차장 보기" desc="가까운 공영·무료 주차장과 예상 요금을 보여 드려요" status={status} onClick={request} approxLabel={pos?'접속 지역':undefined}/>}
     {pos&&!items&&<p className="pk-answer muted">내 주변 주차장 찾는 중…</p>}
     {items&&<>
       <p className="pk-answer">{first?<>📍 {pos?.precise?'내 주변':'접속 위치 주변'} {radius}km 안 공영 주차장 <b>{n(items.length)}곳</b>{items.length>=60?'+':''} · 무료 <b>{n(free.length)}곳</b>

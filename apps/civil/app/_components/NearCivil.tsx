@@ -3,7 +3,7 @@
 // 그리고 주민센터·우체국·여권 발급 기관 가장 가까운 곳. 가까운 시·구청 민원실이 실시간 대기를 주면 대기 인원도.
 // 위치는 약 2km 칸 중심만 서버로(padKm으로 넓혀 받고 within으로 정확한 거리로 다시 자름).
 import {useEffect,useState} from 'react';
-import {LocateCard,useMyPosition,fixKmNow,padKm,within} from '@guidejung/ui/geo';
+import {LocateCard,PosNote,useMyPosition,fixKmNow,padKm,within} from '@guidejung/ui/geo';
 import {KIND_ORDER,KINDS,km,kstNow,n,placePath,stateOf,type Kind,type Slim} from '../../lib/fmt';
 import {PlaceList} from './PlaceList';
 type Res={counts:Record<Kind,number>;open:number;items:Slim[]};
@@ -28,7 +28,7 @@ export function NearCivil({kind,doc,docTitle}:{kind?:Kind;doc?:string;docTitle?:
   const nearest=(k:Kind)=>res?.items.find(p=>p.kind===k);
   const label=doc?`${docTitle} 떼는 발급기`:main==='kiosk'?'무인민원발급기':KINDS[main].label;
   return <section className="cv-near">
-    {!pos?.precise&&<LocateCard title={`내 위치 주변 ${label} 보기`} desc="가까운 순으로, 지금 운영 중인 곳부터 보여 드려요" status={status} onClick={request} approxLabel={pos?'접속 지역':undefined}/>}
+    <PosNote/>{!pos?.precise&&<LocateCard title={`내 위치 주변 ${label} 보기`} desc="가까운 순으로, 지금 운영 중인 곳부터 보여 드려요" status={status} onClick={request} approxLabel={pos?'접속 지역':undefined}/>}
     {pos&&!res&&<p className="cv-answer muted">내 주변 찾는 중…</p>}
     {res&&<>
       <p className={`cv-answer ${openMine.length?'open':'closed'}`}><span className="cv-dot" aria-hidden="true"></span>{mine.length?<>📍 {pos?.precise?'내 주변':'접속 위치 주변'} {radius}km 안 {label} <b>{n(mine.length)}{main==='kiosk'?'대':'곳'}</b>{main==='kiosk'||main==='post'||main==='passport'?<> · 지금 운영 중 <b>{n(openMine.length)}</b></>:null}

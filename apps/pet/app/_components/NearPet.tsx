@@ -3,7 +3,7 @@
 // 밤(21~9시)·일요일·공휴일에는 맨 위에 가장 가까운 24시 동물병원(이름 기준, 30km 안)을 먼저 보여 줌.
 // /api/near?per= 는 종류마다 가까운 곳을 per개씩 + 종류별 전체 수(counts)·지금 문 연 동물약국 수(open).
 import {useEffect,useState} from 'react';
-import {LocateCard,useMyPosition,fixKmNow} from '@guidejung/ui/geo';
+import {LocateCard,PosNote,useMyPosition,fixKmNow} from '@guidejung/ui/geo';
 import {KIND_ORDER,KINDS,km,n,offHours,placePath,telHref,type Kind,type Slim} from '../../lib/fmt';
 import {PlaceList} from './PlaceList';
 type Res={counts:Record<Kind,number>;open:number;items:Slim[]};
@@ -26,7 +26,7 @@ export function NearPet({kind}:{kind?:Kind}){
   const er=e&&<p className={night?'pt-er night':'pt-er'}>{night?'🌙 지금은 일반 동물병원 진료가 끝났을 수 있어요. ':'🚨 '}가장 가까운 <b>24시 동물병원</b>: <a href={placePath(e.id)}><b>{e.name}</b></a> {e.km!=null&&km(e.km)}
     {e.tel&&<> · <a className="pt-call" href={telHref(e.tel)}>📞 {e.tel}</a></>}<small>이름에 ‘24’가 든 곳이에요. 가기 전에 꼭 전화로 확인하세요.</small></p>;
   return <section className="pt-near">
-    {!pos?.precise&&<LocateCard title={`내 위치 주변 ${kind?KINDS[kind].label:'동물병원·동물약국'} 보기`} desc="가까운 순으로 보여 드려요" status={status} onClick={request} approxLabel={pos?'접속 지역':undefined}/>}
+    <PosNote/>{!pos?.precise&&<LocateCard title={`내 위치 주변 ${kind?KINDS[kind].label:'동물병원·동물약국'} 보기`} desc="가까운 순으로 보여 드려요" status={status} onClick={request} approxLabel={pos?'접속 지역':undefined}/>}
     {pos&&!res&&<p className="pt-answer muted">내 주변 찾는 중…</p>}
     {night&&er}
     {res&&<>

@@ -1,7 +1,7 @@
 'use client';
 // 메인 3초 답: 내 위치 주변 지금 진료 중인 병원(과목 버튼으로 바꿈) + 가까운 응급실과 실시간 남은 병상.
 import {useEffect,useState} from 'react';
-import {LocateCard,useMyPosition,fixKmNow,padKm,within} from '@guidejung/ui/geo';
+import {LocateCard,PosNote,useMyPosition,fixKmNow,padKm,within} from '@guidejung/ui/geo';
 import {DEPTS,DEPT_ICON,hospitalPath,km,MAIN_DEPTS,statusOf,type Card} from '../../lib/fmt';
 import {StatusList,useNow} from './StatusList';
 type Er=Card&{beds:number|null;updated:string|null};
@@ -17,7 +17,7 @@ export function NearNow(){
   const first=open[0];const label=dept?DEPTS[dept]:'병원';
   return <section className="hp-near">
     <div className="hp-depts" role="group" aria-label="진료과목">{[['','전체'],...MAIN_DEPTS.map(k=>[k,DEPTS[k]])].map(([k,l])=><button type="button" key={k} className={dept===k?'on':''} aria-pressed={dept===k} onClick={()=>setDept(k)}><span aria-hidden="true">{k?DEPT_ICON[k]:'🏥'}</span>{l}</button>)}</div>
-    {!pos?.precise&&<LocateCard title="내 위치 주변 지금 진료하는 병원 보기" desc="가까운 순으로 지금 진료 중인 곳과 마감 시간을 보여 드려요" status={status} onClick={request} approxLabel={pos?'접속 지역':undefined}/>}
+    <PosNote/>{!pos?.precise&&<LocateCard title="내 위치 주변 지금 진료하는 병원 보기" desc="가까운 순으로 지금 진료 중인 곳과 마감 시간을 보여 드려요" status={status} onClick={request} approxLabel={pos?'접속 지역':undefined}/>}
     {pos&&!items&&<p className="hp-answer muted">내 주변 {label} 찾는 중…</p>}
     {items&&now&&<>
       <p className={`hp-answer ${first?'open':'closed'}`}><span className="hp-dot" aria-hidden="true"></span>{first?<>📍 {pos?.precise?'내 주변':'접속 위치 주변'} {radius}km 안 <b>지금 진료 중 {label} {open.length.toLocaleString('ko-KR')}곳</b> · 가장 가까운 곳 <a href={hospitalPath(first.id)}><b>{first.name}</b></a> {first.km!=null&&km(first.km)} ({statusOf(first,now).label})</>

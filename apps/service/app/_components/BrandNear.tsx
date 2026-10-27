@@ -1,7 +1,7 @@
 'use client';
 // 내 주변 브랜드 서비스센터: 방문자 위치로 그때그때 카카오 로컬 검색(Worker /api/brand-near) — 결과는 저장하지 않음(카카오 API 조건).
 import {useEffect,useState} from 'react';
-import {LocateCard,useMyPosition,fixKmNow} from '@guidejung/ui/geo';
+import {LocateCard,PosNote,useMyPosition,fixKmNow} from '@guidejung/ui/geo';
 import {km} from '../../lib/fmt';
 type Place={name:string;addr:string|null;tel:string|null;km:number;url:string};
 export function BrandNear({slug,name,fallback}:{slug:string;name:string;fallback:string}){
@@ -12,7 +12,7 @@ export function BrandNear({slug,name,fallback}:{slug:string;name:string;fallback
     return ()=>{live=false;};},[pos?.lat,pos?.lon,slug]);
   const first=res&&res!=='error'?res.items[0]:undefined;
   return <section className="sv-near"><h2>📍 내 주변 {name} 센터</h2>
-    {!pos?.precise&&<LocateCard title={`내 위치에서 가까운 ${name} 센터 찾기`} desc="가까운 순으로 위치·전화번호를 보여 드려요" status={status} onClick={request} approxLabel={pos?'접속 지역':undefined}/>}
+    <PosNote/>{!pos?.precise&&<LocateCard title={`내 위치에서 가까운 ${name} 센터 찾기`} desc="가까운 순으로 위치·전화번호를 보여 드려요" status={status} onClick={request} approxLabel={pos?'접속 지역':undefined}/>}
     {pos&&res===null&&<p className="sv-answer muted">가까운 센터 찾는 중…</p>}
     {res==='error'&&<p className="sv-note">지금은 가까운 센터를 불러오지 못했어요. <a href={fallback} rel="noopener" target="_blank">공식 센터 찾기 ↗</a>에서 확인하세요.</p>}
     {res&&res!=='error'&&<>

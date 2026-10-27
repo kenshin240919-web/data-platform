@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import {useEffect,useMemo,useState} from 'react';
 import {AdSlot} from '@guidejung/ui/ads';
-import {LocateCard,km,useMyPosition,here as exactOf} from '@guidejung/ui/geo';
+import {LocateCard,PosNote,km,useMyPosition,here as exactOf} from '@guidejung/ui/geo';
 import {dirLabel,roadName,type Route} from '../../lib/format';
 import type {Cctv,TrafficResponse} from '../../lib/types';
 import {CctvPlayer,cctvName,cctvRoad} from './CctvPlayer';
@@ -67,7 +67,7 @@ export function RouteLive({route}:{route:Route}){
     </section>
 
     <section className="tf-block">
-      {!pos?.precise&&<LocateCard title="내 위치 주변 구간 보기" desc={`${roadName(route)}에서 내 위치와 가까운 구간·CCTV를 먼저 보여 드려요`} status={status} onClick={request}/>}
+      <PosNote/>{!pos?.precise&&<LocateCard title="내 위치 주변 구간 보기" desc={`${roadName(route)}에서 내 위치와 가까운 구간·CCTV를 먼저 보여 드려요`} status={status} onClick={request}/>}
       {near&&<><h2>📍 {where} 주변 구간 <span className="muted small">{segs[here!.k].from} 부근 · {fmtKm(here!.d)}</span></h2>
         {myCams.length>0&&<div className="tf-mycams">{myCams.map(({c,k,d})=><button key={c.url} type="button" className="tf-cam-btn" onClick={()=>setPlay(k)}>📹 {cctvName(c)} <small>{fmtKm(d)}</small></button>)}</div>}
         <div className="tf-seg-grid">{near.map(card)}</div></>}

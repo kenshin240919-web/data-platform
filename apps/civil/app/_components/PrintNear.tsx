@@ -1,7 +1,7 @@
 'use client';
 // 내 주변 무인 프린트점·프린트카페: Worker /api/print 가 카카오·네이버(NAVER API HUB)에서 방문 때마다 실시간으로 찾음(저장 안 함).
 import {useEffect,useState} from 'react';
-import {LocateCard,useMyPosition,fixKmNow} from '@guidejung/ui/geo';
+import {LocateCard,PosNote,useMyPosition,fixKmNow} from '@guidejung/ui/geo';
 import {km,n,telHref} from '../../lib/fmt';
 type Shop={name:string;addr:string|null;lat:number;lon:number;tel:string|null;cat:string;url:string|null;src:string[];km:number};
 export function PrintNear({compact=false}:{compact?:boolean}){
@@ -13,7 +13,7 @@ export function PrintNear({compact=false}:{compact?:boolean}){
   const list=(items??[]).slice(0,compact?4:20);
   return <section className="cv-print">
     <h2>📄 내 주변 무인 프린트·프린트카페</h2>
-    {!pos?.precise&&<LocateCard title="내 주변 무인 프린트 찾기" desc="정부24에서 받은 서류를 바로 뽑을 곳" status={status} onClick={request} approxLabel={pos?'접속 지역':undefined}/>}
+    <PosNote/>{!pos?.precise&&<LocateCard title="내 주변 무인 프린트 찾기" desc="정부24에서 받은 서류를 바로 뽑을 곳" status={status} onClick={request} approxLabel={pos?'접속 지역':undefined}/>}
     {pos&&!items&&<p className="muted">찾는 중…</p>}
     {items&&!items.length&&<p className="muted">5km 안에서 찾지 못했어요. 가까운 편의점·주민센터 복사기도 확인해 보세요.</p>}
     {list.length>0&&<><p className="cv-answer">5km 안 <b>{n(items!.length)}곳</b> · 가장 가까운 곳 <b>{list[0].name}</b> {km(list[0].km)}</p>

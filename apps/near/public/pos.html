@@ -1,0 +1,10 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="robots" content="noindex"><title>내근처 위치 공유</title></head><body>
+<script>
+// 내근처 사이트(*.guidejung.com)끼리 '내 위치'를 이 휴대폰 안에서만 나눠 쓰는 저장소. 다른 사이트가 숨은 iframe으로 열어 postMessage로 읽고 쓴다.
+// 값은 이 브라우저의 near.guidejung.com 저장소에만 있고 서버로 보내지 않는다(30분 지난 값은 쓰지 않음).
+(function(){var K='gj.pos.shared',O=/^https:\/\/([a-z0-9-]+\.)?guidejung\.com$/,MAX=30*60e3;
+function ok(v){return v&&typeof v.lat==='number'&&typeof v.lon==='number'&&v.lat>33&&v.lat<39&&v.lon>124&&v.lon<132&&typeof v.at==='number'&&Date.now()-v.at<MAX}
+addEventListener('message',function(e){if(!O.test(e.origin))return;var d=e.data||{};
+if(d.gj==='pos-set'&&ok(d.v)){try{localStorage.setItem(K,JSON.stringify({lat:d.v.lat,lon:d.v.lon,acc:typeof d.v.acc==='number'?d.v.acc:null,at:d.v.at}))}catch(x){}}
+else if(d.gj==='pos-get'){var v=null;try{v=JSON.parse(localStorage.getItem(K)||'null')}catch(x){}e.source&&e.source.postMessage({gj:'pos',id:d.id,v:ok(v)?v:null},e.origin)}});})();
+</script></body></html>
