@@ -49,9 +49,20 @@ async function wait(env:Env,p:Place,ctx:ExecutionContext){
   if(!rows){
     if(!env.DATA_GO_KR_KEY)return json({error:'service key missing'},503,0);
     const q=new URLSearchParams({serviceKey:env.DATA_GO_KR_KEY,pageNo:'1',numOfRows:'100',type:'json',stdgCd:p.stdg??''});
-    const r=await fetch(`https://apis.data.go.kr/B551982/cso_v2/cso_realtime_v2?${q}`,{signal:AbortSignal.timeout(8000)}).catch(()=>null);
-    const d=r&&r.ok?await r.json().catch(()=>null) as {body?:{items?:{item?:Record<string,string>[]|Record<string,string>}}}|null:null;
-    const it=d?.body?.items?.item;rows=it?(Array.isArray(it)?it:[it]):[];
+    // data.go.kr은 해외(Cloudflare) 요청에 가끔 늦거나 끊겨 2번까지. 실패는 캐시하지 않고 '불러오지 못함'으로 돌려준다(0명으로 보이지 않게).
+    let why='';
+    for(let i=0;i<2&&!rows;i++){
+      const r=await fetch(`https://apis.data.go.kr/B551982/cso_v2/cso_realtime_v2?${q}`,{signal:AbortSignal.timeout(12000),headers:{accept:'application/json'}}).catch(e=>{why=String(e).slice(0,80);return null;});
+      if(!r){continue;}
+      const text=await r.text();
+      if(!r.ok){why=`http ${r.status}`;continue;}
+      let d:{header?:{resultCode?:string;resultMsg?:string};body?:{items?:{item?:Record<string,string>[]|Record<string,string>}}}|null=null;
+      try{d=JSON.parse(text);}catch{why=`not json: ${text.slice(0,60)}`;continue;}
+      const code=d?.header?.resultCode;
+      if(code&&code!=='00'&&code!=='K0'&&code!=='K3'){why=`${code} ${d?.header?.resultMsg??''}`;continue;}
+      const it=d?.body?.items?.item;rows=it?(Array.isArray(it)?it:[it]):[];
+    }
+    if(!rows)return json({id:p.id,name:p.name,error:why||'upstream'},200,0);
     ctx.waitUntil(caches.default.put(key,new Response(JSON.stringify(rows),{headers:{'cache-control':'max-age=60'}})));
   }
   const mine=rows.filter(x=>x.csoSn===p.cso);
@@ -108,7 +119,7 @@ const AD_FILL='<script>try{document.querySelectorAll("ins.adsbygoogle").forEach(
 const stateHtml=(p:Place)=>{const s=stateOf(p);return `<span class="cv-state ${s.state}">${esc(s.label)}${s.guess?' (보통)':''}</span>`;};
 const cardHtml=(c:Near)=>`<div class="cv-card"><a class="cv-card-main" href="${placePath(c.id)}"><span class="cv-kind" aria-hidden="true">${KINDS[c.kind].icon}</span><span class="cv-card-body"><b>${esc(c.name)}</b><small><span class="cv-km">${esc(km(c.km))}</span>${stateHtml(c)}</small><small class="muted">${esc(c.addr??c.jibun??'')}</small></span></a><span class="cv-acts">${c.tel?`<a href="${esc(telHref(c.tel))}" aria-label="전화">📞</a>`:''}<a href="${esc(mapUrl(c))}" target="_blank" rel="noopener" aria-label="길찾기">🧭</a></span></div>`;
 // 실시간 대기(민원실 상세): 인라인 스크립트가 /api/wait를 불러 채움(Next 스크립트 없음).
-const WAIT_JS=(id:string)=>`<script>(function(){var e=document.getElementById('cv-wait');fetch('/api/wait?id=${id}').then(function(r){return r.json()}).then(function(d){if(!d.tasks||!d.tasks.length){e.innerHTML='<p class="muted">지금은 대기 현황을 받지 못했어요(업무 시간 외이거나 점검 중).</p>';return}var t=d.at?String(d.at).replace(/^(\\d{4})(\\d{2})(\\d{2})(\\d{2})(\\d{2}).*/,'$4:$5'):'';e.innerHTML='<p class="cv-answer">지금 대기 <b>'+d.total+'명</b>'+(t?' <span class="muted">('+t+' 기준)</span>':'')+'</p><ul class="cv-wait">'+d.tasks.map(function(x){return '<li><span>'+x.name.replace(/[<>&]/g,'')+'</span><b>'+x.waiting+'명</b></li>'}).join('')+'</ul>'}).catch(function(){e.innerHTML='<p class="muted">대기 현황을 불러오지 못했어요.</p>'})})();</script>`;
+const WAIT_JS=(id:string)=>`<script>(function(){var e=document.getElementById('cv-wait');fetch('/api/wait?id=${id}').then(function(r){return r.json()}).then(function(d){if(d.error){e.innerHTML='<p class="muted">지금은 대기 현황을 불러오지 못했어요. 잠시 뒤 다시 열어 주세요.</p>';return}if(!d.tasks||!d.tasks.length){e.innerHTML='<p class="muted">지금은 대기 현황이 없어요(업무 시간 외이거나 점검 중).</p>';return}var t=d.at?String(d.at).replace(/^(\\d{4})(\\d{2})(\\d{2})(\\d{2})(\\d{2}).*/,'$4:$5'):'';e.innerHTML='<p class="cv-answer">지금 대기 <b>'+d.total+'명</b>'+(t?' <span class="muted">('+t+' 기준)</span>':'')+'</p><ul class="cv-wait">'+d.tasks.map(function(x){return '<li><span>'+x.name.replace(/[<>&]/g,'')+'</span><b>'+x.waiting+'명</b></li>'}).join('')+'</ul>'}).catch(function(){e.innerHTML='<p class="muted">대기 현황을 불러오지 못했어요.</p>'})})();</script>`;
 
 function detailHtml(p:Place,groups:[string,Near[]][]){
   const addr=p.addr??p.jibun,K=KINDS[p.kind],D=data().docs;
