@@ -372,7 +372,7 @@ def main():
         m['cats'] = dict(mc.most_common())
         out_markets.append({k: v for k, v in m.items() if v is not None})
     geo = Counter(m.get('geo') or 'none' for m in out_markets)
-    log(f'위치: 표준데이터 {geo["std"]:,} · 카카오 {geo["kakao"]:,} · 시군구 중심 {geo["area"]:,} · 없음 {geo["none"]:,} '
+    log(f'위치: 표준데이터 {geo["std"]:,} · 카카오 {geo["kakao"]:,} · 동 중심 {geo["dong"]:,} · 시군구 중심 {geo["area"]:,} · 없음 {geo["none"]:,} '
         f'(가맹점 기준 위치 있음 {sum(m["n"] for m in out_markets if m.get("geo") in ("std", "kakao")):,}/{len(stores):,})')
     log(f'품목: {dict(cats.most_common())}')
 
