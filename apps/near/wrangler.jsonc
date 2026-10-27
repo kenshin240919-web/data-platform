@@ -13,5 +13,9 @@
     "run_worker_first": ["/api/*"]
   },
   "routes": [{ "pattern": "near.guidejung.com", "custom_domain": true }],
+  // 내근처 알림(웹 푸시): 구독·VAPID 키는 공용 KV, 날씨·약국 데이터는 서비스 바인딩, 발송은 Cron(UTC 22:00 = 한국 07:00, 23:30 = 08:30).
+  "kv_namespaces": [{ "binding": "CACHE", "id": "78659f07655e4ab99683b85951a377e3" }],
+  "services": [{ "binding": "WEATHER", "service": "guidejung-weather" }, { "binding": "PHARMACY", "service": "guidejung-pharmacy" }],
+  "triggers": { "crons": ["0 22 * * *", "30 23 * * *"] },
   "observability": { "enabled": true }
 }

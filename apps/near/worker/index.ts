@@ -4,7 +4,13 @@
 //   /api/around?lat=&lon=&cat=CE7&r=500  걸어서 갈 곳(카카오 로컬 카테고리 검색: 카페·편의점·음식점) — 가까운 순 8곳
 // 카카오·네이버 결과는 저장하지 않는다(약관): 방문 때마다 받아서 바로 넘기고, 응답도 no-store.
 // 좌표는 장소(충전소·주차장 등)의 좌표만 받는다 — 방문자 위치는 이 API로 보내지 않는다.
-interface Env{ASSETS:Fetcher;NAVER_HUB_CLIENT_ID?:string;NAVER_HUB_CLIENT_SECRET?:string;KAKAO_REST_KEY?:string}
+//   /api/push/*  내근처 알림(웹 푸시, ./push.ts·./alerts.ts) — key·subscribe·unsubscribe·test·status, 예약 발송은 scheduled()
+import {subId,send,vapidKeys,type Rec,type Sub} from './push';
+import {TOPICS,pharmacyMsg,sendTopic,weatherMsg,type AlertEnv,type Topic} from './alerts';
+import {kstNow} from '../../pharmacy/lib/fmt';
+interface Env extends AlertEnv{ASSETS:Fetcher;NAVER_HUB_CLIENT_ID?:string;NAVER_HUB_CLIENT_SECRET?:string;KAKAO_REST_KEY?:string}
+// 브라우저 푸시 서버만(다른 주소로 요청을 보내게 하는 악용 방지).
+const PUSH_HOST=/^https:\/\/(fcm\.googleapis\.com|updates\.push\.services\.mozilla\.com|web\.push\.apple\.com|[a-z0-9-]+\.notify\.windows\.com|[a-z0-9.-]+\.push\.apple\.com)\//;
 const ORIGIN=/^https:\/\/([a-z0-9-]+\.)?guidejung\.com$/;
 const json=(d:unknown,status=200,cache='private, no-store',origin='')=>new Response(JSON.stringify(d),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':cache,
   ...(origin?{'access-control-allow-origin':origin,vary:'origin'}:{})}});
@@ -45,6 +51,35 @@ export default {
     if(url.pathname==='/api/where'){const cf=(req as unknown as {cf?:{latitude?:string;longitude?:string;country?:string;city?:string}}).cf??{};const lat=Number(cf.latitude),lon=Number(cf.longitude);
       return json(Number.isFinite(lat)&&Number.isFinite(lon)&&cf.country==='KR'?{lat,lon,city:cf.city??''}:{});}
     if(url.pathname==='/api/status')return json({ok:true,blog:!!(env.NAVER_HUB_CLIENT_ID&&env.NAVER_HUB_CLIENT_SECRET),around:!!env.KAKAO_REST_KEY},200,'public, max-age=60');
+    if(url.pathname.startsWith('/api/push/')){
+      if(o&&!origin)return json({error:'forbidden'},403);
+      const P=url.pathname.slice(10);
+      if(P==='key')return json({key:(await vapidKeys(env)).pub,topics:TOPICS},200,'public, max-age=300',origin);
+      if(P==='status'){const [w,p]=await Promise.all([env.CACHE.get('push:log:weather','json'),env.CACHE.get('push:log:pharmacy','json')]);return json({weather:w,pharmacy:p},200,'private, no-store',origin);}
+      if(req.method!=='POST')return json({error:'POST only'},405,'private, no-store',origin);
+      let b:{sub?:Sub;endpoint?:string;w?:string;c?:string;n?:string;lat?:number;lon?:number;t?:string[]}={};
+      try{b=await req.json();}catch{return json({error:'bad json'},400,'private, no-store',origin);}
+      const endpoint=b.sub?.endpoint??b.endpoint??'';
+      if(!PUSH_HOST.test(endpoint))return json({error:'bad endpoint'},400,'private, no-store',origin);
+      const key=`push:sub:${await subId(endpoint)}`;
+      if(P==='subscribe'){
+        const t=(b.t??[]).filter((x):x is Topic=>x in TOPICS);
+        if(!b.sub?.keys?.p256dh||!b.sub.keys.auth||!/^\d{5}$/.test(b.w??'')||!/^\d{5}$/.test(b.c??'')||!t.length||!(Number(b.lat)>33&&Number(b.lat)<39))return json({error:'bad request'},400,'private, no-store',origin);
+        const rec:Rec={sub:{endpoint,keys:{p256dh:b.sub.keys.p256dh,auth:b.sub.keys.auth}},w:b.w!,c:b.c!,n:String(b.n??'').slice(0,30),lat:+Number(b.lat).toFixed(4),lon:+Number(b.lon).toFixed(4),t,at:Date.now()};
+        await env.CACHE.put(key,JSON.stringify(rec));
+        return json({ok:true,topics:t},200,'private, no-store',origin);
+      }
+      if(P==='unsubscribe'){await env.CACHE.delete(key);return json({ok:true},200,'private, no-store',origin);}
+      if(P==='test'){
+        const rec=await env.CACHE.get(key,'json') as Rec|null;if(!rec)return json({error:'not subscribed'},404,'private, no-store',origin);
+        if(rec.sent&&Date.now()-rec.sent<60e3)return json({error:'1분에 한 번만 시험할 수 있어요'},429,'private, no-store',origin);
+        const m=rec.t.includes('weather')?await weatherMsg(env,rec):await pharmacyMsg(env,rec);
+        const r=await send(env,rec.sub,{...(m??{title:'내근처 알림',body:'알림이 잘 와요. 아침에 우리 동네 소식을 보내 드릴게요.',url:'https://near.guidejung.com/alerts',tag:'gj-test'}),tag:'gj-test'});
+        await env.CACHE.put(key,JSON.stringify({...rec,sent:Date.now()}));
+        return json({ok:r==='ok',result:r},200,'private, no-store',origin);
+      }
+      return json({error:'not found'},404,'private, no-store',origin);
+    }
     if(url.pathname==='/api/blog'||url.pathname==='/api/around'){
       // 다른 곳에서 키를 빌려 쓰지 못하게: 브라우저 요청은 *.guidejung.com 페이지에서 온 것만.
       if(o&&!origin)return json({error:'forbidden'},403);
@@ -59,5 +94,10 @@ export default {
     }
     if(url.pathname.startsWith('/api/'))return json({error:'not found'},404,'public, max-age=3600');
     return env.ASSETS.fetch(req);
+  },
+  // 예약 발송(UTC): 22:00 = 한국 07:00 날씨, 23:30 = 한국 08:30 일요일·공휴일 약국(날짜는 한국 기준으로 확인).
+  async scheduled(ev:ScheduledController,env:Env,ctx:ExecutionContext){
+    if(ev.cron==='0 22 * * *')ctx.waitUntil(sendTopic(env,'weather'));
+    if(ev.cron==='30 23 * * *'){const k=kstNow(ev.scheduledTime);if(k.day==='7'||k.holiday)ctx.waitUntil(sendTopic(env,'pharmacy'));}
   },
 };
