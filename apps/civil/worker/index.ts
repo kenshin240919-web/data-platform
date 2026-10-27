@@ -187,7 +187,7 @@ export default {
       if(url.pathname==='/api/near'){const lat=num(p.get('lat')),lon=num(p.get('lon'));if(lat===null||lon===null)return json({error:'lat/lon'},400,0);
         const kinds=(p.get('kind')??'').split(',').filter(k=>k in KINDS) as Kind[];
         const per=num(p.get('per'));const doc=p.get('doc');
-        const r=near(lat,lon,Math.max(.2,Math.min(50,num(p.get('km'))??2)),{limit:Math.max(1,Math.min(200,num(p.get('limit'))??100)),per:per?Math.max(1,Math.min(60,per)):undefined,
+        const r=near(lat,lon,Math.max(.2,Math.min(50,num(p.get('km'))??2)),{limit:Math.max(1,Math.min(600,num(p.get('limit'))??100)),per:per?Math.max(1,Math.min(200,per)):undefined,
           kinds:kinds.length?kinds:null,doc:doc?docSet(doc)??null:null,openOnly:p.get('open')==='1'});
         return json({total:r.total,counts:r.counts,open:r.open,items:r.items.map(x=>({...slim(x),km:x.km}))},200,120);}
       if(url.pathname==='/api/wait'){const x=get(p.get('id')??'');if(!x||x.kind!=='cso')return json({error:'unknown'},404,600);return await wait(env,x,ctx);}

@@ -3,7 +3,7 @@
 // 그리고 주민센터·우체국·여권 발급 기관 가장 가까운 곳. 가까운 시·구청 민원실이 실시간 대기를 주면 대기 인원도.
 // 위치는 약 2km 칸 중심만 서버로(padKm으로 넓혀 받고 within으로 정확한 거리로 다시 자름).
 import {useEffect,useState} from 'react';
-import {LocateCard,PosNote,useMyPosition,fixKmNow,padKm,within} from '@guidejung/ui/geo';
+import {LocateCard,PosNote,useMyPosition,fixKmNow,padKm,padLimit,within} from '@guidejung/ui/geo';
 import {KIND_ORDER,KINDS,km,kstNow,n,placePath,stateOf,type Kind,type Slim} from '../../lib/fmt';
 import {PlaceList} from './PlaceList';
 type Res={counts:Record<Kind,number>;open:number;items:Slim[]};
@@ -14,7 +14,7 @@ export function NearCivil({kind,doc,docTitle}:{kind?:Kind;doc?:string;docTitle?:
   const main:Kind=kind??'kiosk';
   useEffect(()=>{if(!pos)return;let live=true;setWait(null);
     const steps=main==='passport'||main==='cso'?[5,10,20,50]:pos.precise?[1,2,5,10]:[3,6,10,20];
-    const q=(k:number)=>`/api/near?lat=${pos.lat.toFixed(4)}&lon=${pos.lon.toFixed(4)}&km=${padKm(k)}&per=${kind||doc?60:12}${kind?`&kind=${kind}`:''}${doc?`&kind=kiosk&doc=${doc}`:''}`;
+    const q=(k:number)=>`/api/near?lat=${pos.lat.toFixed(4)}&lon=${pos.lon.toFixed(4)}&km=${padKm(k)}&per=${padLimit(kind||doc?60:12,200)}&limit=${padLimit(100,600)}${kind?`&kind=${kind}`:''}${doc?`&kind=kiosk&doc=${doc}`:''}`;
     const load=(i:number):Promise<void>=>fetch(q(steps[i])).then(x=>x.json()).then(fixKmNow).then(within(steps[i])).then((d:Res):Promise<void>|void=>{if(!live)return;
       const mine=d.items.filter(p=>p.kind===main).length;if(mine<(kind||doc?3:1)&&i<steps.length-1)return load(i+1);setRes(d);setRadius(steps[i]);});
     load(0).catch(()=>{if(live)setRes({counts:{} as Res['counts'],open:0,items:[]});});

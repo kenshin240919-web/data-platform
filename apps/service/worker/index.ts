@@ -144,7 +144,7 @@ export default {
     try{
       if(url.pathname==='/api/near'){const lat=num(p.get('lat')),lon=num(p.get('lon'));if(lat===null||lon===null)return json({error:'lat/lon'},400,0);
         const kinds=(p.get('kind')??'').split(',').filter(k=>k in KINDS) as Kind[];
-        const r=near(lat,lon,Math.max(.2,Math.min(30,num(p.get('km'))??2)),Math.max(1,Math.min(150,num(p.get('limit'))??40)),kinds.length?kinds:null);
+        const r=near(lat,lon,Math.max(.2,Math.min(30,num(p.get('km'))??2)),Math.max(1,Math.min(300,num(p.get('limit'))??40)),kinds.length?kinds:null);
         return json({total:r.total,items:r.items.map(x=>({...slim(x),km:x.km}))},200,300);}
       if(url.pathname==='/api/brand-near'){const lat=num(p.get('lat')),lon=num(p.get('lon'));if(lat===null||lon===null)return json({error:'lat/lon'},400,0);
         const r=await brandNear(env,p.get('brand')??'',lat,lon);if(!r)return json({error:'unavailable'},404,0);

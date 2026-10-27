@@ -2,7 +2,7 @@
 // 메인 3초 답: 내 위치(이미 허용 → 정확, 아니면 접속 위치) 주변 종류별 수와 가장 가까운 찜질방(또는 고른 종류).
 // /api/near?per= 는 종류마다 가까운 곳을 per개씩 + 종류별 전체 수(counts) — 피부관리실이 많아 다른 종류가 묻히지 않게.
 import {useEffect,useState} from 'react';
-import {LocateCard,PosNote,useMyPosition,fixKmNow} from '@guidejung/ui/geo';
+import {LocateCard,PosNote,useMyPosition,fixKmNow,padLimit} from '@guidejung/ui/geo';
 import {KIND_ORDER,KINDS,km,n,shopPath,type Kind,type Slim} from '../../lib/fmt';
 import {PlaceList} from './PlaceList';
 type Res={counts:Record<Kind,number>;items:Slim[]};
@@ -12,7 +12,7 @@ export function NearRest({kind}:{kind?:Kind}){
   const main=kind??'sauna';
   useEffect(()=>{if(!pos)return;let live=true;
     const steps=kind==='private'||kind==='anma'?(pos.precise?[2,5,10,30]:[5,10,30,50]):pos.precise?[1,2,5,10]:[3,6,10,20];  // 1인·안마원은 드물어 넓게
-    const load=(i:number):Promise<void>=>fetch(`/api/near?lat=${pos.lat.toFixed(4)}&lon=${pos.lon.toFixed(4)}&km=${steps[i]}&per=${kind?60:15}${kind?`&kind=${kind}`:''}`).then(x=>x.json()).then(fixKmNow).then((d:Res):Promise<void>|void=>{if(!live)return;
+    const load=(i:number):Promise<void>=>fetch(`/api/near?lat=${pos.lat.toFixed(4)}&lon=${pos.lon.toFixed(4)}&km=${steps[i]}&per=${padLimit(kind?60:15,200)}&limit=${padLimit(120,600)}${kind?`&kind=${kind}`:''}`).then(x=>x.json()).then(fixKmNow).then((d:Res):Promise<void>|void=>{if(!live)return;
       if((d.counts[main]??0)<(kind?3:2)&&i<steps.length-1)return load(i+1);setRes(d);setRadius(steps[i]);});
     load(0).catch(()=>{if(live)setRes({counts:{} as Res['counts'],items:[]});});return ()=>{live=false;};},[pos?.lat,pos?.lon,pos?.precise,kind]); // eslint-disable-line react-hooks/exhaustive-deps
   const first=res?.items.find(p=>p.kind===main);

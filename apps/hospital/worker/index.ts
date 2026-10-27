@@ -36,7 +36,7 @@ async function search(url:URL,env:Env){
   if(cond&&COND_COL[cond])where.push(`${COND_COL[cond]} = 1`);
   for(const w of q.split(/\s+/).filter(Boolean).slice(0,4)){where.push('text LIKE ?');args.push(`%${w}%`);}
   if(!where.length)return json({total:0,items:[]});
-  const limit=Math.max(1,Math.min(100,num(p.get('limit'))??40));
+  const limit=Math.max(1,Math.min(300,num(p.get('limit'))??40));
   const w=`WHERE ${where.join(' AND ')}`;
   const [count,rows]=await Promise.all([env.DB.prepare(`SELECT COUNT(*) AS n FROM hospitals ${w}`).bind(...args).first<{n:number}>(),
     env.DB.prepare(`SELECT card FROM hospitals ${w} ORDER BY rank DESC LIMIT ${limit}`).bind(...args).all<{card:string}>()]);

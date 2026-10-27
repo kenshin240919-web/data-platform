@@ -1,7 +1,7 @@
 'use client';
 // 메인 3초 답: 내 위치(이미 허용 → 정확, 아니면 접속 위치) 주변 지금 문 연 약국 수와 가장 가까운 곳.
 import {useEffect,useState} from 'react';
-import {LocateCard,PosNote,useMyPosition,fixKmNow,padKm,within} from '@guidejung/ui/geo';
+import {LocateCard,PosNote,useMyPosition,fixKmNow,padKm,padLimit,within} from '@guidejung/ui/geo';
 import {km,pharmacyPath,statusOf} from '../../lib/fmt';
 import {StatusList,useNow,type Item} from './StatusList';
 export function NearNow(){
@@ -9,7 +9,7 @@ export function NearNow(){
   const [items,setItems]=useState<Item[]|null>(null);const [radius,setRadius]=useState(0);
   useEffect(()=>{if(!pos)return;let live=true;const r=pos.precise?2:5;
     // 가까운 곳에 지금 문 연 약국이 없으면 반경을 넓혀 다시(밤·휴일).
-    const load=(k:number):Promise<void>=>fetch(`/api/near?lat=${pos.lat.toFixed(4)}&lon=${pos.lon.toFixed(4)}&km=${padKm(k)}&limit=100`).then(x=>x.json()).then(fixKmNow).then(within(k)).then((d:{items:Item[]}):Promise<void>|void=>{if(!live)return;
+    const load=(k:number):Promise<void>=>fetch(`/api/near?lat=${pos.lat.toFixed(4)}&lon=${pos.lon.toFixed(4)}&km=${padKm(k)}&limit=${padLimit(100)}`).then(x=>x.json()).then(fixKmNow).then(within(k)).then((d:{items:Item[]}):Promise<void>|void=>{if(!live)return;
       const open=d.items.filter(p=>statusOf(p).state!=='closed').length;if(!open&&k<10)return load(k*2);setItems(d.items);setRadius(k);});
     load(r).catch(()=>{if(live)setItems([]);});return ()=>{live=false;};},[pos?.lat,pos?.lon,pos?.precise]); // eslint-disable-line react-hooks/exhaustive-deps
   const open=items&&now?items.filter(p=>statusOf(p,now).state!=='closed'):[];

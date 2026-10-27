@@ -3,7 +3,7 @@
 // 밤(21~9시)·일요일·공휴일에는 맨 위에 가장 가까운 24시 동물병원(이름 기준, 30km 안)을 먼저 보여 줌.
 // /api/near?per= 는 종류마다 가까운 곳을 per개씩 + 종류별 전체 수(counts)·지금 문 연 동물약국 수(open).
 import {useEffect,useState} from 'react';
-import {LocateCard,PosNote,useMyPosition,fixKmNow} from '@guidejung/ui/geo';
+import {LocateCard,PosNote,useMyPosition,fixKmNow,padLimit} from '@guidejung/ui/geo';
 import {KIND_ORDER,KINDS,km,n,offHours,placePath,telHref,type Kind,type Slim} from '../../lib/fmt';
 import {PlaceList} from './PlaceList';
 type Res={counts:Record<Kind,number>;open:number;items:Slim[]};
@@ -15,7 +15,7 @@ export function NearPet({kind}:{kind?:Kind}){
   useEffect(()=>{if(!pos)return;let live=true;const ll=`lat=${pos.lat.toFixed(4)}&lon=${pos.lon.toFixed(4)}`;
     const rare=kind==='cafe'||kind==='taxi'||kind==='shelter';  // 카페·펫택시·보호센터는 드물어 넓게
     const steps=rare?(pos.precise?[3,10,30,50]:[10,30,50]):pos.precise?[2,5,10,20]:[5,10,20,30];
-    const load=(i:number):Promise<void>=>fetch(`/api/near?${ll}&km=${steps[i]}&per=${kind?60:15}${kind?`&kind=${kind}`:''}`).then(x=>x.json()).then(fixKmNow).then((d:Res):Promise<void>|void=>{if(!live)return;
+    const load=(i:number):Promise<void>=>fetch(`/api/near?${ll}&km=${steps[i]}&per=${padLimit(kind?60:15,200)}&limit=${padLimit(120,600)}${kind?`&kind=${kind}`:''}`).then(x=>x.json()).then(fixKmNow).then((d:Res):Promise<void>|void=>{if(!live)return;
       if((d.counts[main]??0)<(kind?3:2)&&i<steps.length-1)return load(i+1);setRes(d);setRadius(steps[i]);});
     load(0).catch(()=>{if(live)setRes({counts:{} as Res['counts'],open:0,items:[]});});
     if(!kind||kind==='hospital')fetch(`/api/near?${ll}&km=30&kind=hospital&sub=24시&limit=3`).then(x=>x.json()).then(fixKmNow).then((d:Res)=>{if(live)setH24(d.items);}).catch(()=>{});

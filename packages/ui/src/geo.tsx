@@ -120,6 +120,9 @@ export const fixKmNow=<T,>(d:T):T=>fixKm(d,state.pos);
  * 정확한 위치를 모를 때(접속 위치·다른 사이트의 칸)는 넓히지 않는다. */
 export const PAD_KM=1.6;
 export const padKm=(k:number)=>state.pos?.exact?Math.round((k+PAD_KM)*10)/10:k;
+/** 서버는 칸 중심에서 가까운 순으로 n곳만 자르므로, 정확한 위치를 알 때는 칸 전체를 덮을 만큼(min) 받아 휴대폰에서 다시 줄 세운다
+ * (10/27: 시청 앞에서 20m 옆 발급기가 빠지고 400m 곳이 '가장 가까운 곳'으로 나왔음). */
+export const padLimit=(n:number,min=300)=>state.pos?.exact?Math.max(n,min):n;
 export const within=(k:number)=><T,>(d:T):T=>{const x=d as {items?:{km?:number}[]};if(state.pos?.exact&&Array.isArray(x?.items))x.items=x.items.filter(i=>i.km==null||i.km<=k);return d;};
 
 export function useMyPosition(){

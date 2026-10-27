@@ -138,7 +138,7 @@ export default {
       if(url.pathname==='/api/near'){const lat=num(p.get('lat')),lon=num(p.get('lon'));if(lat===null||lon===null)return json({error:'lat/lon'},400,0);
         const kinds=(p.get('kind')??'').split(',').filter(k=>k in KINDS) as Kind[];
         const per=num(p.get('per'));
-        const r=near(lat,lon,Math.max(.2,Math.min(50,num(p.get('km'))??2)),{limit:Math.max(1,Math.min(200,num(p.get('limit'))??120)),per:per?Math.max(1,Math.min(60,per)):undefined,kinds:kinds.length?kinds:null});
+        const r=near(lat,lon,Math.max(.2,Math.min(50,num(p.get('km'))??2)),{limit:Math.max(1,Math.min(600,num(p.get('limit'))??120)),per:per?Math.max(1,Math.min(200,per)):undefined,kinds:kinds.length?kinds:null});
         return json({total:r.total,counts:r.counts,items:r.items.map(x=>({...slim(x),km:x.km}))},200,300);}
       if(url.pathname==='/api/search'){const q=flat(p.get('q')??'').slice(0,30);if(!q)return json({total:0,items:[]});
         const words=(p.get('q')??'').trim().toLowerCase().split(/\s+/).filter(Boolean).slice(0,4).map(flat);

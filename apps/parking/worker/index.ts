@@ -126,7 +126,7 @@ export default {
       if(url.pathname==='/api/fav'){const ids=[...new Set((p.get('ids')??'').split(','))].filter(x=>/^[0-9A-Za-z-]{2,40}$/.test(x)).slice(0,20);const now=kstNow();
         return json({items:ids.map(get).filter((x):x is Lot=>!!x).map(x=>{const o=openNow(x,now),w=feeFor(x,60);return {id:x.id,state:o.open?'open':'closed',label:x.charge==='무료'?'무료 주차장':w!=null?`1시간 약 ${won(w)}`:o.label,line:o.label};})},200,60);}
       if(url.pathname==='/api/near'){const lat=num(p.get('lat')),lon=num(p.get('lon'));if(lat===null||lon===null)return json({error:'lat/lon'},400,0);
-        const r=near(lat,lon,Math.max(.2,Math.min(20,num(p.get('km'))??1)),Math.max(1,Math.min(100,num(p.get('limit'))??30)),undefined,p.get('free')==='1');
+        const r=near(lat,lon,Math.max(.2,Math.min(20,num(p.get('km'))??1)),Math.max(1,Math.min(300,num(p.get('limit'))??30)),undefined,p.get('free')==='1');
         return json({total:r.total,items:r.items.map(x=>({...slim(x),km:x.km}))},200,300);}
       if(url.pathname==='/api/search'){const q=flat(p.get('q')??'').slice(0,30);if(!q)return json({total:0,items:[]});
         const words=(p.get('q')??'').trim().toLowerCase().split(/\s+/).filter(Boolean).slice(0,4).map(flat);

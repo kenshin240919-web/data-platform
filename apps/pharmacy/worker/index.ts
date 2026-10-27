@@ -114,7 +114,7 @@ export default {
       if(url.pathname==='/api/fav'){const ids=[...new Set((p.get('ids')??'').split(','))].filter(x=>/^[0-9A-Za-z-]{2,40}$/.test(x)).slice(0,20);const now=kstNow();
         return json({items:ids.map(get).filter((x):x is Pharmacy=>!!x).map(x=>{const s=statusOf(x,now);return {id:x.id,state:s.state,label:s.label,line:x.region_name};})},200,60);}
       if(url.pathname==='/api/near'){const lat=num(p.get('lat')),lon=num(p.get('lon'));if(lat===null||lon===null)return json({error:'lat/lon'},400,0);
-        const cond=p.get('cond');return json(near(lat,lon,Math.max(.3,Math.min(20,num(p.get('km'))??2)),cond&&TESTS[cond]?cond:null,Math.max(1,Math.min(100,num(p.get('limit'))??20))));}
+        const cond=p.get('cond');return json(near(lat,lon,Math.max(.3,Math.min(20,num(p.get('km'))??2)),cond&&TESTS[cond]?cond:null,Math.max(1,Math.min(300,num(p.get('limit'))??20))));}
       if(url.pathname==='/api/search'){const q=flat(p.get('q')??'').slice(0,30);if(!q)return json({total:0,items:[]});
         const words=(p.get('q')??'').trim().toLowerCase().split(/\s+/).filter(Boolean).slice(0,4).map(flat);
         const hit=data().items.filter(x=>{const name=flat(x.name),where=flat(x.region_name+(x.address??''));return words.every(w=>name.includes(w)||where.includes(w));});
