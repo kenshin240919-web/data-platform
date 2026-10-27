@@ -8,7 +8,7 @@
 // 카카오·네이버 결과는 저장하지 않는다(브라우저에서 보여 주기만). 방문자 위치는 이 기능들로 서버에 보내지 않는다(장소 좌표만).
 
 /** 카카오 JavaScript 키(브라우저용 공개 키, 카카오 앱에 등록한 *.guidejung.com 도메인에서만 동작). 비어 있으면 ④·⑤·카카오내비는 숨김. */
-export const KAKAO_JS_KEY='';
+export const KAKAO_JS_KEY='cac688b824d2cb8e2ac694915275f714';
 export const NEAR_API='https://near.guidejung.com';
 const attr=(s:unknown)=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]!));
 
