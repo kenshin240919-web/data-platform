@@ -43,7 +43,6 @@ function near(lat:number,lon:number,radius:number,opt:{limit?:number;per?:number
 }
 
 // ---- 실시간: 민원실 대기 · 무인 프린트 ------------------------------------------------------------------------------------
-let upCode='',peek='';
 async function wait(env:Env,p:Place,ctx:ExecutionContext){
   const key=new Request(`https://cache.minwon.internal/wait/${p.stdg}/${Math.floor(Date.now()/60e3)}`);
   const hit=await caches.default.match(key);let rows:Record<string,string>[]|null=hit?await hit.json():null;
@@ -53,16 +52,18 @@ async function wait(env:Env,p:Place,ctx:ExecutionContext){
     // data.go.kr은 해외(Cloudflare) 요청에 가끔 늦거나 끊겨 2번까지. 실패는 캐시하지 않고 '불러오지 못함'으로 돌려준다(0명으로 보이지 않게).
     let why='';
     for(let i=0;i<2&&!rows;i++){
-      const r=await fetch(`https://apis.data.go.kr/B551982/cso_v2/cso_realtime_v2?${q}`,{signal:AbortSignal.timeout(12000),headers:{accept:'application/json'}}).catch(e=>{why=String(e).slice(0,80);return null;});
+      const r=await fetch(`https://apis.data.go.kr/B551982/cso_v2/cso_realtime_v2?${q}`,{signal:AbortSignal.timeout(12000),headers:{accept:'application/json','user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36'}}).catch(e=>{why=String(e).slice(0,80);return null;});
       if(!r){continue;}
       const text=await r.text();
       if(!r.ok){why=`http ${r.status}`;continue;}
       let d:{header?:{resultCode?:string;resultMsg?:string};body?:{items?:{item?:Record<string,string>[]|Record<string,string>}}}|null=null;
-      peek=text.slice(0,240);
       try{d=JSON.parse(text);}catch{why=`not json: ${text.slice(0,60)}`;continue;}
+      // 관문 오류는 {OpenAPI_ServiceResponse:{cmmMsgHeader:{errMsg,returnReasonCode}}} 모양(10/27: User-Agent 없이 부르면 HTTP_ERROR 04)
+      const gw=(d as {OpenAPI_ServiceResponse?:{cmmMsgHeader?:{errMsg?:string;returnReasonCode?:string}}}|null)?.OpenAPI_ServiceResponse?.cmmMsgHeader;
+      if(gw){why=`${gw.returnReasonCode??''} ${gw.errMsg??''}`.trim();continue;}
       const code=d?.header?.resultCode;
       if(code&&code!=='00'&&code!=='K0'&&code!=='K3'){why=`${code} ${d?.header?.resultMsg??''}`;continue;}
-      const it=d?.body?.items?.item;rows=it?(Array.isArray(it)?it:[it]):[];upCode=code??'';
+      const it=d?.body?.items?.item;rows=it?(Array.isArray(it)?it:[it]):[];
     }
     if(!rows)return json({id:p.id,name:p.name,error:why||'upstream'},200,0);
     ctx.waitUntil(caches.default.put(key,new Response(JSON.stringify(rows),{headers:{'cache-control':'max-age=60'}})));
@@ -70,8 +71,7 @@ async function wait(env:Env,p:Place,ctx:ExecutionContext){
   const mine=rows.filter(x=>x.csoSn===p.cso);
   const tasks=mine.map(x=>({name:x.taskNm,waiting:Number(x.wtngCnt)||0,windows:x.clotCnterNo?String(x.clotCnterNo).split(',').filter(Boolean).length:null}));
   const at=mine[0]?.totDt??null;
-  // rows·code: 원본 줄 수와 결과 코드(점검용 — K3 NODATA면 그 시각 원본에 자료 없음)
-  return json({id:p.id,name:p.name,at,total:tasks.reduce((a,t)=>a+t.waiting,0),tasks,rows:rows.length,code:upCode||null,cached:!!hit,...(rows.length?{}:{peek})},200,60);
+  return json({id:p.id,name:p.name,at,total:tasks.reduce((a,t)=>a+t.waiting,0),tasks},200,60);
 }
 
 const PRINT_WORD=/프린트|출력|인쇄|복사|제본|카피|copy|print/i;
