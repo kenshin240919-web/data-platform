@@ -3,7 +3,7 @@
 // 위치는 가게가 아니라 소속 시장·상점가 단위(원본에 가게 주소가 없음). 품목 칩을 누르면 그 품목 가게만.
 // /api/near: 반경 안 시장(가까운 순)과 가맹점 수·품목별 수, cat이 있으면 그 품목 가게 목록.
 import {useEffect,useState} from 'react';
-import {LocateCard,PosNote,useMyPosition,fixKmNow} from '@guidejung/ui/geo';
+import {LocateCard,PosNote,useMyPosition,fixKmNow,padKm,padLimit} from '@guidejung/ui/geo';
 import {CAT_ORDER,CATS,km,marketPath,n,storePath,type Cat,type SlimMarket,type SlimStore} from '../../lib/fmt';
 type Res={km:number;total:number;markets:SlimMarket[];cats:Partial<Record<Cat,number>>;stores:SlimStore[]};
 export function NearMarket({cat:c0}:{cat?:Cat}){
@@ -11,7 +11,11 @@ export function NearMarket({cat:c0}:{cat?:Cat}){
   const [cat,setCat]=useState<Cat|undefined>(c0);const [res,setRes]=useState<Res|null>(null);const [more,setMore]=useState(8);
   useEffect(()=>{if(!pos)return;let live=true;setRes(null);const ll=`lat=${pos.lat.toFixed(4)}&lon=${pos.lon.toFixed(4)}`;
     const steps=pos.precise?[1,2,3,5,10,20]:[3,5,10,20,30];
-    const load=(i:number):Promise<void>=>fetch(`/api/near?${ll}&km=${steps[i]}${cat?`&cat=${cat}`:''}`).then(x=>x.json()).then(fixKmNow).then((d:Res):Promise<void>|void=>{if(!live)return;
+    // 서버엔 칸 중심만 가므로, 정확한 위치를 알면 반경·개수를 넓혀 받고 여기서 정확한 거리로 다시 자른다(합계·품목 수도 다시).
+    const cut=(d:Res,k:number):Res=>{if(!pos.exact)return d;const ms=d.markets.filter(m=>m.km==null||m.km<=k);const cats:Partial<Record<Cat,number>>={};
+      for(const m of ms)for(const [c,v] of Object.entries(m.cats??{}) as [Cat,number][])cats[c]=(cats[c]??0)+v;
+      return {km:k,markets:ms,cats,total:ms.reduce((a,m)=>a+(cat?m.hit??0:m.n),0),stores:d.stores.filter(s=>s.km==null||s.km<=k)};};
+    const load=(i:number):Promise<void>=>fetch(`/api/near?${ll}&km=${padKm(steps[i])}&mlimit=${padLimit(60,200)}&limit=${padLimit(300,600)}${cat?`&cat=${cat}`:''}`).then(x=>x.json()).then(fixKmNow).then((r:Res)=>cut(r,steps[i])).then((d:Res):Promise<void>|void=>{if(!live)return;
       if(d.markets.length<1&&i<steps.length-1)return load(i+1);setRes(d);setMore(8);});
     load(0).catch(()=>{if(live)setRes({km:0,total:0,markets:[],cats:{},stores:[]});});
     return ()=>{live=false;};},[pos?.lat,pos?.lon,pos?.precise,cat]); // eslint-disable-line react-hooks/exhaustive-deps

@@ -18,8 +18,8 @@ const num=(v:string|null)=>v!==null&&v!==''&&Number.isFinite(Number(v))?Number(v
 const flat=(s:string)=>s.replace(/[\s·.,()\-]/g,'').toLowerCase();
 const slimStore=(s:StoreRow,m:Market,km?:number)=>({id:s[0],name:s[1],cat:s[3],item:s[4],d:s[5],market:m.name,mid:m.id,lat:located(m)?m.lat:null,lon:located(m)?m.lon:null,...(km!=null?{km}:{})});
 
-/** 반경 안 시장(위치가 확실한 곳만: 표준데이터·카카오 좌표)을 가까운 순으로. cat이 있으면 그 품목 가게가 있는 시장만, 가게 목록도. */
-function near(lat:number,lon:number,radius:number,cat:Cat|null,limit:number){
+/** 반경 안 시장(위치가 있는 곳: 표준데이터·카카오·동 중심)을 가까운 순으로(최대 mlimit, 휴대폰이 정확한 위치로 다시 자를 수 있게 시장별 품목 수 cats도). cat이 있으면 그 품목 가게가 있는 시장만, 가게 목록도. */
+function near(lat:number,lon:number,radius:number,cat:Cat|null,limit:number,mlimit:number){
   const dLat=radius/111,dLon=radius/(111*Math.cos(lat*Math.PI/180));
   const ms:{m:Market;i:number;km:number;hit:number}[]=[];const cats:Partial<Record<Cat,number>>={};let total=0;
   data().markets.forEach((m,i)=>{
@@ -31,7 +31,7 @@ function near(lat:number,lon:number,radius:number,cat:Cat|null,limit:number){
   });
   ms.sort((a,b)=>a.km-b.km);
   const stores=cat?ms.flatMap(x=>storesOf(x.i).filter(s=>s[3]===cat).map(s=>slimStore(s,x.m,x.km))).slice(0,limit):[];
-  return {km:radius,total,cats,markets:ms.slice(0,60).map(x=>({...slimMarket(x.m),km:x.km,hit:x.hit})),stores};
+  return {km:radius,total,cats,markets:ms.slice(0,mlimit).map(x=>({...slimMarket(x.m),km:x.km,hit:x.hit,cats:x.m.cats})),stores};
 }
 
 function search(q:string){
@@ -125,7 +125,7 @@ export default {
     try{
       if(url.pathname==='/api/near'){const lat=num(p.get('lat')),lon=num(p.get('lon'));if(lat===null||lon===null)return json({error:'lat/lon'},400,0);
         const c=p.get('cat');const cat=c&&c in CATS?c as Cat:null;
-        return json(near(lat,lon,Math.max(.3,Math.min(50,num(p.get('km'))??2)),cat,Math.max(1,Math.min(600,num(p.get('limit'))??300))),200,600);}
+        return json(near(lat,lon,Math.max(.3,Math.min(50,num(p.get('km'))??2)),cat,Math.max(1,Math.min(600,num(p.get('limit'))??300)),Math.max(1,Math.min(200,num(p.get('mlimit'))??60))),200,600);}
       if(url.pathname==='/api/search'){const q=(p.get('q')??'').slice(0,40);return json(search(q),200,600);}
       if(url.pathname==='/api/place'){const s=store(p.get('id')??'');if(!s)return json({found:false},404,0);
         try{return json(await place(env,s),200,0);}catch{return json({found:false,error:'upstream'},200,0);}}

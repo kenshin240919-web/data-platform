@@ -62,7 +62,7 @@ export const isMarket=(m:Pick<Market,'name'|'std'>)=>!!m.std||/시장|장터|장
 export const topCats=(cats:Partial<Record<Cat,number>>,k=3)=>CAT_ORDER.filter(c=>c!=='etc'&&(cats[c]??0)>0).sort((a,b)=>(cats[b]??0)-(cats[a]??0)).slice(0,k);
 /** 브라우저로 보내는 가벼운 시장 카드 */
 export const slimMarket=(m:Market)=>({id:m.id,name:m.name,region_name:m.region_name??m.sido,lat:m.lat??null,lon:m.lon??null,n:m.n,d:m.d,top:topCats(m.cats)});
-export type SlimMarket=ReturnType<typeof slimMarket>&{km?:number;hit?:number};
+export type SlimMarket=ReturnType<typeof slimMarket>&{km?:number;hit?:number;cats?:Partial<Record<Cat,number>>};
 export type SlimStore={id:string;name:string;cat:Cat;item:string|null;d:0|1;market:string;mid:string;lat?:number|null;lon?:number|null;km?:number};
 export const updatedLabel=(iso:string)=>{const d=new Date(iso);return `${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()}`;};
 export const baseLabel=(b:string|null)=>b?`${+b.slice(0,4)}년 ${+b.slice(5,7)}월 ${+b.slice(8,10)}일`:'최신';
