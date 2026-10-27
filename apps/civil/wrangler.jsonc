@@ -1,0 +1,19 @@
+// Cloudflare Worker for minwon.guidejung.com (내근처 서류), separate from the other sites.
+// Run from the repo root: npx wrangler deploy -c apps/civil/wrangler.jsonc (builds with npm run build:civil).
+// Static pages: ./out. Worker: /api/*, 상세 /place/{id}, sitemap index. The list ships with the Worker (data/places.json).
+// Secrets (civil-deploy.yml이 GitHub Secret에서 넣음): DATA_GO_KR_KEY(민원실 실시간 대기), KAKAO_REST_KEY·NAVER_HUB_CLIENT_ID/SECRET(무인 프린트 실시간).
+{
+  "name": "guidejung-civil",
+  "main": "worker/index.ts",
+  "compatibility_date": "2025-09-01",
+  "build": { "command": "npm run build:civil" },
+  "assets": {
+    "directory": "./out",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    "run_worker_first": ["/api/*", "/place/*", "/sitemap.xml", "/sitemap-places-*"]
+  },
+  "rules": [{ "type": "Text", "globs": ["**/data/places.json"], "fallthrough": true }],
+  "observability": { "enabled": true },
+  "routes": [{ "pattern": "minwon.guidejung.com", "custom_domain": true }]
+}

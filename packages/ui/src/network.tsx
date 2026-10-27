@@ -7,7 +7,7 @@ import {InstallHint} from './install';
 import {SeasonBanner} from './season';
 import {ACTIONS_JS} from './actions';
 
-export type Site='trip'|'weather'|'traffic'|'charge'|'academy'|'school'|'pharmacy'|'hospital'|'oil'|'parking'|'service'|'near'|'rest'|'pet';
+export type Site='trip'|'weather'|'traffic'|'charge'|'academy'|'school'|'pharmacy'|'hospital'|'oil'|'parking'|'service'|'near'|'rest'|'pet'|'civil';
 // brand: 사이트 이름(로고·탭 제목), tagline: 부제(질문형 후킹). 10/17 사용자 결정: "내근처" 시리즈.
 // hidden: 아직 배포 전인 사이트(그 사이트 자신의 연결 바에만 보임).
 export const SITES:Record<Site,{url:string;icon:string;name:string;brand:string;tagline:string;hidden?:boolean}>={
@@ -25,6 +25,7 @@ export const SITES:Record<Site,{url:string;icon:string;name:string;brand:string;
   near:{url:'https://near.guidejung.com',icon:'📍',name:'모아보기',brand:'내근처',tagline:'내 근처에 뭐가 있지?'},
   rest:{url:'https://rest.guidejung.com',icon:'♨️',name:'휴식',brand:'내근처 휴식',tagline:'오늘 어디서 쉬지?'},
   pet:{url:'https://pet.guidejung.com',icon:'🐾',name:'동물병원',brand:'내근처 동물병원',tagline:'우리 아이 아플 때 어디로?'},
+  civil:{url:'https://minwon.guidejung.com',icon:'🖨️',name:'서류',brand:'내근처 서류',tagline:'떼고, 뽑고, 부치는 곳',hidden:true},
 };
 const {trip:T,weather:W,traffic:R,charge:C}=Object.fromEntries(Object.entries(SITES).map(([k,v])=>[k,v.url])) as Record<Site,string>;
 
@@ -90,6 +91,7 @@ const ORDER:Record<Site,Site[]>={
   near:['weather','pharmacy','hospital','parking','oil','trip','charge'],
   rest:['parking','trip','weather','pharmacy','hospital','oil'],
   pet:['pharmacy','parking','weather','trip','hospital','rest'],
+  civil:['parking','pharmacy','weather','school','trip','hospital'],
 };
 const MAX_LINKS=7;
 /** Standard links for a spot: the sister sites' pages for the same 시군구 (or the spot itself), in the order that fits the current site. */
@@ -111,6 +113,7 @@ export function linksNear(lat:number,lon:number,skip:Site){
     parking:[{icon:'🅿️',title:`${a.label} 공영·무료 주차장`,desc:'무료 주차장과 1시간 예상 요금 싼 순',href:`${SITES.parking.url}/region/${a.charge}`}],
     rest:[{icon:'♨️',title:`${a.label} 찜질방·목욕탕`,desc:'찜질방·사우나·1인 목욕·세신샵',href:`${SITES.rest.url}/region/${a.charge}`}],
     pet:[{icon:'🐾',title:`${a.label} 동물병원·24시`,desc:'동물병원·24시 동물병원·지금 문 연 동물약국',href:`${SITES.pet.url}/region/${a.charge}`}],
+    civil:[{icon:'🖨️',title:`${a.label} 무인민원발급기·주민센터`,desc:'지금 운영 중인 발급기와 뗄 수 있는 서류',href:`${SITES.civil.url}/region/${a.charge}`}],
     service:[{icon:'🔧',title:`${a.label} 자동차 정비소·검사소`,desc:'정비소·검사소·세차장, 맡기기 전 체크리스트',href:`${SITES.service.url}/region/${a.charge}`}],
   };
   return ORDER[skip].filter(k=>k!==skip&&!SITES[k].hidden).flatMap(k=>by[k]??[]).slice(0,MAX_LINKS);
@@ -136,6 +139,7 @@ export const GENERIC:Record<Site,Link_>={
   near:{icon:'📍',title:'내 근처에 뭐가 있지?',desc:'날씨·문 연 약국·병원·주유소·주차장을 한 화면에',href:SITES.near.url},
   rest:{icon:'♨️',title:'내 주변 찜질방·목욕탕',desc:'찜질방·사우나·1인 목욕탕·세신샵',href:SITES.rest.url},
   pet:{icon:'🐾',title:'내 주변 동물병원·24시',desc:'24시 동물병원·지금 문 연 동물약국·펫호텔',href:SITES.pet.url},
+  civil:{icon:'🖨️',title:'서류 떼는 곳·무인 프린트',desc:'지금 운영 중인 무인민원발급기·주민센터·우체국',href:SITES.civil.url},
 };
 export const genericFor=(skip:Site)=>(Object.keys(GENERIC) as Site[]).filter(k=>k!==skip&&!SITES[k].hidden).map(k=>GENERIC[k]);
 export {T as TRIP_URL,W as WEATHER_URL,R as TRAFFIC_URL,C as CHARGE_URL};

@@ -1,0 +1,39 @@
+name: Civil deploy
+# Deploys minwon.guidejung.com (Worker guidejung-civil) with wrangler from GitHub Actions. Secrets: CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID,
+# DATA_GO_KR_KEY(민원실 실시간 대기), KAKAO_REST_KEY·NAVER_HUB_CLIENT_ID·NAVER_HUB_CLIENT_SECRET(무인 프린트 실시간 — 저장 안 함).
+# 첫 배포·도메인 연결은 사용자 승인 뒤(수동 실행만). 승인되면 push·매일 수집 후 자동 배포를 켠다.
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: civil-deploy
+  cancel-in-progress: true
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Build and deploy
+        run: npx wrangler deploy -c apps/civil/wrangler.jsonc
+      - name: Worker secrets
+        env:
+          DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
+          KAKAO_REST_KEY: ${{ secrets.KAKAO_REST_KEY }}
+          NAVER_HUB_CLIENT_ID: ${{ secrets.NAVER_HUB_CLIENT_ID }}
+          NAVER_HUB_CLIENT_SECRET: ${{ secrets.NAVER_HUB_CLIENT_SECRET }}
+        run: |
+          for k in DATA_GO_KR_KEY KAKAO_REST_KEY NAVER_HUB_CLIENT_ID NAVER_HUB_CLIENT_SECRET; do
+            printf '%s' "${!k}" | npx wrangler secret put "$k" -c apps/civil/wrangler.jsonc
+          done

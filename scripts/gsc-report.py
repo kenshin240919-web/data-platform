@@ -30,7 +30,8 @@ VERDICT = {'PASS': '✅ 색인됨', 'NEUTRAL': '⏳ 아직', 'FAIL': '❌ 문제
 
 def hosts():
     net = (ROOT / 'packages/ui/src/network.tsx').read_text(encoding='utf-8')
-    return [(k, h) for k, h in re.findall(r"^\s+(\w+):\{url:'https://(\w+\.guidejung\.com)'", net, re.M)]
+    # 아직 배포 전인 사이트(hidden:true)는 빼고
+    return [(k, h) for k, h, rest in re.findall(r"^\s+(\w+):\{url:'https://(\w+\.guidejung\.com)'(.*)$", net, re.M) if 'hidden:true' not in rest]
 
 
 def sample(host, n=4):

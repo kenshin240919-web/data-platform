@@ -1,0 +1,19 @@
+# 내근처 서류 (minwon.guidejung.com)
+
+> 내 주변 무인민원발급기(평일·주말·공휴일 운영 시간, 기계마다 뗄 수 있는 서류, 장애인 편의 기능), 주민센터·행정복지센터, 실시간 대기 인원을 알려 주는 시·구청 민원실, 여권 발급 기관, 우체국, 무인 프린트점을 가까운 순으로 보여 주는 서비스입니다. 출처는 행정안전부·한국지역정보개발원·우정사업본부·외교부 공공데이터이며 매일 갱신합니다. 공공데이터로 만든 민간 안내 사이트로, 정부·지자체 공식 사이트가 아닙니다.
+
+## 주요 페이지
+- [내 주변 무인민원발급기](https://minwon.guidejung.com/kiosk): 지금 운영 중인 발급기부터
+- [서류별로 찾기](https://minwon.guidejung.com/doc): 주민등록등본·가족관계증명서·건축물대장 등 서류를 뗄 수 있는 발급기
+- [주말·공휴일 발급기](https://minwon.guidejung.com/weekend)
+- [시·구청 민원실 실시간 대기](https://minwon.guidejung.com/cso)
+- [여권 발급 기관](https://minwon.guidejung.com/passport)
+- [우체국](https://minwon.guidejung.com/post)
+- [무인 프린트](https://minwon.guidejung.com/print)
+- [지역별](https://minwon.guidejung.com/region)
+
+## 데이터
+- 행정안전부 무인민원발급기 정보, 읍면동 하부행정기관 현황
+- 행정안전부·한국지역정보개발원 민원실 이용 현황 실시간 정보
+- 우정사업본부 우체국 정보, 외교부 여권사무대행기관 정보
+- 무인 프린트점은 카카오 로컬·NAVER API HUB 지역 검색을 방문 때마다 실시간 조회(저장 안 함)
