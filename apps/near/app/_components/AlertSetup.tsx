@@ -40,11 +40,13 @@ export function AlertSetup({areas}:{areas:Area[]}){
   const area=areas.find(a=>a.w===w);
   const post=(path:string,body:unknown)=>fetch(`/api/push/${path}`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)}).then(r=>r.json() as Promise<{ok?:boolean;error?:string;result?:string}>);
   async function on(){
-    if(!area||!t.length){setMsg('지역과 받을 알림을 골라 주세요.');return;}
+    // 누르는 순간 허용 팝업부터(다른 일을 먼저 기다리면 삼성 인터넷·사파리가 '직접 누른 동작'이 아니라며 팝업을 막음).
+    const ask=Notification.permission==='granted'?Promise.resolve('granted' as NotificationPermission):Notification.requestPermission();
     setSt('busy');setMsg('');
     try{
+      const perm=await ask;if(perm!=='granted'){setSt(perm==='denied'?'denied':'off');ga('push_subscribe',{result:perm});return;}
+      if(!area||!t.length){setSt('off');setMsg('알림이 허용됐어요. 아래에서 지역과 받을 알림을 고른 뒤 한 번 더 눌러 주세요.');return;}
       const reg=await navigator.serviceWorker.register('/sw.js',{scope:'/'});await navigator.serviceWorker.ready;
-      const perm=await Notification.requestPermission();if(perm!=='granted'){setSt(perm==='denied'?'denied':'off');ga('push_subscribe',{result:perm});return;}
       const {key}=await fetch('/api/push/key').then(r=>r.json() as Promise<{key:string}>);
       const sub=await reg.pushManager.getSubscription()??await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64(key)});
       const r=await post('subscribe',{sub:sub.toJSON(),w:area.w,c:area.c,n:area.n,lat:area.lat,lon:area.lon,t});
@@ -73,7 +75,16 @@ export function AlertSetup({areas}:{areas:Area[]}){
     try{localStorage.removeItem(KEY);}catch{}setSt('off');setMsg('알림을 껐어요.');ga('push_unsub');
   }
   const ext=externalUrl(inapp());
-  return <section className="nr-alerts">
+  // 맨 위 큰 파란 상자도 버튼: 아직이면 알림 받기, 받고 있으면 시험 알림.
+  const ready=st==='off'||st==='on';
+  const hero=()=>{if(st==='off')on();else if(st==='on')test();else document.querySelector('.nr-alerts .gj-locate-help')?.scrollIntoView({behavior:'smooth',block:'center'});};
+  return <>
+  <button type="button" className="nr-hero small nr-alert-hero" onClick={hero} disabled={st==='busy'||st==='checking'}>
+    <h1>🔔 우리 동네 알림 받기</h1>
+    <p>앱 설치 없이, 아침마다 우리 동네 날씨와 쉬는 날 문 연 약국을 휴대폰 알림으로 보내 드려요.</p>
+    <span className="nr-alert-hero-go">{st==='busy'?'등록 중…':st==='on'?'✅ 받는 중 · 눌러서 시험 알림 보내기':ready?'👉 여기를 눌러 알림 받기':'아래 안내를 확인해 주세요'}</span>
+  </button>
+  <section className="nr-alerts">
     {st==='inapp'&&<div className="gj-locate-help"><b>🔔 {inapp()} 안에서는 알림을 받을 수 없어요</b><p>{ext?'아래 버튼으로 휴대폰 브라우저에서 열면 알림을 받을 수 있어요.':<>오른쪽 아래(또는 위) <b>⋯ 메뉴 → ‘Safari로 열기’</b>를 누른 뒤 다시 와 주세요.</>}</p>{ext&&<a className="gj-locate-ext" href={ext}>🌐 휴대폰 브라우저로 열기</a>}</div>}
     {st==='ios-home'&&<div className="gj-locate-help"><b>🔔 아이폰은 홈 화면에 추가해야 알림을 받을 수 있어요</b><ol><li>아래 <b>공유 버튼(⬆︎)</b> → <b>‘홈 화면에 추가’</b></li><li>홈 화면의 ‘내근처’ 아이콘으로 다시 열기</li><li>이 페이지에서 ‘알림 받기’ 누르기</li></ol><p className="gj-locate-sub">iOS 16.4 이상에서 돼요.</p></div>}
     {st==='unsupported'&&<p className="gj-locate-help">이 브라우저는 알림을 지원하지 않아요. 크롬·삼성 인터넷·사파리(홈 화면 추가) 최신 버전에서 열어 주세요.</p>}
@@ -103,5 +114,5 @@ export function AlertSetup({areas}:{areas:Area[]}){
       :<ol><li>주소창 왼쪽 아이콘 → 권한 → <b>알림 ‘허용’</b></li><li>휴대폰 <b>설정 → 애플리케이션 → (지금 브라우저) → 알림</b> 켜기</li><li>방해 금지 모드가 켜져 있으면 끄기</li><li>‘알림 끄기’ → ‘알림 받기’를 다시 누른 뒤 ‘시험 알림 보내기’</li></ol>}
     </details>}
     <p className="muted small">밤(오후 9시~오전 8시)에는 보내지 않아요. 광고 알림은 보내지 않아요. 언제든 ‘알림 끄기’로 그만 받을 수 있어요.</p>
-  </section>;
+  </section></>;
 }

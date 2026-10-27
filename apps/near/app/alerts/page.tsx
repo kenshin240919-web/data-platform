@@ -8,7 +8,6 @@ export const metadata:Metadata={title:'알림 받기 · 우리 동네 아침 날
 export default function Alerts(){
   return <div className="page">
     <nav className="crumbs"><Link href="/">홈</Link> › 알림 받기</nav>
-    <section className="nr-hero small"><h1>🔔 우리 동네 알림 받기</h1><p>앱 설치 없이, 아침마다 우리 동네 날씨와 쉬는 날 문 연 약국을 휴대폰 알림으로 보내 드려요.</p></section>
     <AlertSetup areas={AREAS}/>
     <section className="prose"><h2>어떤 알림이 오나요?</h2><ul>
       <li><b>🌤️ 매일 아침 7시</b> — “경기 과천시 아침 날씨 · 🍂 어제보다 3° 낮아요 · 쌀쌀해요 / 오늘 6~14° · 비 0% · 미세먼지 보통”</li>
