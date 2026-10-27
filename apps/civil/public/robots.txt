@@ -21,3 +21,4 @@ Disallow: /api/
 
 # Site summary for AI: https://minwon.guidejung.com/llms.txt
 Sitemap: https://minwon.guidejung.com/sitemap.xml
+#DaumWebMasterTool:ee768fead579f793896df835707f5b42cf9c7ed17c7705d14084339573ec25b8:/Dn1va1+69DmjyIIIsTgww==
