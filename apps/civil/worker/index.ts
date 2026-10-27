@@ -46,13 +46,15 @@ function near(lat:number,lon:number,radius:number,opt:{limit?:number;per?:number
 async function wait(env:Env,p:Place,ctx:ExecutionContext){
   const key=new Request(`https://cache.minwon.internal/wait/${p.stdg}/${Math.floor(Date.now()/60e3)}`);
   const hit=await caches.default.match(key);let rows:Record<string,string>[]|null=hit?await hit.json():null;
+  const bad=new Request(`https://cache.minwon.internal/wait-bad/${p.stdg}`);
+  if(!rows){const b=await caches.default.match(bad);if(b)return json({id:p.id,name:p.name,error:await b.text()},200,0);}
   if(!rows){
     if(!env.DATA_GO_KR_KEY)return json({error:'service key missing'},503,0);
     const q=new URLSearchParams({serviceKey:env.DATA_GO_KR_KEY,pageNo:'1',numOfRows:'100',type:'json',stdgCd:p.stdg??''});
     // data.go.kr은 해외(Cloudflare) 요청에 가끔 늦거나 끊겨 2번까지. 실패는 캐시하지 않고 '불러오지 못함'으로 돌려준다(0명으로 보이지 않게).
     let why='';
     for(let i=0;i<2&&!rows;i++){
-      const r=await fetch(`https://apis.data.go.kr/B551982/cso_v2/cso_realtime_v2?${q}`,{signal:AbortSignal.timeout(12000),headers:{accept:'application/json','user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36'}}).catch(e=>{why=String(e).slice(0,80);return null;});
+      const r=await fetch(`https://apis.data.go.kr/B551982/cso_v2/cso_realtime_v2?${q}`,{signal:AbortSignal.timeout(6000),headers:{accept:'application/json','user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36'}}).catch(e=>{why=String(e).slice(0,80);return null;});
       if(!r){continue;}
       const text=await r.text();
       if(!r.ok){why=`http ${r.status}`;continue;}
@@ -65,7 +67,8 @@ async function wait(env:Env,p:Place,ctx:ExecutionContext){
       if(code&&code!=='00'&&code!=='K0'&&code!=='K3'){why=`${code} ${d?.header?.resultMsg??''}`;continue;}
       const it=d?.body?.items?.item;rows=it?(Array.isArray(it)?it:[it]):[];
     }
-    if(!rows)return json({id:p.id,name:p.name,error:why||'upstream'},200,0);
+    // 제공 서버 장애(10/27 오후: GitHub·Cloudflare 모두 시간 초과·HTTP_ERROR 04) 때 방문마다 기다리지 않게 실패도 30초 기억.
+    if(!rows){ctx.waitUntil(caches.default.put(bad,new Response(why||'upstream',{headers:{'cache-control':'max-age=30'}})));return json({id:p.id,name:p.name,error:why||'upstream'},200,0);}
     ctx.waitUntil(caches.default.put(key,new Response(JSON.stringify(rows),{headers:{'cache-control':'max-age=60'}})));
   }
   const mine=rows.filter(x=>x.csoSn===p.cso);
