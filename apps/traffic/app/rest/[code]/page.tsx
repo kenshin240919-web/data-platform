@@ -14,7 +14,7 @@ export async function generateMetadata(props:Props):Promise<Metadata>{
   const {code}=await props.params;const r=findRest(code);if(!r)return {};
   const f=r.foods.find(x=>x.best)??r.foods[0];
   return {title:`${r.name} 대표 음식·기름값·편의시설`,description:`${roadName({name:r.route})} ${r.name}${r.dir?`(${r.dir} 방향)`:''}${f?` 대표 음식 ${f.name}`:''}${won(r.gas?.gasoline)?`, 휘발유 ${r.gas!.gasoline}`:''}. 편의시설, 주변 충전소·날씨·가볼만한곳까지 확인하세요.`,
-    alternates:{canonical:`${SITE}/rest/${code}`},openGraph:{images:'/og.png',title:r.name,url:`${SITE}/rest/${code}`}};
+    alternates:{canonical:`${SITE}/rest/${code}`},openGraph:{images:'/og.png?v=2',title:r.name,url:`${SITE}/rest/${code}`}};
 }
 export default async function RestPage(props:Props){
   const {code}=await props.params;const r=findRest(code);if(!r)notFound();

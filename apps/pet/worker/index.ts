@@ -101,7 +101,7 @@ function detailHtml(p:Place,groups:[string,Near[]][]){
   const [sido,...rest]=p.region_name.split(' ');
   const DAYS:Record<string,string>={'1':'Monday','2':'Tuesday','3':'Wednesday','4':'Thursday','5':'Friday','6':'Saturday','7':'Sunday'};
   const hhmm=(s:string)=>{const v=+s%2400;return `${String(Math.floor(v/100)).padStart(2,'0')}:${String(v%100).padStart(2,'0')}`;};
-  const ld={'@context':'https://schema.org','@type':K.ld,name:p.name,url:SITE+placePath(p.id),image:SITE+'/og.png',
+  const ld={'@context':'https://schema.org','@type':K.ld,name:p.name,url:SITE+placePath(p.id),image:SITE+'/og.png?v=2',
     ...(addr?{address:{'@type':'PostalAddress',streetAddress:addr,addressLocality:rest.join(' ')||sido,addressRegion:sido,addressCountry:'KR'}}:{}),
     ...(p.lat!=null?{geo:{'@type':'GeoCoordinates',latitude:p.lat,longitude:p.lon}}:{}),...(p.tel?{telephone:p.tel}:{}),
     ...(p.since&&/^\d{4}-\d{2}-\d{2}$/.test(p.since)?{foundingDate:p.since}:{}),
@@ -152,7 +152,7 @@ async function detail(p:Place,url:URL,env:Env,ctx:ExecutionContext){
     .replace(/<meta name="description" content="[^"]*"\/?>/,`<meta name="description" content="${esc(desc)}"/>`)
     .replace(/<link rel="canonical" href="[^"]*"\/?>/,'')
     .replace(/<meta property="og:[^"]*" content="[^"]*"\/?>/g,'').replace(/<meta name="twitter:[^"]*" content="[^"]*"\/?>/g,'')
-    .replace('</head>',`<link rel="canonical" href="${canonical}"/><meta property="og:title" content="${esc(title)}"/><meta property="og:description" content="${esc(desc)}"/><meta property="og:url" content="${canonical}"/><meta property="og:image" content="${SITE}/og.png"/><meta property="og:site_name" content="내근처 동물병원"/><meta property="og:locale" content="ko_KR"/><meta name="twitter:card" content="summary_large_image"/></head>`)
+    .replace('</head>',`<link rel="canonical" href="${canonical}"/><meta property="og:title" content="${esc(title)}"/><meta property="og:description" content="${esc(desc)}"/><meta property="og:url" content="${canonical}"/><meta property="og:image" content="${SITE}/og.png?v=2"/><meta property="og:site_name" content="내근처 동물병원"/><meta property="og:locale" content="ko_KR"/><meta name="twitter:card" content="summary_large_image"/></head>`)
     .replace(/<div id="place-detail">PLACE_DETAIL<\/div>/,detailHtml(p,groups))
     .replace('</body>',AD_FILL+'</body>');
   const res=new Response(html,{headers:{'content-type':'text/html; charset=utf-8','cache-control':`public, max-age=${slot?300:3600}`}});

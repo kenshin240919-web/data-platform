@@ -17,7 +17,7 @@ export async function generateMetadata(props:Props):Promise<Metadata>{
   const name=s?s.name:r?label(r):'';
   return {title:`${name} 날씨 - 오늘·내일·주간 예보, 미세먼지`,
     description:`${name}의 지금 날씨와 시간별 예보, 10일 예보, 미세먼지, 오늘 옷차림과 우산 여부를 기상청 공식 예보로 확인하세요.`,
-    alternates:{canonical:`${SITE}/region/${code}`},openGraph:{images:'/og.png',title:`${name} 날씨`,url:`${SITE}/region/${code}`}};
+    alternates:{canonical:`${SITE}/region/${code}`},openGraph:{images:'/og.png?v=2',title:`${name} 날씨`,url:`${SITE}/region/${code}`}};
 }
 
 export default async function RegionPage(props:Props){

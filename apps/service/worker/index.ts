@@ -79,7 +79,7 @@ function detailHtml(p:Center,groups:[string,(Center&{km:number})[]][]){
   ] as [string,string][]).filter(([,x])=>x);
   const spec=(Object.keys(DAY_LD) as (keyof typeof DAY_LD)[]).filter(k=>p.hours[k]).map(k=>({'@type':'OpeningHoursSpecification',dayOfWeek:DAY_LD[k].map(d=>`https://schema.org/${d}`),opens:p.hours[k]![0],closes:p.hours[k]![1]==='24:00'?'23:59':p.hours[k]![1]}));
   const [sido,...rest]=p.region_name.split(' ');
-  const ld={'@context':'https://schema.org','@type':K.ld,name:p.name,url:SITE+centerPath(p.id),image:SITE+'/og.png',
+  const ld={'@context':'https://schema.org','@type':K.ld,name:p.name,url:SITE+centerPath(p.id),image:SITE+'/og.png?v=2',
     ...(addr?{address:{'@type':'PostalAddress',streetAddress:addr,addressLocality:rest.join(' ')||sido,addressRegion:sido,addressCountry:'KR'}}:{}),
     ...(p.lat!=null?{geo:{'@type':'GeoCoordinates',latitude:p.lat,longitude:p.lon}}:{}),...(p.tel?{telephone:p.tel}:{}),...(spec.length?{openingHoursSpecification:spec}:{}),
     ...(p.since&&/^\d{4}-\d{2}-\d{2}$/.test(p.since)?{foundingDate:p.since}:{})};
@@ -121,7 +121,7 @@ async function detail(p:Center,url:URL,env:Env,ctx:ExecutionContext){
     .replace(/<meta name="description" content="[^"]*"\/?>/,`<meta name="description" content="${esc(desc)}"/>`)
     .replace(/<link rel="canonical" href="[^"]*"\/?>/,'')
     .replace(/<meta property="og:[^"]*" content="[^"]*"\/?>/g,'').replace(/<meta name="twitter:[^"]*" content="[^"]*"\/?>/g,'')
-    .replace('</head>',`<link rel="canonical" href="${canonical}"/><meta property="og:title" content="${esc(title)}"/><meta property="og:description" content="${esc(desc)}"/><meta property="og:url" content="${canonical}"/><meta property="og:image" content="${SITE}/og.png"/><meta property="og:site_name" content="내근처 서비스센터"/><meta property="og:locale" content="ko_KR"/><meta name="twitter:card" content="summary_large_image"/></head>`)
+    .replace('</head>',`<link rel="canonical" href="${canonical}"/><meta property="og:title" content="${esc(title)}"/><meta property="og:description" content="${esc(desc)}"/><meta property="og:url" content="${canonical}"/><meta property="og:image" content="${SITE}/og.png?v=2"/><meta property="og:site_name" content="내근처 서비스센터"/><meta property="og:locale" content="ko_KR"/><meta name="twitter:card" content="summary_large_image"/></head>`)
     .replace(/<div id="center-detail">CENTER_DETAIL<\/div>/,detailHtml(p,groups))
     .replace('</body>',AD_FILL+'</body>');
   const res=new Response(html,{headers:{'content-type':'text/html; charset=utf-8','cache-control':'public, max-age=600'}});

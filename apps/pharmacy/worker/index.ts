@@ -63,7 +63,7 @@ function detailHtml(p:Pharmacy,nearby:Card[]){
     [`${eun(p.name)} 어디에 있나요?`,p.address?`${p.address}에 있습니다${p.tel?`(전화 ${p.tel})`:''}.`:''],
   ] as [string,string][]).filter(([,x])=>x);
   const spec=Object.entries(p.hours).filter(([d])=>LD_DAY[d]).map(([d,[o,c]])=>({'@type':'OpeningHoursSpecification',dayOfWeek:`https://schema.org/${LD_DAY[d]}`,opens:hm(o).replace('새벽 ',''),closes:hm(c).replace('새벽 ','')}));
-  const ld={'@context':'https://schema.org','@type':'Pharmacy',name:p.name,url:SITE+pharmacyPath(p.id),image:SITE+'/og.png',
+  const ld={'@context':'https://schema.org','@type':'Pharmacy',name:p.name,url:SITE+pharmacyPath(p.id),image:SITE+'/og.png?v=2',
     ...(p.address?{address:{'@type':'PostalAddress',streetAddress:p.address,addressLocality:p.region_name.split(' ').slice(1).join(' ')||p.region_name,addressRegion:p.region_name.split(' ')[0],postalCode:p.zip??undefined,addressCountry:'KR'}}:{}),
     ...(p.lat!=null?{geo:{'@type':'GeoCoordinates',latitude:p.lat,longitude:p.lon}}:{}),...(p.tel?{telephone:p.tel}:{}),...(spec.length?{openingHoursSpecification:spec}:{})};
   const crumbs={'@context':'https://schema.org','@type':'BreadcrumbList',itemListElement:[['내근처 약국',SITE+'/'],['지역별 약국',SITE+'/region'],[p.region_name,`${SITE}/region/${p.region}`],[p.name,SITE+pharmacyPath(p.id)]].map(([name,item],i)=>({'@type':'ListItem',position:i+1,name,item}))};
@@ -99,7 +99,7 @@ async function detail(p:Pharmacy,url:URL,env:Env,ctx:ExecutionContext){
     .replace(/<meta name="description" content="[^"]*"\/?>/,`<meta name="description" content="${esc(desc)}"/>`)
     .replace(/<link rel="canonical" href="[^"]*"\/?>/,'')
     .replace(/<meta property="og:[^"]*" content="[^"]*"\/?>/g,'').replace(/<meta name="twitter:[^"]*" content="[^"]*"\/?>/g,'')
-    .replace('</head>',`<link rel="canonical" href="${canonical}"/><meta property="og:title" content="${esc(title)}"/><meta property="og:description" content="${esc(desc)}"/><meta property="og:url" content="${canonical}"/><meta property="og:image" content="${SITE}/og.png"/><meta property="og:site_name" content="내근처 약국"/><meta property="og:locale" content="ko_KR"/><meta name="twitter:card" content="summary_large_image"/></head>`)
+    .replace('</head>',`<link rel="canonical" href="${canonical}"/><meta property="og:title" content="${esc(title)}"/><meta property="og:description" content="${esc(desc)}"/><meta property="og:url" content="${canonical}"/><meta property="og:image" content="${SITE}/og.png?v=2"/><meta property="og:site_name" content="내근처 약국"/><meta property="og:locale" content="ko_KR"/><meta name="twitter:card" content="summary_large_image"/></head>`)
     .replace(/<div id="pharmacy-detail">PHARMACY_DETAIL<\/div>/,detailHtml(p,nearby))
     .replace('</body>',AD_FILL+'</body>');
   const res=new Response(html,{headers:{'content-type':'text/html; charset=utf-8','cache-control':'public, max-age=300'}});

@@ -198,11 +198,11 @@ function detailHtml(s:School,today:string,week:MealDay[],todayMeal:MealDay|null,
     [`${s.name} 시험(고사)은 언제인가요?`,exam?`학사일정의 다음 시험 일정은 ${eventDate(exam)} ${exam.name}(${dday(today,exam.date)})입니다.`:''],
     [`${eun(s.name)} 어디에 있나요?`,s.address?`${[s.address,s.detail].filter(Boolean).join(' ')}에 있는 ${[s.found,s.coedu].filter(Boolean).join(' ')} ${s.kind}입니다${s.tel?`(전화 ${s.tel})`:''}.`:''],
   ] as [string,string][]).filter(([,x])=>x);
-  const ld={'@context':'https://schema.org','@type':s.k==='elem'?'ElementarySchool':s.k==='middle'?'MiddleSchool':s.k==='high'?'HighSchool':'School',name:s.name,url:SITE+schoolPath(s.code),image:SITE+'/og.png',
+  const ld={'@context':'https://schema.org','@type':s.k==='elem'?'ElementarySchool':s.k==='middle'?'MiddleSchool':s.k==='high'?'HighSchool':'School',name:s.name,url:SITE+schoolPath(s.code),image:SITE+'/og.png?v=2',
     ...(s.eng?{alternateName:s.eng}:{}),...(s.address?{address:{'@type':'PostalAddress',streetAddress:[s.address,s.detail].filter(Boolean).join(' '),addressLocality:s.region_name.split(' ').slice(1).join(' ')||s.region_name,addressRegion:s.region_name.split(' ')[0],postalCode:s.zip??undefined,addressCountry:'KR'}}:{}),
     ...(s.lat!=null?{geo:{'@type':'GeoCoordinates',latitude:s.lat,longitude:s.lon}}:{}),...(s.tel?{telephone:s.tel}:{}),...(s.homepage?{sameAs:s.homepage}:{}),...(s.founded?{foundingDate:ymd(s.founded)!.replace(/\./g,'-')}:{}),
     ...(upcoming.length?{event:upcoming.slice(0,5).map(e=>({'@type':'Event',name:`${s.name} ${e.name}`,startDate:`${e.date.slice(0,4)}-${e.date.slice(4,6)}-${e.date.slice(6,8)}`,...(e.end?{endDate:`${e.end.slice(0,4)}-${e.end.slice(4,6)}-${e.end.slice(6,8)}`}:{}),eventAttendanceMode:'https://schema.org/OfflineEventAttendanceMode',eventStatus:'https://schema.org/EventScheduled',
-      location:{'@type':'Place',name:s.name,address:[s.address,s.detail].filter(Boolean).join(' ')||s.region_name},organizer:{'@type':'Organization',name:s.name,url:SITE+schoolPath(s.code)},description:`${s.name} 학사일정: ${e.name}`,image:SITE+'/og.png'}))}:{})};
+      location:{'@type':'Place',name:s.name,address:[s.address,s.detail].filter(Boolean).join(' ')||s.region_name},organizer:{'@type':'Organization',name:s.name,url:SITE+schoolPath(s.code)},description:`${s.name} 학사일정: ${e.name}`,image:SITE+'/og.png?v=2'}))}:{})};
   const crumbs={'@context':'https://schema.org','@type':'BreadcrumbList',itemListElement:[['내 학교',SITE+'/'],['지역별 학교',SITE+'/region'],...(s.region.includes('기타')?[]:[[s.region_name,`${SITE}/region/${s.region}`]]),[s.name,SITE+schoolPath(s.code)]].map(([name,item],i)=>({'@type':'ListItem',position:i+1,name,item}))};
   const faqLd={'@context':'https://schema.org','@type':'FAQPage',mainEntity:faq.map(([q,x])=>({'@type':'Question',name:q,acceptedAnswer:{'@type':'Answer',text:x}}))};
   const ldTag=(d:unknown)=>`<script type="application/ld+json">${JSON.stringify(d).replace(/</g,'\\u003c')}</script>`;
@@ -252,7 +252,7 @@ async function detail(s:School,url:URL,env:Env,ctx:ExecutionContext){
     .replace(/<meta name="description" content="[^"]*"\/?>/,`<meta name="description" content="${esc(desc)}"/>`)
     .replace(/<link rel="canonical" href="[^"]*"\/?>/,'')
     .replace(/<meta property="og:[^"]*" content="[^"]*"\/?>/g,'').replace(/<meta name="twitter:[^"]*" content="[^"]*"\/?>/g,'')
-    .replace('</head>',`<link rel="canonical" href="${canonical}"/><meta property="og:title" content="${esc(title)}"/><meta property="og:description" content="${esc(desc)}"/><meta property="og:url" content="${canonical}"/><meta property="og:image" content="${SITE}/og.png"/><meta property="og:site_name" content="내 학교"/><meta property="og:locale" content="ko_KR"/><meta name="twitter:card" content="summary_large_image"/></head>`)
+    .replace('</head>',`<link rel="canonical" href="${canonical}"/><meta property="og:title" content="${esc(title)}"/><meta property="og:description" content="${esc(desc)}"/><meta property="og:url" content="${canonical}"/><meta property="og:image" content="${SITE}/og.png?v=2"/><meta property="og:site_name" content="내 학교"/><meta property="og:locale" content="ko_KR"/><meta name="twitter:card" content="summary_large_image"/></head>`)
     .replace(/<div id="school-detail">SCHOOL_DETAIL<\/div>/,detailHtml(s,today,ms.filter(d=>d.date>=w.from&&d.date<=w.to),todayMeal,nextMeal,ev,failed))
     .replace('</body>',AD_FILL+PAGE_JS+'</body>');
   const res=new Response(html,{headers:{'content-type':'text/html; charset=utf-8','cache-control':'public, max-age=600'}});

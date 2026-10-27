@@ -16,7 +16,7 @@ const esc=(s:string)=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'
 export function detailHtml({place,nearby,status,styles,today}:{place:Place;nearby:Nearby[];status:Status|null;styles:string;today:string}){
   const path=detailPath(place),url=ORIGIN+path,title=`${place.name} | 내근처 여행`;
   const index=place.indexable&&!place.is_demo;
-  const DESC=esc(placeDescription(place));const image=place.images?.[0]?.url||ORIGIN+'/og.png';
+  const DESC=esc(placeDescription(place));const image=place.images?.[0]?.url||ORIGIN+'/og.png?v=2';
   const body=renderToString(<ShellView status={status}><DetailView place={place} nearby={nearby} today={today}/></ShellView>);
   const clarity=`(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,"clarity","script","${CLARITY}");`;
   return `<!DOCTYPE html><html lang="ko"><head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><meta name="color-scheme" content="light dark"/><script async src="https://www.googletagmanager.com/gtag/js?id=${GA}"></script><script>${gaInline(GA)}</script><script>${IMAGE_FALLBACK}</script>${styles}`

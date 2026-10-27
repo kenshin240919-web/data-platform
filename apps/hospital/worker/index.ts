@@ -105,7 +105,7 @@ function detailHtml(h:Hospital,nearby:Card[],bed:Bed|null){
     [`${eun(h.name)} 어디에 있나요?`,h.address?`${h.address}에 있는 ${h.div??'의료기관'}입니다${h.tel?`(전화 ${h.tel})`:''}.`:''],
   ] as [string,string][]).filter(([,x])=>x);
   const spec=Object.entries(h.hours).filter(([d])=>LD_DAY[d]).map(([d,[o,c]])=>({'@type':'OpeningHoursSpecification',dayOfWeek:`https://schema.org/${LD_DAY[d]}`,opens:hm(o).replace('새벽 ',''),closes:hm(c).replace('새벽 ','')}));
-  const ld={'@context':'https://schema.org','@type':ldType(h.div),name:h.name,url:SITE+hospitalPath(h.id),image:SITE+'/og.png',
+  const ld={'@context':'https://schema.org','@type':ldType(h.div),name:h.name,url:SITE+hospitalPath(h.id),image:SITE+'/og.png?v=2',
     ...(h.address?{address:{'@type':'PostalAddress',streetAddress:h.address,addressLocality:h.region_name.split(' ').slice(1).join(' ')||h.region_name,addressRegion:h.region_name.split(' ')[0],postalCode:h.zip??undefined,addressCountry:'KR'}}:{}),
     ...(h.lat!=null?{geo:{'@type':'GeoCoordinates',latitude:h.lat,longitude:h.lon}}:{}),...(h.tel?{telephone:h.tel}:{}),...(spec.length?{openingHoursSpecification:spec}:{}),
     ...(depts.length&&ldType(h.div)!=='Dentist'?{medicalSpecialty:depts}:{}),...(h.info?{description:h.info}:{})};
@@ -151,7 +151,7 @@ async function detail(id:string,url:URL,env:Env,ctx:ExecutionContext){
     .replace(/<meta name="description" content="[^"]*"\/?>/,`<meta name="description" content="${esc(desc)}"/>`)
     .replace(/<link rel="canonical" href="[^"]*"\/?>/,'')
     .replace(/<meta property="og:[^"]*" content="[^"]*"\/?>/g,'').replace(/<meta name="twitter:[^"]*" content="[^"]*"\/?>/g,'')
-    .replace('</head>',`<link rel="canonical" href="${canonical}"/><meta property="og:title" content="${esc(title)}"/><meta property="og:description" content="${esc(desc)}"/><meta property="og:url" content="${canonical}"/><meta property="og:image" content="${SITE}/og.png"/><meta property="og:site_name" content="내근처 병원"/><meta property="og:locale" content="ko_KR"/><meta name="twitter:card" content="summary_large_image"/></head>`)
+    .replace('</head>',`<link rel="canonical" href="${canonical}"/><meta property="og:title" content="${esc(title)}"/><meta property="og:description" content="${esc(desc)}"/><meta property="og:url" content="${canonical}"/><meta property="og:image" content="${SITE}/og.png?v=2"/><meta property="og:site_name" content="내근처 병원"/><meta property="og:locale" content="ko_KR"/><meta name="twitter:card" content="summary_large_image"/></head>`)
     .replace(/<div id="hospital-detail">HOSPITAL_DETAIL<\/div>/,detailHtml(h,nearby,bed))
     .replace('</body>',AD_FILL+'</body>');
   const res=new Response(html,{headers:{'content-type':'text/html; charset=utf-8','cache-control':'public, max-age=300'}});

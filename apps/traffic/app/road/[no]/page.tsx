@@ -13,7 +13,7 @@ type Props={params:Promise<{no:string}>};
 export async function generateMetadata(props:Props):Promise<Metadata>{
   const {no}=await props.params;const r=findRoute(no);if(!r)return {};const name=roadName(r);
   return {title:`${name} 실시간 교통상황 - 정체 구간·휴게소`,description:`${name}(${r.start}~${r.end}) 실시간 정체·서행 구간을 IC 순서대로 확인하세요. 구간별 속도, 휴게소 ${restsOn(no).length}곳의 대표 음식과 기름값도 함께 안내합니다.`,
-    alternates:{canonical:`${SITE}/road/${no}`},openGraph:{images:'/og.png',title:`${name} 실시간 교통상황`,url:`${SITE}/road/${no}`}};
+    alternates:{canonical:`${SITE}/road/${no}`},openGraph:{images:'/og.png?v=2',title:`${name} 실시간 교통상황`,url:`${SITE}/road/${no}`}};
 }
 /** 출발·중간·도착 지역 날씨 + 노선 중간쯤 가볼만한곳·충전소. */
 function alongRoad(r:NonNullable<ReturnType<typeof findRoute>>):Link_[]{

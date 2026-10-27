@@ -16,7 +16,7 @@ export async function generateMetadata(props:Props):Promise<Metadata>{
   const n=s?snapSum(s.regions.map(x=>x.code)):r?snapRegion(r.code):null;
   const counts=n&&n.stations?`충전소 ${n.stations.toLocaleString()}곳·충전기 ${n.chargers.toLocaleString()}대(급속 ${n.fast.toLocaleString()}대). `:'';
   return {title:`${name} 전기차 충전소 - 실시간 이용 가능 충전기`,description:`${name} 전기차 ${counts}충전소 위치와 지금 비어 있는 급속·완속 충전기, 무료 주차·24시간 충전소를 실시간으로 확인하세요.`,
-    alternates:{canonical:`${SITE}/region/${code}`},openGraph:{images:'/og.png',title:`${name} 전기차 충전소`,url:`${SITE}/region/${code}`}};
+    alternates:{canonical:`${SITE}/region/${code}`},openGraph:{images:'/og.png?v=2',title:`${name} 전기차 충전소`,url:`${SITE}/region/${code}`}};
 }
 export default async function RegionPage(props:Props){
   const {code}=await props.params;

@@ -124,7 +124,7 @@ export async function pageMetadata(service:Service,segments:string[]):Promise<Me
       description=segments[0]==='region'&&name?`${name}의 가볼만한곳과 축제·행사를 한국관광공사 공식 정보로 확인하세요. 운영시간·요금·주차 정보 제공.`:`${head} 목록을 지역과 조건으로 찾아보세요. 한국관광공사 공식 관광정보 기반.`;
     }
   }
-  return {title,description,alternates:{canonical:origin(service)+path,types:{'application/rss+xml':origin(service)+'/rss.xml'}},robots:{index,follow:true},twitter:{card:'summary_large_image'},openGraph:{images:origin(service)+'/og.png',title,description,url:origin(service)+path,siteName:'내근처 여행',locale:'ko_KR',type:'website'}};
+  return {title,description,alternates:{canonical:origin(service)+path,types:{'application/rss+xml':origin(service)+'/rss.xml'}},robots:{index,follow:true},twitter:{card:'summary_large_image'},openGraph:{images:origin(service)+'/og.png?v=2',title,description,url:origin(service)+path,siteName:'내근처 여행',locale:'ko_KR',type:'website'}};
 }
 export async function siteMap(service:Service){
   if(!enabled())return [];

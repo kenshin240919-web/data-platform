@@ -73,7 +73,7 @@ function detailHtml(p:Place,groups:[string,Near[]][]){
     [`${p.name} 가격과 영업 시간은?`,`공공데이터에는 가격·예약·영업 시간이 없습니다. 네이버 지도에서 ‘${p.name}’을 검색하거나${p.tel?` 전화(${p.tel})로`:''} 확인하세요.`],
   ] as [string,string][]).filter(([,x])=>x);
   const [sido,...rest]=p.region_name.split(' ');
-  const ld={'@context':'https://schema.org','@type':K.ld,name:p.name,url:SITE+shopPath(p.id),image:SITE+'/og.png',
+  const ld={'@context':'https://schema.org','@type':K.ld,name:p.name,url:SITE+shopPath(p.id),image:SITE+'/og.png?v=2',
     ...(addr?{address:{'@type':'PostalAddress',streetAddress:addr,addressLocality:rest.join(' ')||sido,addressRegion:sido,addressCountry:'KR'}}:{}),
     ...(p.lat!=null?{geo:{'@type':'GeoCoordinates',latitude:p.lat,longitude:p.lon}}:{}),...(p.tel?{telephone:p.tel}:{}),
     ...(p.since&&/^\d{4}-\d{2}-\d{2}$/.test(p.since)?{foundingDate:p.since}:{})};
@@ -112,7 +112,7 @@ async function detail(p:Place,url:URL,env:Env,ctx:ExecutionContext){
     .replace(/<meta name="description" content="[^"]*"\/?>/,`<meta name="description" content="${esc(desc)}"/>`)
     .replace(/<link rel="canonical" href="[^"]*"\/?>/,'')
     .replace(/<meta property="og:[^"]*" content="[^"]*"\/?>/g,'').replace(/<meta name="twitter:[^"]*" content="[^"]*"\/?>/g,'')
-    .replace('</head>',`<link rel="canonical" href="${canonical}"/><meta property="og:title" content="${esc(title)}"/><meta property="og:description" content="${esc(desc)}"/><meta property="og:url" content="${canonical}"/><meta property="og:image" content="${SITE}/og.png"/><meta property="og:site_name" content="내근처 휴식"/><meta property="og:locale" content="ko_KR"/><meta name="twitter:card" content="summary_large_image"/></head>`)
+    .replace('</head>',`<link rel="canonical" href="${canonical}"/><meta property="og:title" content="${esc(title)}"/><meta property="og:description" content="${esc(desc)}"/><meta property="og:url" content="${canonical}"/><meta property="og:image" content="${SITE}/og.png?v=2"/><meta property="og:site_name" content="내근처 휴식"/><meta property="og:locale" content="ko_KR"/><meta name="twitter:card" content="summary_large_image"/></head>`)
     .replace(/<div id="shop-detail">SHOP_DETAIL<\/div>/,detailHtml(p,groups));
   if(ADS)html=html.replace('</body>',AD_FILL+'</body>');
   const res=new Response(html,{headers:{'content-type':'text/html; charset=utf-8','cache-control':'public, max-age=3600'}});

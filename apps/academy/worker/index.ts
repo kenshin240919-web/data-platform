@@ -146,7 +146,7 @@ function detailHtml(a:Academy,near:Card[],ins:ReturnType<typeof insight>){
     ...ins.faq,
   ].filter(([,x])=>x) as [string,string][];
   const ld={'@context':'https://schema.org','@type':'EducationalOrganization',name:a.name,url:SITE+academyPath(a.id),
-    image:SITE+'/og.png',...(a.address?{address:{'@type':'PostalAddress',streetAddress:[a.address,a.address_detail].filter(Boolean).join(' '),addressLocality:a.region_name.split(' ').slice(1).join(' ')||a.region_name,addressRegion:a.office_name?.replace(/교육청$/,'')??undefined,postalCode:a.zip??undefined,addressCountry:'KR'}}:{}),
+    image:SITE+'/og.png?v=2',...(a.address?{address:{'@type':'PostalAddress',streetAddress:[a.address,a.address_detail].filter(Boolean).join(' '),addressLocality:a.region_name.split(' ').slice(1).join(' ')||a.region_name,addressRegion:a.office_name?.replace(/교육청$/,'')??undefined,postalCode:a.zip??undefined,addressCountry:'KR'}}:{}),
     ...(a.lat!=null?{geo:{'@type':'GeoCoordinates',latitude:a.lat,longitude:a.lon}}:{}),...(a.tel?{telephone:a.tel}:{}),...(a.established?{foundingDate:ymd(a.established)!.replace(/\./g,'-')}:{}),
     ...(okFees.length?{hasOfferCatalog:{'@type':'OfferCatalog',name:'교습 과정 수강료',itemListElement:okFees.slice(0,30).map(f=>({'@type':'Offer',itemOffered:{'@type':'Course',name:f.name,description:`${a.name}의 ${f.name} 과정. 교육청에 공개된 인당 수강료 ${won(f.won)}(${a.region_name}).`,provider:{'@type':'Organization',name:a.name}},price:f.won,priceCurrency:'KRW'}))}}:{})};
   const crumbs={'@context':'https://schema.org','@type':'BreadcrumbList',itemListElement:[['내근처 학원',SITE+'/'],['지역별 학원',SITE+'/region'],[a.region_name,`${SITE}/region/${a.region_id}`],[a.name,SITE+academyPath(a.id)]].map(([name,item],i)=>({'@type':'ListItem',position:i+1,name,item}))};
@@ -197,7 +197,7 @@ async function detail(id:string,url:URL,env:Env,ctx:ExecutionContext){
     .replace(/<meta name="description" content="[^"]*"\/?>/,`<meta name="description" content="${esc(desc)}"/>`)
     .replace(/<link rel="canonical" href="[^"]*"\/?>/,'')
     .replace(/<meta property="og:[^"]*" content="[^"]*"\/?>/g,'').replace(/<meta name="twitter:[^"]*" content="[^"]*"\/?>/g,'')
-    .replace('</head>',`<link rel="canonical" href="${canonical}"/><meta property="og:title" content="${esc(title)}"/><meta property="og:description" content="${esc(desc)}"/><meta property="og:url" content="${canonical}"/><meta property="og:image" content="${SITE}/og.png"/><meta property="og:site_name" content="내근처 학원"/><meta property="og:locale" content="ko_KR"/><meta name="twitter:card" content="summary_large_image"/></head>`)
+    .replace('</head>',`<link rel="canonical" href="${canonical}"/><meta property="og:title" content="${esc(title)}"/><meta property="og:description" content="${esc(desc)}"/><meta property="og:url" content="${canonical}"/><meta property="og:image" content="${SITE}/og.png?v=2"/><meta property="og:site_name" content="내근처 학원"/><meta property="og:locale" content="ko_KR"/><meta name="twitter:card" content="summary_large_image"/></head>`)
     .replace(/<div id="academy-detail">ACADEMY_DETAIL<\/div>/,detailHtml(a,near,ins))
     .replace('</body>',AD_FILL+COMPARE_JS+'</body>');
   const res=new Response(html,{headers:{'content-type':'text/html; charset=utf-8','cache-control':'public, max-age=600'}});

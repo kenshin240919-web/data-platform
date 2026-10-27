@@ -138,7 +138,7 @@ function detailHtml(p:Place,groups:[string,Near[]][]){
     ...(p.kind==='kiosk'?[[`${p.name}에서 어떤 서류를 뗄 수 있나요?`,docs.length?`${n2(docs.length)}종을 뗄 수 있습니다(${byMenu.slice(0,4).map(([m,l])=>`${m} ${l.length}종`).join(', ')}). ${p.reg?'등기사항증명서도 뗄 수 있습니다.':''}`:'서류 목록을 아직 받지 못했습니다.'] as [string,string]]:[]),
   ] as [string,string][]).filter(([,x])=>x);
   const [sido,...rest]=p.region_name.split(' ');
-  const ld={'@context':'https://schema.org','@type':K.ld,name:p.name,url:SITE+placePath(p.id),image:SITE+'/og.png',
+  const ld={'@context':'https://schema.org','@type':K.ld,name:p.name,url:SITE+placePath(p.id),image:SITE+'/og.png?v=2',
     ...(addr?{address:{'@type':'PostalAddress',streetAddress:addr,addressLocality:rest.join(' ')||sido,addressRegion:sido,addressCountry:'KR',...(p.zip?{postalCode:p.zip}:{})}}:{}),
     ...(p.lat!=null?{geo:{'@type':'GeoCoordinates',latitude:p.lat,longitude:p.lon}}:{}),...(p.tel?{telephone:p.tel}:{}),
     ...(p.kind==='kiosk'&&p.wk?{openingHoursSpecification:[{'@type':'OpeningHoursSpecification',dayOfWeek:['Monday','Tuesday','Wednesday','Thursday','Friday'],opens:p.wk[0],closes:p.wk[1]},...(p.hol?[{'@type':'OpeningHoursSpecification',dayOfWeek:['Saturday','Sunday'],opens:p.hol[0],closes:p.hol[1]}]:[])]}:{})};
@@ -180,7 +180,7 @@ async function detail(p:Place,url:URL,env:Env,ctx:ExecutionContext){
     .replace(/<meta name="description" content="[^"]*"\/?>/,`<meta name="description" content="${esc(desc)}"/>`)
     .replace(/<link rel="canonical" href="[^"]*"\/?>/,'')
     .replace(/<meta property="og:[^"]*" content="[^"]*"\/?>/g,'').replace(/<meta name="twitter:[^"]*" content="[^"]*"\/?>/g,'')
-    .replace('</head>',`<link rel="canonical" href="${canonical}"/><meta property="og:title" content="${esc(title)}"/><meta property="og:description" content="${esc(desc)}"/><meta property="og:url" content="${canonical}"/><meta property="og:image" content="${SITE}/og.png"/><meta property="og:site_name" content="내근처 서류"/><meta property="og:locale" content="ko_KR"/><meta name="twitter:card" content="summary_large_image"/></head>`)
+    .replace('</head>',`<link rel="canonical" href="${canonical}"/><meta property="og:title" content="${esc(title)}"/><meta property="og:description" content="${esc(desc)}"/><meta property="og:url" content="${canonical}"/><meta property="og:image" content="${SITE}/og.png?v=2"/><meta property="og:site_name" content="내근처 서류"/><meta property="og:locale" content="ko_KR"/><meta name="twitter:card" content="summary_large_image"/></head>`)
     .replace(/<div id="place-detail">PLACE_DETAIL<\/div>/,detailHtml(p,groups));
   if(ADS)html=html.replace('</body>',AD_FILL+'</body>');
   const res=new Response(html,{headers:{'content-type':'text/html; charset=utf-8','cache-control':'public, max-age=600'}});

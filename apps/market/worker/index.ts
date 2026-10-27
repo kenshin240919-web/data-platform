@@ -108,7 +108,7 @@ async function detail(s:StoreRow,url:URL,env:Env,ctx:ExecutionContext){
     .replace(/<link rel="canonical" href="[^"]*"\/?>/,'')
     .replace(/<meta name="robots" content="[^"]*"\/?>/g,'')
     .replace(/<meta property="og:[^"]*" content="[^"]*"\/?>/g,'').replace(/<meta name="twitter:[^"]*" content="[^"]*"\/?>/g,'')
-    .replace('</head>',`<meta name="robots" content="noindex, follow"/><meta property="og:title" content="${esc(title)}"/><meta property="og:description" content="${esc(desc)}"/><meta property="og:image" content="${SITE}/og.png"/><meta property="og:site_name" content="내근처 시장"/><meta name="twitter:card" content="summary_large_image"/></head>`)
+    .replace('</head>',`<meta name="robots" content="noindex, follow"/><meta property="og:title" content="${esc(title)}"/><meta property="og:description" content="${esc(desc)}"/><meta property="og:image" content="${SITE}/og.png?v=2"/><meta property="og:site_name" content="내근처 시장"/><meta name="twitter:card" content="summary_large_image"/></head>`)
     .replace(/<div id="store-detail">STORE_DETAIL<\/div>/,`<div id="store-detail">${detailHtml(s,m)}</div>`)
     .replace('</body>',AD_FILL+'</body>');
   const res=new Response(html,{headers:{'content-type':'text/html; charset=utf-8','cache-control':'public, max-age=3600'}});

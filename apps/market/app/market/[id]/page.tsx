@@ -31,7 +31,7 @@ export default async function MarketPage({params}:P){
     ['취급 품목',s?.goods],['주차장',s?.parking==null?null:s.parking?'있음':'없음'],['공중화장실',s?.toilet==null?null:s.toilet?'있음':'없음'],['전화',s?.tel],['개설',s?.year?`${s.year}년`:null],
     ['온누리 가맹점',`${n(m.n)}곳 (디지털도 되는 곳 ${n(m.d)}곳 · ${pct(m.d,m.n)}%)`],['새로 가맹',m.new?`${status.latest_year}년 ${n(m.new)}곳`:null]];
   const lead=`${eun(m.name)} ${where(m)}에 있는 ${kind}${kind==="전통시장"?"으로":"로"}, 온누리상품권 가맹점이 ${n(m.n)}곳 등록돼 있어요.${top.length?` 가장 많은 품목은 ${top.map(c=>`${CATS[c].label} ${n(m.cats[c]!)}곳`).join(', ')}이에요.`:''} 이 중 ${n(m.d)}곳(${pct(m.d,m.n)}%)은 디지털(모바일·카드) 온누리상품권도 받고, ${n(m.n-m.d)}곳은 지류(종이)형만 받아요.${m.new?` ${status.latest_year}년에 새로 가맹한 곳은 ${n(m.new)}곳이에요.`:''}`;
-  const ld={'@context':'https://schema.org','@type':'ShoppingCenter',name:m.name,url:SITE+marketPath(m.id),image:SITE+'/og.png',
+  const ld={'@context':'https://schema.org','@type':'ShoppingCenter',name:m.name,url:SITE+marketPath(m.id),image:SITE+'/og.png?v=2',
     ...(m.addr||m.jibun?{address:{'@type':'PostalAddress',streetAddress:m.addr??m.jibun,addressRegion:sidoFull(m.sido),addressCountry:'KR'}}:{}),
     ...(pin?{geo:{'@type':'GeoCoordinates',latitude:m.lat,longitude:m.lon}}:{}),...(s?.tel?{telephone:s.tel}:{}),paymentAccepted:'온누리상품권'};
   return <div className="page">

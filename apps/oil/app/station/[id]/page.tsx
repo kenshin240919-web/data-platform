@@ -40,7 +40,7 @@ export default async function StationPage({params}:P){
     {s.lat!=null&&<Connect items={linksNear(s.lat,s.lon!,'oil')}/>}
     <JsonLd data={{'@context':'https://schema.org','@type':'GasStation',name:s.name,url:`${SITE}/station/${s.id}`,...(s.brand?{brand:{'@type':'Brand',name:brandName(s.brand)}}:{}),
       ...(s.address?{address:{'@type':'PostalAddress',streetAddress:s.address,addressCountry:'KR',...(r?{addressRegion:r.sido_name,addressLocality:r.name}:{})}}:{}),
-      ...(s.lat!=null?{geo:{'@type':'GeoCoordinates',latitude:s.lat,longitude:s.lon}}:{}),image:`${SITE}/og.png`}}/>
+      ...(s.lat!=null?{geo:{'@type':'GeoCoordinates',latitude:s.lat,longitude:s.lon}}:{}),image:`${SITE}/og.png?v=2`}}/>
     <JsonLd data={breadcrumbLd([['내근처 주유소',SITE+'/'],...(r?[['지역별 휘발유',SITE+'/region'],[r.label,`${SITE}/region/${r.code}`]] as [string,string][]:[]),[s.name,`${SITE}/station/${s.id}`]])}/>
   </div>;
 }
