@@ -26,7 +26,7 @@ export const SITES:Record<Site,{url:string;icon:string;name:string;brand:string;
   near:{url:'https://near.guidejung.com',icon:'📍',name:'모아보기',brand:'내근처',tagline:'내 근처에 뭐가 있지?'},
   rest:{url:'https://rest.guidejung.com',icon:'♨️',name:'휴식',brand:'내근처 휴식',tagline:'오늘 어디서 쉬지?'},
   pet:{url:'https://pet.guidejung.com',icon:'🐾',name:'동물병원',brand:'내근처 동물병원',tagline:'우리 아이 아플 때 어디로?'},
-  civil:{url:'https://minwon.guidejung.com',icon:'🖨️',name:'서류',brand:'내근처 서류',tagline:'떼고, 뽑고, 부치는 곳',hidden:true},
+  civil:{url:'https://minwon.guidejung.com',icon:'🖨️',name:'서류',brand:'내근처 서류',tagline:'떼고, 뽑고, 부치는 곳'},
 };
 const {trip:T,weather:W,traffic:R,charge:C}=Object.fromEntries(Object.entries(SITES).map(([k,v])=>[k,v.url])) as Record<Site,string>;
 
@@ -82,13 +82,13 @@ const ORDER:Record<Site,Site[]>={
   weather:['trip','parking','traffic','oil','charge','pharmacy','hospital'],
   traffic:['oil','service','parking','trip','charge','weather','rest'],
   charge:['trip','parking','weather','service','traffic','academy','rest'],
-  academy:['parking','hospital','pharmacy','school','trip','weather'],
-  school:['academy','hospital','pharmacy','parking','weather','trip'],
+  academy:['parking','hospital','pharmacy','school','trip','weather','civil'],
+  school:['academy','hospital','pharmacy','parking','weather','trip','civil'],
   pharmacy:['hospital','parking','weather','trip','academy','school','pet'],
   hospital:['pharmacy','parking','weather','trip','academy','school','pet'],
   oil:['service','charge','parking','traffic','trip','weather'],
   parking:['trip','oil','charge','service','weather','pharmacy','rest','pet'],
-  service:['oil','parking','charge','traffic','weather','trip'],
+  service:['oil','parking','charge','traffic','weather','trip','civil'],
   near:['weather','pharmacy','hospital','parking','oil','trip','charge'],
   rest:['parking','trip','weather','pharmacy','hospital','oil'],
   pet:['pharmacy','parking','weather','trip','hospital','rest'],
