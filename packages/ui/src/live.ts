@@ -3,12 +3,18 @@
 //  ① 📝 네이버 블로그 후기  <section class="gj-blog" data-q data-must>  — 보이기 직전에 near.guidejung.com/api/blog
 //  ② ☕ 걸어서 갈 곳        <section class="gj-around" data-lat data-lon data-cats data-r> — 보이기 직전에 /api/around(카카오 카테고리)
 //  ③ 🧭 길안내 앱 고르기    map.kakao.com/link/to/… 링크를 누르면(휴대폰) 카카오맵·카카오내비·네이버지도·T맵 중 고르기
-//  ④ 🗺️ 지도로 보기        한 페이지에 좌표 있는 곳이 2곳 넘으면 카카오맵으로(누를 때만 지도를 불러옴) — KAKAO_JS_KEY 필요
-//  ⑤ 💬 카카오톡 공유      .gj-kakao 버튼 — KAKAO_JS_KEY 필요
+//  ④ 🗺️ 지도로 보기        한 페이지에 좌표 있는 곳이 2곳 넘으면 카카오맵으로(누를 때만 지도를 불러옴) — KAKAO_APPS map 앱 사이트만
+//  ⑤ 💬 카카오톡 공유      .gj-kakao 버튼(늘 넣고, 키 없는 사이트는 html.gj-nokakao로 숨김)
 // 카카오·네이버 결과는 저장하지 않는다(브라우저에서 보여 주기만). 방문자 위치는 이 기능들로 서버에 보내지 않는다(장소 좌표만).
 
-/** 카카오 JavaScript 키(브라우저용 공개 키, 카카오 앱에 등록한 *.guidejung.com 도메인에서만 동작). 비어 있으면 ④·⑤·카카오내비는 숨김. */
-export const KAKAO_JS_KEY='cac688b824d2cb8e2ac694915275f714';
+/** 카카오 JavaScript 키(브라우저용 공개 키 — 그 카카오 앱에 등록한 도메인에서만 동작). 카카오 앱 하나에 도메인이 10개까지라 사이트를 나눔.
+ * map: 카카오맵 무료 쿼터 앱('내근처학원', 첫 번째로 카카오맵을 켠 앱)만 true — 다른 앱에서 지도를 쓰면 유료가 될 수 있음.
+ * 목록에 없거나 키가 빈 사이트는 ④·⑤·카카오내비를 숨김(길안내 고르기는 카카오맵·네이버·T맵으로 동작). */
+export const KAKAO_APPS:{key:string;map:boolean;hosts:string[]}[]=[
+  {key:'cac688b824d2cb8e2ac694915275f714',map:true,hosts:['trip','pharmacy','hospital','oil','parking','charge','pet','rest','service','minwon']},
+  {key:'',map:false,hosts:['weather','traffic','academy','school','near']},
+];
+const KAKAO_BY_HOST=Object.fromEntries(KAKAO_APPS.flatMap(a=>a.key?a.hosts.map(h=>[h,[a.key,a.map?1:0]]):[]));
 export const NEAR_API='https://near.guidejung.com';
 const attr=(s:unknown)=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]!));
 
@@ -20,7 +26,7 @@ export const aroundHtml=(lat:number,lon:number,title='☕ 기다리는 동안 �
   `<section class="gj-around" data-lat="${lat}" data-lon="${lon}" data-cats="${attr(cats)}" data-r="${r}" aria-label="걸어서 갈 곳"><h2>${attr(title)}</h2><div class="gj-around-tabs"></div><div class="gj-live-body"><p class="gj-live-wait">주변을 찾는 중…</p></div></section>`;
 
 export const LIVE_JS=`(function(){if(window.__gjLive)return;window.__gjLive=1;
-var API='${NEAR_API}',KEY='${KAKAO_JS_KEY}',CN={CE7:'☕ 카페',CS2:'🏪 편의점',FD6:'🍚 식당',PM9:'💊 약국',BK9:'🏦 은행',MT1:'🛒 마트',PK6:'🅿️ 주차장'};
+var API='${NEAR_API}',KA=${JSON.stringify(KAKAO_BY_HOST)}[location.hostname.split('.')[0]]||['',0],KEY=KA[0],MAP=KA[1],CN={CE7:'☕ 카페',CS2:'🏪 편의점',FD6:'🍚 식당',PM9:'💊 약국',BK9:'🏦 은행',MT1:'🛒 마트',PK6:'🅿️ 주차장'};
 function e(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function ga(n,p){try{window.gtag&&window.gtag('event',n,p)}catch(x){}}
 function get(p){return fetch(API+p).then(function(r){return r.ok?r.json():null}).catch(function(){return null})}
@@ -70,7 +76,7 @@ function pts(){var out=[],k={};document.querySelectorAll('a[href^="https://map.k
 if(el.hasAttribute('data-gj-pt')){var v=el.getAttribute('data-gj-pt').split(',');p={lat:+v[0],lon:+v[1],name:el.getAttribute('data-gj-name')||el.textContent.trim().slice(0,30),url:el.tagName==='A'?el.getAttribute('href'):null}}
 else{p=parse(el.getAttribute('href'));if(!p)return;var c=el.closest('article,li,[class*=card]'),d=c&&c.querySelector('a[href^="/"],a[href^="'+location.origin+'"]');p.url=d?d.getAttribute('href'):null}
 if(!(p.lat>33&&p.lat<39)||out.length>=300)return;var id=p.lat.toFixed(5)+','+p.lon.toFixed(5);if(k[id])return;k[id]=1;out.push(p)});return out}
-var mb=null;function mapBtn(){if(!KEY)return;var n=pts().length;if(n<2){if(mb)mb.hidden=true;return}
+var mb=null;function mapBtn(){if(!KEY||!MAP)return;var n=pts().length;if(n<2){if(mb)mb.hidden=true;return}
 if(!mb){mb=document.createElement('button');mb.type='button';mb.className='gj-map-btn';document.body.appendChild(mb);mb.addEventListener('click',openMap)}mb.hidden=false;mb.textContent='🗺️ 지도로 보기 ('+n+')'}
 function openMap(){var P=pts(),o=document.createElement('div');o.className='gj-map';o.innerHTML='<div class="gj-map-top"><b>🗺️ 지도로 보기 · '+P.length+'곳</b><button type="button">닫기 ✕</button></div><div class="gj-map-canvas"></div><div class="gj-map-pick"></div>';
 document.body.appendChild(o);document.documentElement.style.overflow='hidden';ga('map_open',{item_id:location.pathname,count:P.length});
