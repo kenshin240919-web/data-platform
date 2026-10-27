@@ -6,6 +6,7 @@
 //  D GA 이벤트 install_hint(보임)·install_click(추가하기·브라우저로 열기)·install_done(설치 완료)
 // 이미 앱처럼 열었거나 ✕로 닫은 지 30일이 안 됐으면 숨김. 안드로이드 크롬 등은 브라우저 설치 창(beforeinstallprompt), 아이폰 사파리는 방법 안내.
 import {useEffect,useState} from 'react';
+import {externalUrl,inapp,isIos} from './inapp';
 
 type BIP=Event&{prompt:()=>Promise<void>;userChoice:Promise<{outcome:string}>};
 type Mode='none'|'prompt'|'ios'|'inapp';
@@ -31,20 +32,7 @@ function visits(){
   }catch{return 0;}
 }
 const standalone=()=>matchMedia('(display-mode: standalone)').matches||(navigator as {standalone?:boolean}).standalone===true;
-const ios=()=>/iphone|ipad|ipod/i.test(navigator.userAgent);
-const android=()=>/android/i.test(navigator.userAgent);
-/** 앱 안 브라우저(홈 화면 추가·설치 창이 안 되는 곳). */
-function inapp():string|null{
-  const u=navigator.userAgent;
-  return /KAKAOTALK/i.test(u)?'카카오톡':/NAVER\(inapp|NAVER\//i.test(u)?'네이버 앱':/Instagram/i.test(u)?'인스타그램':/FBAN|FBAV/i.test(u)?'페이스북':/\bLine\//i.test(u)?'라인':/DaumApps/i.test(u)?'다음 앱':/BAND\//i.test(u)?'밴드':/everytimeApp/i.test(u)?'에브리타임':null;
-}
-/** 바깥 브라우저로 여는 주소: 카카오톡은 공식 스킴, 안드로이드 다른 앱은 크롬 intent, 아이폰 다른 앱은 방법 안내만. */
-function externalUrl(app:string){
-  const u=location.href;
-  if(app==='카카오톡')return 'kakaotalk://web/openExternal?url='+encodeURIComponent(u);
-  if(android())return `intent://${u.replace(/^https?:\/\//,'')}#Intent;scheme=https;package=com.android.chrome;end`;
-  return null;
-}
+const ios=isIos;
 /** 을/를 */
 const eul=(w:string)=>{const c=(w.trim().slice(-1).charCodeAt(0)||0)-0xac00;return `‘${w}’${c>=0&&c<11172&&c%28?'을':'를'}`;};
 const off=()=>{try{return Date.now()-Number(localStorage.getItem(OFF)??0)<QUIET;}catch{return false;}};

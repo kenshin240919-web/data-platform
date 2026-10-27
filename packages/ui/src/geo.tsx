@@ -7,6 +7,7 @@
 // 정확한 좌표는 이 브라우저 밖으로 나가지 않는다. 페이지가 쓰는 pos.lat/lon은 약 2km 칸(위도 0.02°×경도 0.025°)의 중심이라
 // API 주소·링크·쿠키·GA에 들어가는 것은 칸 중심뿐이고, 정확한 위치(pos.exact)는 거리 계산·정렬에만 브라우저 안에서 쓴다(fixKm·here).
 import {useCallback,useEffect,useState} from 'react';
+import {externalUrl,inapp,isAndroid,isIos,isSamsung} from './inapp';
 
 /** precise: 실제 내 위치(GPS·Wi-Fi)를 안다. exact·acc(오차 m)·at(잡은 시각)은 브라우저 안에서만 쓴다.
  * src: gps(이 사이트에서 잡음) · shared(다른 내근처 사이트에서 잡은 것, 이 휴대폰 안 공용 저장소) · cell(공용 쿠키의 칸 중심) · ip(접속 위치). */
@@ -139,20 +140,40 @@ export function PosNote(){
     <button type="button" onClick={request} disabled={status==='locating'}>{status==='locating'?'찾는 중…':weak?'정확하게 다시 찾기':'다시 찾기'}</button></p>;
 }
 
-/** 이유를 먼저 보여 주고, 누르면 그때 브라우저 위치 권한을 묻는 카드. */
+/** 위치를 못 쓸 때 큰 안내 상자: 앱 안 브라우저면 바깥 브라우저로 여는 버튼, 아니면 이 브라우저에서 위치를 켜는 순서. */
+function LocateHelp({status,onRetry}:{status:'denied'|'failed';onRetry:()=>void}){
+  const app=inapp(),ext=externalUrl(app);
+  const ga=(n:string,p:Record<string,unknown>)=>{try{(window as {gtag?:(...a:unknown[])=>void}).gtag?.('event',n,p);}catch{}};
+  const steps:string[]=app?[]:isIos()?['주소창 왼쪽 ‘가가(aA)’ 버튼 → ‘웹 사이트 설정’ → 위치 → ‘허용’','그래도 안 되면: 휴대폰 설정 앱 → 개인정보 보호 및 보안 → 위치 서비스 → 켜기, 그 아래 ‘Safari 웹 사이트’ → ‘앱을 사용하는 동안’']
+    :isSamsung()?['아래 메뉴(≡) → 설정 → 사이트 및 다운로드 → 사이트 권한 → 위치 → 이 사이트 허용','휴대폰 위에서 아래로 내려 ‘위치’가 켜져 있는지 확인']
+    :isAndroid()?['주소창 왼쪽 아이콘(⚙️ 또는 자물쇠) → 권한(또는 사이트 설정) → 위치 → ‘허용’','휴대폰 위에서 아래로 내려 ‘위치’가 켜져 있는지 확인']
+    :['주소창 왼쪽 아이콘(자물쇠·⚙️) → 위치 → ‘허용’ 후 새로고침'];
+  return <div className="gj-locate-help" role="alert">
+    <b>📍 {status==='failed'?'위치를 잡지 못했어요':app?`${app} 안에서는 위치를 쓸 수 없어요`:'위치 권한이 꺼져 있어요'}</b>
+    {app?<>
+      <p>{app} 안 브라우저는 위치가 막혀 있는 경우가 많아요. {ext?'아래 버튼으로 크롬·사파리 같은 브라우저에서 열면 바로 쓸 수 있어요.':isIos()?<>오른쪽 아래(또는 위) <b>⋯ 메뉴 → ‘Safari로 열기’</b>를 누르면 바로 쓸 수 있어요.</>:<><b>⋯ 메뉴 → ‘다른 브라우저로 열기’</b>를 누르면 바로 쓸 수 있어요.</>}</p>
+      {ext&&<a className="gj-locate-ext" href={ext} onClick={()=>ga('locate_help',{action:'external',app})}>🌐 휴대폰 브라우저로 열기</a>}
+      {app==='카카오톡'&&<p className="gj-locate-sub">카카오톡에서 계속 보려면: {isIos()?'설정 앱 → 카카오톡 → 위치 → ‘앱을 사용하는 동안’':'휴대폰 설정 → 애플리케이션(앱) → 카카오톡 → 권한 → 위치 ‘허용’'} 후 다시 누르세요.</p>}
+    </>:<>
+      {status==='failed'&&<p>휴대폰의 위치(GPS)가 꺼져 있거나 신호가 약할 수 있어요.</p>}
+      <ol>{steps.map(t=><li key={t}>{t}</li>)}</ol>
+    </>}
+    <button type="button" className="gj-locate-retry" onClick={()=>{ga('locate_help',{action:'retry',app:app??''});onRetry();}}>다시 시도</button>
+  </div>;
+}
+
+/** 이유를 먼저 보여 주고, 누르면 그때 브라우저 위치 권한을 묻는 카드. 못 쓰면(거부·실패) 큰 안내 상자. */
 export function LocateCard({title,desc,status,onClick,approxLabel}:{title:string;desc:string;status:Status;onClick:()=>void;approxLabel?:string}){
   const cellOnly=state.pos?.src==='cell';
-  return <div className="gj-locate">
+  return <><div className="gj-locate">
     <button type="button" onClick={onClick} disabled={status==='locating'}>
       <span className="gj-locate-icon" aria-hidden="true">📍</span>
       <span className="gj-locate-text"><b>{status==='locating'?'위치 확인 중… (GPS로 정확하게 잡는 중)':title}</b><small>{desc}</small></span>
       <span className="gj-locate-go" aria-hidden="true">→</span>
     </button>
-    <p className="gj-locate-note">{status==='denied'?'위치 권한이 꺼져 있어요. 브라우저 주소창의 자물쇠(사이트 설정)에서 위치를 허용하면 바로 쓸 수 있어요.':
-      status==='failed'?'위치를 잡지 못했어요. 휴대폰 설정에서 위치(GPS)가 켜져 있는지 확인하고 다시 눌러 주세요.':
-      status==='unsupported'?'이 브라우저는 위치 확인을 지원하지 않아요. 지역을 직접 골라 주세요.':
-      `${cellOnly?'지금은 대략적인 내 위치(약 2km 범위) 기준이에요. ':approxLabel?`지금은 접속 위치(${approxLabel} 부근) 기준으로 보여 드려요. `:''}한 번 허용하면 30분 동안 다른 내근처 사이트에서도 다시 묻지 않아요. 정확한 위치는 휴대폰 밖으로 보내지 않아요.`}</p>
-  </div>;
+    {status!=='denied'&&status!=='failed'&&<p className="gj-locate-note">{status==='unsupported'?'이 브라우저는 위치 확인을 지원하지 않아요. 지역을 직접 골라 주세요.':
+      `${cellOnly?'지금은 대략적인 내 위치(약 2km 범위) 기준이에요. ':approxLabel?`지금은 접속 위치(${approxLabel} 부근) 기준으로 보여 드려요. `:''}한 번 허용하면 30분 동안 다른 내근처 사이트에서도 다시 묻지 않아요. 정확한 위치는 휴대폰 밖으로 보내지 않아요.`}</p>}
+  </div>{(status==='denied'||status==='failed')&&<LocateHelp status={status} onRetry={onClick}/>}</>;
 }
 
 /**
