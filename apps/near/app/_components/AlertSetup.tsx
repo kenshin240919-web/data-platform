@@ -17,6 +17,8 @@ let waiting=0,asking=false;
 // 누르기 전에 서비스 워커 등록·공개 키를 미리 받아 둠 → 누르는 순간 바로 구독(허용 창)을 띄울 수 있게.
 const prep:{reg?:ServiceWorkerRegistration;key?:string}={};
 const browser=()=>{const u=navigator.userAgent;return /SamsungBrowser/.test(u)?'samsung':/EdgA?\//.test(u)?'edge':/Firefox|FxiOS/.test(u)?'firefox':/CriOS|Chrome\//.test(u)?'chrome':/Safari/.test(u)?'safari':'other';};
+// 모든 내근처 사이트 맨 위 '🔔 알림 받기'를 숨기는 표시(이 브라우저에서 받는 중이라는 뜻뿐 — 지역·주제는 담지 않음).
+const mark=(on:boolean)=>{try{document.cookie=`gj_alerts=${on?1:0}; domain=.guidejung.com; path=/; max-age=${on?365*864e2:0}; samesite=lax; secure`;}catch{}};
 const load=():Saved|null=>{try{return JSON.parse(localStorage.getItem(KEY)??'null');}catch{return null;}};
 
 export function AlertSetup({areas}:{areas:Area[]}){
@@ -34,7 +36,7 @@ export function AlertSetup({areas}:{areas:Area[]}){
     fetch('/api/push/key').then(r=>r.json() as Promise<{key:string}>).then(d=>{prep.key=d.key;}).catch(()=>{});
     navigator.serviceWorker.getRegistration('/').then(r=>r?.pushManager.getSubscription()).then(sub=>{
       // 등록은 남아 있는데 허용이 빠진 경우(삼성 인터넷에서 확인): 그대로면 도착한 알림을 브라우저가 버림 → '받는 중'으로 보이지 않게, 맨 위 버튼으로 다시 허용.
-      const ok=!!sub&&!!s&&Notification.permission==='granted';setSt(ok?'on':'off');
+      const ok=!!sub&&!!s&&Notification.permission==='granted';setSt(ok?'on':'off');mark(ok);
       if(sub&&s&&!ok)setMsg('알림 허용이 빠져 있어요. 맨 위 ‘🔔 우리 동네 알림 받기’를 누른 뒤 ‘허용’을 눌러 주세요. (또는 주소창 옆 사이트 아이콘 → 알림 ‘허용’)');
     }).catch(()=>setSt('off'));
     // 서비스 워커가 '받았다·띄웠다'를 알려 줌 → 도착 문제인지 휴대폰 알림 표시 설정 문제인지 구분.
@@ -78,7 +80,7 @@ export function AlertSetup({areas}:{areas:Area[]}){
       }
       const r=await post('subscribe',{sub:sub.toJSON(),w:area.w,c:area.c,n:area.n,lat:area.lat,lon:area.lon,t});
       if(!r.ok)throw new Error(r.error??'subscribe');
-      try{localStorage.setItem(KEY,JSON.stringify({w:area.w,t}));}catch{}
+      try{localStorage.setItem(KEY,JSON.stringify({w:area.w,t}));}catch{}mark(true);
       setSt('on');setMsg('등록됐어요. 아래 ‘시험 알림 보내기’로 바로 확인해 보세요.');ga('push_subscribe',{result:'granted',area:area.w,topics:t.join(','),browser:browser()});
     }catch{setSt('off');setMsg('등록하지 못했어요. 잠시 뒤 다시 눌러 주세요.');}
     finally{asking=false;}
@@ -116,7 +118,7 @@ export function AlertSetup({areas}:{areas:Area[]}){
   async function off(){
     const sub=await (await navigator.serviceWorker.getRegistration('/'))?.pushManager.getSubscription();
     if(sub){await post('unsubscribe',{endpoint:sub.endpoint}).catch(()=>null);await sub.unsubscribe().catch(()=>null);}
-    try{localStorage.removeItem(KEY);}catch{}setSt('off');setMsg('알림을 껐어요.');ga('push_unsub');
+    try{localStorage.removeItem(KEY);}catch{}mark(false);setSt('off');setMsg('알림을 껐어요.');ga('push_unsub');
   }
   const ext=externalUrl(inapp());
   // 맨 위 큰 '우리 동네 알림 받기' 상자도 버튼: 아직이면 알림 받기, 받고 있으면 시험 알림.

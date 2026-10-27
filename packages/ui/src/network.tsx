@@ -34,10 +34,13 @@ const {trip:T,weather:W,traffic:R,charge:C}=Object.fromEntries(Object.entries(SI
 /** 운영자 정보: 네이버 검색광고 비즈채널 심사에 사이트 하단 담당자·이메일이 필요함. */
 export function Contact(){return <>담당자: 가이드정 · 문의: <a href="mailto:kenshin240919@gmail.com">kenshin240919@gmail.com</a></>;}
 
+// '🔔 알림 받기'(near /alerts): 이미 이 브라우저에서 알림을 받는 중이면(공용 쿠키 gj_alerts=1, AlertSetup이 씀) 숨김. 누르면 GA alert_click.
+const ALERT_JS=`(function(){try{if(/(?:^|; )gj_alerts=1/.test(document.cookie))document.documentElement.classList.add('gj-alerted');}catch(e){}
+document.addEventListener('click',function(e){var a=e.target&&e.target.closest&&e.target.closest('.gj-network-alert');if(!a)return;try{window.gtag&&gtag('event','alert_click',{site:a.getAttribute('data-site')||''});}catch(x){}});})();`;
 export function NetworkBar({current}:{current:Site}){
-  return <><nav className="gj-network" aria-label="내근처 서비스"><div>{current==='near'?<b className="gj-network-brand">📍 내근처</b>:<a className="gj-network-brand" href={SITES.near.url}>📍 내근처</a>}{(Object.keys(SITES) as Site[]).filter(k=>!SITES[k].hidden||k===current).map(k=>k===current
+  return <><nav className="gj-network" aria-label="내근처 서비스"><div>{current==='near'?<b className="gj-network-brand">📍 내근처</b>:<a className="gj-network-brand" href={SITES.near.url}>📍 내근처</a>}<a className="gj-network-alert" href={`${SITES.near.url}/alerts?from=${current}`} data-site={current}>🔔 알림 받기</a>{(Object.keys(SITES) as Site[]).filter(k=>!SITES[k].hidden||k===current).map(k=>k===current
     ?<span key={k} className="on" aria-current="page">{SITES[k].icon} {SITES[k].name}</span>
-    :<a key={k} href={SITES[k].url}>{SITES[k].icon} {SITES[k].name}</a>)}</div></nav><SeasonBanner site={current}/><InstallHint brand={SITES[current].brand}/><script dangerouslySetInnerHTML={{__html:ACTIONS_JS}}/><script dangerouslySetInnerHTML={{__html:LIVE_JS}}/></>;
+    :<a key={k} href={SITES[k].url}>{SITES[k].icon} {SITES[k].name}</a>)}</div></nav><SeasonBanner site={current}/><InstallHint brand={SITES[current].brand}/><script dangerouslySetInnerHTML={{__html:ALERT_JS}}/><script dangerouslySetInnerHTML={{__html:ACTIONS_JS}}/><script dangerouslySetInnerHTML={{__html:LIVE_JS}}/></>;
 }
 
 export type Link_={icon:string;title:string;desc:string;href:string};
