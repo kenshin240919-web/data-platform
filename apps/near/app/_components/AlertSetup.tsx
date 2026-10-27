@@ -19,7 +19,8 @@ const load=():Saved|null=>{try{return JSON.parse(localStorage.getItem(KEY)??'nul
 
 export function AlertSetup({areas}:{areas:Area[]}){
   const {pos}=useMyPosition();
-  const [st,setSt]=useState<State>('checking');const [w,setW]=useState('');const [t,setT]=useState<string[]>(['weather','pharmacy']);const [msg,setMsg]=useState('');const [help,setHelp]=useState(false);
+  const [st,setSt]=useState<State>('checking');const [w,setW]=useState('');const [t,setT]=useState<string[]>(['weather','pharmacy']);const [msg,setMsg]=useState('');const [help,setHelp]=useState(false);const [diag,setDiag]=useState<Record<string,string>>({});
+  const note=(k:string,v:string)=>setDiag(d=>({...d,[k]:v}));
   const sidos=[...new Set(areas.map(a=>a.n.split(' ')[0]))];
   useEffect(()=>{
     const s=load();if(s){setW(s.w);setT(s.t);}
@@ -29,7 +30,11 @@ export function AlertSetup({areas}:{areas:Area[]}){
     if(Notification.permission==='denied'){setSt('denied');return;}
     navigator.serviceWorker.getRegistration('/').then(r=>{r?.update().catch(()=>{});return r?.pushManager.getSubscription();}).then(sub=>setSt(sub&&s?'on':'off')).catch(()=>setSt('off'));
     // 서비스 워커가 '받았다·띄웠다'를 알려 줌 → 도착 문제인지 휴대폰 알림 표시 설정 문제인지 구분.
-    const onMsg=(e:MessageEvent)=>{const d=e.data as {gj?:string;ok?:boolean;error?:string};if(d?.gj!=='push')return;
+    const onMsg=(e:MessageEvent)=>{const d=e.data as {gj?:string;ok?:boolean;error?:string;got?:boolean;v?:string};
+      if(d?.gj==='pong'){note('서비스 워커',`v${d.v} 작동 중`);return;}
+      if(d?.gj!=='push')return;
+      if(d.got){if(waiting){clearTimeout(waiting);waiting=0;}note('휴대폰 도착',`✅ ${new Date().toLocaleTimeString('ko-KR')}`);setMsg('휴대폰이 알림을 받았어요. 띄우는 중…');return;}
+      note('알림 띄우기',d.ok?'✅ 성공':`❌ ${d.error??'실패'}`);
       if(waiting){clearTimeout(waiting);waiting=0;}
       setMsg(d.ok?'✅ 휴대폰이 알림을 받아서 띄웠어요. 화면 위에 안 보였다면 아래 ‘알림이 안 보일 때’를 확인해 주세요.':`휴대폰이 알림을 받았지만 띄우지 못했어요(${d.error??'알 수 없음'}). 아래 ‘알림이 안 보일 때’를 확인해 주세요.`);
       setHelp(true);ga('push_received',{shown:!!d.ok,browser:browser()});};
@@ -55,9 +60,24 @@ export function AlertSetup({areas}:{areas:Area[]}){
       setSt('on');setMsg('등록됐어요. 아래 ‘시험 알림 보내기’로 바로 확인해 보세요.');ga('push_subscribe',{result:'granted',area:area.w,topics:t.join(',')});
     }catch{setSt('off');setMsg('등록하지 못했어요. 잠시 뒤 다시 눌러 주세요.');}
   }
+  /** 진단: 이 휴대폰의 알림 준비 상태(브라우저·권한·서비스 워커·구독). 알림이 안 올 때 캡처해 받기용 — 개인정보 없음. */
+  async function inspect(){
+    const u=navigator.userAgent.match(/(SamsungBrowser|Chrome|Firefox|Version)\/[\d.]+/g)?.join(' ')??'';
+    const reg=await navigator.serviceWorker.getRegistration('/').catch(()=>undefined);
+    const sub=await reg?.pushManager.getSubscription().catch(()=>null);
+    const enc=(PushManager as unknown as {supportedContentEncodings?:string[]}).supportedContentEncodings;
+    setDiag(d=>({...d,'브라우저':`${browser()} ${u}`,'알림 권한':Notification.permission,
+      '서비스 워커':reg?.active?(d['서비스 워커']??'응답 기다림'):reg?.installing||reg?.waiting?'설치 중':'없음',
+      '구독':sub?`${new URL(sub.endpoint).host}`:'없음','암호화 지원':enc?.join(', ')??'알 수 없음'}));
+    reg?.active?.postMessage({gj:'ping'});
+    return sub;
+  }
   async function test(){
-    const sub=await (await navigator.serviceWorker.getRegistration('/'))?.pushManager.getSubscription();if(!sub)return setSt('off');
-    const r=await post('test',{endpoint:sub.endpoint}).catch(()=>({ok:false,error:'network'}));ga('push_test',{ok:!!r.ok});
+    setHelp(true);
+    const sub=await inspect();if(!sub)return setSt('off');
+    note('휴대폰 도착','기다리는 중…');note('알림 띄우기','-');
+    const r=await post('test',{endpoint:sub.endpoint}).catch(()=>({ok:false,error:'network'})) as {ok?:boolean;error?:string;result?:string;status?:number};ga('push_test',{ok:!!r.ok,status:r.status??0,browser:browser()});
+    note('서버 발송',`${r.ok?'✅':'❌'} ${r.result??r.error??''} (푸시 서버 응답 ${r.status??'-'})`);
     setMsg(r.ok?'시험 알림을 보냈어요. 몇 초 안에 휴대폰 알림이 떠요.':r.error??'보내지 못했어요.');
     if(r.ok){if(waiting)clearTimeout(waiting);waiting=window.setTimeout(()=>{waiting=0;setHelp(true);
       setMsg('20초가 지나도 휴대폰이 알림을 받지 못했어요. 아래 ‘알림이 안 보일 때’를 확인해 주세요.');ga('push_received',{shown:false,timeout:true,browser:browser()});},20000);}
@@ -67,7 +87,7 @@ export function AlertSetup({areas}:{areas:Area[]}){
     const reg=await navigator.serviceWorker.getRegistration('/');
     try{await reg?.showNotification('내근처 알림 표시 확인',{body:'이 알림이 보이면 휴대폰 알림 설정은 정상이에요.',tag:'gj-local',icon:'/icon-192.png'});setMsg('휴대폰에서 바로 알림을 띄웠어요. 안 보이면 아래 순서로 알림을 켜 주세요.');}
     catch{setMsg('이 브라우저에서 알림을 띄우지 못했어요. 아래 순서로 알림을 켜 주세요.');}
-    setHelp(true);ga('push_local',{browser:browser()});
+    setHelp(true);inspect();ga('push_local',{browser:browser()});
   }
   async function off(){
     const sub=await (await navigator.serviceWorker.getRegistration('/'))?.pushManager.getSubscription();
@@ -112,6 +132,8 @@ export function AlertSetup({areas}:{areas:Area[]}){
         <li>‘알림 끄기’ → ‘알림 받기’를 다시 누른 뒤 ‘시험 알림 보내기’</li></ol>
       :isIos()?<ol><li>설정 앱 → 알림 → 내근처 → 알림 허용</li><li>집중 모드(방해 금지)가 켜져 있으면 끄기</li></ol>
       :<ol><li>주소창 왼쪽 아이콘 → 권한 → <b>알림 ‘허용’</b></li><li>휴대폰 <b>설정 → 애플리케이션 → (지금 브라우저) → 알림</b> 켜기</li><li>방해 금지 모드가 켜져 있으면 끄기</li><li>‘알림 끄기’ → ‘알림 받기’를 다시 누른 뒤 ‘시험 알림 보내기’</li></ol>}
+      {Object.keys(diag).length>0&&<div className="nr-alert-diag"><b>진단 정보</b> <small>(알림이 안 오면 이 부분을 캡처해 보내 주세요)</small>
+        <dl>{Object.entries(diag).map(([k,v])=><div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}</dl></div>}
     </details>}
     <p className="muted small">밤(오후 9시~오전 8시)에는 보내지 않아요. 광고 알림은 보내지 않아요. 언제든 ‘알림 끄기’로 그만 받을 수 있어요.</p>
   </section></>;

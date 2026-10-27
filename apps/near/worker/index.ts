@@ -5,7 +5,7 @@
 // 카카오·네이버 결과는 저장하지 않는다(약관): 방문 때마다 받아서 바로 넘기고, 응답도 no-store.
 // 좌표는 장소(충전소·주차장 등)의 좌표만 받는다 — 방문자 위치는 이 API로 보내지 않는다.
 //   /api/push/*  내근처 알림(웹 푸시, ./push.ts·./alerts.ts) — key·subscribe·unsubscribe·test·status, 예약 발송은 scheduled()
-import {subId,send,vapidKeys,type Rec,type Sub} from './push';
+import {lastPush,subId,send,vapidKeys,type Rec,type Sub} from './push';
 import {TOPICS,pharmacyMsg,sendTopic,weatherMsg,type AlertEnv,type Topic} from './alerts';
 import {kstNow} from '../../pharmacy/lib/fmt';
 interface Env extends AlertEnv{ASSETS:Fetcher;NAVER_HUB_CLIENT_ID?:string;NAVER_HUB_CLIENT_SECRET?:string;KAKAO_REST_KEY?:string}
@@ -55,7 +55,7 @@ export default {
       if(o&&!origin)return json({error:'forbidden'},403);
       const P=url.pathname.slice(10);
       if(P==='key')return json({key:(await vapidKeys(env)).pub,topics:TOPICS},200,'public, max-age=300',origin);
-      if(P==='status'){const [w,p]=await Promise.all([env.CACHE.get('push:log:weather','json'),env.CACHE.get('push:log:pharmacy','json')]);return json({weather:w,pharmacy:p},200,'private, no-store',origin);}
+      if(P==='status'){const [w,p,t]=await Promise.all([env.CACHE.get('push:log:weather','json'),env.CACHE.get('push:log:pharmacy','json'),env.CACHE.get('push:log:test','json')]);return json({weather:w,pharmacy:p,test:t},200,'private, no-store',origin);}
       if(req.method!=='POST')return json({error:'POST only'},405,'private, no-store',origin);
       let b:{sub?:Sub;endpoint?:string;w?:string;c?:string;n?:string;lat?:number;lon?:number;t?:string[]}={};
       try{b=await req.json();}catch{return json({error:'bad json'},400,'private, no-store',origin);}
@@ -74,9 +74,13 @@ export default {
         const rec=await env.CACHE.get(key,'json') as Rec|null;if(!rec)return json({error:'not subscribed'},404,'private, no-store',origin);
         if(rec.sent&&Date.now()-rec.sent<60e3)return json({error:'1분에 한 번만 시험할 수 있어요'},429,'private, no-store',origin);
         const m=rec.t.includes('weather')?await weatherMsg(env,rec):await pharmacyMsg(env,rec);
-        const r=await send(env,rec.sub,{...(m??{title:'내근처 알림',body:'알림이 잘 와요. 아침에 우리 동네 소식을 보내 드릴게요.',url:'https://near.guidejung.com/alerts',tag:'gj-test'}),tag:'gj-test'});
+        // 시험마다 다른 tag → 앞 시험 알림을 조용히 바꿔치기하지 않고 매번 새로 뜸.
+        const tag=`gj-test-${Date.now()%1e6}`;
+        const r=await send(env,rec.sub,{...(m??{title:'내근처 알림',body:'알림이 잘 와요. 아침에 우리 동네 소식을 보내 드릴게요.',url:'https://near.guidejung.com/alerts',tag}),tag});
         await env.CACHE.put(key,JSON.stringify({...rec,sent:Date.now()}));
-        return json({ok:r==='ok',result:r},200,'private, no-store',origin);
+        const host=new URL(endpoint).host;
+        await env.CACHE.put('push:log:test',JSON.stringify({at:new Date().toISOString(),host,result:r,...lastPush}),{expirationTtl:7*86400});
+        return json({ok:r==='ok',result:r,status:lastPush.status,host,tag},200,'private, no-store',origin);
       }
       return json({error:'not found'},404,'private, no-store',origin);
     }
