@@ -320,8 +320,8 @@ def main():
         st = norm(stem_of(name))
         if hit or len(st) < 2:
             return hit
-        # 짧은 쪽이 3글자 넘고 긴 쪽의 70% 넘게 겹칠 때만('사거리'가 '삼익사거리'·'지석사거리'에 다 붙던 것 막기)
-        near_ok = lambda a, b: len(a) >= 3 and a in b and len(a) / len(b) >= 0.7
+        # 짧은 쪽이 4글자 이상이고 긴 쪽의 70% 넘게 겹칠 때만('사거리'→'삼익사거리', '안동구'→'안동구담' 같은 잘못 붙기 막기)
+        near_ok = lambda a, b: len(a) >= 4 and a in b and len(a) / len(b) >= 0.7
         cand = [v for s, v in by_sido[sido] if s and (s == st or near_ok(s, st) or near_ok(st, s))]
         return cand[0] if len(cand) == 1 else None
 
