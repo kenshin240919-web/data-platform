@@ -35,7 +35,7 @@ async function around(env:Env,lat:number,lon:number,cat:string,r:number){
   if(!res.ok)return {items:[],error:res.status};
   const d=await res.json() as {meta?:{total_count?:number};documents?:Record<string,string>[]};
   return {total:d.meta?.total_count??0,items:(d.documents??[]).map(x=>({name:x.place_name,cat:(x.category_name??'').split(' > ').slice(-1)[0]??'',m:Number(x.distance)||null,
-    addr:x.road_address_name||x.address_name||null,tel:x.phone||null,url:x.place_url||null,lat:+x.y,lon:+x.x}))};
+    addr:x.road_address_name||x.address_name||null,tel:x.phone||null,url:x.place_url?String(x.place_url).replace(/^http:/,'https:'):null,lat:+x.y,lon:+x.x}))};
 }
 
 export default {
