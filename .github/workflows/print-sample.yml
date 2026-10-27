@@ -1,0 +1,30 @@
+name: Print sample
+# One-off: 무인 프린트 검색 시험(NAVER API HUB 지역 검색 + 카카오 반경 검색) — 건수·분류만 reports/civil/print-sample.md 커밋.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [scripts/print-sample.py]
+permissions:
+  contents: write
+jobs:
+  sample:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -q requests
+      - name: Sample
+        env:
+          NAVER_HUB_CLIENT_ID: ${{ secrets.NAVER_HUB_CLIENT_ID }}
+          NAVER_HUB_CLIENT_SECRET: ${{ secrets.NAVER_HUB_CLIENT_SECRET }}
+          KAKAO_REST_KEY: ${{ secrets.KAKAO_REST_KEY }}
+        run: python scripts/print-sample.py
+      - name: Commit
+        run: |
+          git config user.name github-actions; git config user.email github-actions@users.noreply.github.com
+          git add reports/civil/print-sample.md
+          git diff --cached --quiet || git commit -m "무인 프린트 검색 시험 결과"
+          git pull --rebase -q origin main && git push -q origin HEAD:main
