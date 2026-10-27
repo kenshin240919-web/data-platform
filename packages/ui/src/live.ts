@@ -19,8 +19,8 @@ export const NEAR_API='https://near.guidejung.com';
 const attr=(s:unknown)=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]!));
 
 /** 네이버 블로그 후기 자리. q: 검색어(이름 + 지역), must: 글에 꼭 들어가야 할 이름. */
-export const blogHtml=(q:string,must:string,title='📝 네이버 블로그 후기')=>
-  `<section class="gj-blog" data-q="${attr(q)}" data-must="${attr(must)}" aria-label="블로그 후기"><h2>${attr(title)}</h2><div class="gj-live-body"><p class="gj-live-wait">후기를 찾는 중…</p></div></section>`;
+export const blogHtml=(q:string,must:string,title='📝 네이버 블로그 후기',cafe=false)=>
+  `<section class="gj-blog" data-q="${attr(q)}" data-must="${attr(must)}"${cafe?' data-src="cafe"':''} aria-label="${cafe?'카페 이야기':'블로그 후기'}"><h2>${attr(title)}</h2><div class="gj-live-body"><p class="gj-live-wait">후기를 찾는 중…</p></div></section>`;
 /** 걸어서 갈 곳 자리. cats: 카카오 카테고리 코드(CE7 카페·CS2 편의점·FD6 음식점…), r: 반경 m. */
 export const aroundHtml=(lat:number,lon:number,title='☕ 기다리는 동안 걸어서 갈 곳',cats='CE7,CS2,FD6',r=500)=>
   `<section class="gj-around" data-lat="${lat}" data-lon="${lon}" data-cats="${attr(cats)}" data-r="${r}" aria-label="걸어서 갈 곳"><h2>${attr(title)}</h2><div class="gj-around-tabs"></div><div class="gj-live-body"><p class="gj-live-wait">주변을 찾는 중…</p></div></section>`;
@@ -34,11 +34,11 @@ function dist(m){return m==null?'':m<1000?m+'m':(m/1000).toFixed(1)+'km'}
 var mob=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 /* ① 블로그 후기 */
 function blog(s){var q=s.getAttribute('data-q'),b=s.querySelector('.gj-live-body');
-get('/api/blog?q='+encodeURIComponent(q)+'&must='+encodeURIComponent(s.getAttribute('data-must')||'')).then(function(d){
+var cafe=s.getAttribute('data-src')==='cafe';get('/api/blog?q='+encodeURIComponent(q)+'&must='+encodeURIComponent(s.getAttribute('data-must')||'')+(cafe?'&src=cafe':'')).then(function(d){
 if(!d||!d.items||!d.items.length){s.remove();return}
 b.innerHTML='<ul class="gj-blog-list">'+d.items.map(function(x){return '<li><a href="'+e(x.url)+'" target="_blank" rel="noopener nofollow"><b>'+e(x.title)+'</b><span>'+e(x.desc)+'</span><small>'+e(x.by)+(x.date?' · '+e(x.date):'')+'</small></a></li>'}).join('')+'</ul>'
-+'<p class="gj-live-note">네이버 블로그 검색 결과예요 · 광고·협찬 글이 섞여 있을 수 있어요 · <a href="https://search.naver.com/search.naver?ssc=tab.blog.all&query='+encodeURIComponent(q)+'" target="_blank" rel="noopener nofollow">후기 더 보기 ↗</a></p>';
-b.addEventListener('click',function(ev){var a=ev.target.closest&&ev.target.closest('a');if(a)ga('blog_click',{item_id:location.pathname})})})}
++'<p class="gj-live-note">네이버 '+(cafe?'카페':'블로그')+' 검색 결과예요 · '+(cafe?'회원만 볼 수 있는 글도 있어요':'광고·협찬 글이 섞여 있을 수 있어요')+' · <a href="https://search.naver.com/search.naver?ssc=tab.'+(cafe?'cafe':'blog')+'.all&query='+encodeURIComponent(q)+'" target="_blank" rel="noopener nofollow">더 보기 ↗</a></p>';
+b.addEventListener('click',function(ev){var a=ev.target.closest&&ev.target.closest('a');if(a)ga('blog_click',{item_id:location.pathname,src:cafe?'cafe':'blog'})})})}
 /* ② 걸어서 갈 곳 */
 function around(s){if(!s.querySelector('.gj-live-body'))s.insertAdjacentHTML('beforeend','<div class="gj-around-tabs"></div><div class="gj-live-body"></div>');var cats=(s.getAttribute('data-cats')||'CE7,CS2,FD6').split(','),tabs=s.querySelector('.gj-around-tabs'),b=s.querySelector('.gj-live-body'),seen={};
 function show(c){if(tabs)tabs.querySelectorAll('button').forEach(function(t){t.toggleAttribute('data-on',t.getAttribute('data-c')===c)});
