@@ -43,6 +43,7 @@ function near(lat:number,lon:number,radius:number,opt:{limit?:number;per?:number
 }
 
 // ---- 실시간: 민원실 대기 · 무인 프린트 ------------------------------------------------------------------------------------
+let upCode='';
 async function wait(env:Env,p:Place,ctx:ExecutionContext){
   const key=new Request(`https://cache.minwon.internal/wait/${p.stdg}/${Math.floor(Date.now()/60e3)}`);
   const hit=await caches.default.match(key);let rows:Record<string,string>[]|null=hit?await hit.json():null;
@@ -60,7 +61,7 @@ async function wait(env:Env,p:Place,ctx:ExecutionContext){
       try{d=JSON.parse(text);}catch{why=`not json: ${text.slice(0,60)}`;continue;}
       const code=d?.header?.resultCode;
       if(code&&code!=='00'&&code!=='K0'&&code!=='K3'){why=`${code} ${d?.header?.resultMsg??''}`;continue;}
-      const it=d?.body?.items?.item;rows=it?(Array.isArray(it)?it:[it]):[];
+      const it=d?.body?.items?.item;rows=it?(Array.isArray(it)?it:[it]):[];upCode=code??'';
     }
     if(!rows)return json({id:p.id,name:p.name,error:why||'upstream'},200,0);
     ctx.waitUntil(caches.default.put(key,new Response(JSON.stringify(rows),{headers:{'cache-control':'max-age=60'}})));
@@ -68,7 +69,8 @@ async function wait(env:Env,p:Place,ctx:ExecutionContext){
   const mine=rows.filter(x=>x.csoSn===p.cso);
   const tasks=mine.map(x=>({name:x.taskNm,waiting:Number(x.wtngCnt)||0,windows:x.clotCnterNo?String(x.clotCnterNo).split(',').filter(Boolean).length:null}));
   const at=mine[0]?.totDt??null;
-  return json({id:p.id,name:p.name,at,total:tasks.reduce((a,t)=>a+t.waiting,0),tasks},200,60);
+  // rows·code: 원본 줄 수와 결과 코드(점검용 — K3 NODATA면 그 시각 원본에 자료 없음)
+  return json({id:p.id,name:p.name,at,total:tasks.reduce((a,t)=>a+t.waiting,0),tasks,rows:rows.length,code:upCode||null,cached:!!hit},200,60);
 }
 
 const PRINT_WORD=/프린트|출력|인쇄|복사|제본|카피|copy|print/i;
