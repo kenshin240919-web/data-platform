@@ -46,6 +46,7 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          [ -f apps/civil/data/places.json ] || { echo 'no data yet'; exit 0; }
           git add apps/civil/data/places.json
           if git diff --cached --quiet; then echo 'no change'; exit 0; fi
           git commit -m 'civil: 민원·서류 장소 목록 갱신'

@@ -62,7 +62,8 @@ def get(url, timeout=60):
     return d if st == 200 else None
 
 
-def pages(path, key, rows=100, extra=None, threads=8):
+def pages(path, key, rows=100, extra=None, threads=8, partial=False):
+    # partial=True: 쪽이 조금 빠져도 받은 만큼 (줄, 다 받았는지)로 돌려줌
     """data.go.kr 표준 응답(response.body.items.item) 전체 쪽을 병렬로. 첫 쪽에서 totalCount를 보고 나머지를 받는다."""
     def one(page):
         q = urllib.parse.urlencode({'serviceKey': key, 'pageNo': page, 'numOfRows': rows, 'returnType': 'json', 'type': 'json', **(extra or {})})
@@ -81,21 +82,30 @@ def pages(path, key, rows=100, extra=None, threads=8):
     if first is None:
         log(f'  {path}: 첫 쪽 실패')
         return None
+
     total, out = first
     n = -(-total // rows)
     log(f'  {path} {extra or ""}: 전체 {total:,}줄 · {n:,}쪽')
     if n > 1:
         with ThreadPoolExecutor(threads) as ex:
             res = list(ex.map(one, range(2, n + 1)))
+        miss = [i + 2 for i, r in enumerate(res) if r is None]
+        if miss and left() > 120:  # 실패한 쪽은 천천히(4개씩) 한 번 더
+            log(f'  {path}: 실패한 쪽 {len(miss):,} → 다시 받기')
+            with ThreadPoolExecutor(4) as ex:
+                for pg, r in zip(miss, ex.map(one, miss)):
+                    res[pg - 2] = r
         bad = sum(1 for r in res if r is None)
         if bad:
-            log(f'  {path}: 실패한 쪽 {bad:,}')
-            if bad > n * 0.02:
+            log(f'  {path}: 끝내 못 받은 쪽 {bad:,}/{n:,}')
+            if bad > n * 0.02 and not partial:
                 return None
         for r in res:
             if r:
                 out += r[1]
-    return out
+        if bad and partial:
+            return out, False
+    return (out, True) if partial else out
 
 
 def kiosks(key):
@@ -133,10 +143,11 @@ def docs(key, prev, full):
         extra = {'cond[DAT_UPDT_PNT::GTE]': (datetime.fromisoformat(since) - timedelta(days=2)).strftime('%Y%m%d%H%M%S')}
     else:
         by = {}
-    rows = pages('1741000/kiosk_info/certificate_info', key, extra=extra, threads=16)
-    if rows is None:
+    got = pages('1741000/kiosk_info/certificate_info', key, extra=extra, threads=8, partial=True)
+    if got is None:
         log('서류 목록을 받지 못해 지난 목록을 씁니다')
         return table, by, since
+    rows, complete = got
     ch = Counter()
     for r in rows:
         k = f"{txt(r.get('OPN_ATMY_GRP_CD'))}-{txt(r.get('ISSUMCHN_NO'))}"
@@ -151,8 +162,9 @@ def docs(key, prev, full):
         if nm:
             table[no] = [nm, txt(r.get('INITA_MENU_NM')) or '']
         by.setdefault(k, set()).add(no)
-    log(f"서류 줄 {len(rows):,} {dict(ch)} · 서류 종류 {len(table):,} · 발급기 {len(by):,}대")
-    return table, by, datetime.now(KST).isoformat(timespec='seconds')
+    log(f"서류 줄 {len(rows):,} {dict(ch)} · 서류 종류 {len(table):,} · 발급기 {len(by):,}대{'' if complete else ' (일부 쪽 빠짐 — 다음 실행이 다시 전체로)'}")
+    # 다 받지 못했으면 기준 시각을 남기지 않아 다음 실행이 다시 전체를 받는다(바뀐 줄만 받으면 빠진 쪽이 영영 안 채워짐).
+    return table, by, (datetime.now(KST).isoformat(timespec='seconds') if complete else (since if extra else None))
 
 
 def offices():
@@ -240,6 +252,58 @@ def passports(key):
     return out
 
 
+GEO = ROOT / 'runtime/civil/geo.json'  # 주소 → [위도, 경도, 확인일] 또는 {'miss': 날짜} — Actions cache(사이트에 싣지 않음)
+
+
+def geocode(items, key):
+    """좌표 없는 곳을 카카오 주소 검색으로(8개씩 병렬). 주소별로 캐시해 1,000곳마다 저장하고, 남은 시간이 5분 밑이면 멈춘다
+    (다음 실행이 이어서). 카카오 좌표는 30일마다 다시 확인(A.refresh_due, 운영정책: 캐시는 최신으로 유지), 못 찾은 주소는 7일 뒤 다시."""
+    today = datetime.now(KST).date()
+    cache = json.loads(GEO.read_text(encoding='utf-8')) if GEO.exists() else {}
+    def addr_of(p):
+        return p.get('addr') or p.get('jibun')
+    def due(a):
+        v = cache.get(a)
+        if isinstance(v, list):
+            return A.refresh_due(a, v[2] if len(v) > 2 else '', today)
+        return v is None or (today - datetime.fromisoformat(v['miss']).date()).days >= 7
+    need = {addr_of(p) for p in items if addr_of(p) and (p['lat'] is None or 'geo_at' in p)}
+    todo = sorted(a for a in need if due(a))
+    log(f'좌표: 주소 {len(need):,}곳 중 이번에 받을 곳 {len(todo):,} (저장된 주소 {len(cache):,}, 남은 시간 {left() / 60:.0f}분)')
+    stop = {'why': None}
+    def one(a):
+        if stop['why'] or left() < 300:
+            return
+        for q in dict.fromkeys([a, re.sub(r'\s*[(,].*$', '', a)]):
+            st, d = K.http_json(f'{K.KAKAO}?{urllib.parse.urlencode({"query": q})}', {'Authorization': f'KakaoAK {key}'}, timeout=15, tries=2)
+            if st != 200:
+                if st in (401, 403, 429) or st == 0:
+                    stop['why'] = f'{st} {str(d)[:160]}'
+                return
+            ds = d.get('documents') or []
+            if ds:
+                cache[a] = [round(float(ds[0]['y']), 6), round(float(ds[0]['x']), 6), today.isoformat()]
+                return
+        v = cache.get(a)
+        cache[a] = [v[0], v[1], today.isoformat()] if isinstance(v, list) else {'miss': today.isoformat()}
+    GEO.parent.mkdir(parents=True, exist_ok=True)
+    with ThreadPoolExecutor(8) as ex:
+        for i in range(0, len(todo), 1000):
+            list(ex.map(one, todo[i:i + 1000]))
+            GEO.write_text(json.dumps(cache, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
+            log(f'  좌표 {min(i + 1000, len(todo)):,}/{len(todo):,} · 남은 시간 {left() / 60:.0f}분')
+            if stop['why'] or left() < 300:
+                log(f"  좌표 변환 멈춤: {stop['why'] or '시간 예산'} — 다음 실행이 이어서")
+                break
+    got = 0
+    for p in items:
+        v = cache.get(addr_of(p) or '')
+        if isinstance(v, list) and (p['lat'] is None or 'geo_at' in p):
+            p['lat'], p['lon'], p['geo_at'] = v[0], v[1], v[2] if len(v) > 2 else today.isoformat()
+            got += 1
+    log(f'좌표를 붙인 곳 {got:,} · 아직 좌표 없는 곳 {sum(1 for p in items if p["lat"] is None):,}')
+
+
 def main():
     args = sys.argv[1:]
     key = os.environ.get('DATA_GO_KR_KEY', '').strip()
@@ -279,10 +343,7 @@ def main():
             p['lat'], p['lon'], p['geo_at'] = q['lat'], q['lon'], q.get('geo_at') or ''
     kakao = os.environ.get('KAKAO_REST_KEY', '').strip()
     if kakao:
-        # 첫 실행 약 12,600곳(발급기·주민센터·우체국)은 한 번에 다 못 해서 남은 시간만큼(약 0.25초/곳) — 나머지는 다음 실행이 이어서
-        K.GEO_LIMIT = max(0, min(15000, int(left() / 0.3) - 200))
-        log(f'좌표 변환 이번 한도 {K.GEO_LIMIT:,}곳 (남은 시간 {left() / 60:.0f}분)')
-        K.geocode(items, kakao)
+        geocode(items, kakao)
     placed = K.place(items, regions)
     items = [compact(p) for p in placed]
     for p in items:
