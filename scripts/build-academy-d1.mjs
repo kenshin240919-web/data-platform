@@ -27,22 +27,23 @@ const pad=a=>` ${(a??[]).join(' ')} `;
 const CARD=['id','name','type','region_id','region_name','subjects','grades','fee_min','fee_max','address','lat','lon','established'];
 const card=a=>JSON.stringify(Object.fromEntries(CARD.map(k=>[k,a[k]??null])));
 const text=a=>[a.name,a.address,a.region_name,...(a.courses??[]).flatMap(c=>[c.course,c.list]),...(a.fees??[]).map(f=>f.name)].filter(Boolean).join(' ').toLowerCase();
-const row=(a,into)=>`${into} (id,name,type,region_id,lat,lon,subjects,grades,realm,fee_min,fee_max,fee_n,rank,text,card,body,first_seen) VALUES (${[
+const row=(a,into)=>`${into} (id,name,type,region_id,lat,lon,subjects,grades,realm,fee_min,fee_max,fee_n,rank,text,card,body,first_seen,stage) VALUES (${[
   s(a.id),s(a.name),s(a.type),s(a.region_id),s(a.lat),s(a.lon),s(pad(a.subjects)),s(pad(a.grades)),s(a.realm),s(a.fee_min),s(a.fee_max),s(a.fees?.length??0),
-  s(a.rank??0),s(text(a)),s(card(a)),s(JSON.stringify(a)),s(a.first_seen)].join(',')});`;
+  s(a.rank??0),s(text(a)),s(card(a)),s(JSON.stringify(a)),s(a.first_seen),s(a.stage??3)].join(',')});`;
 
-// Regions with counts and the centre of their academies (the static build has the detailed statistics).
+// Regions with counts, the centre of their academies and the fee·정원 statistics the detail page compares with.
 const regions=Object.values(items.reduce((m,a)=>{const r=m[a.region_id]??={id:a.region_id,name:a.region_name,sido:a.region_name.split(' ')[0],zone:a.zone??'',count:0,lat:0,lon:0,n:0};
   r.count++;if(a.lat!=null){r.lat+=a.lat;r.lon+=a.lon;r.n++;}return m;},{}));
-const regionSql=into=>regions.map(r=>`${into} (id,name,sido,zone,count,lat,lon,stats) VALUES (${[s(r.id),s(r.name),s(r.sido),s(r.zone),s(r.count),s(r.n?+(r.lat/r.n).toFixed(5):null),s(r.n?+(r.lon/r.n).toFixed(5):null),s('{}')].join(',')});`).join('\n');
+const regionSql=into=>regions.map(r=>`${into} (id,name,sido,zone,count,lat,lon,stats) VALUES (${[s(r.id),s(r.name),s(r.sido),s(r.zone),s(r.count),s(r.n?+(r.lat/r.n).toFixed(5):null),s(r.n?+(r.lon/r.n).toFixed(5):null),s(JSON.stringify(data.stats?.regions?.[r.id]??{}))].join(',')});`).join('\n');
 
 const schema=readFileSync(join(ROOT,'apps/academy/worker/schema.sql'),'utf8');
 const tables=(schema.match(/CREATE TABLE IF NOT EXISTS [\s\S]*?\);/g)??[]).join('\n');
 const indexes=(schema.match(/CREATE INDEX IF NOT EXISTS[^\n]*/g)??[]).join('\n');
 const next=name=>schema.match(new RegExp(`CREATE TABLE IF NOT EXISTS ${name} \\([\\s\\S]*?\\);`))[0].replace(`IF NOT EXISTS ${name} (`,`${name}_next (`);
-const SCHEMA=1;  // bump when the table layout or a stored value rule changes
+const SCHEMA=2;  // bump when the table layout or a stored value rule changes (a new SCHEMA always does a full load)
 const version=`${data.status?.updated_at}#s${SCHEMA}`;
 const metaSql=`INSERT OR REPLACE INTO meta (key,value) VALUES ('status',${s(JSON.stringify(data.status??null))});
+INSERT OR REPLACE INTO meta (key,value) VALUES ('nation',${s(JSON.stringify(data.stats?.nation??{}))});
 INSERT OR REPLACE INTO meta (key,value) VALUES ('version',${s(JSON.stringify(version))});`;
 
 const out=join(ROOT,'runtime/d1-academy');rmSync(out,{recursive:true,force:true});mkdirSync(out,{recursive:true});
@@ -58,7 +59,7 @@ let live={};
 if(mode)try{live=JSON.parse(wrangler(['d1','execute',DB,mode,'--json','--command',"SELECT (SELECT value FROM meta WHERE key='version') AS version, (SELECT COUNT(*) FROM academies) AS n"],{encoding:'utf8'}))?.[0]?.results?.[0]??{};}catch{console.log('D1 not initialised yet (first load)');}
 if(Number(live.n)>items.length*1.1&&!args.includes('--force')){console.log(`D1 has ${live.n} academies, the file only ${items.length}: not loading (--force).`);process.exit(1);}
 const manifest=existsSync(manifestPath)?JSON.parse(readFileSync(manifestPath,'utf8')):null;
-if(mode&&manifest&&live.version===JSON.stringify(manifest.version)){
+if(mode&&manifest&&live.version===JSON.stringify(manifest.version)&&manifest.version.endsWith(`#s${SCHEMA}`)){
   if(manifest.version===version){console.log(`D1 already holds ${version}`);process.exit(0);}
   const changed=items.filter(a=>manifest.hashes[a.id]!==hash(a)),ids=new Set(items.map(a=>a.id));
   const removed=Object.keys(manifest.hashes).filter(id=>!ids.has(id));

@@ -10,7 +10,7 @@ Runs daily in GitHub Actions (.github/workflows/academy-collect.yml); runtime/ac
 Usage: NEIS_API_KEY=... KAKAO_REST_KEY=... python scripts/collect-academy.py [--minutes N] [--no-geocode]
 Writes runtime/academy/full.json (all academies) and runtime/academy/geo.json (address → [lat, lon, checked date]).
 """
-import json, os, re, sys, time, urllib.error, urllib.parse, urllib.request, zlib
+import json, math, os, re, sys, time, urllib.error, urllib.parse, urllib.request, zlib
 from collections import Counter, defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
@@ -274,7 +274,80 @@ def fee_stats(won):
     won = sorted(won)
     if not won:
         return None
-    return {'n': len(won), 'min': won[0], 'median': won[len(won) // 2], 'max': won[-1]}
+    return {'n': len(won), 'min': won[0], 'p25': won[len(won) // 4], 'median': won[len(won) // 2], 'p75': won[len(won) * 3 // 4], 'max': won[-1]}
+
+
+def meters(lat, lon, lat2, lon2):
+    # 몇 km 안 거리는 평면 근사로 충분(오차 0.1% 미만), haversine보다 빠름.
+    return math.hypot((lat2 - lat) * 111_320, (lon2 - lon) * 111_320 * math.cos(math.radians(lat)))
+
+
+CELL = 0.005  # 격자 한 칸: 위도 약 556m·경도 약 445m
+
+
+def grid(points):
+    g = defaultdict(list)
+    for p in points:
+        g[(math.floor(p['lat'] / CELL), math.floor(p['lon'] / CELL))].append(p)
+    return g
+
+
+def within(g, lat, lon, m):
+    """Points of grid g within m metres of (lat, lon), as (metres, point)."""
+    ri, rj = math.ceil(m / 556), math.ceil(m / 445)
+    i, j = math.floor(lat / CELL), math.floor(lon / CELL)
+    for di in range(-ri, ri + 1):
+        for dj in range(-rj, rj + 1):
+            for p in g.get((i + di, j + dj), ()):
+                d = meters(lat, lon, p['lat'], p['lon'])
+                if d <= m:
+                    yield d, p
+
+
+def enrich(items, schools):
+    """Facts that are different on every detail page (Google skips near-identical template pages): the nearest
+    초·중·고 (school.guidejung.com) and the 학원가 within 1km — how many, which subjects, the local fee for the same
+    subject. Distances and fees are rounded so a nearby change rewrites few D1 rows."""
+    geo = [a for a in items if a['lat'] is not None]
+    ga, gs = grid(geo), grid([s for s in schools if s.get('lat') is not None and s.get('k') in ('elem', 'middle', 'high')])
+    for a in items:
+        a['around'], a['schools'] = None, []
+        if a['lat'] is None:
+            continue
+        near = [b for d, b in within(ga, a['lat'], a['lon'], 1000) if b is not a]
+        # 대표 과목: 이름에 있는 과목('OO미술학원' → 미술), 없으면 첫 과목 (subjects는 SUBJECTS 순서라 수학·영어가 앞)
+        k = next((s for s in tags(a['name'], SUBJECT_RE) if s in a['subjects']), a['subjects'][0] if a['subjects'] else None)
+        same = [b for b in near if k in b['subjects']]
+        won = sorted(f['won'] for b in same for f in b['fees'] if k in f['subjects'] and FEE_OK[0] <= f['won'] <= FEE_OK[1])
+        a['around'] = {'n': len(near), 'top': [s for s, _ in Counter(s for b in near for s in b['subjects']).most_common(3)],
+                       'subject': k, 'same': len(same), 'same_fee': round(won[len(won) // 2], -4) if len(won) >= 5 else None}
+        best = {}
+        for d, s in within(gs, a['lat'], a['lon'], 2000):
+            if s['k'] not in best or d < best[s['k']][0]:
+                best[s['k']] = (d, s)
+        a['schools'] = [{'code': s['code'], 'name': s['name'], 'k': k2, 'm': int(round(d, -1))} for k2 in ('elem', 'middle', 'high') if k2 in best for d, s in [best[k2]]]
+
+
+def stage_of(items, summary):
+    """Sitemap stage: 1 = linked from the static region·subject·new pages (submitted first), 2 = fee public, 3 = rest.
+    The Worker's SITEMAP_STAGE decides how far the sitemap goes (Google crawls a new site's pages slowly)."""
+    linked = {c['id'] for r in summary['regions'] for c in r['top'] + r['new'] + [c for s in r['subjects'].values() for c in s['top']]}
+    linked |= {c['id'] for c in summary['latest']}
+    for a in items:
+        a['stage'] = 1 if a['id'] in linked else 2 if a['fee_min'] else 3
+
+
+def region_stats(items, summary):
+    """Per region fee statistics per subject and the median 정원 per 학원/교습소 (D1 regions.stats), and the nation's
+    fee statistics: the detail page compares one academy with its region without storing the numbers in every row."""
+    cap = defaultdict(list)
+    for a in items:
+        if a['capacity']:
+            cap[(a['region_id'], a['type'])].append(a['capacity'])
+    med = lambda v: sorted(v)[len(v) // 2]
+    regions = {r['id']: {'subjects': {k: s['fees'] for k, s in r['subjects'].items() if s['fees']},
+                         'cap': {t: med(cap[(r['id'], t)]) for t in ('학원', '교습소') if len(cap[(r['id'], t)]) >= 10}} for r in summary['regions']}
+    return {'regions': regions, 'nation': {k: v['fees'] for k, v in summary['nation'].items() if v['fees']}}
 
 
 def make_summary(items, status):
@@ -369,8 +442,11 @@ def main():
         'with_fees': sum(1 for a in items if a['fees']), 'new': sum(1 for a in items if prev and a['id'] not in prev_ids),
         'removed': sum(1 for i in prev_ids if i not in {a['id'] for a in items}) if prev else 0,
     }
-    save_json(prev_path, {'status': status, 'items': items})
+    enrich(items, json.loads((ROOT / 'apps/school/data/schools.json').read_text(encoding='utf-8'))['items'])
     summary = make_summary(items, status)
+    stage_of(items, summary)
+    log('사이트맵 단계', sorted(Counter(a['stage'] for a in items).items()))
+    save_json(prev_path, {'status': status, 'stats': region_stats(items, summary), 'items': items})
     (ROOT / 'apps/academy/data').mkdir(parents=True, exist_ok=True)
     (ROOT / 'apps/academy/data/summary.json').write_text(json.dumps(summary, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
     log(f"요약 파일: 지역 {len(summary['regions']):,}곳")

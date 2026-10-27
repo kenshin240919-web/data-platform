@@ -1,7 +1,7 @@
 // Cloudflare Worker for academy.guidejung.com (내근처 학원). Static pages: ./out (Next.js export).
 // D1 guidejung-academy (scripts/build-academy-d1.mjs): /api/search, 학원 상세 /academy/{id} (server-rendered into the
 // static template /academy/shell so header·footer·scripts match), /sitemap.xml + /sitemap-academies-{n}.xml.
-import {FEE_MAX,FEE_MIN,academyPath,esc,eun,feeRange,GRADES,n,SITE,SUBJECTS,subjectLabel,won,ymd,type Card} from '../lib/fmt';
+import {FEE_MAX,FEE_MIN,academyPath,esc,eun,feeRange,GRADES,man,n,SITE,SUBJECTS,subjectLabel,won,ymd,type Card,type FeeStats} from '../lib/fmt';
 
 import weatherRegions from '../../weather/data/regions.json';
 import {actionsHtml} from '../../../packages/ui/src/actions';
@@ -26,8 +26,14 @@ function connectHtml(a:{lat:number|null;lon:number|null;region_name:string}){
 interface Env{ASSETS:Fetcher;DB:D1Database}
 type Academy=Card&{office_name:string|null;zone:string|null;region_name:string;region_id:string;realms:string[];courses:{order:string|null;course:string|null;list:string|null;realm:string|null}[];
   fees:{name:string;won:number;subjects:string[];grades:string[]}[];fee_public:boolean;capacity:number|null;capacity_now:number|null;boarding:boolean;
-  established:string|null;registered:string|null;closed_from:string|null;closed_until:string|null;address_detail:string|null;zip:string|null;tel:string|null;loaded:string|null};
+  established:string|null;registered:string|null;closed_from:string|null;closed_until:string|null;address_detail:string|null;zip:string|null;tel:string|null;loaded:string|null;
+  around?:{n:number;top:string[];subject:string|null;same:number;same_fee:number|null}|null;schools?:{code:string;name:string;k:'elem'|'middle'|'high';m:number}[]};
+// D1 regions.stats·meta nation (scripts/collect-academy.py region_stats): the detail page compares an academy with these.
+type Stats={subjects?:Record<string,FeeStats>;cap?:Record<string,number>};
 
+// 사이트맵 단계(academies.stage): 1 정적 지역·과목 페이지에서 링크된 곳 → 2 수강료 공개 → 3 전부. 새 사이트는 구글이 천천히 읽어서
+// 좋은 페이지부터 내고, 서치 콘솔 색인 수가 늘면 숫자를 올림(10/27 1단계 약 9,300곳).
+const SITEMAP_STAGE=1;
 const PAGE=20,SITEMAP_SIZE=40000;
 const json=(d:unknown,status=200,maxAge=300)=>new Response(JSON.stringify(d),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':`public, max-age=${maxAge}`,'access-control-allow-origin':'*'}});
 const distKm=(aLat:number,aLon:number,bLat:number,bLon:number)=>{const r=Math.PI/180,dLat=(bLat-aLat)*r,dLon=(bLon-aLon)*r;const h=Math.sin(dLat/2)**2+Math.cos(aLat*r)*Math.cos(bLat*r)*Math.sin(dLon/2)**2;return 12742*Math.asin(Math.sqrt(h));};
@@ -77,8 +83,51 @@ var d=document.getElementById('ac-cbar');if(!v.length){if(d)d.remove();return}if
 d.innerHTML='';var s=document.createElement('span');s.textContent='⚖️ 비교함 '+v.length+'/4 · '+v.map(function(x){return x.name}).join(', ');var a=document.createElement('a');a.href='/compare';a.textContent='비교하기 →';d.appendChild(s);d.appendChild(a)}
 if(b)b.addEventListener('click',function(){var v=g(),i=v.findIndex(function(x){return x.id===b.dataset.id});if(i>=0)v.splice(i,1);else if(v.length>=4){alert('비교는 최대 4곳까지예요. 비교함에서 하나를 빼 주세요.');return}else v.push({id:b.dataset.id,name:b.dataset.name});try{localStorage.setItem(K,JSON.stringify(v))}catch(e){}draw()});
 window.addEventListener('storage',draw);draw()})();</script>`;
+// 이 학원만의 내용(구글은 틀만 같고 데이터만 바뀐 페이지를 색인하지 않음): 한눈에 보기 문장, 지역·1km·전국과 수강료 비교,
+// 가까운 학교(school 사이트 급식), 주변 학원가, 정원 규모. 문장·FAQ·메타 설명이 함께 씀.
+const SCHOOL_K={elem:'초등학교',middle:'중학교',high:'고등학교'} as const;
+const dist=(m:number)=>m<1000?`${n(m)}m`:`${(m/1000).toFixed(1)}km`;
+const median=(v:number[])=>{const s=[...v].sort((x,y)=>x-y);return s[s.length>>1];};
+function insight(a:Academy,st:Stats,nation:Record<string,FeeStats>){
+  const region=a.region_name,ok=(f:{won:number})=>f.won>=FEE_MIN&&f.won<=FEE_MAX;
+  // 과목별 이 학원 금액: 과정 이름에 과목이 있는 수강료의 중앙값(과목이 하나뿐이면 모든 과정).
+  const own=(k:string)=>{const w=a.fees.filter(f=>ok(f)&&(f.subjects.includes(k)||a.subjects.length===1)).map(f=>f.won);return w.length?median(w):null;};
+  const band=(v:number,s:FeeStats)=>!s||s.n<10||s.p25==null||s.p75==null?null:v<s.p25?'낮은 편(하위 25%)':v>s.p75?'높은 편(상위 25%)':'중간 수준';
+  const rows=[...a.subjects].sort((x,y)=>Number(y===a.around?.subject)-Number(x===a.around?.subject)).filter(k=>st.subjects?.[k]||nation[k]).slice(0,4).map(k=>({k,own:own(k),reg:st.subjects?.[k]??null,nat:nation[k]??null,
+    near:a.around?.subject===k?a.around.same_fee:null}));
+  const lead=rows.find(r=>r.own!=null&&r.reg)??rows.find(r=>r.reg);
+  const year=a.established?.slice(0,4),age=year?new Date(Date.now()+9*3600e3).getUTCFullYear()-Number(year)+1:null;
+  const kind=a.type==='교습소'?'교습소로':'학원으로',subj=a.subjects.slice(0,3).map(subjectLabel),grades=a.grades.map(g=>GRADES[g]);
+  const school=[...(a.schools??[])].sort((x,y)=>x.m-y.m)[0];
+  const cap=a.capacity&&a.type?st.cap?.[a.type]:null;
+  const size=cap?(a.capacity!<cap*.7?'규모가 작은 편이에요':a.capacity!>cap*1.5?'규모가 큰 편이에요':'보통 규모예요'):null;
+  const ar=a.around;
+  const feeLine=lead?lead.own!=null?`공개된 ${subjectLabel(lead.k)} 수강료 ${man(lead.own)}${band(lead.own,lead.reg)?`은 ${region} ${subjectLabel(lead.k)} 학원 가운데 ${band(lead.own,lead.reg)}이에요(지역 중앙값 ${man(lead.reg!.median)})`:`이에요(${region} 중앙값 ${man(lead.reg!.median)})`}.`
+    :`수강료 금액은 공개하지 않았고, ${region} ${subjectLabel(lead.k)} 공개 수강료 중앙값은 ${man(lead.reg!.median)}이에요.`:null;
+  const lines=[
+    `${eun(a.name)} ${year?`${year}년에 문을 연(올해 ${age}년째) `:''}${region} ${kind}, ${grades.length?`${grades.join('·')} 대상 `:''}${subj.length?`${subj.join('·')} 과정을 운영해요.`:'교습 과정을 운영해요.'}`,
+    feeLine,
+    ar&&ar.n?`반경 1km 안에 학원·교습소 ${n(ar.n)}곳이 있고${ar.top.length?` ${ar.top.map(subjectLabel).join('·')} 학원이 많아요`:''}${ar.subject?`. 같은 ${subjectLabel(ar.subject)} 학원은 ${n(ar.same)}곳이에요.`:'.'}`:null,
+    school?`가장 가까운 학교는 ${school.name}(${dist(school.m)})예요.`:null,
+    size?`정원 ${n(a.capacity!)}명으로 ${region} ${a.type} 가운데 ${size}(지역 중앙값 ${n(cap!)}명).`:null,
+  ].filter(Boolean) as string[];
+  const cell=(s:FeeStats|null)=>s?`<b>${esc(man(s.median))}</b><small class="muted"> · ${n(s.n)}건</small>`:'–';
+  const table=rows.length?`<section><h2>수강료, 이 동네와 비교하면</h2><table class="ac-table"><thead><tr><th>과목</th><th>이 ${esc(a.type??'학원')}</th><th>반경 1km</th><th>${esc(region)}</th><th>전국</th></tr></thead><tbody>${rows.map(r=>
+    `<tr><th><a href="/region/${esc(a.region_id)}/${r.k}">${esc(subjectLabel(r.k))}</a></th><td>${r.own!=null?`<b>${esc(man(r.own))}</b>`:'<span class="muted">미공개</span>'}</td><td>${r.near!=null?esc(man(r.near)):'–'}</td><td>${cell(r.reg)}</td><td>${cell(r.nat)}</td></tr>`).join('')}</tbody></table>
+<p class="muted small">교육청에 공개된 과정별 인당 수강료의 중앙값(기간 표기 없음, 3만 원 미만 제외). 반경 1km는 같은 과목 학원 공개 금액 5건 이상일 때만 보여요.</p></section>`:'';
+  const schools=a.schools?.length?`<section><h2>가까운 학교</h2><ul class="ac-links">${a.schools.map(s=>`<li><a href="https://school.guidejung.com/school/${esc(s.code)}">${esc(s.name)}</a> <span class="muted">· ${SCHOOL_K[s.k]} · ${dist(s.m)} · 오늘 급식·학사일정</span></li>`).join('')}</ul></section>`:'';
+  const around=ar&&ar.n?`<section><h2>주변 학원가</h2><p>반경 1km 안 학원·교습소 <b>${n(ar.n)}곳</b>${ar.top.length?` · 많은 과목 ${ar.top.map(k=>`<a href="/region/${esc(a.region_id)}/${k}">${esc(subjectLabel(k))}</a>`).join('·')}`:''}${ar.subject?` · 같은 ${esc(subjectLabel(ar.subject))} 학원 <b>${n(ar.same)}곳</b>${ar.same_fee?`(공개 수강료 중앙값 ${esc(man(ar.same_fee))})`:''}`:''}</p></section>`:'';
+  const faq:[string,string][]=[
+    ...(a.schools?.length?[[`${a.name} 근처 학교는 어디인가요?`,`${a.schools.map(s=>`${s.name} ${dist(s.m)}`).join(', ')} 거리에 있습니다(직선거리).`] as [string,string]]:[]),
+    ...(lead?.own!=null&&band(lead.own,lead.reg)?[[`${a.name} 수강료는 이 동네보다 비싼가요?`,`${subjectLabel(lead.k)} 공개 수강료 ${man(lead.own)}은 ${region} ${subjectLabel(lead.k)} 학원 공개 금액 ${n(lead.reg!.n)}건 가운데 ${band(lead.own,lead.reg)}입니다(중앙값 ${man(lead.reg!.median)}).`] as [string,string]]:[]),
+    ...(ar?.subject?[[`${a.name} 주변에 같은 과목 학원은 몇 곳인가요?`,`반경 1km 안에 ${subjectLabel(ar.subject)} 학원·교습소가 ${n(ar.same)}곳 있습니다(전체 학원·교습소 ${n(ar.n)}곳).`] as [string,string]]:[]),
+  ];
+  const desc=[school?`${school.name} ${dist(school.m)}.`:'',lead?.own!=null&&band(lead.own,lead.reg)?`${subjectLabel(lead.k)} 수강료 ${region}에서 ${band(lead.own,lead.reg)!.replace(/\(.*\)/,'')}.`:''].join(' ');
+  return {top:`<section><h2>한눈에 보기</h2><p>${lines.map(esc).join(' ')}</p></section>${table}`,bottom:schools+around,faq,desc};
+}
+
 const AD_FILL='<script>try{document.querySelectorAll("ins.adsbygoogle").forEach(function(){(window.adsbygoogle=window.adsbygoogle||[]).push({})})}catch(e){}</script>';
-function detailHtml(a:Academy,near:Card[]){
+function detailHtml(a:Academy,near:Card[],ins:ReturnType<typeof insight>){
   const subj=a.subjects.map(subjectLabel),grades=a.grades.map(g=>GRADES[g]);
   const fees=[...a.fees].sort((x,y)=>x.won-y.won);
   const okFees=fees.filter(f=>f.won>=FEE_MIN&&f.won<=FEE_MAX);
@@ -94,6 +143,7 @@ function detailHtml(a:Academy,near:Card[]){
     [`${a.name} 수강료는 얼마인가요?`,okFees.length?`교육청에 공개된 수강료는 ${okFees.slice(0,5).map(f=>`${f.name} ${won(f.won)}`).join(', ')}${okFees.length>5?` 등 ${n(okFees.length)}개 과정`:''}입니다. 실제 수강료는 학원에 확인하세요.`:'교육청에 공개된 수강료 금액이 없습니다. 학원에 직접 문의하세요.'],
     [`${eun(a.name)} 어디에 있나요?`,a.address?`${[a.address,a.address_detail].filter(Boolean).join(' ')}에 있습니다.`:''],
     [`${a.name}에서는 무엇을 가르치나요?`,subj.length?`${subj.join('·')} 과정을 운영합니다${grades.length?`(${grades.join('·')} 대상 과정 포함)`:''}.`:''],
+    ...ins.faq,
   ].filter(([,x])=>x) as [string,string][];
   const ld={'@context':'https://schema.org','@type':'EducationalOrganization',name:a.name,url:SITE+academyPath(a.id),
     image:SITE+'/og.png',...(a.address?{address:{'@type':'PostalAddress',streetAddress:[a.address,a.address_detail].filter(Boolean).join(' '),addressLocality:a.region_name.split(' ').slice(1).join(' ')||a.region_name,addressRegion:a.office_name?.replace(/교육청$/,'')??undefined,postalCode:a.zip??undefined,addressCountry:'KR'}}:{}),
@@ -109,10 +159,12 @@ function detailHtml(a:Academy,near:Card[]){
 <div class="ac-tags">${[...subj,...grades].map(t=>`<span>${esc(t)}</span>`).join('')}</div></div>${actionsHtml()}
 <p class="ac-answer">${fee?`교육청에 공개된 수강료는 <b>${esc(fee)}</b>${okFees.length>1?`(과정 ${n(okFees.length)}개)`:''}이에요.`:'교육청에 공개된 수강료 금액이 없어요. 학원에 직접 문의해 주세요.'}</p>
 <div class="ac-actions"><button type="button" class="ac-pick-big" id="ac-pick" data-id="${esc(a.id)}" data-name="${esc(a.name)}">+ 비교에 담기</button>${map?`<a href="${esc(map)}" rel="noopener" target="_blank">🧭 지도·길찾기</a>`:''}${a.tel?`<a class="sub" href="tel:${esc(a.tel.replace(/[^0-9]/g,''))}">📞 전화</a>`:''}${subjectLinks}</div>
+${ins.top}
 ${fees.length?`<section><h2>과정별 수강료</h2><ul class="ac-fees">${fees.map(f=>`<li><span>${esc(f.name)}</span><b>${esc(won(f.won))}</b></li>`).join('')}</ul><p class="muted small">교육청에 신고·공개된 인당 수강료(기간 표기 없음, 교재비 등 제외될 수 있음). 실제 수강료는 학원에 확인하세요.</p></section>`:''}
 ${blogHtml(`${a.name} ${a.region_name.split(' ').slice(-1)[0]}`,a.name.replace(/\s*[([].*$/,'').trim(),'📝 학부모·수강생 블로그 후기 · 네이버')}
 ${blogHtml(`${a.name} ${a.region_name.split(' ').slice(-1)[0]}`,a.name.replace(/\s*[([].*$/,'').trim(),'💬 동네 카페 이야기 · 네이버 카페',true)}
 <section><h2>학원 정보</h2><dl class="ac-facts">${facts.filter(([,v])=>v).map(([k,v])=>`<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl></section>
+${ins.bottom}
 ${near.length?`<section><h2>근처 같은 과목 학원</h2><div class="ac-cards">${near.map(c=>`<a class="ac-card" href="${academyPath(c.id)}"><span class="ac-card-body"><b>${esc(c.name)}</b><small class="muted">${c.km!=null?`📍 ${c.km<1?`${Math.round(c.km*1000)}m`:`${c.km.toFixed(1)}km`} · `:''}${esc(c.subjects.slice(0,3).map(subjectLabel).join(' · '))}</small></span><span class="${feeRange(c)?'ac-fee':'ac-fee none'}">${esc(feeRange(c)??'수강료 미공개')}</span></a>`).join('')}</div><p><a class="ac-more-link" href="/region/${esc(a.region_id)}">${esc(a.region_name)} 학원 모두 보기 →</a></p></section>`:''}
 ${connectHtml(a)}
 <section class="gj-faq" aria-label="자주 묻는 질문"><h2>자주 묻는 질문</h2><dl>${faq.map(([q,x])=>`<div><dt>${esc(q)}</dt><dd>${esc(x)}</dd></div>`).join('')}</dl></section>
@@ -122,11 +174,13 @@ ${ldTag(ld)}${ldTag(crumbs)}${faq.length?ldTag(faqLd):''}`;
 
 async function detail(id:string,url:URL,env:Env,ctx:ExecutionContext){
   const v=await version(env);
-  const key=new Request(`${url.origin}/academy/${id}?v=${encodeURIComponent(v)}&t=4`);
+  const key=new Request(`${url.origin}/academy/${id}?v=${encodeURIComponent(v)}&t=5`);
   const hit=await caches.default.match(key);if(hit)return hit;
-  const row=await env.DB.prepare('SELECT body FROM academies WHERE id = ?').bind(id).first<{body:string}>();
-  if(!row)return null;
+  const [rb,rs,rn]=await env.DB.batch<{body?:string;stats?:string;value?:string}>([env.DB.prepare('SELECT body FROM academies WHERE id = ?').bind(id),
+    env.DB.prepare('SELECT r.stats FROM regions r JOIN academies a ON a.region_id = r.id WHERE a.id = ?').bind(id),env.DB.prepare("SELECT value FROM meta WHERE key='nation'")]);
+  const row=rb.results[0];if(!row?.body)return null;
   const a=JSON.parse(row.body) as Academy;
+  const ins=insight(a,JSON.parse(rs.results[0]?.stats??'{}'),JSON.parse(rn.results[0]?.value??'{}'));
   let near:Card[]=[];
   if(a.lat!=null&&a.lon!=null){
     const k=a.subjects[0];const d=.03;
@@ -136,7 +190,7 @@ async function detail(id:string,url:URL,env:Env,ctx:ExecutionContext){
   }
   const fee=feeRange(a);
   const title=`${a.name} 수강료·정보 | 내근처 학원`;
-  const desc=`${a.region_name} ${a.name}(${[a.type,...a.subjects.slice(0,3).map(subjectLabel)].filter(Boolean).join('·')}). ${fee?`교육청 공개 수강료 ${fee}.`:''} 주소·교습과정·정원을 확인하세요.`.replace(/\s+/g,' ').trim();
+  const desc=`${a.region_name} ${a.name}(${[a.type,...a.subjects.slice(0,3).map(subjectLabel)].filter(Boolean).join('·')}). ${fee?`교육청 공개 수강료 ${fee}.`:''} ${ins.desc} 주소·교습과정·정원을 확인하세요.`.replace(/\s+/g,' ').trim();
   const canonical=SITE+academyPath(a.id);
   const html=(await template(env,url.origin))
     .replace(/<title>[^<]*<\/title>/,`<title>${esc(title)}</title>`)
@@ -144,7 +198,7 @@ async function detail(id:string,url:URL,env:Env,ctx:ExecutionContext){
     .replace(/<link rel="canonical" href="[^"]*"\/?>/,'')
     .replace(/<meta property="og:[^"]*" content="[^"]*"\/?>/g,'').replace(/<meta name="twitter:[^"]*" content="[^"]*"\/?>/g,'')
     .replace('</head>',`<link rel="canonical" href="${canonical}"/><meta property="og:title" content="${esc(title)}"/><meta property="og:description" content="${esc(desc)}"/><meta property="og:url" content="${canonical}"/><meta property="og:image" content="${SITE}/og.png"/><meta property="og:site_name" content="내근처 학원"/><meta property="og:locale" content="ko_KR"/><meta name="twitter:card" content="summary_large_image"/></head>`)
-    .replace(/<div id="academy-detail">ACADEMY_DETAIL<\/div>/,detailHtml(a,near))
+    .replace(/<div id="academy-detail">ACADEMY_DETAIL<\/div>/,detailHtml(a,near,ins))
     .replace('</body>',AD_FILL+COMPARE_JS+'</body>');
   const res=new Response(html,{headers:{'content-type':'text/html; charset=utf-8','cache-control':'public, max-age=600'}});
   ctx.waitUntil(caches.default.put(key,res.clone()));
@@ -154,12 +208,12 @@ async function detail(id:string,url:URL,env:Env,ctx:ExecutionContext){
 const xml=(body:string)=>new Response(`<?xml version="1.0" encoding="UTF-8"?>\n${body}\n`,{headers:{'content-type':'application/xml; charset=utf-8','cache-control':'public, max-age=3600'}});
 async function sitemap(url:URL,env:Env){
   if(url.pathname==='/sitemap.xml'){
-    const c=await env.DB.prepare('SELECT COUNT(*) AS n FROM academies').first<{n:number}>().catch(()=>null);
+    const c=await env.DB.prepare('SELECT COUNT(*) AS n FROM academies WHERE stage <= ?').bind(SITEMAP_STAGE).first<{n:number}>().catch(()=>null);
     const parts=['sitemap-pages.xml',...Array.from({length:Math.ceil((c?.n??0)/SITEMAP_SIZE)},(_,i)=>`sitemap-academies-${i+1}.xml`)];
     return xml(`<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${parts.map(p=>`<sitemap><loc>${SITE}/${p}</loc></sitemap>`).join('')}</sitemapindex>`);
   }
   const m=url.pathname.match(/^\/sitemap-academies-(\d+)\.xml$/);if(!m)return null;
-  const {results}=await env.DB.prepare(`SELECT id FROM academies ORDER BY id LIMIT ${SITEMAP_SIZE} OFFSET ?`).bind((Number(m[1])-1)*SITEMAP_SIZE).all<{id:string}>();
+  const {results}=await env.DB.prepare(`SELECT id FROM academies WHERE stage <= ? ORDER BY stage, id LIMIT ${SITEMAP_SIZE} OFFSET ?`).bind(SITEMAP_STAGE,(Number(m[1])-1)*SITEMAP_SIZE).all<{id:string}>();
   if(!results.length)return null;
   return xml(`<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${results.map(r=>`<url><loc>${SITE}${academyPath(r.id)}</loc></url>`).join('')}</urlset>`);
 }
