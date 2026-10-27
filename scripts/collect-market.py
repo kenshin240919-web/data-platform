@@ -310,8 +310,18 @@ def main():
     key = os.environ.get('KAKAO_REST_KEY')
     order = sorted(groups.items(), key=lambda x: -len(x[1]))
 
+    by_sido = defaultdict(list)  # 이름이 조금 다른 곳('포항죽도시장'·'죽도시장')은 줄인 이름이 서로 들어 있고 시도 안에서 하나뿐일 때만
+    for (sd, _), v in std.items():
+        if all(v is not x for _, x in by_sido[sd]):
+            by_sido[sd].append((norm(stem_of(v['name'])), v))
+
     def std_of(sido, name):
-        return std.get((sido, norm(name))) or std.get((sido, norm(base_name(name))))
+        hit = std.get((sido, norm(name))) or std.get((sido, norm(base_name(name))))
+        st = norm(stem_of(name))
+        if hit or len(st) < 2:
+            return hit
+        cand = [v for s, v in by_sido[sido] if s and (s == st or (len(s) >= 3 and s in st) or (len(st) >= 3 and st in s))]
+        return cand[0] if len(cand) == 1 else None
 
     def due(ck):
         c = cache.get(ck)
@@ -372,6 +382,7 @@ def main():
             m['region'], m['region_name'] = code, region_name(code, nm, regions)
         m['rows'] = rs
         markets.append(m)
+    log(f'전통시장 표준데이터와 연결된 시장 {sum(1 for m in markets if "std" in m):,}곳')
 
     stores, seen, cats = [], set(), Counter()
     latest = max((r['year'] for r in rows if r['year'].isdigit()), default='')
