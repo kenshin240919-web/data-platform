@@ -24,6 +24,7 @@
     "build:service": "npm run build -w @guidejung/service",
     "build:rest": "npm run build -w @guidejung/rest",
     "build:pet": "npm run build -w @guidejung/pet",
+    "build:market": "npm run build -w @guidejung/market",
     "build:civil": "npm run build -w @guidejung/civil",
     "build:hospital": "npm run build -w @guidejung/hospital"
   },

@@ -1,0 +1,19 @@
+// Cloudflare Worker for market.guidejung.com (내근처 시장 — 온누리상품권 사용처), separate from the other sites.
+// Run from the repo root: npx wrangler deploy -c apps/market/wrangler.jsonc (builds with npm run build:market).
+// Static pages: ./out. Worker: /api/*, 가게 상세 /store/{id} (noindex), sitemap index. The list ships with the Worker (data/market.json).
+{
+  "name": "guidejung-market",
+  "main": "worker/index.ts",
+  "compatibility_date": "2025-09-01",
+  "build": { "command": "npm run build:market" },
+  "assets": {
+    "directory": "./out",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    "run_worker_first": ["/api/*", "/store/*", "/sitemap.xml"]
+  },
+  // The list is imported as text and parsed on first use (a large object literal slows the Worker start).
+  "rules": [{ "type": "Text", "globs": ["**/data/market.json"], "fallthrough": true }],
+  "observability": { "enabled": true },
+  "routes": [{ "pattern": "market.guidejung.com", "custom_domain": true }]
+}
