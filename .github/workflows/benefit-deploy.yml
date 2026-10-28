@@ -2,8 +2,22 @@ name: Benefit deploy
 # Deploys benefit.guidejung.com (Worker guidejung-benefit, 내근처 혜택 — 정부·지자체 지원금) with wrangler from GitHub Actions.
 # 데이터(apps/benefit/data/benefits.json, 약 20MB)는 저장소에 두지 않고 배포할 때마다 새로 받음(scripts/collect-benefit.py, 약 33회 호출).
 # Secrets: DATA_GO_KR_KEY, CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID.
-# 첫 배포·도메인 연결은 사용자 승인 뒤 — 그때까지는 수동 실행만(승인 후 push·매일 05:47 KST로 바꿈).
+# 10/28 사용자 승인(첫 배포·도메인 연결) → push·매일 05:47 KST·수동.
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/benefit/**'
+      - 'scripts/collect-benefit.py'
+      - 'apps/weather/data/**'
+      - 'apps/traffic/data/**'
+      - 'apps/oil/data/areas.json'
+      - 'packages/**'
+      - 'scripts/prune-rsc.mjs'
+      - 'package.json'
+      - 'package-lock.json'
+  schedule:
+    - cron: '47 20 * * *'  # 매일 05:47 KST
   workflow_dispatch:
 permissions:
   contents: read
