@@ -1,0 +1,37 @@
+name: Index picks
+# 매일 '색인 생성 요청'할 주소 10개 고르기(scripts/index-picks.py, 10/28 사용자 요청) → reports/gsc/색인요청-오늘.md main 커밋.
+# 요청 자체는 Search Console 브라우저에서 사용자가 함(공개 API 없음). Secret: GA_SERVICE_ACCOUNT_JSON(URL 검사로 이미 색인된 곳 빼기). 무료.
+on:
+  schedule:
+    - cron: '27 23 * * *' # 08:27 KST
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: index-picks
+  cancel-in-progress: false
+jobs:
+  pick:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -q google-auth requests
+      - name: Pick
+        env:
+          GA_SERVICE_ACCOUNT_JSON: ${{ secrets.GA_SERVICE_ACCOUNT_JSON }}
+        run: python scripts/index-picks.py
+      - name: Commit
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add reports/gsc
+          if git diff --cached --quiet; then echo 'no change'; exit 0; fi
+          git commit -m '오늘의 색인 생성 요청 주소'
+          for i in 1 2 3; do git pull --rebase origin main && git push origin HEAD:main && exit 0; sleep 10; done
+          exit 1
