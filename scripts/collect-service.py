@@ -289,7 +289,7 @@ def main():
         return
     kinds = Counter(p['kind'] for p in items)
     status = {'updated_at': now.isoformat(timespec='seconds'), 'count': len(items), 'kinds': dict(kinds),
-              'with_coords': sum(1 for p in items if p['lat'] is not None), 'new': sum(1 for p in items if prev and p['id'] not in prev_by_id),
+              'with_coords': sum(1 for p in items if p.get('lat') is not None), 'new': sum(1 for p in items if prev and p['id'] not in prev_by_id),
               'removed': len(set(prev_by_id) - {p['id'] for p in items}) if prev else 0}
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps({'status': status, 'stats': stats, 'items': items}, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
