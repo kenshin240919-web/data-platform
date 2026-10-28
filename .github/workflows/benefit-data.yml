@@ -1,0 +1,27 @@
+name: Benefit data
+# 내근처 혜택 개발용: 수집 결과(raw.json·benefits.json)를 Actions 아티팩트로 남김(저장소에는 올리지 않음 — 수십 MB).
+on: workflow_dispatch
+permissions:
+  contents: read
+jobs:
+  data:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Collect
+        env:
+          DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
+        run: python scripts/collect-benefit.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: benefit-data
+          path: |
+            runtime/benefit/raw.json
+            apps/benefit/data/benefits.json
+          retention-days: 3
