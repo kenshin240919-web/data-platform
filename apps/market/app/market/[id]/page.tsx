@@ -6,7 +6,8 @@ import {Connect,genericFor,linksNear} from '@guidejung/ui/network';
 import {MarketCard} from '../../_components/Cards';
 import {StoreTable,type Row} from '../../_components/StoreTable';
 import {Ad} from '../../_components/Ad';
-import {baseLabel,CATS,eun,exact,isMarket,located,mapUrl,market,marketPath,markets,n,nearMarkets,pct,SITE,sidoFull,sidoSlug,status,storesOf,topCats,type Market} from '../../../lib/data';
+import {JangInfo} from '../../_components/JangInfo';
+import {baseLabel,CATS,eun,exact,fairOf,jangDaysText,jangLabel,isMarket,located,mapUrl,market,marketPath,markets,n,nearMarkets,pct,SITE,sidoFull,sidoSlug,status,storesOf,topCats,type Market} from '../../../lib/data';
 
 export const dynamicParams=false;
 export function generateStaticParams(){return markets.map(m=>({id:m.id}));}
@@ -14,8 +15,8 @@ type P={params:Promise<{id:string}>};
 const where=(m:Market)=>m.region_name??sidoFull(m.sido);
 export async function generateMetadata({params}:P):Promise<Metadata>{
   const m=market((await params).id);if(!m)return {};
-  const top=topCats(m.cats,3).map(c=>CATS[c].label).join('·');
-  return {title:`${m.name} 온누리상품권 사용처 가맹점 ${n(m.n)}곳`,
+  const top=topCats(m.cats,3).map(c=>CATS[c].label).join('·');const f=fairOf(m);
+  return {title:`${m.name} 온누리상품권 사용처 가맹점 ${n(m.n)}곳${f?` · ${jangLabel(f)}`:''}`,
     description:`${where(m)} ${m.name} 온누리상품권 가맹점 ${n(m.n)}곳(디지털 ${pct(m.d,m.n)}%)${top?` — ${top}`:''}. ${m.addr??m.jibun??''} ${baseLabel(status.base)} 공식 가맹점 목록 기준.`.replace(/\s+/g,' ').trim().slice(0,160),
     alternates:{canonical:marketPath(m.id)}};
 }
@@ -26,7 +27,7 @@ export default async function MarketPage({params}:P){
   const loc=located(m),pin=exact(m);
   const near=loc?nearMarkets(m.lat!,m.lon!,5,m.id).slice(0,6):[];
   const kind=isMarket(m)?'전통시장':'상점가';
-  const s=m.std;
+  const s=m.std;const fr=fairOf(m);
   const facts:[string,string|null|undefined][]=[['주소',m.addr],['지번 주소',m.jibun],['지역',where(m)],['시장 유형',s?.mtype],['장 서는 날',s?.cycle],['점포 수',s?.stores?`${s.stores}개(전통시장 표준데이터)`:null],
     ['취급 품목',s?.goods],['주차장',s?.parking==null?null:s.parking?'있음':'없음'],['공중화장실',s?.toilet==null?null:s.toilet?'있음':'없음'],['전화',s?.tel],['개설',s?.year?`${s.year}년`:null],
     ['온누리 가맹점',`${n(m.n)}곳 (디지털도 되는 곳 ${n(m.d)}곳 · ${pct(m.d,m.n)}%)`],['새로 가맹',m.new?`${status.latest_year}년 ${n(m.new)}곳`:null]];
@@ -42,6 +43,7 @@ export default async function MarketPage({params}:P){
       {s?.tel&&<a className="sub" href={`tel:${s.tel.replace(/[^0-9]/g,'')}`}>📞 시장 전화</a>}
       <a className="naver" href={`https://map.naver.com/p/search/${encodeURIComponent(`${m.name} ${where(m).split(' ').slice(-1)[0]}`)}`} target="_blank" rel="noopener">🟢 네이버 지도에서 보기</a></div>
     <p className="mk-lead">{lead}</p>
+    {fr&&<JangInfo f={fr} name={m.name}/>}
     <section><h2>가맹점 목록 <span className="muted">{n(m.n)}곳</span></h2><StoreTable rows={rows} latest={status.latest_year}/></section>
     <Ad/>
     <section><h2>시장 정보</h2><dl className="mk-facts">{facts.filter(([,v])=>v).map(([k,v])=><div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}</dl>
@@ -49,6 +51,7 @@ export default async function MarketPage({params}:P){
     {near.length>0&&<section><h2>가까운 다른 시장·상점가</h2><div className="mk-cards">{near.map(x=><MarketCard key={x.m.id} m={x.m} dist={x.km}/>)}</div></section>}
     {m.region&&<p><Link className="mk-more-link" href={`/region/${m.region}`}>{m.region_name} 온누리상품권 사용처 모두 보기 →</Link></p>}
     <Faq title={`${m.name} 자주 묻는 질문`} items={([
+      ...(fr?[[`${m.name} 장날은 언제인가요?`,`${jangDaysText(fr)}에 서는 ${jangLabel(fr)}이에요. 명절·날씨에 따라 쉬거나 바뀔 수 있어요.`] as [string,string]]:[]),
       [`${m.name}에서 온누리상품권을 쓸 수 있나요?`,`네. ${baseLabel(status.base)} 기준 ${m.name}에는 온누리상품권 가맹점이 ${n(m.n)}곳 있어요. 모든 가게가 가맹한 것은 아니니 가게 입구의 가맹점 표시를 확인하세요.`],
       [`${m.name}에서 디지털 온누리상품권도 되나요?`,`가맹점 ${n(m.n)}곳 중 ${n(m.d)}곳(${pct(m.d,m.n)}%)이 디지털형(모바일·카드)도 가맹했어요. 가게 목록에서 ‘디지털 되는 곳’을 누르면 그 가게만 보여요.`],
       [`${m.name}에는 어떤 가게가 있나요?`,top.length?`온누리 가맹점 기준 ${top.map(c=>`${CATS[c].label} ${n(m.cats[c]!)}곳`).join(', ')} 등이 있어요.`:''],

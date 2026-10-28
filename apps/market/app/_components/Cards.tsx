@@ -1,10 +1,11 @@
 // Server-rendered cards (no hooks): market cards for lists, store rows for market/region pages.
 import {CATS,km,marketPath,n,storePath,topCats,type Market,type StoreRow} from '../../lib/fmt';
+import {fairOf,jangLabel} from '../../lib/data';
 export function MarketCard({m,dist,hit,hitLabel}:{m:Market;dist?:number;hit?:number;hitLabel?:string}){
-  const top=topCats(m.cats);
+  const top=topCats(m.cats);const f=fairOf(m);
   return <a className="mk-card" href={marketPath(m.id)} data-gj-pt={m.geo==='std'||m.geo==='kakao'?`${m.lat},${m.lon}`:undefined} data-gj-name={m.name}>
     <span className="mk-icon" aria-hidden="true">🏪</span>
-    <span className="mk-card-body"><b>{m.name}</b>
+    <span className="mk-card-body"><b>{m.name}{f&&<span className="mk-tag">{jangLabel(f)}</span>}</b>
       <small>{dist!=null&&<span className="mk-km">{km(dist)}</span>}{m.region_name??m.sido}{top.length>0&&<> · {top.map(c=>CATS[c].label).join('·')}</>}</small></span>
     <span className="mk-card-n"><b>{n(hit??m.n)}</b><small>{hitLabel??'가맹점'}</small></span>
   </a>;

@@ -1,6 +1,6 @@
 // Static build data: apps/market/data/market.json (scripts/collect-market.py, daily). Server components only.
 import raw from '../data/market.json';
-import {CAT_MIN,CAT_ORDER,SIDOS,located,type Cat,type Data,type Market,type StoreRow} from './fmt';
+import {CAT_MIN,CAT_ORDER,SIDOS,jangLabel,located,type Cat,type Data,type Fair,type Market,type StoreRow} from './fmt';
 export * from './fmt';
 
 const D=raw as unknown as Data;
@@ -38,3 +38,15 @@ export const updated=()=>{const d=new Date(status.updated_at);return `${d.getFul
 export const nearMarkets=(lat:number,lon:number,km:number,skip?:string)=>{const dLat=km/111,dLon=km/(111*Math.cos(lat*Math.PI/180));
   return markets.filter(m=>located(m)&&m.id!==skip&&Math.abs(m.lat!-lat)<=dLat&&Math.abs(m.lon!-lon)<=dLon)
     .map(m=>({m,km:Math.hypot((m.lat!-lat)*111,(m.lon!-lon)*111*Math.cos(lat*Math.PI/180))})).filter(x=>x.km<=km).sort((a,b)=>a.km-b.km);};
+
+/** 장 서는 날이 정해진 시장(5일장 등). 온누리 시장과 이어진 곳(mid)은 시장 페이지에, 나머지는 /jang/{id} */
+export const fairs:Fair[]=D.fairs??[];
+export const fair=(id:string)=>fairs.find(f=>f.id===id);
+export const ownFairs=fairs.filter(f=>!f.mid);
+const byMid=new Map(fairs.filter(f=>f.mid).map(f=>[f.mid!,f]));
+export const fairOf=(m:Pick<Market,'id'>)=>byMid.get(m.id);
+export const fairsIn=(region:string)=>fairs.filter(f=>f.region===region);
+/** '1·6일장'… 묶음(끝자리 순), 그 밖(매달 며칠·매주 요일)은 뒤에 */
+export const jangGroups=(()=>{const g=new Map<string,Fair[]>();for(const f of fairs)(g.get(jangLabel(f))??g.set(jangLabel(f),[]).get(jangLabel(f))!).push(f);
+  const rank=(k:string)=>{const m=k.match(/^(\d+)·(\d+)일장$/);return m?+m[1]:k.endsWith('일장')?20:k.startsWith('매달')?30:40;};
+  return [...g].map(([label,fs])=>({label,fairs:fs})).sort((a,b)=>rank(a.label)-rank(b.label)||b.fairs.length-a.fairs.length);})();

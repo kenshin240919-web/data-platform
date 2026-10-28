@@ -38,3 +38,6 @@
   .mk-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.mk-cards{grid-template-columns:1fr}.mk-rank{grid-template-columns:1fr}.mk-stores{grid-template-columns:repeat(2,minmax(0,1fr))}
   .mk-nav{gap:16px;overflow-x:auto;white-space:nowrap}.mk-facts div{grid-template-columns:90px 1fr}.mk-bars a{grid-template-columns:96px 1fr 60px}
 }
+.mk-jang-band{display:flex;align-items:center;gap:12px;margin:14px 0;padding:14px 16px;border-radius:14px;background:#fff7ed;border:1px solid #fed7aa;color:var(--ink);text-decoration:none}.mk-jang-band>span[aria-hidden]{font-size:26px}.mk-jang-band>span:nth-child(2){flex:1;display:flex;flex-direction:column;font-size:15px}.mk-jang-band b{color:#c2410c}.mk-jang-band small{color:var(--muted);font-size:13px;margin-top:2px}.mk-jang-band em{font-style:normal;font-weight:800;color:#c2410c;white-space:nowrap}
+.mk-jang-groups h3{font-size:15px;margin:14px 0 6px;color:var(--muted)}.mk-jang-list{display:flex;flex-wrap:wrap;gap:6px 14px;margin:0;padding:0;list-style:none;font-size:14px}.mk-jang-list a{color:var(--ink)}.mk-jang-list small{color:var(--muted);margin-left:4px}
+.mk-tag{display:inline-block;background:#fff7ed;color:#c2410c;border-radius:6px;padding:0 6px;font-size:11px;font-weight:700;margin-left:6px;white-space:nowrap}

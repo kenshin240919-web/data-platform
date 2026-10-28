@@ -292,6 +292,22 @@ def load_cache():
         return {}
 
 
+WEEK = '일월화수목금토'  # 브라우저 Date.getDay()와 같은 순서(일=0)
+
+
+def jang_days(cycle):
+    """장 서는 주기 → {'days': 날짜들, 'wd': 요일들}. '2일+7일' → 2·7·12·17·22·27(31일은 시장마다 달라 넣지 않음),
+    '15일+30일'처럼 10보다 큰 날이 있으면 그대로, '매주 토요일' → wd [6]. 매일·음력·알 수 없는 것은 None."""
+    c = cycle or ''
+    if not c or '매일' in c or '음력' in c:
+        return None
+    nums = sorted({int(x) for x in re.findall(r'(\d{1,2})\s*일', c) if 1 <= int(x) <= 31})
+    days = sorted({d for k in nums for d in (k, k + 10, k + 20) if d <= 30}) if nums and max(nums) <= 10 else nums
+    wd = sorted({WEEK.index(w) for w in re.findall(r'([일월화수목금토])요일', c)})
+    out = {k: v for k, v in (('days', days), ('wd', wd)) if v}
+    return out or None
+
+
 def main():
     force = '--force' in sys.argv
     path = sys.argv[sys.argv.index('--csv') + 1] if '--csv' in sys.argv else None
@@ -359,13 +375,14 @@ def main():
             break
     log(f'카카오 검색 {asked:,}곳 / 대상 {len(todo):,}곳 ({time.time() - t0:,.0f}초)')
 
-    markets = []
+    markets, linked = [], {}
     for (sido, name), rs in order:
         m = {'id': hid(sido, name), 'name': name, 'sido': sido, 'addr': None, 'jibun': None, 'lat': None, 'lon': None, 'geo': None}
         s = std_of(sido, name)
         if s and s['lat'] is not None:
             m.update({k: s[k] for k in ('addr', 'jibun', 'lat', 'lon')}, geo='std')
         if s:
+            linked.setdefault(id(s), m)
             m['std'] = {k: v for k, v in s.items() if k not in ('name', 'addr', 'jibun', 'lat', 'lon') and v not in (None, '')}
         c = cache.get(f'{sido}|{name}')
         if m['geo'] is None and c and c.get('lat') is not None:  # 다시 확인에서 못 찾으면 이전 좌표를 그대로(확인한 날만 바뀜)
@@ -412,6 +429,31 @@ def main():
         f'(가맹점 기준 위치 있음 {sum(m["n"] for m in out_markets if m.get("geo") in ("std", "kakao")):,}/{len(stores):,})')
     log(f'품목: {dict(cats.most_common())}')
 
+    # 5일장 등 정기장(장 서는 날이 정해진 곳): 표준데이터 전체에서. 온누리 시장과 이어진 곳은 그 시장 페이지(mid), 아니면 /jang/{id}.
+    fairs, odd = [], Counter()
+    for s in {id(v): v for v in std.values()}.values():
+        j = jang_days(s.get('cycle'))
+        if not j:
+            if s.get('cycle') and '매일' not in s['cycle']:
+                odd[s['cycle']] += 1
+            continue
+        lm = linked.get(id(s))
+        sido = lm['sido'] if lm else sido_of(s.get('addr') or s.get('jibun'))
+        f = {'id': hid('jang', sido or '', s['name']), 'name': s['name'], 'sido': sido, **j,
+             **{k: s.get(k) for k in ('cycle', 'addr', 'jibun', 'lat', 'lon', 'mtype', 'stores', 'goods', 'tel', 'parking', 'toilet', 'year')}}
+        if lm:
+            f.update(mid=lm['id'], region=lm.get('region'), region_name=lm.get('region_name'))
+        elif sido:
+            hit = region_of(f, regions)
+            if hit:
+                code, nm = hit
+                if ' ' in nm:
+                    code, nm = code[:4] + '0', nm.split(' ')[0]
+                f['region'], f['region_name'] = code, region_name(code, nm, regions)
+        fairs.append({k: v for k, v in f.items() if v not in (None, '')})
+    fairs.sort(key=lambda f: (f.get('sido') or '', f.get('region_name') or '', f['name']))
+    log(f'장 서는 날이 정해진 시장 {len(fairs):,}곳(온누리 시장과 이어진 곳 {sum(1 for f in fairs if "mid" in f):,}) · 해석 못 한 주기 {dict(odd.most_common(15))}')
+
     prev = None
     try:
         prev = json.loads(OUT.read_text(encoding='utf-8'))
@@ -422,7 +464,9 @@ def main():
     status = {'updated_at': datetime.now(KST).isoformat(timespec='seconds'), 'base': base or (prev or {}).get('status', {}).get('base'),
               'count': len(stores), 'markets': len(out_markets), 'latest_year': int(latest) if latest else None,
               'digital': sum(s[5] for s in stores), 'located': geo['std'] + geo['kakao'] + geo['dong'], 'std': bool(std), 'cats': dict(cats)}
-    data = {'status': status, 'markets': out_markets, 'stores': stores}
+    fairs = fairs if std else (prev or {}).get('fairs', [])  # 표준데이터를 못 받은 날은 어제 목록
+    status['fairs'] = len(fairs)
+    data = {'status': status, 'markets': out_markets, 'stores': stores, 'fairs': fairs}
     if prev and {k: v for k, v in prev.items() if k != 'status'} == {k: v for k, v in data.items() if k != 'status'}:
         log('바뀐 것 없음')
         return

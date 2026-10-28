@@ -5,6 +5,7 @@ import {Connect,genericFor} from '@guidejung/ui/network';
 import {NearMarket} from './_components/NearMarket';
 import {MarketCard} from './_components/Cards';
 import {Ad} from './_components/Ad';
+import {JangToday} from './_components/Jang';
 import {baseLabel,CAT_ORDER,CATS,markets,n,nation,pct,SITE,sidos,status,updated} from '../lib/data';
 
 export const metadata:Metadata={alternates:{canonical:'/'}};
@@ -20,6 +21,7 @@ export default function Home(){
       <div><b>{n(nation.d)}</b><small>디지털(모바일·카드)도 되는 곳 · {pct(nation.d,nation.n)}%</small></div>
       <div><b>{n(nation.new)}</b><small>{status.latest_year}년 새로 가맹</small></div>
     </div>
+    <JangToday/>
     <NearMarket/>
     <Ad/>
     <section><h2>품목으로 찾기</h2><div className="mk-cats">{CAT_ORDER.filter(c=>c!=='etc').map(c=><Link key={c} href={`/item/${c}`}><span aria-hidden="true">{CATS[c].icon}</span><span><b>{CATS[c].label}</b><small>{n(nation.cats[c])}곳</small></span></Link>)}</div></section>

@@ -38,8 +38,11 @@ export type Market={id:string;name:string;sido:string;addr?:string;jibun?:string
   std?:Std;n:number;d:number;new:number;cats:Partial<Record<Cat,number>>};
 /** 가맹점 한 줄: [id, 이름, 시장 번호, 품목 묶음, 취급품목 원문, 디지털 가맹(1/0), 가맹 등록년도] — 모두 지류형 가맹. */
 export type StoreRow=[string,string,number,Cat,string|null,0|1,number|null];
-export type Status={updated_at:string;base:string|null;count:number;markets:number;latest_year:number|null;digital:number;located:number;std:boolean;cats:Partial<Record<Cat,number>>};
-export type Data={status:Status;markets:Market[];stores:StoreRow[]};
+export type Status={fairs?:number;updated_at:string;base:string|null;count:number;markets:number;latest_year:number|null;digital:number;located:number;std:boolean;cats:Partial<Record<Cat,number>>};
+/** 장 서는 날이 정해진 시장(5일장 등, 전국전통시장표준데이터). days: 매달 장 서는 날(31일 제외), wd: 매주 요일(일=0). mid: 이어진 온누리 시장 id. */
+export type Fair={id:string;name:string;sido?:string;days?:number[];wd?:number[];cycle?:string;addr?:string;jibun?:string;lat?:number;lon?:number;mtype?:string;stores?:string;goods?:string;
+  tel?:string;parking?:boolean;toilet?:boolean;year?:string;mid?:string;region?:string;region_name?:string};
+export type Data={status:Status;markets:Market[];stores:StoreRow[];fairs?:Fair[]};
 
 export const n=(v:number)=>v.toLocaleString('ko-KR');
 export const pct=(a:number,b:number)=>b?Math.round(a/b*100):0;
@@ -67,3 +70,23 @@ export type SlimStore={id:string;name:string;cat:Cat;item:string|null;d:0|1;mark
 export const updatedLabel=(iso:string)=>{const d=new Date(iso);return `${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()}`;};
 export const baseLabel=(b:string|null)=>b?`${+b.slice(0,4)}년 ${+b.slice(5,7)}월 ${+b.slice(8,10)}일`:'최신';
 export const CAT_MIN=10;  // 지역×품목 페이지는 가맹점이 이만큼 있을 때만
+
+// ── 장날(5일장). 날짜는 한국 시간 기준(브라우저에서 다시 계산 — 정적 페이지는 하루 한 번만 빌드되므로).
+export const WEEK='일월화수목금토';
+export type Day={y:number;m:number;d:number;wd:number};
+export const kstDay=(t=Date.now()):Day=>{const x=new Date(t+9*3600e3);return {y:x.getUTCFullYear(),m:x.getUTCMonth()+1,d:x.getUTCDate(),wd:x.getUTCDay()};};
+export const dayLabel=(k:Day)=>`${k.m}월 ${k.d}일(${WEEK[k.wd]})`;
+export const jangOn=(f:Pick<Fair,'days'|'wd'>,k:Pick<Day,'d'|'wd'>)=>!!(f.days?.includes(k.d)||f.wd?.includes(k.wd));
+/** 오늘부터 장날 n개(오늘 포함, after=며칠 뒤) */
+export const nextJangs=(f:Pick<Fair,'days'|'wd'>,n=1,t=Date.now())=>{const out:(Day&{after:number})[]=[];for(let i=0;i<62&&out.length<n;i++){const k=kstDay(t+i*864e5);if(jangOn(f,k))out.push({...k,after:i});}return out;};
+/** '2·7일장', '매달 15·30일', '매주 토요일' */
+export const jangLabel=(f:Pick<Fair,'days'|'wd'>)=>{const parts:string[]=[];
+  if(f.days?.length){const tails=[...new Set(f.days.map(d=>d%10||10))].sort((a,b)=>a-b);const full=tails.flatMap(k=>[k,k+10,k+20].filter(d=>d<=30));
+    parts.push(full.length===f.days.length&&full.every(d=>f.days!.includes(d))?`${tails.join('·')}일장`:`매달 ${f.days.join('·')}일`);}
+  if(f.wd?.length)parts.push(`매주 ${f.wd.map(w=>WEEK[w]).join('·')}요일`);
+  return parts.join(' · ');};
+export const jangDaysText=(f:Pick<Fair,'days'|'wd'>)=>[f.days?.length?`매달 ${f.days.join('·')}일`:'',f.wd?.length?`매주 ${f.wd.map(w=>WEEK[w]).join('·')}요일`:''].filter(Boolean).join(', ');
+export const fairPath=(f:Pick<Fair,'id'|'mid'>)=>f.mid?`/market/${f.mid}#jang`:`/jang/${f.id}`;
+/** 브라우저로 보내는 장날 목록(/jang.json) 한 줄 */
+export const slimFair=(f:Fair)=>({id:f.id,name:f.name,r:f.region_name??f.sido??'',lat:f.lat??null,lon:f.lon??null,days:f.days,wd:f.wd,href:fairPath(f)});
+export type SlimFair=ReturnType<typeof slimFair>;
