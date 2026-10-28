@@ -54,11 +54,37 @@ export function Dashboard({areas}:{areas:Area[]}){
     widen([2,5,10],r=>L.repair(lat,lon,'repair',r)).then(x=>{if(!x)return put('service',null);const p=x.d.items[0] as (Place&{sub?:string})|undefined;
       put('service',{icon:'🔧',title:'자동차 정비소',answer:x.d.total?`${x.r}km 안 ${n(x.d.total)}곳`:'10km 안에 없어요',sub:p?`가장 가까운 곳 ${p.name}${p.sub?`(${p.sub})`:''} · ${km(p.km)}`:'',
         href:p?`${U.service}/center/${p.id}`:`${U.service}/region/${a.c}`,acts:acts(p&&call(p),{label:'🔍 검사소',href:`${U.service}/inspection`})});});
+    // 10/29 사용자: 16개 사이트 모두 카드로(위치를 알면 숫자, 모르면 바로 가기).
+    L.benefit(a).then(d=>put('benefit',d?{icon:'🎁',title:`${d.name} 혜택·지원금`,answer:`받을 수 있는 혜택 ${n(d.total)}가지`,badge:d.dueN?`한 달 안 마감 ${n(d.dueN)}건`:undefined,
+      sub:d.due[0]?`곧 마감: ${d.due[0][1]}`:`시군구 혜택 ${n(d.local)}가지`,href:`${U.benefit}/region/${a.c}`,state:'good',
+      acts:[{label:'🎯 나에게 맞는 것만',href:`${U.benefit}/find`},{label:'📅 마감 임박',href:`${U.benefit}/deadline`}]}:null));
+    widen([2,5,10],r=>L.petHospital(lat,lon,r)).then(x=>{if(!x)return put('pet',null);const p=x.d.items[0] as (Place&{sub?:string|null})|undefined;
+      put('pet',{icon:'🐾',title:'가까운 동물병원',answer:x.d.total?`${x.r}km 안 ${n(x.d.total)}곳`:'10km 안에 없어요',sub:p?`가장 가까운 곳 ${p.name}${p.sub?`(${p.sub})`:''} · ${km(p.km)}`:'',
+        href:p?`${U.pet}/place/${p.id}`:U.pet,acts:acts(p&&call(p),{label:'🌙 24시',href:`${U.pet}/24h`},{label:'💊 동물약국',href:`${U.pet}/pharmacy`})});});
+    widen([1,2,5],r=>L.market(lat,lon,r)).then(x=>{if(!x)return put('market',null);const m=[...x.d.markets].sort((p,q)=>p.km-q.km)[0];
+      put('market',{icon:'🏪',title:'온누리상품권 쓰는 곳',answer:x.d.total?`${x.r}km 안 가맹점 ${n(x.d.total)}곳`:'5km 안에 없어요',sub:m?`가까운 시장 ${m.name} · ${km(m.km)}`:'',
+        href:m?`${U.market}/market/${m.id}`:U.market,acts:[{label:'📅 오늘 장날',href:`${U.market}/jang`}]});});
+    widen([1,2,5],r=>L.kiosk(lat,lon,r)).then(x=>{if(!x)return put('civil',null);const p=x.d.items[0] as Place|undefined;
+      put('civil',{icon:'🖨️',title:'지금 쓰는 무인민원발급기',answer:x.d.total?`${x.r}km 안 ${n(x.d.total)}대`:'5km 안에 없어요',sub:p?`가장 가까운 곳 ${p.name} · ${km(p.km)}`:'주민센터·우체국은 서류 사이트에서',
+        href:p?`${U.civil}/place/${p.id}`:U.civil,state:x.d.total?'good':'none',acts:[{label:'📄 떼는 서류 찾기',href:`${U.civil}/doc`}]});});
+    L.school(lat,lon,2).then(d=>{const p=d?.items[0];put('school',d?{icon:'🏫',title:'가까운 학교 · 오늘 급식',answer:d.total?`2km 안 학교 ${n(d.total)}곳`:'2km 안에 없어요',
+      sub:p?`가장 가까운 곳 ${p.name} · ${km(p.km)}`:'',href:p?`${U.school}/school/${p.code}`:U.school,acts:acts(p&&{label:'🍱 오늘 급식',href:`${U.school}/school/${p.code}`})}:null);});
+    widen([1,3],r=>L.academy(lat,lon,r)).then(x=>{if(!x)return put('academy',null);
+      put('academy',{icon:'🎓',title:'우리 동네 학원',answer:x.d.total?`${x.r}km 안 ${n(x.d.total)}곳`:'3km 안에 없어요',sub:'수강료 공개 학원부터 보기',
+        href:`${U.academy}/region/${a.c}`,acts:[{label:'💰 학원비 순위',href:`${U.academy}/rank`}]});});
+    L.highway().then(d=>put('traffic',d?{icon:'🛣️',title:'전국 고속도로 지금',answer:`정체 ${n(d.jam)}구간`,sub:`서행 ${n(d.slow)}구간 · 내 근처 노선·CCTV는 고속도로 사이트에서`,
+      href:U.traffic,state:d.jam>=30?'warn':'good',acts:[{label:'🚧 사고·공사',href:`${U.traffic}/incidents`}]}:null));
+    widen([2,5,10],r=>L.sauna(lat,lon,r)).then(x=>{if(!x)return put('rest',null);const p=x.d.items[0] as Place|undefined;
+      put('rest',{icon:'♨️',title:'찜질방·사우나',answer:x.d.total?`${x.r}km 안 ${n(x.d.total)}곳`:'10km 안에 없어요',sub:p?`가장 가까운 곳 ${p.name} · ${km(p.km)}`:'',
+        href:p?`${U.rest}/shop/${p.id}`:U.rest,acts:acts(p&&call(p))});});
     return ()=>{on=false;};
   // eslint-disable-next-line react-hooks/exhaustive-deps
   },[pos?.lat,pos?.lon]);
-  const order=['weather','pharmacy','hospital','oil','parking','charge','trip','service'];
-  const base:Record<string,Card>={weather:{icon:'🌤️',title:'우리 동네 날씨',href:U.weather},pharmacy:{icon:'💊',title:'지금 문 연 약국',href:U.pharmacy},hospital:{icon:'🏥',title:'지금 진료하는 병원',href:U.hospital},oil:{icon:'⛽',title:'가까운 최저가 주유소',href:U.oil},parking:{icon:'🅿️',title:'무료 공영 주차장',href:U.parking},charge:{icon:'⚡',title:'전기차 충전',href:U.charge},trip:{icon:'🚗',title:'가까운 가볼만한곳',href:U.trip},service:{icon:'🔧',title:'자동차 정비소',href:U.service}};
+  const order=['weather','pharmacy','hospital','benefit','oil','parking','trip','charge','pet','market','civil','school','academy','service','traffic','rest'];
+  const base:Record<string,Card>={weather:{icon:'🌤️',title:'우리 동네 날씨',href:U.weather},pharmacy:{icon:'💊',title:'지금 문 연 약국',href:U.pharmacy},hospital:{icon:'🏥',title:'지금 진료하는 병원',href:U.hospital},oil:{icon:'⛽',title:'가까운 최저가 주유소',href:U.oil},parking:{icon:'🅿️',title:'무료 공영 주차장',href:U.parking},charge:{icon:'⚡',title:'전기차 충전',href:U.charge},trip:{icon:'🚗',title:'가까운 가볼만한곳',href:U.trip},service:{icon:'🔧',title:'자동차 정비소',href:U.service},
+    benefit:{icon:'🎁',title:'우리 동네 혜택·지원금',href:U.benefit},pet:{icon:'🐾',title:'가까운 동물병원',href:U.pet},market:{icon:'🏪',title:'온누리상품권 쓰는 곳',href:U.market},
+    civil:{icon:'🖨️',title:'무인민원발급기·서류',href:U.civil},school:{icon:'🏫',title:'우리 학교 오늘 급식',href:U.school},academy:{icon:'🎓',title:'우리 동네 학원',href:U.academy},
+    traffic:{icon:'🛣️',title:'고속도로 지금 막혀?',href:U.traffic},rest:{icon:'♨️',title:'찜질방·사우나',href:U.rest}};
   return <section className="nr-board" aria-label="내 주변 지금">
     <p className="nr-where">{a?<>📍 <b>{a.n}</b> {pos?.precise?'내 위치':'접속 지역'} 기준 · 지금</>:status==='locating'?'위치 확인 중…':'위치를 알면 우리 동네 정보로 바로 바꿔 드려요'}</p>
     <PosNote/>{!pos?.precise&&<LocateCard title="내 위치로 한 번에 보기" desc="날씨·문 연 약국·병원·최저가 주유소·무료 주차장을 내 주변 기준으로" status={status} onClick={request} approxLabel={pos&&a?a.n:undefined}/>}

@@ -127,7 +127,7 @@ async function get<T extends {stale:boolean}>(env:Env,job:Job<T>,ctx?:Ctx):Promi
   catch(e){if(old)return {...old,stale:true};throw e;}
 }
 
-const json=(body:unknown,status=200,maxAge=60)=>new Response(JSON.stringify(body),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':`public, max-age=${maxAge}`}});
+const json=(body:unknown,status=200,maxAge=60)=>new Response(JSON.stringify(body),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':`public, max-age=${maxAge}`,'access-control-allow-origin':'*'}});  // 모아보기(near)가 브라우저에서 읽음
 
 /** Cron (5분마다): traffic every run, incidents every 10 minutes, CCTV at most hourly (ITS answers only from Korea, so it often fails here; visitors in Korea refresh it). */
 async function scheduled(env:Env,now:number){
