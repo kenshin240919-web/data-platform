@@ -11,8 +11,8 @@ Region codes are the weather site's 시군구 codes (scripts/collect-parking.py 
 Lots without usable coordinates keep the previous run's coordinates or get them from Kakao (KAKAO_REST_KEY, optional).
 Usage: DATA_GO_KR_KEY=... [KAKAO_REST_KEY=...] python scripts/collect-service.py [--force]
 """
-import csv, hashlib, importlib.util, io, json, os, re, sys, time, urllib.parse, urllib.request
-from collections import Counter
+import bisect, csv, hashlib, importlib.util, io, json, os, re, sys, time, urllib.parse, urllib.request
+from collections import Counter, defaultdict
 from datetime import datetime
 from pathlib import Path
 
@@ -197,6 +197,59 @@ def emissions(rows):
     return out
 
 
+BIG = ('종합정비', '소형자동차종합정비')
+hm = lambda s: int(s[:2]) * 60 + int(s[3:5])
+
+
+def enrich(items, parkings):
+    """Facts that differ on every detail page (Google skips near-identical template pages): 정비소·세차장 within 1km,
+    the nearest 검사소 (20km) and 공영주차장 (500m). Distances are rounded to 10m so a nearby change rewrites little."""
+    geo = [p for p in items if p.get('lat') is not None]
+    g = A.grid(geo)
+    gk = A.grid([x for x in parkings if x.get('lat') is not None])
+    ins = sorted((p for p in geo if p['kind'] == 'inspect'), key=lambda p: p['lat'])
+    ins_lat = [p['lat'] for p in ins]
+    for p in geo:
+        near = [b for _, b in A.within(g, p['lat'], p['lon'], 1000) if b is not p]
+        rep = [b for b in near if b['kind'] == 'repair']
+        p['around'] = {'r': len(rep), 'b': sum(b.get('sub') in BIG for b in rep), 'w': sum(b['kind'] == 'wash' for b in near)}
+        lo, hi = bisect.bisect_left(ins_lat, p['lat'] - 0.2), bisect.bisect_right(ins_lat, p['lat'] + 0.2)
+        best = min(((A.meters(p['lat'], p['lon'], e['lat'], e['lon']), e) for e in ins[lo:hi] if e is not p), key=lambda e: e[0], default=None)
+        if best and best[0] <= 20000:
+            p['insp'] = {'id': best[1]['id'], 'm': int(round(best[0], -1))}
+        park = min(A.within(gk, p['lat'], p['lon'], 500), key=lambda e: e[0], default=None)
+        if park:
+            p['park'] = {'id': park[1]['id'], 'name': park[1]['name'], 'm': int(round(park[0], -1)), 'free': park[1].get('charge') == '무료'}
+
+
+def stage_of(items):
+    """Sitemap stage: 1 = 검사소·종합/소형 정비소·전화와 시간이 있는 세차장 (submitted first), 2 = 전화나 시간이 있는 곳,
+    3 = 이름·주소뿐인 곳. The Worker's SITEMAP_STAGE decides how far the sitemap goes (Google crawls a new site slowly)."""
+    for p in items:
+        p['stage'] = (1 if p['kind'] == 'inspect' or (p['kind'] == 'repair' and p.get('sub') in BIG) or (p['kind'] == 'wash' and p.get('tel') and p['hours'])
+                      else 2 if p.get('tel') or p['hours'] else 3)
+
+
+def region_stats(items):
+    """Per region and kind: count, 등록 연도 and 평일 마감 quartiles, 토·일요일 시간 등록 수, 종합·소형 정비소 수 — the detail
+    page compares one place with its neighbours without storing them on every row."""
+    by = defaultdict(list)
+    for p in items:
+        by[(p['region'], p['kind'])].append(p)
+    q = lambda v, f: v[int(len(v) * f)] if v else None
+    out = defaultdict(dict)
+    for (rid, k), ps in by.items():
+        year = sorted(int(p['since'][:4]) for p in ps if (p.get('since') or '')[:4].isdigit())
+        close = sorted(hm(p['hours']['wk'][1]) for p in ps if 'wk' in p['hours'])
+        st = {'n': len(ps), 'y25': q(year, .25), 'y50': q(year, .5), 'y75': q(year, .75), 'hours': len(close),
+              'c25': q(close, .25), 'c50': q(close, .5), 'c75': q(close, .75),
+              'sat': sum('sat' in p['hours'] for p in ps), 'hol': sum('hol' in p['hours'] for p in ps)}
+        if k == 'repair':
+            st['big'] = sum(p.get('sub') in BIG for p in ps)
+        out[rid][k] = {a: v for a, v in st.items() if v is not None}
+    return out
+
+
 def main():
     args = sys.argv[1:]
     key = os.environ.get('DATA_GO_KR_KEY', '').strip()
@@ -226,9 +279,12 @@ def main():
         K.geocode(items, kakao)
     items = [compact(p) for p in K.place(items, regions)]
     items.sort(key=lambda p: (p['region'], p['kind'], p['name'], p['id']))
+    enrich(items, json.loads((ROOT / 'apps/parking/data/parkings.json').read_text(encoding='utf-8'))['items'])
+    stage_of(items)
+    stats = region_stats(items)
     if prev and len(items) < len(prev['items']) * 0.9 and '--force' not in args:
         raise SystemExit(f"서비스센터 수가 {len(prev['items']):,} → {len(items):,}로 10% 넘게 줄어 중단합니다 (--force로 무시)")
-    if prev and prev['items'] == items:
+    if prev and prev['items'] == items and prev.get('stats') == stats:
         log('변경 없음')
         return
     kinds = Counter(p['kind'] for p in items)
@@ -236,8 +292,9 @@ def main():
               'with_coords': sum(1 for p in items if p['lat'] is not None), 'new': sum(1 for p in items if prev and p['id'] not in prev_by_id),
               'removed': len(set(prev_by_id) - {p['id'] for p in items}) if prev else 0}
     OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps({'status': status, 'items': items}, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
+    OUT.write_text(json.dumps({'status': status, 'stats': stats, 'items': items}, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
     log(f"서비스센터 {len(items):,}곳 {dict(kinds)} · 좌표 {status['with_coords']:,} · 지역 {len({p['region'] for p in items})} · 파일 {OUT.stat().st_size / 1e6:.1f}MB")
+    log('사이트맵 단계', sorted(Counter(p['stage'] for p in items).items()))
     log('정비 종류', Counter(p['sub'] for p in items if p['kind'] == 'repair').most_common())
     # 종류 코드 추정 확인: 이름에 '공업사'(보통 종합정비)·'타이어'·'카센터'가 든 곳의 종류 분포
     for word in ('공업사', '타이어', '카센터', '오토', '모터스'):

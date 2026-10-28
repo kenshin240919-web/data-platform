@@ -7,7 +7,11 @@ export type Kind='repair'|'inspect'|'wash'|'emission';
 type HM=[string,string];
 /** hours: wk(평일)·sat(토)·hol(일요일·공휴일) → ['09:00','18:00'] — 원본에 있는 것만. region: weather 시군구 코드. */
 export type Center={id:string;kind:Kind;name:string;sub:string|null;addr:string|null;jibun:string|null;lat:number|null;lon:number|null;tel:string|null;
-  hours:{wk?:HM;sat?:HM;hol?:HM};hours_text?:string|null;since:string|null;tags:string[];fee:string|null;off:string|null;org:string|null;ref:string|null;region:string;region_name:string};
+  hours:{wk?:HM;sat?:HM;hol?:HM};hours_text?:string|null;since:string|null;tags:string[];fee:string|null;off:string|null;org:string|null;ref:string|null;region:string;region_name:string;
+  /** scripts/collect-service.py enrich: 1km 안 정비소(r)·그중 종합·소형(b)·세차장(w), 가장 가까운 검사소·공영주차장, 사이트맵 단계 */
+  around?:{r:number;b:number;w:number};insp?:{id:string;m:number};park?:{id:string;name:string;m:number;free:boolean};stage?:number};
+/** 시군구×종류 통계(region_stats): 등록 연도·평일 마감(분) 사분위, 시간 등록 수, 토·일요일 시간 등록 수, 종합·소형 정비소 수 */
+export type KindStats={n:number;y25?:number;y50?:number;y75?:number;hours:number;c25?:number;c50?:number;c75?:number;sat:number;hol:number;big?:number};
 export const KINDS:Record<Kind,{label:string;icon:string;title:string;desc:string;ld:string}>={
   repair:{label:'정비소',icon:'🔧',title:'자동차 정비소',desc:'종합·소형·전문 정비업체(카센터·공업사)',ld:'AutoRepair'},
   inspect:{label:'검사소',icon:'🔍',title:'자동차 검사소',desc:'정기·종합검사를 받는 곳(공단·민간 지정)',ld:'AutomotiveBusiness'},
