@@ -21,3 +21,4 @@ Disallow: /api/
 
 # Site summary for AI: https://benefit.guidejung.com/llms.txt
 Sitemap: https://benefit.guidejung.com/sitemap.xml
+#DaumWebMasterTool:130bf3669612b53934645f8eb6466022eec18870dade1b507935d409d06967dd:7v7Co2KibzUex4fH7zWmNA==
