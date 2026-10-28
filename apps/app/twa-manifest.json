@@ -1,0 +1,87 @@
+{
+  "packageId": "com.guidejung.near",
+  "host": "near.guidejung.com",
+  "name": "내근처",
+  "launcherName": "내근처",
+  "display": "standalone",
+  "themeColor": "#1765e8",
+  "themeColorDark": "#0f172a",
+  "navigationColor": "#ffffff",
+  "navigationColorDark": "#0f172a",
+  "navigationDividerColor": "#e5e7eb",
+  "navigationDividerColorDark": "#1f2937",
+  "backgroundColor": "#ffffff",
+  "enableNotifications": true,
+  "startUrl": "/?source=twa",
+  "iconUrl": "https://near.guidejung.com/icon-512.png",
+  "maskableIconUrl": "https://near.guidejung.com/icon-maskable-512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "./upload-key.p12",
+    "alias": "upload"
+  },
+  "appVersionCode": 1,
+  "appVersion": "1.0.0",
+  "shortcuts": [
+    {
+      "name": "지금 문 연 약국",
+      "shortName": "약국",
+      "url": "https://pharmacy.guidejung.com/?source=twa",
+      "chosenIconUrl": "https://pharmacy.guidejung.com/icon-192.png"
+    },
+    {
+      "name": "지금 진료하는 병원",
+      "shortName": "병원",
+      "url": "https://hospital.guidejung.com/?source=twa",
+      "chosenIconUrl": "https://hospital.guidejung.com/icon-192.png"
+    },
+    {
+      "name": "오늘 날씨",
+      "shortName": "날씨",
+      "url": "https://weather.guidejung.com/?source=twa",
+      "chosenIconUrl": "https://weather.guidejung.com/icon-192.png"
+    },
+    {
+      "name": "우리 동네 혜택",
+      "shortName": "혜택",
+      "url": "https://benefit.guidejung.com/?source=twa",
+      "chosenIconUrl": "https://benefit.guidejung.com/icon-192.png"
+    }
+  ],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://near.guidejung.com/manifest.webmanifest",
+  "fallbackType": "customtabs",
+  "features": {
+    "locationDelegation": {
+      "enabled": true
+    }
+  },
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "minSdkVersion": 24,
+  "orientation": "default",
+  "fingerprints": [],
+  "additionalTrustedOrigins": [
+    "trip.guidejung.com",
+    "weather.guidejung.com",
+    "traffic.guidejung.com",
+    "charge.guidejung.com",
+    "academy.guidejung.com",
+    "school.guidejung.com",
+    "pharmacy.guidejung.com",
+    "hospital.guidejung.com",
+    "oil.guidejung.com",
+    "parking.guidejung.com",
+    "service.guidejung.com",
+    "rest.guidejung.com",
+    "pet.guidejung.com",
+    "minwon.guidejung.com",
+    "market.guidejung.com",
+    "benefit.guidejung.com"
+  ],
+  "retainedBundles": []
+}

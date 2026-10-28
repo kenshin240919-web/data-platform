@@ -1,0 +1,65 @@
+# 내근처 안드로이드 앱(TWA, apps/app) — 구글 플레이에 올릴 AAB와 휴대폰에 바로 깔아 볼 APK를 만든다.
+# 필요한 것: GitHub Secret TWA_KEY_PASSWORD(16자 이상, 사용자가 정한 아무 긴 비밀번호 — 업로드 키 비밀번호).
+# 첫 실행 때 업로드 키(apps/app/upload-key.p12, 그 비밀번호로 암호화)를 만들어 main에 커밋하고, 지문(SHA-256)을 apps/app/upload-key.sha256에 남긴다.
+# 버전 번호는 실행 번호(github.run_number)로 자동 증가 — 플레이에 올릴 때마다 더 큰 번호가 필요해서.
+name: 내근처 앱 빌드
+# 지금은 수동 실행만(Actions → 내근처 앱 빌드 → Run workflow). 새 버전은 플레이에 올릴 때만 만들면 된다.
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: app-build
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      KEY_PASS: ${{ secrets.TWA_KEY_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: 비밀번호 확인
+        run: |
+          if [ ${#KEY_PASS} -lt 16 ]; then echo "::error::GitHub Secret TWA_KEY_PASSWORD(16자 이상)를 먼저 넣어 주세요."; exit 1; fi
+      - name: 업로드 키(없으면 처음 한 번 만듦)
+        run: |
+          K=apps/app/upload-key.p12
+          if [ ! -f "$K" ]; then
+            keytool -genkeypair -storetype PKCS12 -keystore "$K" -alias upload -keyalg RSA -keysize 2048 -validity 10000 \
+              -dname "CN=Naegeuncheo, O=guidejung, C=KR" -storepass "$KEY_PASS" -keypass "$KEY_PASS"
+          fi
+          keytool -list -v -keystore "$K" -storetype PKCS12 -storepass "$KEY_PASS" -alias upload | sed -n 's/.*SHA256: //p' > apps/app/upload-key.sha256
+          echo "업로드 키 SHA-256: $(cat apps/app/upload-key.sha256)" | tee -a "$GITHUB_STEP_SUMMARY"
+          if [ -n "$(git status --porcelain apps/app)" ]; then
+            git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add "$K" apps/app/upload-key.sha256
+            git commit -m "내근처 앱: 업로드 키 만들기(비밀번호로 암호화)·지문 기록"
+            git pull --rebase -q origin main && git push -q origin HEAD:main
+          fi
+      - name: 빌드(AAB·APK)
+        working-directory: apps/app/android
+        run: |
+          V=${{ github.run_number }}
+          sed -i -E "s/versionCode [0-9]+/versionCode $V/; s/versionName \"[^\"]*\"/versionName \"1.0.$V\"/" app/build.gradle
+          grep -E "versionCode|versionName" app/build.gradle
+          ./gradlew --no-daemon -q bundleRelease assembleRelease
+      - name: 서명
+        working-directory: apps/app/android
+        run: |
+          V=${{ github.run_number }}; K=../upload-key.p12; mkdir -p out
+          cp app/build/outputs/bundle/release/app-release.aab out/naegeuncheo-$V.aab
+          jarsigner -keystore $K -storetype PKCS12 -storepass "$KEY_PASS" -keypass "$KEY_PASS" -sigalg SHA256withRSA -digestalg SHA-256 out/naegeuncheo-$V.aab upload
+          BT=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)
+          "$BT/zipalign" -f -p 4 app/build/outputs/apk/release/app-release-unsigned.apk out/aligned.apk
+          "$BT/apksigner" sign --ks $K --ks-type PKCS12 --ks-pass env:KEY_PASS --key-pass env:KEY_PASS --ks-key-alias upload --out out/naegeuncheo-$V.apk out/aligned.apk
+          rm out/aligned.apk; "$BT/apksigner" verify out/naegeuncheo-$V.apk && ls -la out | tee -a "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: naegeuncheo-app-${{ github.run_number }}
+          path: apps/app/android/out/
+          retention-days: 30

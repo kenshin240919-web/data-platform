@@ -1,7 +1,7 @@
 // Home-screen app files for every 내근처 site: PNG icons (from public/icon.svg) and public/manifest.webmanifest.
 // Names come from SITES in packages/ui/src/network.tsx. Run again after changing an icon or a site name:
 //   node scripts/make-pwa.mjs
-import {readFileSync,writeFileSync} from 'node:fs';
+import {existsSync,readFileSync,writeFileSync} from 'node:fs';
 import sharp from 'sharp';
 
 const net=readFileSync('packages/ui/src/network.tsx','utf8');
@@ -13,7 +13,9 @@ for(const [,key,,name,brand,tagline] of sites){
     await sharp(svg,{density:Math.ceil(72*size/64)}).resize(size,size).png().toFile(`${dir}/${file}`);
   const manifest={name:brand,short_name:brand.replace(/^내근처 /,'')===brand?brand:`내근처 ${name}`,description:`${brand} — ${tagline}`,lang:'ko',
     start_url:'/?source=pwa',scope:'/',display:'standalone',background_color:'#ffffff',theme_color:color,
-    icons:[{src:'/icon-192.png',sizes:'192x192',type:'image/png'},{src:'/icon-512.png',sizes:'512x512',type:'image/png'},{src:'/icon.svg',sizes:'any',type:'image/svg+xml'}]};
+    icons:[{src:'/icon-192.png',sizes:'192x192',type:'image/png'},{src:'/icon-512.png',sizes:'512x512',type:'image/png'},
+      // 안드로이드 앱(apps/app, near만): 가장자리까지 채운 마스크 아이콘
+      ...(existsSync(`${dir}/icon-maskable-512.png`)?[{src:'/icon-maskable-512.png',sizes:'512x512',type:'image/png',purpose:'maskable'}]:[]),{src:'/icon.svg',sizes:'any',type:'image/svg+xml'}]};
   writeFileSync(`${dir}/manifest.webmanifest`,JSON.stringify(manifest,null,1)+'\n');
   console.log(key,brand,color);
 }
