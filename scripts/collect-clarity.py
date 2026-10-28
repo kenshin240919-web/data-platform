@@ -15,7 +15,7 @@ import requests
 
 API = 'https://www.clarity.ms/export-data/api/v1/project-live-insights'
 SITES = ['trip', 'weather', 'traffic', 'charge', 'academy', 'school',
-         'pharmacy', 'hospital', 'oil', 'parking', 'service', 'near', 'rest', 'pet', 'civil', 'market']
+         'pharmacy', 'hospital', 'oil', 'parking', 'service', 'near', 'rest', 'pet', 'civil', 'market', 'benefit']
 CALLS = {'all': {}, 'url': {'dimension1': 'URL'}, 'device': {'dimension1': 'Device'}}
 
 tokens = {}
