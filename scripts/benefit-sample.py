@@ -56,13 +56,15 @@ if lst:
         s = (r.get('신청기한') or '').strip()
         dl['상시' if '상시' in s else '날짜 있음' if re.search(r'\d{4}[.\-년]\s*\d{1,2}', s) else '빈 값' if not s else '그 밖(글)'] += 1
     out += [f'- 신청기한 형식: {dict(dl)}', '- 신청기한 예: ' + ' / '.join(sorted({(r.get('신청기한') or '')[:40] for r in lst if r.get('신청기한')})[:12])]
+    since = (datetime.now() - timedelta(days=30)).strftime('%Y%m%d')
+    recent = sum(1 for r in lst if re.sub(r'\D', '', r.get('수정일시') or '')[:8] >= since)
     money = sum(1 for r in lst if re.search(r'\d[\d,]*\s*(만\s*)?원', r.get('지원내용') or ''))
     out += [f'- 지원내용에 금액(숫자+원) 있음: {pc(money)}',
             f"- 상세조회URL 있음: {pc(sum(1 for r in lst if r.get('상세조회URL')))}",
             f"- 온라인신청사이트URL 있음(상세): {sum(1 for r in det if r.get('온라인신청사이트URL')):,}/{len(det):,}",
             f"- 구비서류 있음(상세): {sum(1 for r in det if (r.get('구비서류') or '').strip() not in ('', '-', '해당없음')):,}/{len(det):,}",
             f"- 자치법규 있음(상세): {sum(1 for r in det if r.get('자치법규')):,} · 법령 {sum(1 for r in det if r.get('법령')):,}",
-            f"- 수정일시 최근 30일: {sum(1 for r in lst if re.sub(r'\\D', '', r.get('수정일시') or '')[:8] >= (datetime.now() - timedelta(days=30)).strftime('%Y%m%d')):,}",
+            f"- 수정일시 최근 30일: {recent:,}",
             '- 수정일시 형식 예: ' + ', '.join(sorted({r.get('수정일시') or '' for r in lst})[-3:]), '']
     docs = Counter()
     for r in det:
