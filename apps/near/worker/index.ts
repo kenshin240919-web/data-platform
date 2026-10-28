@@ -6,7 +6,7 @@
 // 좌표는 장소(충전소·주차장 등)의 좌표만 받는다 — 방문자 위치는 이 API로 보내지 않는다.
 //   /api/push/*  내근처 알림(웹 푸시, ./push.ts·./alerts.ts) — key·subscribe·unsubscribe·test·status, 예약 발송은 scheduled()
 import {lastPush,subId,send,vapidKeys,type Rec,type Sub} from './push';
-import {TOPICS,pharmacyMsg,sendTopic,weatherMsg,type AlertEnv,type Topic} from './alerts';
+import {TOPICS,benefitMsg,pharmacyMsg,sendTopic,weatherMsg,type AlertEnv,type Topic} from './alerts';
 import {kstNow} from '../../pharmacy/lib/fmt';
 interface Env extends AlertEnv{ASSETS:Fetcher;NAVER_HUB_CLIENT_ID?:string;NAVER_HUB_CLIENT_SECRET?:string;KAKAO_REST_KEY?:string}
 // 브라우저 푸시 서버만(다른 주소로 요청을 보내게 하는 악용 방지).
@@ -55,7 +55,7 @@ export default {
       if(o&&!origin)return json({error:'forbidden'},403);
       const P=url.pathname.slice(10);
       if(P==='key')return json({key:(await vapidKeys(env)).pub,topics:TOPICS},200,'public, max-age=300',origin);
-      if(P==='status'){const [w,p,t]=await Promise.all([env.CACHE.get('push:log:weather','json'),env.CACHE.get('push:log:pharmacy','json'),env.CACHE.get('push:log:test','json')]);return json({weather:w,pharmacy:p,test:t},200,'private, no-store',origin);}
+      if(P==='status'){const [w,p,b,t]=await Promise.all([env.CACHE.get('push:log:weather','json'),env.CACHE.get('push:log:pharmacy','json'),env.CACHE.get('push:log:benefit','json'),env.CACHE.get('push:log:test','json')]);return json({weather:w,pharmacy:p,benefit:b,test:t},200,'private, no-store',origin);}
       if(req.method!=='POST')return json({error:'POST only'},405,'private, no-store',origin);
       let b:{sub?:Sub;endpoint?:string;w?:string;c?:string;n?:string;lat?:number;lon?:number;t?:string[]}={};
       try{b=await req.json();}catch{return json({error:'bad json'},400,'private, no-store',origin);}
@@ -73,7 +73,7 @@ export default {
       if(P==='test'){
         const rec=await env.CACHE.get(key,'json') as Rec|null;if(!rec)return json({error:'not subscribed'},404,'private, no-store',origin);
         if(rec.sent&&Date.now()-rec.sent<60e3)return json({error:'1분에 한 번만 시험할 수 있어요'},429,'private, no-store',origin);
-        const m=rec.t.includes('weather')?await weatherMsg(env,rec):await pharmacyMsg(env,rec);
+        const m=rec.t.includes('weather')?await weatherMsg(env,rec):rec.t.includes('pharmacy')?await pharmacyMsg(env,rec):await benefitMsg(env,rec,{dry:true});
         // 시험마다 다른 tag → 앞 시험 알림을 조용히 바꿔치기하지 않고 매번 새로 뜸.
         const tag=`gj-test-${Date.now()%1e6}`;
         const r=await send(env,rec.sub,{...(m??{title:'내근처 알림',body:'알림이 잘 와요. 아침에 우리 동네 소식을 보내 드릴게요.',url:'https://near.guidejung.com/alerts',tag}),tag});
@@ -102,6 +102,6 @@ export default {
   // 예약 발송(UTC): 22:00 = 한국 07:00 날씨, 23:30 = 한국 08:30 일요일·공휴일 약국(날짜는 한국 기준으로 확인).
   async scheduled(ev:ScheduledController,env:Env,ctx:ExecutionContext){
     if(ev.cron==='0 22 * * *')ctx.waitUntil(sendTopic(env,'weather'));
-    if(ev.cron==='30 23 * * *'){const k=kstNow(ev.scheduledTime);if(k.day==='7'||k.holiday)ctx.waitUntil(sendTopic(env,'pharmacy'));}
+    if(ev.cron==='30 23 * * *'){const k=kstNow(ev.scheduledTime);if(k.day==='7'||k.holiday)ctx.waitUntil(sendTopic(env,'pharmacy'));ctx.waitUntil(sendTopic(env,'benefit',{weekly:k.day==='1'}));}
   },
 };

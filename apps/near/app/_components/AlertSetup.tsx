@@ -9,7 +9,7 @@ import {nearestArea} from '../../lib/live';
 
 type State='checking'|'unsupported'|'ios-home'|'inapp'|'denied'|'off'|'on'|'busy';
 const KEY='gj.alerts';
-const TOPICS:[string,string,string][]=[['weather','🌤️ 매일 아침 7시 우리 동네 날씨','어제보다 몇 도 춥고 더운지, 비·미세먼지'],['pharmacy','💊 일요일·공휴일 아침 문 연 약국','아침 8시 30분, 우리 동네 지금 문 연 약국 수']];
+const TOPICS:[string,string,string][]=[['weather','🌤️ 매일 아침 7시 우리 동네 날씨','어제보다 몇 도 춥고 더운지, 비·미세먼지'],['pharmacy','💊 일요일·공휴일 아침 문 연 약국','아침 8시 30분, 우리 동네 지금 문 연 약국 수'],['benefit','🎁 우리 동네 새 혜택·마감 3일 전','새 지원금·혜택이 생기거나 마감 3일 전인 날만(아침 8시 30분), 월요일엔 한 주 요약']];
 const ga=(n:string,p:Record<string,unknown>={})=>{try{(window as {gtag?:(...a:unknown[])=>void}).gtag?.('event',n,p);}catch{}};
 const b64=(s:string)=>Uint8Array.from(atob(s.replace(/-/g,'+').replace(/_/g,'/')+'==='.slice((s.length+3)%4)),c=>c.charCodeAt(0));
 type Saved={w:string;t:string[]};
@@ -23,7 +23,7 @@ const load=():Saved|null=>{try{return JSON.parse(localStorage.getItem(KEY)??'nul
 
 export function AlertSetup({areas}:{areas:Area[]}){
   const {pos}=useMyPosition();
-  const [st,setSt]=useState<State>('checking');const [w,setW]=useState('');const [t,setT]=useState<string[]>(['weather','pharmacy']);const [msg,setMsg]=useState('');const [help,setHelp]=useState(false);const [diag,setDiag]=useState<Record<string,string>>({});
+  const [st,setSt]=useState<State>('checking');const [w,setW]=useState('');const [t,setT]=useState<string[]>(['weather','pharmacy','benefit']);const [msg,setMsg]=useState('');const [help,setHelp]=useState(false);const [diag,setDiag]=useState<Record<string,string>>({});
   const note=(k:string,v:string)=>setDiag(d=>({...d,[k]:v}));
   const sidos=[...new Set(areas.map(a=>a.n.split(' ')[0]))];
   useEffect(()=>{
