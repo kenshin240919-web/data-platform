@@ -295,12 +295,12 @@ def main():
     OUT.write_text(json.dumps({'status': status, 'stats': stats, 'items': items}, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
     log(f"서비스센터 {len(items):,}곳 {dict(kinds)} · 좌표 {status['with_coords']:,} · 지역 {len({p['region'] for p in items})} · 파일 {OUT.stat().st_size / 1e6:.1f}MB")
     log('사이트맵 단계', sorted(Counter(p['stage'] for p in items).items()))
-    log('정비 종류', Counter(p['sub'] for p in items if p['kind'] == 'repair').most_common())
+    log('정비 종류', Counter(p.get('sub') for p in items if p['kind'] == 'repair').most_common())
     # 종류 코드 추정 확인: 이름에 '공업사'(보통 종합정비)·'타이어'·'카센터'가 든 곳의 종류 분포
     for word in ('공업사', '타이어', '카센터', '오토', '모터스'):
-        log(f'  이름 "{word}"', Counter(p['sub'] for p in items if p['kind'] == 'repair' and word in p['name']).most_common())
-    log('세차 유형', Counter(p['sub'] for p in items if p['kind'] == 'wash').most_common(8))
-    log('검사소', Counter(p['sub'] for p in items if p['kind'] == 'inspect').most_common(), '시간 파싱', sum(1 for p in items if p['kind'] == 'inspect' and p['hours']))
+        log(f'  이름 "{word}"', Counter(p.get('sub') for p in items if p['kind'] == 'repair' and word in p['name']).most_common())
+    log('세차 유형', Counter(p.get('sub') for p in items if p['kind'] == 'wash').most_common(8))
+    log('검사소', Counter(p.get('sub') for p in items if p['kind'] == 'inspect').most_common(), '시간 파싱', sum(1 for p in items if p['kind'] == 'inspect' and p['hours']))
 
 
 if __name__ == '__main__':
