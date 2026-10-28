@@ -27,7 +27,7 @@ export const SITES:Record<Site,{url:string;icon:string;name:string;brand:string;
   rest:{url:'https://rest.guidejung.com',icon:'♨️',name:'휴식',brand:'내근처 휴식',tagline:'오늘 어디서 쉬지?'},
   pet:{url:'https://pet.guidejung.com',icon:'🐾',name:'동물병원',brand:'내근처 동물병원',tagline:'우리 아이 아플 때 어디로?'},
   civil:{url:'https://minwon.guidejung.com',icon:'🖨️',name:'서류',brand:'내근처 서류',tagline:'떼고, 뽑고, 부치는 곳'},
-  market:{url:'https://market.guidejung.com',icon:'🏪',name:'시장',brand:'내근처 시장',tagline:'온누리 어디서 써?',hidden:true},
+  market:{url:'https://market.guidejung.com',icon:'🏪',name:'시장',brand:'내근처 시장',tagline:'온누리 어디서 써?'},
 };
 const {trip:T,weather:W,traffic:R,charge:C}=Object.fromEntries(Object.entries(SITES).map(([k,v])=>[k,v.url])) as Record<Site,string>;
 
@@ -82,24 +82,24 @@ export function nearRests(lat:number,lon:number,n=2,maxKm=40){
 
 /** Which sister sites matter most from each site (사이트 간 순환): first ones are shown first, up to MAX_LINKS. */
 const ORDER:Record<Site,Site[]>={
-  trip:['parking','weather','oil','charge','traffic','pharmacy','hospital'],
-  weather:['trip','parking','traffic','oil','charge','pharmacy','hospital'],
+  trip:['parking','weather','oil','charge','traffic','pharmacy','hospital','market'],
+  weather:['trip','parking','traffic','oil','charge','pharmacy','hospital','market'],
   traffic:['oil','service','parking','trip','charge','weather','rest'],
   charge:['trip','parking','weather','service','traffic','academy','rest'],
   academy:['parking','hospital','pharmacy','school','trip','weather','civil'],
   school:['academy','hospital','pharmacy','parking','weather','trip','civil'],
   pharmacy:['hospital','parking','weather','trip','academy','school','pet'],
   hospital:['pharmacy','parking','weather','trip','academy','school','pet'],
-  oil:['service','charge','parking','traffic','trip','weather'],
+  oil:['service','charge','parking','traffic','trip','weather','market'],
   parking:['trip','oil','charge','service','weather','pharmacy','rest','pet'],
   service:['oil','parking','charge','traffic','weather','trip','civil'],
-  near:['weather','pharmacy','hospital','parking','oil','trip','charge'],
-  rest:['parking','trip','weather','pharmacy','hospital','oil'],
-  pet:['pharmacy','parking','weather','trip','hospital','rest'],
-  civil:['parking','pharmacy','weather','school','trip','hospital'],
+  near:['weather','pharmacy','hospital','parking','oil','trip','charge','market'],
+  rest:['parking','trip','weather','pharmacy','hospital','oil','market'],
+  pet:['pharmacy','parking','weather','trip','hospital','rest','market'],
+  civil:['parking','pharmacy','weather','school','trip','hospital','market'],
   market:['parking','trip','weather','pharmacy','oil','hospital','civil'],
 };
-const MAX_LINKS=7;
+const MAX_LINKS=8;
 /** Standard links for a spot: the sister sites' pages for the same 시군구 (or the spot itself), in the order that fits the current site. */
 export function linksNear(lat:number,lon:number,skip:Site){
   const a=nearArea(lat,lon);const rd=nearRoad(lat,lon);const ll=`lat=${lat.toFixed(4)}&lon=${lon.toFixed(4)}`;
