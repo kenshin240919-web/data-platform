@@ -4,11 +4,11 @@
 // Routes: /api/near, /api/search, /api/where, /api/status, 약국 상세 /pharmacy/{hpid} (server-rendered into /pharmacy/shell).
 import raw from '../data/pharmacies.json';
 import weatherRegions from '../../weather/data/regions.json';
-import {DAY_LABEL,esc,eun,hm,km,kstNow,late,pharmacyPath,SITE,statusOf,sunday,holidayOpen,weekLine,type Card,type Pharmacy} from '../lib/fmt';
+import {DAY_LABEL,esc,eun,hm,km,kstNow,late,n,pharmacyPath,SITE,statusOf,sunday,holidayOpen,weekLine,type Card,type Pharmacy} from '../lib/fmt';
 import {actionsHtml} from '../../../packages/ui/src/actions';
 
 interface Env{ASSETS:Fetcher}
-type Data={status:{updated_at:string;count:number};items:Pharmacy[]};
+type Data={status:{updated_at:string;count:number};stats?:Record<string,RegionStats>;items:PharmacyX[]};
 let parsed:Data|null=null,byId:Map<string,Pharmacy>|null=null;
 const data=()=>parsed??=(typeof raw==='string'?JSON.parse(raw):raw) as Data;
 const get=(id:string)=>(byId??=new Map(data().items.map(p=>[p.id,p]))).get(id);
@@ -25,7 +25,7 @@ function near(lat:number,lon:number,radius:number,cond:string|null,limit:number,
     if(p.lat==null||p.id===skip||Math.abs(p.lat-lat)>dLat||Math.abs(p.lon!-lon)>dLon)continue;
     const d=distKm(lat,lon,p.lat,p.lon!);if(d>radius)continue;
     if(test&&!(cond==='open'?statusOf(p,now).state!=='closed':test(p)))continue;
-    out.push({...p,km:Math.round(d*100)/100});
+    out.push({id:p.id,name:p.name,address:p.address,tel:p.tel,lat:p.lat,lon:p.lon,hours:p.hours,zip:p.zip,region:p.region,region_name:p.region_name,km:Math.round(d*100)/100});
   }
   out.sort((a,b)=>a.km!-b.km!);
   return {total:out.length,items:out.slice(0,limit)};
@@ -48,11 +48,58 @@ function connectHtml(p:Pharmacy){
   ];
   return `<section class="gj-connect" aria-label="함께 보면 좋은 정보"><h2>🔗 함께 보면 좋은 정보</h2><div>${items.map(([i,t,d,h])=>`<a href="${esc(h)}"><span class="gj-connect-icon" aria-hidden="true">${i}</span><span><b>${esc(t)}</b><small>${esc(d)}</small></span><span class="gj-connect-go" aria-hidden="true">→</span></a>`).join('')}</div></section>`;
 }
+// 이 약국만의 내용(구글은 틀만 같고 데이터만 바뀐 페이지를 색인하지 않음): 평일 마감·일주일 영업 시간을 같은 시군구와 비교,
+// 반경 1km 약국, 닫은 뒤 갈 곳(평일 마감 뒤에도 여는 약국·일요일에 여는 약국·응급실·공영주차장). 계산은 collect-pharmacy.py.
+type Ref={id:string;m:number};
+type PharmacyX=Pharmacy&{wk_close?:number|null;week_h?:number;stage?:number;around?:{n:number;sun:number};after?:Ref;sun_alt?:Ref;
+  er_near?:Ref&{name:string};park?:Ref&{name:string;free:boolean}};
+type RegionStats={n:number;c25?:number;c50?:number;c75?:number;week?:number;sat:number;sun:number;hol:number;night:number};
+const hhmm=(v:number)=>hm(String(v).padStart(4,'0'));
+const dist=(m:number)=>m<1000?`${n(m)}m`:`${(m/1000).toFixed(1)}km`;
+const parkName=(s:string)=>/주차장$/.test(s)?s:/(공영|주차)$/.test(s)?`${s}${s.endsWith('주차')?'장':'주차장'}`:`${s} 공영주차장`;
+function insight(p:PharmacyX){
+  const st=data().stats?.[p.region],region=p.region_name,close=p.wk_close??null,ar=p.around,er=p.er_near,pk=p.park;
+  const day=['1','2','3','4','5'].find(d=>p.hours[d]);
+  const af=p.after&&get(p.after.id),afUntil=af&&day&&af.hours[day]?hm(af.hours[day][1]):null;
+  const su=p.sun_alt&&get(p.sun_alt.id),allDay=(p.week_h??0)>=160,cmp=!!st&&st.n>=8;
+  const band=close!=null&&cmp&&st!.c25!=null&&st!.c75!=null?close>st!.c75?'늦게까지 여는 편(상위 25%)':close<st!.c25?'일찍 닫는 편(하위 25%)':'보통 시간에 닫는 곳':null;
+  const sat=!!p.hours['6'],sun=!!p.hours['7'],hol=!!p.hours['8'],night=late(p);
+  const lines=[
+    allDay?`${eun(p.name)} 24시간 열어요.`:close!=null?`${eun(p.name)} 평일 보통 ${hhmm(close)}에 닫아요${band?`. ${region} 약국 ${n(st!.n)}곳 가운데 ${band}이에요`:''}.`:null,
+    `${sat&&sun?'토요일·일요일 모두 열어요':!sat&&!sun?'토요일·일요일은 쉬어요':sat?'토요일은 열고 일요일은 쉬어요':'토요일은 쉬고 일요일은 열어요'}${hol?'. 공휴일에도 열어요':''}.${cmp?` ${region}에서 일요일에 여는 약국은 ${n(st!.sun)}곳${sun?'이고, 이 약국이 그중 하나예요':'이에요'}.`:''}`,
+    p.week_h?`일주일 영업 시간은 약 ${p.week_h}시간이에요${cmp&&st!.week?`(${region} 약국 중앙값 ${st!.week}시간)`:''}.`:null,
+    ar?ar.n?`반경 1km 안에 다른 약국 ${n(ar.n)}곳이 있고, 그중 일요일에 여는 곳은 ${n(ar.sun)}곳이에요.`:'반경 1km 안에 다른 약국이 없어요.':null,
+    af&&close!=null&&!allDay?`평일 ${hhmm(close)}에 닫은 뒤에는 ${af.name}(${dist(p.after!.m)})이 ${afUntil?`${afUntil}까지 `:''}열려 있어요.`:null,
+  ].filter(Boolean) as string[];
+  const yn=(v:boolean)=>v?'<b>영업</b>':'<span class="muted">휴무</span>';
+  const rows:[string,string,string][]=cmp?[
+    ['평일 마감(보통)',allDay?'<b>24시간</b>':close!=null?`<b>${esc(hhmm(close))}</b>`:'–',st!.c50!=null?`중앙값 ${esc(hhmm(st!.c50))}${st!.c25!=null&&st!.c75!=null?` <small class="muted">(가운데 절반 ${esc(hhmm(st!.c25))}~${esc(hhmm(st!.c75))})</small>`:''}`:'–'],
+    ['일주일 영업 시간',p.week_h?`<b>${p.week_h}시간</b>`:'–',st!.week?`중앙값 ${st!.week}시간`:'–'],
+    ['토요일',yn(sat),`${n(st!.sat)}곳 영업`],['일요일',yn(sun),`${n(st!.sun)}곳 영업`],['공휴일',yn(hol),`${n(st!.hol)}곳 영업`],
+    ['평일 밤 10시 넘어서',yn(night),`${n(st!.night)}곳 영업`],
+  ]:[];
+  const table=rows.length?`<section><h2>운영 시간, 이 동네와 비교하면</h2><table class="ph-hours" style="max-width:none"><thead><tr><th></th><th>이 약국</th><th>${esc(region)} 약국 ${n(st!.n)}곳</th></tr></thead><tbody>${rows.map(([a,b,c])=>`<tr><th>${esc(a)}</th><td>${b}</td><td>${c}</td></tr>`).join('')}</tbody></table>
+<p class="muted small">같은 시군구 약국이 국립중앙의료원에 신고한 시간 기준입니다. 평일 마감은 월~금 가운데 보통 시각입니다.</p></section>`:'';
+  const go=[
+    af&&!allDay?`<li>🌙 <a href="${pharmacyPath(af.id)}">${esc(af.name)}</a> <span class="muted">· ${dist(p.after!.m)} · ${close!=null?`평일 ${esc(hhmm(close))} 넘어서도 영업`:'더 늦게까지 영업'}${afUntil?`(${esc(afUntil)}까지)`:''}${su&&su.id===af.id?` · 일요일 ${esc(hm(su.hours['7'][0]))}~${esc(hm(su.hours['7'][1]))} 영업`:''}</span></li>`:'',
+    su&&su.id!==af?.id?`<li>📅 <a href="${pharmacyPath(su.id)}">${esc(su.name)}</a> <span class="muted">· ${dist(p.sun_alt!.m)} · 일요일 ${esc(hm(su.hours['7'][0]))}~${esc(hm(su.hours['7'][1]))} 영업</span></li>`:'',
+    er?`<li>🚑 <a href="https://hospital.guidejung.com/hospital/${esc(er.id)}">${esc(er.name)} 응급실</a> <span class="muted">· ${dist(er.m)} · 실시간 남은 병상 보기</span></li>`:'',
+    pk?`<li>🅿️ <a href="https://parking.guidejung.com/parking/${esc(pk.id)}">${esc(parkName(pk.name))}</a> <span class="muted">· ${dist(pk.m)}${pk.free?' · 무료':''}</span></li>`:''].filter(Boolean);
+  const faq:[string,string][]=[
+    ...(close!=null&&!allDay?[[`${p.name} 닫은 뒤 근처에 여는 약국이 있나요?`,af?`평일 기준 ${af.name}이 ${dist(p.after!.m)} 거리에 있고 ${afUntil?`${afUntil}까지 `:''}엽니다(직선거리, 신고 시간 기준).`:`반경 2km 안에는 평일 ${hhmm(close)} 넘어서까지 여는 약국이 등록돼 있지 않습니다.`] as [string,string]]:[]),
+    ...(!sun&&su?[[`${p.name} 근처에 일요일에 여는 약국은?`,`${su.name}이 ${dist(p.sun_alt!.m)} 거리에 있고 일요일 ${hm(su.hours['7'][0])}~${hm(su.hours['7'][1])}에 엽니다.`] as [string,string]]:[]),
+    ...(er?[[`${p.name}에서 가장 가까운 응급실은?`,`${er.name} 응급실이 ${dist(er.m)} 거리에 있습니다(직선거리). 위급하면 119에 전화하세요.`] as [string,string]]:[]),
+  ];
+  const desc=[allDay?'24시간 영업':close!=null?`평일 ${hhmm(close)}까지${band&&band!=='보통 시간에 닫는 곳'?`(${region}에서 ${band.replace(/\(.*\)/,'')})`:''}`:'',`토요일 ${sat?'영업':'휴무'}·일요일 ${sun?'영업':'휴무'}`,af&&!allDay?`닫은 뒤 ${af.name} ${dist(p.after!.m)}`:''].filter(Boolean).join(' · ');
+  return {top:lines.length?`<section><h2>한눈에 보기</h2><p>${lines.map(esc).join(' ')}</p></section>`:'',
+    bottom:table+(go.length?`<section><h2>🌙 이 약국이 닫은 뒤 갈 곳</h2><ul style="padding-left:4px;list-style:none;line-height:2">${go.join('')}</ul></section>`:''),faq,desc};
+}
+
 const AD_FILL='<script>try{document.querySelectorAll("ins.adsbygoogle").forEach(function(){(window.adsbygoogle=window.adsbygoogle||[]).push({})})}catch(e){}</script>';
 const LD_DAY:Record<string,string>={'1':'Monday','2':'Tuesday','3':'Wednesday','4':'Thursday','5':'Friday','6':'Saturday','7':'Sunday'};
 const cardHtml=(c:Card)=>{const s=statusOf(c);return `<a class="ph-card ${s.state}" href="${pharmacyPath(c.id)}"><span class="ph-dot" aria-hidden="true"></span><span class="ph-card-body"><b>${esc(c.name)}</b><small>${c.km!=null?`${esc(km(c.km))} · `:''}${esc(s.label)}</small></span></a>`;};
 
-function detailHtml(p:Pharmacy,nearby:Card[]){
+function detailHtml(p:PharmacyX,nearby:Card[],ins:ReturnType<typeof insight>){
   const now=kstNow(),s=statusOf(p,now);
   const days=['1','2','3','4','5','6','7','8'];
   const todayKey=now.holiday?'8':now.day;
@@ -61,6 +108,7 @@ function detailHtml(p:Pharmacy,nearby:Card[]){
     [`${p.name} 일요일에도 여나요?`,p.hours['7']?`네, 일요일 ${hm(p.hours['7'][0])}~${hm(p.hours['7'][1])}에 엽니다.`:'등록된 일요일 운영 시간이 없습니다(휴무로 봅니다).'],
     [`${p.name} 공휴일에도 여나요?`,p.hours['8']?`네, 공휴일 ${hm(p.hours['8'][0])}~${hm(p.hours['8'][1])}에 엽니다.`:'등록된 공휴일 운영 시간이 없습니다(휴무로 봅니다).'],
     [`${eun(p.name)} 어디에 있나요?`,p.address?`${p.address}에 있습니다${p.tel?`(전화 ${p.tel})`:''}.`:''],
+    ...ins.faq,
   ] as [string,string][]).filter(([,x])=>x);
   const spec=Object.entries(p.hours).filter(([d])=>LD_DAY[d]).map(([d,[o,c]])=>({'@type':'OpeningHoursSpecification',dayOfWeek:`https://schema.org/${LD_DAY[d]}`,opens:hm(o).replace('새벽 ',''),closes:hm(c).replace('새벽 ','')}));
   const ld={'@context':'https://schema.org','@type':'Pharmacy',name:p.name,url:SITE+pharmacyPath(p.id),image:SITE+'/og.png?v=2',
@@ -74,9 +122,9 @@ function detailHtml(p:Pharmacy,nearby:Card[]){
 <div class="ph-head"><h1>${esc(p.name)}</h1><p>${esc([p.region_name,p.address].filter(Boolean).join(' · '))}</p></div>${actionsHtml({id:p.id,name:p.name,sub:p.region_name,url:pharmacyPath(p.id)})}
 <p class="ph-answer ${s.state}"><span class="ph-dot" aria-hidden="true"></span><b>${esc(s.label)}</b>${s.today?` <span class="muted">· 오늘 ${esc(s.today)}</span>`:''}</p>
 <div class="ph-actions">${p.tel?`<a href="tel:${esc(p.tel.replace(/[^0-9]/g,''))}">📞 전화하기</a>`:''}${map?`<a class="sub" href="${esc(map)}" rel="noopener" target="_blank">🧭 길찾기</a>`:''}</div>
-<section><h2>요일별 운영 시간</h2><table class="ph-hours"><tbody>${days.map(d=>{const h=p.hours[d];return `<tr${d===todayKey?' class="today"':''}><th>${DAY_LABEL[d]}${d===todayKey?' (오늘)':''}</th><td>${h?`${esc(hm(h[0]))} ~ ${esc(hm(h[1]))}`:'<span class="muted">휴무</span>'}</td></tr>`;}).join('')}</tbody></table>
+${ins.top}<section><h2>요일별 운영 시간</h2><table class="ph-hours"><tbody>${days.map(d=>{const h=p.hours[d];return `<tr${d===todayKey?' class="today"':''}><th>${DAY_LABEL[d]}${d===todayKey?' (오늘)':''}</th><td>${h?`${esc(hm(h[0]))} ~ ${esc(hm(h[1]))}`:'<span class="muted">휴무</span>'}</td></tr>`;}).join('')}</tbody></table>
 <p class="muted small">약국이 국립중앙의료원에 신고한 시간입니다. 명절·임시 휴무는 다를 수 있으니 가기 전에 전화로 확인하세요.</p></section>
-${nearby.length?`<section><h2>근처 다른 약국 <span class="muted">${nearby.some(c=>statusOf(c).state!=='closed')?'지금 문 연 곳 · 가까운 순':'가까운 순'}</span></h2><div class="ph-cards">${nearby.map(cardHtml).join('')}</div><p><a class="ph-more-link" href="/region/${esc(p.region)}">${esc(p.region_name)} 약국 모두 보기 →</a></p></section>`:''}
+${ins.bottom}${nearby.length?`<section><h2>근처 다른 약국 <span class="muted">${nearby.some(c=>statusOf(c).state!=='closed')?'지금 문 연 곳 · 가까운 순':'가까운 순'}</span></h2><div class="ph-cards">${nearby.map(cardHtml).join('')}</div><p><a class="ph-more-link" href="/region/${esc(p.region)}">${esc(p.region_name)} 약국 모두 보기 →</a></p></section>`:''}
 <section><h2>약국 정보</h2><dl class="ph-facts">${([['주소',p.address],['전화',p.tel],['우편번호',p.zip],['지역',p.region_name]] as [string,string|null][]).filter(([,v])=>v).map(([k,v])=>`<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl></section>
 ${connectHtml(p)}
 <section class="gj-faq" aria-label="자주 묻는 질문"><h2>자주 묻는 질문</h2><dl>${faq.map(([q,x])=>`<div><dt>${esc(q)}</dt><dd>${esc(x)}</dd></div>`).join('')}</dl></section>
@@ -84,15 +132,16 @@ ${connectHtml(p)}
 ${ldTag(ld)}${ldTag(crumbs)}${ldTag(faqLd)}`;
 }
 
-async function detail(p:Pharmacy,url:URL,env:Env,ctx:ExecutionContext){
+async function detail(p:PharmacyX,url:URL,env:Env,ctx:ExecutionContext){
   // 영업 상태가 시각에 따라 바뀌므로 5분 단위로 새로 만듦.
-  const key=new Request(`${url.origin}/pharmacy/${p.id}?b=${Math.floor(Date.now()/300e3)}&v=${encodeURIComponent(data().status.updated_at)}&t=1`);
+  const key=new Request(`${url.origin}/pharmacy/${p.id}?b=${Math.floor(Date.now()/300e3)}&v=${encodeURIComponent(data().status.updated_at)}&t=2`);
   const hit=await caches.default.match(key);if(hit)return hit;
   // 근처 약국은 지금 문 연 곳 먼저(밤·휴일에 바로 갈 곳), 없으면 가까운 순.
   const openNear=p.lat!=null?near(p.lat,p.lon!,5,'open',6,p.id).items:[];
   const nearby=openNear.length?openNear:p.lat!=null?near(p.lat,p.lon!,3,null,6,p.id).items:[];
   const title=`${p.name} 운영 시간·지금 영업 | 내근처 약국`;
-  const desc=`${p.region_name} ${p.name}: ${weekLine(p)}${p.hours['8']?` · 공휴일 ${hm(p.hours['8'][0])}~${hm(p.hours['8'][1])}`:''}. ${p.address??''} ${p.tel??''}`.replace(/\s+/g,' ').trim().slice(0,160);
+  const ins=insight(p);
+  const desc=`${p.region_name} ${p.name}: ${ins.desc}. ${weekLine(p)}${p.hours['8']?` · 공휴일 ${hm(p.hours['8'][0])}~${hm(p.hours['8'][1])}`:''}. ${p.address??''}`.replace(/\s+/g,' ').trim().slice(0,160);
   const canonical=SITE+pharmacyPath(p.id);
   const html=(await template(env,url.origin))
     .replace(/<title>[^<]*<\/title>/,`<title>${esc(title)}</title>`)
@@ -100,7 +149,7 @@ async function detail(p:Pharmacy,url:URL,env:Env,ctx:ExecutionContext){
     .replace(/<link rel="canonical" href="[^"]*"\/?>/,'')
     .replace(/<meta property="og:[^"]*" content="[^"]*"\/?>/g,'').replace(/<meta name="twitter:[^"]*" content="[^"]*"\/?>/g,'')
     .replace('</head>',`<link rel="canonical" href="${canonical}"/><meta property="og:title" content="${esc(title)}"/><meta property="og:description" content="${esc(desc)}"/><meta property="og:url" content="${canonical}"/><meta property="og:image" content="${SITE}/og.png?v=2"/><meta property="og:site_name" content="내근처 약국"/><meta property="og:locale" content="ko_KR"/><meta name="twitter:card" content="summary_large_image"/></head>`)
-    .replace(/<div id="pharmacy-detail">PHARMACY_DETAIL<\/div>/,detailHtml(p,nearby))
+    .replace(/<div id="pharmacy-detail">PHARMACY_DETAIL<\/div>/,detailHtml(p,nearby,ins))
     .replace('</body>',AD_FILL+'</body>');
   const res=new Response(html,{headers:{'content-type':'text/html; charset=utf-8','cache-control':'public, max-age=300'}});
   ctx.waitUntil(caches.default.put(key,res.clone()));

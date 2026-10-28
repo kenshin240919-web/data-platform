@@ -98,6 +98,7 @@ type HospitalX=Hospital&{dept?:string|null;wk_close?:number|null;week_h?:number;
 type DeptStats={n:number;c25:number|null;c50:number|null;c75:number|null;week:number|null;sat:number;sun:number;hol:number;night:number};
 const hhmm=(v:number)=>hm(String(v).padStart(4,'0'));
 const dist=(m:number)=>m<1000?`${n(m)}m`:`${(m/1000).toFixed(1)}km`;
+const parkName=(s:string)=>/주차장$/.test(s)?s:/(공영|주차)$/.test(s)?`${s}${s.endsWith('주차')?'장':'주차장'}`:`${s} 공영주차장`;
 function insight(h:HospitalX,stats:Record<string,DeptStats>){
   const k=h.dept??h.depts.find(d=>d!=='internal')??h.depts[0],dl=k?deptLabel(k):'병원',st=k?stats[k]:undefined,region=h.region_name;
   const close=h.wk_close??null,ar=h.around,ph=h.pharm??[],er=h.er_near,pk=h.park,allDay=(h.week_h??0)>=160;
@@ -122,7 +123,7 @@ function insight(h:HospitalX,stats:Record<string,DeptStats>){
 <p class="muted small">같은 시군구에서 ${esc(dl)}를 진료과목으로 신고한 병·의원 기준(국립중앙의료원 신고 시간). 평일 마감은 월~금 가운데 보통 시각입니다.</p></section>`:'';
   const go=[...ph.map(p=>`<li>💊 <a href="https://pharmacy.guidejung.com/pharmacy/${esc(p.id)}">${esc(p.name)}</a> <span class="muted">· ${dist(p.m)}${p.after?' · 진료 끝난 뒤에도 영업':''}</span></li>`),
     er?`<li>🚑 <a href="${hospitalPath(er.id)}">${esc(er.name)} 응급실</a> <span class="muted">· ${dist(er.m)} · 실시간 남은 병상 보기</span></li>`:'',
-    pk?`<li>🅿️ <a href="https://parking.guidejung.com/parking/${esc(pk.id)}">${esc(pk.name)} 공영주차장</a> <span class="muted">· ${dist(pk.m)}${pk.free?' · 무료':''}</span></li>`:''].filter(Boolean);
+    pk?`<li>🅿️ <a href="https://parking.guidejung.com/parking/${esc(pk.id)}">${esc(parkName(pk.name))}</a> <span class="muted">· ${dist(pk.m)}${pk.free?' · 무료':''}</span></li>`:''].filter(Boolean);
   const faq:[string,string][]=[
     [`${h.name} 토요일에도 진료하나요?`,h.hours['6']?`네, 토요일 ${hm(h.hours['6'][0])}~${hm(h.hours['6'][1])}에 진료합니다.`:'등록된 토요일 진료 시간이 없습니다(휴진으로 봅니다).'],
     ...(ph[0]?[[`${h.name} 근처 약국은 어디인가요?`,`${ph.map(p=>`${p.name} ${dist(p.m)}`).join(', ')} 거리에 있습니다(직선거리)${ph[0].after?`. ${ph[0].name}은 평일 진료가 끝난 뒤에도 영업합니다`:''}.`] as [string,string]]:[]),
