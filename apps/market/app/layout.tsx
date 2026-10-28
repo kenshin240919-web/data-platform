@@ -15,7 +15,8 @@ import { SITE } from '../lib/fmt';
 const GA_ID='G-L2J6MMPR8B',CLARITY_ID='z4hemv3oh7';
 // 직접 만든 어두운 화면을 쓰도록 알림(휴대폰 브라우저가 색을 강제로 뒤집어 글자가 노랗게 보이던 것 방지).
 export const viewport:Viewport={colorScheme:'light dark'};
-export const metadata:Metadata={metadataBase:new URL(SITE),icons:{icon:'/icon.svg',apple:'/apple-touch-icon.png'},manifest:'/manifest.webmanifest',
+// Search engine ownership tags (do not remove: verification is rechecked periodically).
+export const metadata:Metadata={metadataBase:new URL(SITE),icons:{icon:'/icon.svg',apple:'/apple-touch-icon.png'},manifest:'/manifest.webmanifest',verification:{other:{'naver-site-verification':'65639cd18f5e4092ee3961843528ec314c090bc7','msvalidate.01':'94FB5F5FCBAB10DABDC0256A035F8369'}},
   title:{default:'내근처 시장 | 온누리상품권 사용처 가맹점 찾기 — 내 주변 전통시장·상점가',template:'%s | 내근처 시장'},
   description:'온누리상품권 어디서 써? 내 주변 온누리상품권 사용처(가맹점)를 전통시장·상점가별, 시군구별, 품목별(음식점·카페·정육·미용실…)로 찾아 드려요. 소상공인시장진흥공단 공식 가맹점 목록 기준.',
   twitter:{card:'summary_large_image'},openGraph:{images:'/og.png?v=2',siteName:'내근처 시장',locale:'ko_KR',type:'website'}};
