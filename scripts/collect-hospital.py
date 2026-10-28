@@ -7,7 +7,7 @@ Region codes are the weather site's 시군구 codes (same rules as the academy/p
 Runs daily in GitHub Actions (.github/workflows/hospital-collect.yml).
 Usage: DATA_GO_KR_KEY=... python scripts/collect-hospital.py [--force]
 """
-import hashlib, importlib.util, json, os, re, sys, urllib.parse
+import bisect, hashlib, importlib.util, json, os, re, sys, urllib.parse
 from collections import Counter, defaultdict
 from datetime import datetime
 from pathlib import Path
@@ -106,6 +106,90 @@ def build(rows, depts_of, regions):
     return out
 
 
+def mins(t):
+    return int(t) // 100 * 60 + int(t) % 100
+
+
+HOSPITAL_DIVS = {'병원', '종합병원', '상급종합병원', '한방병원', '치과병원', '요양병원'}
+
+
+def main_dept(h):
+    """대표 진료과목: 이름에 있는 과목('OO소아청소년과의원' → 소아청소년과, 가장 긴 이름 우선), 치과·한의원은 종류로,
+    없으면 내과가 아닌 첫 과목(내과는 거의 모든 병원이 신고해서 맨 뒤)."""
+    named = sorted((k for k, (label, _) in DEPTS.items() if label in h['name'] and k in h['depts']), key=lambda k: -len(DEPTS[k][0]))
+    if named:
+        return named[0]
+    if 'dental' in h['depts'] and '치과' in (h['div'] or ''):
+        return 'dental'
+    if 'korean' in h['depts'] and '한' in (h['div'] or ''):
+        return 'korean'
+    return next((d for d in h['depts'] if d != 'internal'), h['depts'][0] if h['depts'] else None)
+
+
+def enrich(items, pharmacies, parkings):
+    """Facts that differ on every detail page (Google skips near-identical template pages): the usual weekday closing
+    time and weekly hours, the same 진료과목 within 1km, and where to go next — nearest 약국 (open after 진료 ends?),
+    nearest 응급실, nearest 공영주차장. Distances are rounded so a nearby change rewrites few D1 rows."""
+    for h in items:
+        h['dept'] = main_dept(h)
+        wk = sorted(span_end(h['hours'][d]) for d in '12345' if d in h['hours'])
+        h['wk_close'] = wk[len(wk) // 2] if wk else None
+        h['week_h'] = round(sum(mins(span_end(v)) - mins(v[0]) for d, v in h['hours'].items() if d in '1234567') / 30) / 2  # 30분 단위
+    geo = [h for h in items if h['lat'] is not None]
+    gh = A.grid(geo)
+    gp = A.grid([x for x in pharmacies if x.get('lat') is not None])
+    gk = A.grid([x for x in parkings if x.get('lat') is not None])
+    ers = sorted((h for h in geo if h['er']), key=lambda h: h['lat'])
+    er_lat = [h['lat'] for h in ers]
+    for h in items:
+        h['around'], h['pharm'], h['er_near'], h['park'] = None, [], None, None
+        if h['lat'] is None:
+            continue
+        k = h['dept']
+        near = [b for _, b in A.within(gh, h['lat'], h['lon'], 1000) if b is not h]
+        same = [b for b in near if k in b['depts']]
+        h['around'] = {'n': len(near), 'same': len(same), 'sun': sum(b['sun'] for b in same), 'night': sum(b['night'] for b in same)}
+        day = next((d for d in '12345' if d in h['hours']), None)
+        t = mins(h['wk_close']) + 10 if h['wk_close'] else None
+
+        def after(x):  # 그 약국이 평일 진료 마감 10분 뒤에도 여는지
+            v = x.get('hours', {}).get(day) if day and t is not None else None
+            return bool(v) and mins(v[0]) <= t < mins(span_end(v))
+        h['pharm'] = [{'id': x['id'], 'name': x['name'], 'm': int(round(d, -1)), 'after': after(x)} for d, x in sorted(A.within(gp, h['lat'], h['lon'], 1000), key=lambda e: e[0])[:2]]
+        park = min(A.within(gk, h['lat'], h['lon'], 500), key=lambda e: e[0], default=None)
+        if park:
+            h['park'] = {'id': park[1]['id'], 'name': park[1]['name'], 'm': int(round(park[0], -1)), 'free': park[1].get('charge') == '무료'}
+        if not h['er']:
+            lo, hi = bisect.bisect_left(er_lat, h['lat'] - 0.5), bisect.bisect_right(er_lat, h['lat'] + 0.5)
+            best = min(((A.meters(h['lat'], h['lon'], e['lat'], e['lon']), e) for e in ers[lo:hi]), key=lambda e: e[0], default=None)
+            if best:
+                h['er_near'] = {'id': best[1]['id'], 'name': best[1]['name'], 'm': int(round(best[0], -1))}
+
+
+def stage_of(items, s):
+    """Sitemap stage: 1 = linked from the static region·과목·조건 pages (submitted first), 2 = 야간·일요일·공휴일·응급실·병원급,
+    3 = rest. The Worker's SITEMAP_STAGE decides how far the sitemap goes (Google crawls a new site's pages slowly)."""
+    linked = {c['id'] for r in s['regions'] for c in r['top'] + r['er'] + [c for v in r['cond_top'].values() for c in v] + [c for v in r['depts'].values() for c in v['top']]}
+    for h in items:
+        h['stage'] = 1 if h['id'] in linked else 2 if h['night'] or h['sun'] or h['hol'] or h['er'] or h['div'] in HOSPITAL_DIVS else 3
+
+
+def region_stats(items):
+    """Per region and 진료과목: count, weekday closing time quartiles, weekly hours median, 토·일·공휴일·야간 counts
+    (D1 regions.stats): the detail page compares one hospital with its neighbours without storing them in every row."""
+    by = defaultdict(list)
+    for h in items:
+        for k in h['depts']:
+            by[(h['region'], k)].append(h)
+    q = lambda v, f: v[int(len(v) * f)] if v else None
+    out = defaultdict(dict)
+    for (rid, k), hs in by.items():
+        close, week = sorted(h['wk_close'] for h in hs if h['wk_close']), sorted(h['week_h'] for h in hs if h['week_h'])
+        out[rid][k] = {'n': len(hs), 'c25': q(close, .25), 'c50': q(close, .5), 'c75': q(close, .75), 'week': q(week, .5),
+                       'sat': sum(h['sat'] for h in hs), 'sun': sum(h['sun'] for h in hs), 'hol': sum(h['hol'] for h in hs), 'night': sum(h['night'] for h in hs)}
+    return out
+
+
 def card(h):
     return {k: h[k] for k in ('id', 'name', 'div', 'address', 'tel', 'lat', 'lon', 'hours', 'depts', 'er')}
 
@@ -165,10 +249,14 @@ def main():
         raise SystemExit(f"기관 수가 {len(prev['items']):,} → {len(items):,}로 10% 넘게 줄어 중단합니다 (--force로 무시)")
     status = {'updated_at': now.isoformat(timespec='seconds'), 'source': '국립중앙의료원 전국 병·의원 찾기 서비스', 'count': len(items),
               'with_coords': sum(1 for h in items if h['lat'] is not None)}
-    tmp = prev_path.with_suffix('.tmp')
-    tmp.write_text(json.dumps({'status': status, 'items': items}, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
-    tmp.replace(prev_path)
     s = summary(items, status)
+    enrich(items, json.loads((ROOT / 'apps/pharmacy/data/pharmacies.json').read_text(encoding='utf-8'))['items'],
+           json.loads((ROOT / 'apps/parking/data/parkings.json').read_text(encoding='utf-8'))['items'])
+    stage_of(items, s)
+    log('사이트맵 단계', sorted(Counter(h['stage'] for h in items).items()))
+    tmp = prev_path.with_suffix('.tmp')
+    tmp.write_text(json.dumps({'status': status, 'stats': region_stats(items), 'items': items}, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
+    tmp.replace(prev_path)
     SUMMARY.parent.mkdir(parents=True, exist_ok=True)
     SUMMARY.write_text(json.dumps(s, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
     log(f"기관 {status['count']:,}곳 · 좌표 {status['with_coords']:,} · 응급실 {s['er']:,} · 야간 {s['cond']['night']:,} · 일요일 {s['cond']['sun']:,} · 공휴일 {s['cond']['hol']:,}")

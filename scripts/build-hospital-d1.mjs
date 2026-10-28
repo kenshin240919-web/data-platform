@@ -28,14 +28,16 @@ const CARD=['id','name','div','address','tel','lat','lon','hours','depts','er'];
 const card=h=>JSON.stringify(Object.fromEntries(CARD.map(k=>[k,h[k]??null])));
 const text=h=>[h.name,h.address,h.region_name,h.div].filter(Boolean).join(' ').toLowerCase();
 const b=v=>v?1:0;
-const row=(h,into)=>`${into} (id,name,div,region_id,sido,lat,lon,depts,er,night,sat,sun,hol,rank,text,card,body) VALUES (${[
-  s(h.id),s(h.name),s(h.div),s(h.region),s(h.sido),s(h.lat),s(h.lon),s(pad(h.depts)),b(h.er),b(h.night),b(h.sat),b(h.sun),b(h.hol),s(h.rank??0),s(text(h)),s(card(h)),s(JSON.stringify(h))].join(',')});`;
+const row=(h,into)=>`${into} (id,name,div,region_id,sido,lat,lon,depts,er,night,sat,sun,hol,rank,text,card,body,stage) VALUES (${[
+  s(h.id),s(h.name),s(h.div),s(h.region),s(h.sido),s(h.lat),s(h.lon),s(pad(h.depts)),b(h.er),b(h.night),b(h.sat),b(h.sun),b(h.hol),s(h.rank??0),s(text(h)),s(card(h)),s(JSON.stringify(h)),s(h.stage??3)].join(',')});`;
+// 시군구별 진료과목 통계(collect-hospital.py region_stats)는 매번 통째로 바꿈(232행).
+const regionSql=`DELETE FROM regions;\n${Object.entries(data.stats??{}).map(([id,st])=>`INSERT INTO regions (id,stats) VALUES (${s(id)},${s(JSON.stringify(st))});`).join('\n')}`;
 
 const schema=readFileSync(join(ROOT,'apps/hospital/worker/schema.sql'),'utf8');
 const tables=(schema.match(/CREATE TABLE IF NOT EXISTS [\s\S]*?\);/g)??[]).join('\n');
 const indexes=(schema.match(/CREATE INDEX IF NOT EXISTS[^\n]*/g)??[]).join('\n');
 const next=name=>schema.match(new RegExp(`CREATE TABLE IF NOT EXISTS ${name} \\([\\s\\S]*?\\);`))[0].replace(`IF NOT EXISTS ${name} (`,`${name}_next (`);
-const SCHEMA=1;  // bump when the table layout or a stored value rule changes
+const SCHEMA=2;  // bump when the table layout or a stored value rule changes (a new SCHEMA always does a full load)
 const version=`${data.status?.updated_at}#s${SCHEMA}`;
 const metaSql=`INSERT OR REPLACE INTO meta (key,value) VALUES ('status',${s(JSON.stringify(data.status??null))});
 INSERT OR REPLACE INTO meta (key,value) VALUES ('version',${s(JSON.stringify(version))});`;
@@ -53,18 +55,19 @@ let live={};
 if(mode)try{live=JSON.parse(wrangler(['d1','execute',DB,mode,'--json','--command',"SELECT (SELECT value FROM meta WHERE key='version') AS version, (SELECT COUNT(*) FROM hospitals) AS n"],{encoding:'utf8'}))?.[0]?.results?.[0]??{};}catch{console.log('D1 not initialised yet (first load)');}
 if(Number(live.n)>items.length*1.1&&!args.includes('--force')){console.log(`D1 has ${live.n} hospitals, the file only ${items.length}: not loading (--force).`);process.exit(1);}
 const manifest=existsSync(manifestPath)?JSON.parse(readFileSync(manifestPath,'utf8')):null;
-if(mode&&manifest&&live.version===JSON.stringify(manifest.version)){
+if(mode&&manifest&&live.version===JSON.stringify(manifest.version)&&manifest.version.endsWith(`#s${SCHEMA}`)){
   if(manifest.version===version){console.log(`D1 already holds ${version}`);process.exit(0);}
   const changed=items.filter(a=>manifest.hashes[a.id]!==hash(a)),ids=new Set(items.map(a=>a.id));
   const removed=Object.keys(manifest.hashes).filter(id=>!ids.has(id));
   for(let i=0;i<changed.length;i+=ROWS_PER_FILE)write(changed.slice(i,i+ROWS_PER_FILE).map(a=>row(a,'INSERT OR REPLACE INTO hospitals')).join('\n')+'\n');
-  write(`${removed.map(id=>`DELETE FROM hospitals WHERE id=${s(id)};`).join('\n')}\n${indexes}\n${metaSql}\n`);
+  write(`${removed.map(id=>`DELETE FROM hospitals WHERE id=${s(id)};`).join('\n')}\n${regionSql}\n${indexes}\n${metaSql}\n`);
   console.log(`D1 upsert: ${changed.length.toLocaleString()} changed, ${removed.length.toLocaleString()} removed (${items.length.toLocaleString()} hospitals), version ${version}`);
   run();saveManifest();process.exit(0);
 }
 const head=`${tables}\nDROP TABLE IF EXISTS hospitals_next;\n${next('hospitals')}\n`;
 const tail=`DROP TABLE hospitals;
 ALTER TABLE hospitals_next RENAME TO hospitals;
+${regionSql}
 ${indexes}
 ${metaSql}
 `;

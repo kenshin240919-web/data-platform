@@ -12,9 +12,13 @@ CREATE TABLE IF NOT EXISTS hospitals (
   rank REAL NOT NULL DEFAULT 0,
   text TEXT NOT NULL,            -- lower-case 이름·주소·종류 for 검색어
   card TEXT NOT NULL,            -- slim JSON (hours included: lists compute '지금 진료 중')
-  body TEXT NOT NULL             -- full JSON for the detail page
+  body TEXT NOT NULL,            -- full JSON for the detail page
+  stage INTEGER NOT NULL DEFAULT 3  -- 사이트맵 단계: 1 정적 페이지에서 링크됨, 2 야간·일요일·공휴일·응급실·병원급, 3 나머지 (worker SITEMAP_STAGE)
 );
 CREATE INDEX IF NOT EXISTS hospitals_region ON hospitals(region_id, rank DESC);
 CREATE INDEX IF NOT EXISTS hospitals_geo ON hospitals(lat, lon, id);
 CREATE INDEX IF NOT EXISTS hospitals_er ON hospitals(er, sido);
+CREATE INDEX IF NOT EXISTS hospitals_stage ON hospitals(stage, id);
+-- 시군구별 진료과목 통계(collect-hospital.py region_stats): 상세 페이지의 '이 동네와 비교'
+CREATE TABLE IF NOT EXISTS regions (id TEXT PRIMARY KEY, stats TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
