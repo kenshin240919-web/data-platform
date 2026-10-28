@@ -26,9 +26,11 @@ export const n=(v:number)=>v.toLocaleString('ko-KR');
 export const esc=(s:unknown)=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]!);
 export const placePath=(id:string)=>`/place/${id}`;
 export const km=(v:number)=>v<1?`${Math.round(v*1000)}m`:`${v.toFixed(1)}km`;
-const jong=(w:string)=>{const t=w.trim(),c=(t[t.length-1]??'').charCodeAt(0)-0xac00;return c>=0&&c<11172&&c%28!==0;};
+// 끝 괄호는 빼고 판단('등기사항증명서(부동산 등기부등본)' → '본')
+const jong=(w:string)=>{const t=w.trim().replace(/\s*\([^()]*\)$/,''),c=(t[t.length-1]??'').charCodeAt(0)-0xac00;return c>=0&&c<11172&&c%28!==0;};
 export const eun=(w:string)=>w+(jong(w)?'은':'는');
 export const ga=(w:string)=>w+(jong(w)?'이':'가');
+export const eul=(w:string)=>w+(jong(w)?'을':'를');
 export const ro=(w:string)=>{const t=w.trim(),c=(t[t.length-1]??'').charCodeAt(0)-0xac00;return w+(c>=0&&c<11172&&c%28!==0&&c%28!==8?'으로':'로');};
 type Loc={name:string;lat?:number|null;lon?:number|null;addr?:string|null;jibun?:string|null};
 export const mapUrl=(p:Loc)=>p.lat!=null?`https://map.kakao.com/link/to/${encodeURIComponent(p.name)},${p.lat},${p.lon}`:`https://map.kakao.com/?q=${encodeURIComponent(p.addr??p.jibun??p.name)}`;
@@ -81,8 +83,22 @@ export const DOCS:{slug:string;title:string;q:RegExp;tip:string}[]=[
   {slug:'land',title:'토지(임야)대장',q:/토지.*대장|임야대장/,tip:'토지·임야대장은 부동산 메뉴에서 지번으로 떼요.'},
   {slug:'building',title:'건축물대장',q:/건축물대장/,tip:'건축물대장은 부동산 메뉴에서 주소로 떼요.'},
   {slug:'registry',title:'등기사항증명서(부동산 등기부등본)',q:/등기사항증명서|등기부/,tip:'등기사항증명서는 이 서류를 주는 발급기에서만 떼요(목록에 ‘등기’ 표시).'},
-  {slug:'tax',title:'지방세 납세증명서',q:/지방세.*납세|납세증명/,tip:'세금 메뉴에서 떼요.'},
+  {slug:'tax',title:'지방세 납세증명서',q:/지방세.*납세/,tip:'세금 메뉴에서 떼요.'},
   {slug:'health',title:'건강보험 자격득실 확인서',q:/건강보험.*(자격|득실)|자격득실/,tip:'건강보험 서류는 건강보험 메뉴가 있는 발급기에서만 떼요.'},
   {slug:'school',title:'졸업·재학증명서',q:/졸업증명|재학증명|학교생활기록부|성적증명/,tip:'학교 서류는 학적 메뉴가 있는 발급기에서 떼요.'},
   {slug:'veteran',title:'보훈·국가유공자 확인서',q:/보훈|국가유공자|참전/,tip:'보훈 메뉴에서 떼요.'},
+  // 10/28 추가: 발급기 서류 목록(certificate_info)에 있는 이름·분류 그대로. 분류 이름은 발급기 첫 메뉴와 같지 않을 수 있어 '서류 목록 분류'로만 적음.
+  {slug:'driving',title:'운전경력증명서',q:/운전경력증명서/,tip:'국문·영문 두 가지가 있어요. 발급기 서류 목록에서는 ‘교통(경찰청)’ 분류에 있어요.'},
+  {slug:'business',title:'사업자등록증명',q:/사업자등록증명/,tip:'국세청 서류라 발급기 서류 목록의 ‘국세증명’ 분류에 있어요.'},
+  {slug:'income',title:'소득금액증명',q:/소득금액증명/,tip:'국세청 서류라 발급기 서류 목록의 ‘국세증명’ 분류에 있어요.'},
+  {slug:'national-tax',title:'납세증명서(국세 완납증명)',q:/국세완납/,tip:'국세청 서류라 발급기 서류 목록의 ‘국세증명’ 분류에 있어요. 지방세 납세증명서와는 다른 서류예요.'},
+  {slug:'car',title:'자동차등록원부',q:/^자동차등록원부/,tip:'갑·을 두 가지가 있어요. 발급기 서류 목록에서는 ‘차량’ 분류에 있어요.'},
+  {slug:'military',title:'병적증명서',q:/병적증명서/,tip:'발급기 서류 목록에서는 ‘병무’ 분류에 있어요.'},
+  {slug:'pension',title:'국민연금 가입증명·납부확인서',q:/국민연금/,tip:'발급기 서류 목록에서는 ‘국민연금’·‘건강보험’ 분류에 있어요.'},
+  {slug:'health-premium',title:'건강보험료 납부확인서',q:/건강장기요양보험료 납부확인서/,tip:'직장·지역 가입자 서류가 따로 있어요. 발급기 서류 목록에서는 ‘건강보험’ 분류에 있어요.'},
+  {slug:'employment',title:'고용보험 자격이력내역서',q:/고용보험 (자격이력|개별사업장 자격|일용근로)/,tip:'근로복지공단 서류라 발급기 서류 목록의 ‘고용, 산재보험(근로복지공단)’ 분류에 있어요.'},
+  {slug:'welfare',title:'장애인·한부모가족·수급자 증명서',q:/장애인증명서|한부모가족증명서|^수급자증명서/,tip:'발급기 서류 목록에서는 ‘보건복지’ 분류에 있어요.'},
+  {slug:'jejeok',title:'제적 등본·초본',q:/^제적\s*(등본|초본)/,tip:'발급기 서류 목록에서는 ‘제적부’ 분류에 있어요.'},
+  {slug:'land-use',title:'토지이용계획확인서',q:/토지이용계획확인서/,tip:'발급기 서류 목록에서는 ‘지적, 토지, 건축’ 분류에 있어요.'},
+  {slug:'land-price',title:'개별공시지가확인서',q:/개별공시지가확인서/,tip:'발급기 서류 목록에서는 ‘지적, 토지, 건축’ 분류에 있어요.'},
 ];
