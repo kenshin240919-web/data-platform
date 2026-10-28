@@ -5,6 +5,7 @@ import {Faq,breadcrumbLd,JsonLd} from '@guidejung/ui/seo';
 import {Connect,genericFor,linksForCode} from '@guidejung/ui/network';
 import {ItemList} from '../../_components/Cards';
 import {Ad} from '../../_components/Ad';
+import {Actions} from '@guidejung/ui/favlist';
 import {ageLabel,benefitPath,byViews,CODE_LABEL,DOC_TITLES,docUrl,dueLabel,FIELDS,HOUSE,INCOME,item,items,LIFE,localItems,onlyFor,region,scopeLabel,SITE,similar,today,won,type Item} from '../../../lib/data';
 
 export const dynamicParams=false;
@@ -34,6 +35,7 @@ export default async function Detail({params}:P){
   return <div className="page">
     <nav className="crumbs"><Link href="/">홈</Link> › {r?<Link href={`/region/${r.code}`}>{r.name}</Link>:<Link href={`/topic/${i.field}`}>{FIELDS[i.field].label}</Link>} › {i.name}</nav>
     <div className="bf-head"><h1>{FIELDS[i.field].icon} {i.name}</h1><p><span className="bf-scope">{scopeLabel(i)}</span>{[i.org,i.dept,FIELDS[i.field].label,(i.kind??[]).join('·')].filter(Boolean).join(' · ')}</p></div>
+    <Actions fav={{id:`benefit:${i.id}`,name:i.name,sub:scopeLabel(i),url:SITE+benefitPath(i.id)}}/>
     <p className="bf-answer">{i.amount?<>💰 지원 내용에 적힌 금액 <b>최대 {won(i.amount)}</b><br/></>:null}
       📅 {i.due?<b>{dueLabel(i.due,i.due_exact,today)}</b>:i.deadline?.includes('상시')?<b>상시 신청</b>:<>신청 기한은 아래 안내를 확인하세요</>}
       {conds.length>0&&<><br/>👤 {conds.join(' · ')}</>}</p>
