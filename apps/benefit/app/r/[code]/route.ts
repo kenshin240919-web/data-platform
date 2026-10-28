@@ -3,7 +3,7 @@ import {allFor,byViews,dueSoon,localItems,regions,region,row,sidoItems,nationIte
 export const dynamic='force-static';
 export function generateStaticParams(){return regions.map(r=>({code:r.code}));}
 export async function GET(_:Request,{params}:{params:Promise<{code:string}>}){
-  const r=region((await params).code)!;const all=allFor(r);const local=localItems(r.code);
+  const r=region((await params).code)!;const all=allFor(r);const local=localItems(r.code);const mine=[...local,...sidoItems(r.sido)];
   return Response.json({code:r.code,name:r.name,zone:r.zone,sido:r.sido,local:local.length,sidoN:sidoItems(r.sido).length,nation:nationItems.length,total:all.length,
-    due:dueSoon(all,31).slice(0,5).map(row),dueN:dueSoon(all,31).length,top:[...local].sort(byViews).slice(0,6).map(row)});
+    due:dueSoon(mine,45).slice(0,5).map(row),dueN:dueSoon(all,31).length,top:[...local].sort(byViews).slice(0,6).map(row)});
 }

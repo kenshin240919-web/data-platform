@@ -3,7 +3,7 @@
 // 맞춤 찾기(조건은 이 브라우저에만 저장), 검색. 목록은 정적 파일(/rows.json, /r/{시군구})이라 서버로 답이 가지 않는다.
 import {useEffect,useMemo,useState} from 'react';
 import {LocateCard,PosNote,here,useMyPosition} from '@guidejung/ui/geo';
-import {BIZ,CODE_LABEL,FIELDS,FIELD_ORDER,HOUSE,INCOME,LIFE,benefitPath,dueLabel,kstToday,matches,n,won,type Ask,type Code,type Field,type Row} from '../../lib/fmt';
+import {BIZ,CODE_LABEL,FIELDS,FIELD_ORDER,HOUSE,INCOME,LIFE,benefitPath,dueLabel,kstToday,matches,n,openTo,won,type Ask,type Code,type Field,type Row} from '../../lib/fmt';
 
 export type RegionLite={c:string;n:string;s:string;a:number;o:number};
 let rowsP:Promise<Row[]>|null=null;
@@ -53,7 +53,9 @@ export function Find({regions}:{regions:RegionLite[]}){
   useEffect(()=>{try{localStorage.setItem(STORE,JSON.stringify({r,age,inc,life,house,biz}));}catch{}},[r,age,inc,life,house,biz]);
   const reg=regions.find(x=>x.c===r);
   const ask:Ask={region:r||undefined,sido:reg?.s,age,inc,life,house,biz};
-  const hits=useMemo(()=>(rows??[]).filter(x=>matches(x,ask)).sort((a,b)=>(b[4]-a[4])||(b[10]-a[10])),[rows,r,age,inc,life,house,biz]); // eslint-disable-line react-hooks/exhaustive-deps
+  // 고른 상황(임산부·다자녀…)을 콕 집은 혜택(일반인에겐 닫힌 것)을 먼저, 그다음 많이 찾는 순
+  const aimed=(x:Row)=>(life.length&&!openTo(x[8],'JA0322')?1:0)+(house.length&&!openTo(x[8],'JA0410')?1:0);
+  const hits=useMemo(()=>(rows??[]).filter(x=>matches(x,ask)).sort((a,b)=>aimed(b)-aimed(a)||b[10]-a[10]),[rows,r,age,inc,life,house,biz]); // eslint-disable-line react-hooks/exhaustive-deps
   const shown=field?hits.filter(x=>x[3]===field):hits;
   const toggle=(list:Code[],set:(v:Code[])=>void,c:Code)=>set(list.includes(c)?list.filter(x=>x!==c):[...list,c]);
   const sidos=[...new Set(regions.map(x=>x.s))];

@@ -36,6 +36,9 @@ SIDO_FULL = {'서울특별시': '서울', '부산광역시': '부산', '대구�
              '울산광역시': '울산', '세종특별자치시': '세종', '경기도': '경기', '강원특별자치도': '강원', '강원도': '강원', '충청북도': '충북',
              '충청남도': '충남', '전북특별자치도': '전북', '전라북도': '전북', '전라남도': '전남광주', '전남광주통합특별시': '전남광주',
              '경상북도': '경북', '경상남도': '경남', '제주특별자치도': '제주'}
+SIDO_SHORT = {'서울': '서울', '부산': '부산', '대구': '대구', '인천': '인천', '광주': '전남광주', '대전': '대전', '울산': '울산', '세종': '세종', '경기': '경기',
+              '강원': '강원', '충북': '충북', '충남': '충남', '전북': '전북', '전남': '전남광주', '경북': '경북', '경남': '경남', '제주': '제주'}
+TEST = re.compile(r'테스트|시연|test', re.I)  # 원본에 섞인 시험 등록
 calls = 0
 
 
@@ -156,6 +159,12 @@ def place_of(org, otype, table, sido_code):
         return 'nation', None, None, None
     sd = SIDO_FULL.get(parts[0])
     if not sd:
+        # 지방 공기업·출연기관·교육청('경상북도평생교육진흥원', '서울교통공사', '인천광역시교육청')은 이름 앞 시도로 그 시도 범위
+        if otype in ('지방출자_출연기관', '지방공기업', '교육청'):
+            hit = next((v for k, v in sorted(SIDO_FULL.items(), key=lambda x: -len(x[0])) if parts[0].startswith(k)), None) \
+                or next((v for k, v in SIDO_SHORT.items() if parts[0].startswith(k)), None)
+            if hit:
+                return 'sido', hit, sido_code.get(hit), None
         return 'nation', None, None, None
     rest = ''.join(parts[1:])
     if not rest or otype == '광역시도':
@@ -202,7 +211,7 @@ def main():
     items, scope_n, miss = [], Counter(), Counter()
     for r in raw['serviceList']:
         sid = r.get('서비스ID')
-        if not sid or not r.get('서비스명'):
+        if not sid or not r.get('서비스명') or TEST.search(r['서비스명']):
             continue
         d, c = det.get(sid, {}), cond.get(sid, {})
         scope, sd, code, rname = place_of(r.get('소관기관명'), r.get('소관기관유형'), table, sido_code)

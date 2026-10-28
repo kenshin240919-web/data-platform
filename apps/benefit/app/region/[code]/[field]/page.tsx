@@ -5,7 +5,7 @@ import {Faq,breadcrumbLd,JsonLd} from '@guidejung/ui/seo';
 import {Connect,linksForCode} from '@guidejung/ui/network';
 import {ItemList} from '../../../_components/Cards';
 import {Ad} from '../../../_components/Ad';
-import {byViews,FIELDS,localItems,n,nationItems,region,regionFields,regions,SITE,sidoItems,today,type Field} from '../../../../lib/data';
+import {byViews,FIELDS,ga,localItems,n,nationItems,region,regionFields,regions,SITE,sidoItems,today,type Field} from '../../../../lib/data';
 
 export const dynamicParams=false;
 export function generateStaticParams(){return regions.flatMap(r=>regionFields(r).map(f=>({code:r.code,field:f})));}
@@ -22,7 +22,7 @@ export default async function RegionField({params}:P){
   return <div className="page">
     <nav className="crumbs"><Link href="/">홈</Link> › <Link href="/region">지역별</Link> › <Link href={`/region/${r.code}`}>{r.name}</Link> › {FIELDS[f].label}</nav>
     <h1>{FIELDS[f].icon} {r.name} {FIELDS[f].label} 혜택</h1>
-    <p className="bf-lead">{r.zone}이 주는 {FIELDS[f].label} 혜택 {n(local.length)}가지와 {r.sido} 전체 혜택 {n(sido.length)}가지예요.</p>
+    <p className="bf-lead">{ga(r.zone)} 주는 {FIELDS[f].label} 혜택 {n(local.length)}가지와 {r.sido} 전체 혜택 {n(sido.length)}가지예요.</p>
     {local.length>0&&<section><h2>🏘️ {r.zone}</h2><ItemList list={local} today={today} hideScope/></section>}
     {sido.length>0&&<section><h2>🏙️ {r.sido} 전체</h2><ItemList list={sido} today={today}/></section>}
     <Ad/>

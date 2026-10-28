@@ -39,7 +39,6 @@ export default async function Detail({params}:P){
       {conds.length>0&&<><br/>👤 {conds.join(' · ')}</>}</p>
     <div className="bf-actions">{i.apply&&<a href={i.apply} target="_blank" rel="noopener">✍️ 온라인 신청하러 가기</a>}{i.url&&<a className={i.apply?'sub':''} href={i.url} target="_blank" rel="noopener">정부24에서 자세히 보기</a>}
       {tel&&<a className="sub" href={`tel:${tel.replace(/-/g,'')}`}>📞 {tel}</a>}</div>
-    {conds.length>0&&<div className="bf-cond" aria-label="받을 수 있는 사람">{conds.map(c=><span key={c}>{c}</span>)}</div>}
     <Sec title="누가 받나요?" text={i.target}/>
     <Sec title="선정 기준" text={i.crit}/>
     <Sec title="무엇을 받나요?" text={i.content}/>
