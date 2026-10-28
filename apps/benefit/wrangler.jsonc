@@ -1,0 +1,17 @@
+// Cloudflare Worker for benefit.guidejung.com (내근처 혜택 — 정부·지자체 지원금), separate from the other sites.
+// Run from the repo root: npx wrangler deploy -c apps/benefit/wrangler.jsonc (builds with npm run build:benefit).
+// 데이터(apps/benefit/data/benefits.json)는 배포 작업이 scripts/collect-benefit.py로 먼저 받아 둠(저장소에 없음).
+{
+  "name": "guidejung-benefit",
+  "main": "worker/index.ts",
+  "compatibility_date": "2025-09-01",
+  "build": { "command": "npm run build:benefit" },
+  "assets": {
+    "directory": "./out",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    "run_worker_first": ["/api/*"]
+  },
+  "observability": { "enabled": true },
+  "routes": [{ "pattern": "benefit.guidejung.com", "custom_domain": true }]
+}

@@ -210,6 +210,8 @@ def main():
             miss[r.get('소관기관명')] += 1
         scope_n[scope] += 1
         due, exact = due_of(d.get('신청기한') or r.get('신청기한'), today)
+        if due and not (today - timedelta(days=90) <= date.fromisoformat(due) <= today + timedelta(days=400)):
+            due, exact = None, False  # 법 시행일·옛 공고일 같은 날짜는 마감으로 보지 않음
         mask = 0
         for i, k in enumerate(CODES):
             if str(c.get(k) or '').upper() != 'Y':

@@ -1,0 +1,28 @@
+{
+ "name": "내근처 혜택",
+ "short_name": "내근처 혜택",
+ "description": "내근처 혜택 — 우리 동네 지원금, 놓친 거 없어?",
+ "lang": "ko",
+ "start_url": "/?source=pwa",
+ "scope": "/",
+ "display": "standalone",
+ "background_color": "#ffffff",
+ "theme_color": "#15803d",
+ "icons": [
+  {
+   "src": "/icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png"
+  },
+  {
+   "src": "/icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png"
+  },
+  {
+   "src": "/icon.svg",
+   "sizes": "any",
+   "type": "image/svg+xml"
+  }
+ ]
+}

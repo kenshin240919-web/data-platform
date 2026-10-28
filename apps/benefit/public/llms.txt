@@ -1,0 +1,14 @@
+# 내근처 혜택 (benefit.guidejung.com)
+
+> 사는 시군구와 나이·상황으로 받을 수 있는 정부·시도·시군구 지원금과 혜택을 찾아 주는 서비스입니다. 출처는 행정안전부 「대한민국 공공서비스(혜택) 정보」(정부24 공공서비스, 공공데이터포털)이며 매일 새로 받아 반영합니다. 이 사이트는 정부·지자체와 관계없는 민간 정보 서비스입니다.
+
+## 주요 페이지
+- [우리 동네 혜택](https://benefit.guidejung.com/): 내 위치로 시군구를 찾아 받을 수 있는 혜택 수·곧 마감·많이 찾는 혜택
+- [나에게 맞는 혜택 찾기](https://benefit.guidejung.com/find): 사는 곳·나이·소득·상황(임산부·학생·구직자·장애인·한부모·다자녀·무주택 등)으로 맞춤(조건은 브라우저에만 저장)
+- [지역별](https://benefit.guidejung.com/region): 시군구 `/region/{시군구코드}`(그 시군구·시도·전국 혜택), 시군구×분야 `/region/{코드}/{분야}`
+- [분야별](https://benefit.guidejung.com/topic): `/topic/{birth|edu|living|house|job|health|care|culture|farm|safety}`
+- [마감 임박](https://benefit.guidejung.com/deadline), [새 혜택](https://benefit.guidejung.com/new)
+- 혜택 상세 `/b/{서비스ID}`: 지원 대상·선정 기준·지원 내용·신청 기한·신청 방법·준비 서류(내근처 서류 연결)·문의처·근거 법령·비슷한 혜택 다른 지역 비교
+
+## 데이터 안내
+- 금액은 지원 내용에 적힌 가장 큰 금액, 마감일은 신청 기한에 적힌 날짜를 읽은 것이라 실제와 다를 수 있습니다. 신청 전 정부24·담당 기관에서 확인하세요.
