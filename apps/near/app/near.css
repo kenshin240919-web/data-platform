@@ -8,7 +8,7 @@
 .nr-cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:12px}
 .nr-card{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:16px;background:#fff;min-width:0;overflow:hidden;transition:border-color .15s,box-shadow .15s}.nr-card:hover{border-color:var(--nr);box-shadow:0 6px 18px #1765e81a}
 .nr-card-main{display:flex;gap:12px;align-items:flex-start;padding:14px 14px 10px;flex:1}.nr-card-icon{font-size:30px;line-height:1.1}
-.nr-card-body{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1}.nr-card-title{font-size:13px;font-weight:700;color:var(--muted)}.nr-card-body b{font-size:21px;line-height:1.3;letter-spacing:-.5px;color:var(--ink)}
+.nr-card-body{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1}.nr-card-title{font-size:13px;font-weight:700;color:var(--muted)}.nr-card-body b.nr-card-name{font-size:17px;letter-spacing:-.3px}.nr-card-body b{font-size:21px;line-height:1.3;letter-spacing:-.5px;color:var(--ink)}
 .nr-card-sub{font-size:13px;color:#3b4a60;overflow-wrap:anywhere}.nr-go{font-size:26px;line-height:1;color:#a7b4c6;align-self:center}
 .nr-badge{align-self:flex-start;font-size:12px;font-weight:800;border-radius:20px;padding:2px 9px;background:#e7f6ec;color:#17693a}.nr-card.warn .nr-badge{background:#fff1dc;color:#9a4d00}
 .nr-acts{display:flex;flex-wrap:wrap;gap:6px;padding:0 14px 12px 56px}.nr-acts a{font-size:13px;font-weight:700;border-radius:20px;padding:5px 11px;background:var(--nr-soft);color:var(--nr)}.nr-acts a:hover{background:var(--nr);color:#fff}

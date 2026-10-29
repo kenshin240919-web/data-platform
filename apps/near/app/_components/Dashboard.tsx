@@ -8,7 +8,7 @@ import * as L from '../../lib/live';
 import {km,n} from '../../lib/site';
 
 type Act={label:string;href:string};
-type Card={icon:string;title:string;answer?:string;vs?:{icon:string;head:string;feel:string;kind:string};sub?:string;href:string;state?:'good'|'warn'|'none';badge?:string;acts?:Act[]};
+type Card={icon:string;title:string;hint?:string;answer?:string;vs?:{icon:string;head:string;feel:string;kind:string};sub?:string;href:string;state?:'good'|'warn'|'none';badge?:string;acts?:Act[]};
 type Res=Record<string,Card|null|undefined>;
 type Place={id:string;name:string;km:number;lat?:number;lon?:number;tel?:string|null};
 const U=L.SITE_URL;
@@ -81,17 +81,17 @@ export function Dashboard({areas}:{areas:Area[]}){
   // eslint-disable-next-line react-hooks/exhaustive-deps
   },[pos?.lat,pos?.lon]);
   const order=['weather','pharmacy','hospital','benefit','oil','parking','trip','charge','pet','market','civil','school','academy','service','traffic','rest'];
-  const base:Record<string,Card>={weather:{icon:'🌤️',title:'우리 동네 날씨',href:U.weather},pharmacy:{icon:'💊',title:'지금 문 연 약국',href:U.pharmacy},hospital:{icon:'🏥',title:'지금 진료하는 병원',href:U.hospital},oil:{icon:'⛽',title:'가까운 최저가 주유소',href:U.oil},parking:{icon:'🅿️',title:'무료 공영 주차장',href:U.parking},charge:{icon:'⚡',title:'전기차 충전',href:U.charge},trip:{icon:'🚗',title:'가까운 가볼만한곳',href:U.trip},service:{icon:'🔧',title:'자동차 정비소',href:U.service},
-    benefit:{icon:'🎁',title:'우리 동네 혜택·지원금',href:U.benefit},pet:{icon:'🐾',title:'가까운 동물병원',href:U.pet},market:{icon:'🏪',title:'온누리상품권 쓰는 곳',href:U.market},
-    civil:{icon:'🖨️',title:'무인민원발급기·서류',href:U.civil},school:{icon:'🏫',title:'우리 학교 오늘 급식',href:U.school},academy:{icon:'🎓',title:'우리 동네 학원',href:U.academy},
-    traffic:{icon:'🛣️',title:'고속도로 지금 막혀?',href:U.traffic},rest:{icon:'♨️',title:'찜질방·사우나',href:U.rest}};
+  const base:Record<string,Card>={weather:{icon:'🌤️',title:'우리 동네 날씨',href:U.weather,hint:'어제보다 추운지 · 우산 챙길지'},pharmacy:{icon:'💊',title:'지금 문 연 약국',href:U.pharmacy,hint:'일요일·공휴일·심야 약국도'},hospital:{icon:'🏥',title:'지금 진료하는 병원',href:U.hospital,hint:'소아과·야간·응급실 병상까지'},oil:{icon:'⛽',title:'가까운 최저가 주유소',href:U.oil,hint:'휘발유·경유 가장 싼 곳'},parking:{icon:'🅿️',title:'무료 공영 주차장',href:U.parking,hint:'몇 시간 세우면 얼마인지'},charge:{icon:'⚡',title:'전기차 충전',href:U.charge,hint:'지금 비어 있는 급속 충전기'},trip:{icon:'🚗',title:'가까운 가볼만한곳',href:U.trip,hint:'축제·맛집·숙소까지'},service:{icon:'🔧',title:'자동차 정비소',href:U.service,hint:'정비소·검사소·세차장'},
+    benefit:{icon:'🎁',title:'우리 동네 혜택·지원금',href:U.benefit,hint:'나이·상황으로 맞춤 찾기'},pet:{icon:'🐾',title:'가까운 동물병원',href:U.pet,hint:'24시 동물병원·동물약국'},market:{icon:'🏪',title:'온누리상품권 쓰는 곳',href:U.market,hint:'가맹점·오늘 장날'},
+    civil:{icon:'🖨️',title:'무인민원발급기·서류',href:U.civil,hint:'주말에도 쓰는 발급기·주민센터'},school:{icon:'🏫',title:'우리 학교 오늘 급식',href:U.school,hint:'급식·시험 D-day·시간표'},academy:{icon:'🎓',title:'우리 동네 학원',href:U.academy,hint:'공개 수강료 비교'},
+    traffic:{icon:'🛣️',title:'고속도로 지금 막혀?',href:U.traffic,hint:'정체 구간·CCTV'},rest:{icon:'♨️',title:'찜질방·사우나',href:U.rest,hint:'찜질방·사우나·목욕탕'}};
   return <section className="nr-board" aria-label="내 주변 지금">
     <p className="nr-where">{a?<>📍 <b>{a.n}</b> {pos?.precise?'내 위치':'접속 지역'} 기준 · 지금</>:status==='locating'?'위치 확인 중…':'위치를 알면 우리 동네 정보로 바로 바꿔 드려요'}</p>
     <PosNote/>{!pos?.precise&&<LocateCard title="내 위치로 한 번에 보기" desc="날씨·문 연 약국·병원·최저가 주유소·무료 주차장을 내 주변 기준으로" status={status} onClick={request} approxLabel={pos&&a?a.n:undefined}/>}
     <div className="nr-cards">{order.map(k=>{const c=res[k]===undefined||res[k]===null?base[k]:res[k]!;const loading=pos&&res[k]===undefined;
       return <div key={k} className={`nr-card ${c.state??''}`}>
-        <a className="nr-card-main" href={c.href}><span className="nr-card-icon" aria-hidden="true">{c.icon}</span><span className="nr-card-body"><small className="nr-card-title">{c.title}</small>
-          <b>{loading?'불러오는 중…':c.answer??'바로 가기 →'}</b>{c.vs&&<span className={`nr-vs ${c.vs.kind}`}>{c.vs.icon} {c.vs.head}{c.vs.feel&&<> · <span className="nr-vs-feel">{c.vs.feel}</span></>}</span>}{c.badge&&<span className="nr-badge">{c.badge}</span>}{c.sub&&<small className="nr-card-sub">{c.sub}</small>}{res[k]===null&&<small className="nr-card-sub">지금은 불러오지 못했어요 · 눌러서 보기</small>}</span><span className="nr-go" aria-hidden="true">›</span></a>
+        <a className="nr-card-main" href={c.href}><span className="nr-card-icon" aria-hidden="true">{c.icon}</span><span className="nr-card-body">{c.answer||loading?<><small className="nr-card-title">{c.title}</small>
+          <b>{loading?'불러오는 중…':c.answer}</b></>:<><b className="nr-card-name">{c.title}</b>{c.hint&&res[k]!==null&&<small className="nr-card-sub">{c.hint}</small>}</>}{c.vs&&<span className={`nr-vs ${c.vs.kind}`}>{c.vs.icon} {c.vs.head}{c.vs.feel&&<> · <span className="nr-vs-feel">{c.vs.feel}</span></>}</span>}{c.badge&&<span className="nr-badge">{c.badge}</span>}{c.sub&&<small className="nr-card-sub">{c.sub}</small>}{res[k]===null&&<small className="nr-card-sub">지금은 불러오지 못했어요 · 눌러서 보기</small>}</span><span className="nr-go" aria-hidden="true">›</span></a>
         {!!c.acts?.length&&<span className="nr-acts">{c.acts.map(x=><a key={x.label} href={x.href}{...(x.href.startsWith('https://map.')?{target:'_blank',rel:'noopener'}:{})}>{x.label}</a>)}</span>}
       </div>;})}</div>
     <div className="nr-quick" aria-label="자주 찾는 것"><b>바로 찾기</b>
