@@ -69,26 +69,36 @@ let state:{pos:Pos|null;status:Status}={pos:null,status:'idle'};let started=fals
 const subs=new Set<()=>void>();
 function set(next:Partial<typeof state>){state={...state,...next};subs.forEach(f=>f());}
 const granted=()=>(navigator.permissions?.query({name:'geolocation' as PermissionName})??Promise.reject()).then(r=>r.state==='granted',()=>false);
-let watching=false;
+let cancel:(()=>void)|null=null;
+const moved=(a:{lat:number;lon:number},b:{lat:number;lon:number})=>km(a.lat,a.lon,b.lat,b.lon)*1000;
 /** 빠른 위치 먼저(Wi-Fi·기지국) → 뒤에서 GPS(enableHighAccuracy)로 최대 20초 다듬기(오차 50m 안이면 멈춤).
- * 화면은 칸이 바뀌거나 오차가 절반 넘게 줄 때만 갱신(같은 칸이면 목록을 다시 받지 않게), 저장은 매번. */
+ * 화면은 칸이 바뀌거나 오차가 절반 넘게 줄 때만 갱신(같은 칸이면 목록을 다시 받지 않게), 저장은 매번.
+ * 직접 누른 '다시 찾기'(quiet=false)는 조용히 돌던 확인을 끊고 새로 시작하며, 저장된 위치는 쓰지 않고(maximumAge 0) 늘 '찾는 중…'을 보여 준다.
+ * 같은 칸 안에서 25m 넘게 옮겨졌으면 끝난 뒤 페이지를 다시 불러 거리·순서를 새 위치로 다시 잰다(10/29: 눌러도 아무 변화가 없었음). */
 function locate(quiet:boolean){
   if(!('geolocation' in navigator)){set({status:'unsupported'});return;}
-  if(watching)return;watching=true;
-  if(!state.pos?.exact)set({status:'locating'});
-  let best:Fix|null=null,w=-1,told=quiet;
-  const stop=()=>{clearTimeout(timer);if(w>=0)navigator.geolocation.clearWatch(w);w=-1;watching=false;if(state.status==='locating')set({status:best?'ok':quiet?'idle':'failed'});};
+  if(cancel){if(quiet)return;cancel();}
+  const before=state.pos?.exact;
+  if(!quiet||!before)set({status:'locating'});
+  let best:Fix|null=null,w=-1,told=quiet,done=false;
+  const end=(reload:boolean)=>{if(done)return;done=true;cancel=null;clearTimeout(timer);if(w>=0)navigator.geolocation.clearWatch(w);w=-1;
+    if(state.status==='locating')set({status:best?'ok':quiet?'idle':'failed'});
+    if(reload&&!quiet&&best&&before&&state.pos?.src==='gps'){const c=cell(best.lat,best.lon),b=cell(before.lat,before.lon);
+      if(c.lat===b.lat&&c.lon===b.lon&&moved(before,best)>25)location.reload();}};
+  const stop=()=>end(true);
+  cancel=()=>end(false);
   // 20초 다듬기는 첫 위치가 잡힌 뒤부터 센다(권한 창에 늦게 답해도 '못 잡음'으로 끝나지 않게). 첫 위치 전에는 최대 60초 기다린다.
   let timer=setTimeout(stop,60000);
-  const ok=(p:GeolocationPosition)=>{if(!best){clearTimeout(timer);timer=setTimeout(stop,20000);}const v:Fix={lat:p.coords.latitude,lon:p.coords.longitude,acc:Math.round(p.coords.accuracy),at:Date.now()};
+  const ok=(p:GeolocationPosition)=>{if(done)return;const first=!best;if(first){clearTimeout(timer);timer=setTimeout(stop,20000);}const v:Fix={lat:p.coords.latitude,lon:p.coords.longitude,acc:Math.round(p.coords.accuracy),at:Date.now()};
     if(best&&best.acc!=null&&v.acc!=null&&v.acc>=best.acc)return;best=v;save(v);
     const cur=state.pos,c=cell(v.lat,v.lon);
-    if(!cur?.exact||cur.lat!==c.lat||cur.lon!==c.lon||cur.src!=='gps'||(cur.acc??1e9)>(v.acc??0)*2)set({pos:withCell(v,'gps'),status:'ok'});
+    // 직접 누른 경우 첫 결과는 같은 칸이어도 바로 반영('방금'·오차가 바뀌어 눌린 것이 보이게).
+    if((!quiet&&first)||!cur?.exact||cur.lat!==c.lat||cur.lon!==c.lon||cur.src!=='gps'||(cur.acc??1e9)>(v.acc??0)*2)set({pos:withCell(v,'gps'),status:(v.acc??1e9)<=50||quiet?'ok':state.status});
     // 위치를 처음 허용해 결과가 나온 순간 → '홈 화면에 추가' 안내(install.tsx)
     if(!told){told=true;setTimeout(()=>{try{dispatchEvent(new CustomEvent('gj-moment',{detail:'located'}));}catch{}},3000);}
     if((v.acc??1e9)<=50)stop();};
-  const bad=(e:GeolocationPositionError)=>{if(e.code===1){stop();if(!best)set({status:quiet?'idle':'denied'});}};
-  navigator.geolocation.getCurrentPosition(ok,bad,{enableHighAccuracy:false,timeout:8000,maximumAge:60e3});
+  const bad=(e:GeolocationPositionError)=>{if(done)return;if(e.code===1){stop();if(!best)set({status:quiet?'idle':'denied'});}};
+  navigator.geolocation.getCurrentPosition(ok,bad,{enableHighAccuracy:false,timeout:8000,maximumAge:quiet?60e3:0});
   w=navigator.geolocation.watchPosition(ok,bad,{enableHighAccuracy:true,timeout:20000,maximumAge:0});
 }
 function start(){
