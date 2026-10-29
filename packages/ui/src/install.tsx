@@ -31,7 +31,10 @@ function visits(){
     return v.n;
   }catch{return 0;}
 }
-const standalone=()=>matchMedia('(display-mode: standalone)').matches||(navigator as {standalone?:boolean}).standalone===true;
+/** 안드로이드 앱 '내근처'(TWA, apps/app)로 열었는지. 앱 안은 보통 display-mode: standalone이지만, 시작 주소(?source=twa)·앱 referrer도 이 탭에서 기억해 둔다
+ * (쿠키는 크롬 브라우저와 같이 쓰여서 쓰지 않음). */
+const twa=()=>{try{if(/[?&]source=twa\b/.test(location.search)||document.referrer.startsWith('android-app://com.guidejung.near'))sessionStorage.setItem('gj.twa','1');return sessionStorage.getItem('gj.twa')==='1';}catch{return false;}};
+const standalone=()=>matchMedia('(display-mode: standalone)').matches||(navigator as {standalone?:boolean}).standalone===true||twa();
 const ios=isIos;
 /** 을/를 */
 const eul=(w:string)=>{const c=(w.trim().slice(-1).charCodeAt(0)||0)-0xac00;return `‘${w}’${c>=0&&c<11172&&c%28?'을':'를'}`;};
