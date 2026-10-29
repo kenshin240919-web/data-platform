@@ -21,11 +21,13 @@ export default function Home(){
   return <div className="page ac-home">
     <section className="ac-hero">
       <h1>우리 동네 학원비, 얼마야?</h1>
-      <p>전국 학원·교습소 <b>{n(status.count)}곳</b>의 위치와 교육청에 공개된 과정별 수강료를 지역·과목·학년별로 보여 드려요. <span className="muted">({updated()} 기준)</span></p>
+      <p>학원 위치와 <b>공개 수강료</b>를 지역·과목별로</p>
       <div className="ac-subjects">{MAIN_SUBJECTS.map(k=><Link key={k} href={`/search?subject=${k}`}><span aria-hidden="true">{SUBJECT_ICON[k]}</span>{SUBJECTS[k]}</Link>)}</div>
     </section>
     <HomeLocal areas={areas}/>
     <HomeNearby/>
+    {/* 전국 수치(검색엔진·AI 답변용): 첫 화면을 가볍게 하려고 히어로에서 3초 답 아래로 내림(10/29 사용자) */}
+    <p className="muted small gj-facts">전국 학원·교습소 <b>{n(status.count)}곳</b>의 위치와 교육청에 공개된 과정별 수강료를 지역·과목·학년별로 보여 드려요. <span className="muted">({updated()} 기준)</span></p>
     <AdSlot/>
     <section><h2>학원 많은 동네 TOP 12</h2><ol className="ac-rank">{popular.map(r=><li key={r.id}><Link href={`/region/${r.id}`}><b>{r.name}</b><span>{n(r.count)}곳</span></Link></li>)}</ol>
       <p><Link href="/region" className="ac-more-link">전체 지역 보기 →</Link></p></section>

@@ -17,8 +17,10 @@ export default function Home(){
     ['내 위치는 저장되나요?','위치는 버튼을 눌러 허용한 경우에만 쓰고, 이 브라우저와 내근처 사이트 안에서 30분 동안만 기억해요. 서버에 위치를 저장하지 않아요.'],
     ['정보는 얼마나 자주 바뀌나요?','약국·병원 진료 여부는 지금 시각 기준으로 계산하고, 날씨·충전기·응급실 병상은 실시간에 가깝게, 주유소 가격은 매일 갱신해요.']];
   return <div className="page">
-    <section className="nr-hero top"><h1>내 근처에 뭐가 있지?</h1><p>날씨 · 문 연 약국 · 진료 중인 병원 · 최저가 주유소 · 무료 주차장 · 충전기 · 가볼만한곳을 한 번에</p></section>
+    <section className="nr-hero top"><h1>내 근처에 뭐가 있지?</h1><p>약국·병원·날씨·혜택까지 <b>16가지</b>를 내 위치로 한 번에</p></section>
     <Dashboard areas={areas}/>
+    {/* 전국 수치(검색엔진·AI 답변용): 첫 화면을 가볍게 하려고 히어로에서 3초 답 아래로 내림(10/29 사용자) */}
+    <p className="muted small gj-facts">날씨 · 문 연 약국 · 진료 중인 병원 · 최저가 주유소 · 무료 주차장 · 충전기 · 가볼만한곳을 한 번에</p>
     <section><h2>이럴 땐 한 번에</h2><div className="nr-situations">{SITUATIONS.map(s=><Link key={s.slug} href={`/situation/${s.slug}`} className="nr-situation"><span aria-hidden="true">{s.icon}</span><b>{s.title}</b><small>{s.lead}</small></Link>)}</div></section>
     <section><h2>지금 챙길 것</h2><div className="nr-situations">{SEASONS.map(s=><Link key={s.slug} href={`/season/${s.slug}`} className="nr-situation"><span aria-hidden="true">{s.icon}</span><b>{s.title}</b><small>{s.lead}</small></Link>)}</div></section>
     <AdSlot/>

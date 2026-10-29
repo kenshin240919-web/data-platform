@@ -14,13 +14,14 @@ export default function Home(){
   const base=baseLabel(status.base);
   return <div className="page mk-home">
     <section className="mk-hero"><h1>온누리상품권 어디서 써?</h1>
-      <p>전국 온누리상품권 가맹점 <b>{n(nation.n)}곳</b>(전통시장·상점가 {n(nation.markets)}곳)을 내 주변부터, 품목별로 찾아 드려요. {base} 기준 소상공인시장진흥공단 공식 가맹점 목록이에요.</p></section>
+      <p>내 주변 <b>온누리 가맹점</b>을 품목별로</p></section>
     <div className="mk-stats">
       <div><b>{n(nation.n)}</b><small>전체 가맹점</small></div>
       <div><b>{n(nation.markets)}</b><small>시장·상점가</small></div>
       <div><b>{n(nation.d)}</b><small>디지털(모바일·카드)도 되는 곳 · {pct(nation.d,nation.n)}%</small></div>
       <div><b>{n(nation.new)}</b><small>{status.latest_year}년 새로 가맹</small></div>
     </div>
+    <p className="muted small gj-facts">전국 온누리상품권 가맹점 <b>{n(nation.n)}곳</b>(전통시장·상점가 {n(nation.markets)}곳)을 내 주변부터, 품목별로 찾아 드려요. {base} 기준 소상공인시장진흥공단 공식 가맹점 목록이에요.</p>
     <JangToday/>
     <NearMarket/>
     <Ad/>

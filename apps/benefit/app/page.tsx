@@ -15,8 +15,10 @@ export default function Home(){
   const cash=items.filter(i=>(i.kind??[]).some(k=>k.startsWith('현금'))).length;
   return <div className="page bf-home">
     <section className="bf-hero"><h1>우리 동네 지원금, 놓친 거 없어?</h1>
-      <p>정부·시도·시군구가 주는 혜택 <b>{n(items.length)}가지</b>를 사는 곳과 나이·상황으로 찾아 드려요. 시군구 혜택 {n(local)} · 시도 혜택 {n(sido)} · 전국 혜택 {n(nationItems.length)}, 정부24 공공서비스 정보 기준이에요.</p></section>
+      <p>사는 곳·나이로 <b>받을 수 있는 혜택</b>만</p></section>
     <MyArea regions={regionsLite}/>
+    {/* 전국 수치(검색엔진·AI 답변용): 첫 화면을 가볍게 하려고 히어로에서 3초 답 아래로 내림(10/29 사용자) */}
+    <p className="muted small gj-facts">정부·시도·시군구가 주는 혜택 <b>{n(items.length)}가지</b>를 사는 곳과 나이·상황으로 찾아 드려요. 시군구 혜택 {n(local)} · 시도 혜택 {n(sido)} · 전국 혜택 {n(nationItems.length)}, 정부24 공공서비스 정보 기준이에요.</p>
     <a className="bf-band" href="/find"><span aria-hidden="true">🎯</span><span><span><b>나에게 맞는 혜택만</b> 골라 보기</span><small>사는 곳·나이·상황(임신·학생·구직·한부모·다자녀…)을 고르면 받을 수 있을지도 모르는 혜택만 보여 드려요</small></span><em>찾기 →</em></a>
     <Ad/>
     {soon.length>0&&<section><h2>📅 곧 마감되는 혜택</h2><ItemList list={soon} today={today}/><p><Link className="bf-more-link" href="/deadline">마감 임박 혜택 모두 보기 →</Link></p></section>}

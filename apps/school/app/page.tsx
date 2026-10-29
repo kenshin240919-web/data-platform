@@ -11,8 +11,10 @@ export default function Home(){
   const popular=[...regions].sort((a,b)=>b.count-a.count).slice(0,12);
   return <div className="page sc-home">
     <section className="sc-hero"><h1>오늘 급식 뭐야?</h1>
-      <p>우리 학교를 한 번 고르면 열자마자 <b>오늘 급식</b>, 시험·방학까지 <b>D-day</b>, <b>시간표</b>가 보여요. 전국 {n(status.count)}개 학교, 나이스 공식 데이터.</p></section>
+      <p><b>오늘 급식</b>·D-day·시간표를 열자마자</p></section>
     <MySchool/>
+    {/* 전국 수치(검색엔진·AI 답변용): 첫 화면을 가볍게 하려고 히어로에서 3초 답 아래로 내림(10/29 사용자) */}
+    <p className="muted small gj-facts">우리 학교를 한 번 고르면 열자마자 <b>오늘 급식</b>, 시험·방학까지 <b>D-day</b>, <b>시간표</b>가 보여요. 전국 {n(status.count)}개 학교, 나이스 공식 데이터.</p>
     <AdSlot/>
     <section><h2>전국 학교</h2><div className="sc-kinds">{KIND_ORDER.filter(k=>kindCount[k]).map(k=><div key={k}><span aria-hidden="true">{KIND_ICON[k]}</span><b>{n(kindCount[k])}</b><small>{KIND_LABEL[k]}</small></div>)}</div>
       <p className="muted small">{updated()} 기준 · 문을 연 학교만(개교 예정 학교 제외)</p></section>

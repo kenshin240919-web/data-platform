@@ -12,9 +12,11 @@ export default function Home(){
   const kids=[...regions].sort((a,b)=>(b.depts.pediatrics?.sun??0)-(a.depts.pediatrics?.sun??0)).slice(0,8);
   return <div className="page hp-home">
     <section className="hp-hero"><h1>지금 진료하는 병원 어디?</h1>
-      <p>전국 병·의원 <b>{n(status.count)}곳</b>의 요일별 진료 시간으로 <b>지금 진료 중</b>인 곳을 과목별로 가까운 순으로 보여 드려요. 야간 {n(cond.night)}곳 · 일요일 {n(cond.sun)}곳 · 공휴일 {n(cond.hol)}곳 · 응급실 {n(erCount)}곳.</p></section>
+      <p><b>지금 진료 중</b>인 병원을 과목별로 가까운 순으로</p></section>
     <FavList hint="병원 상세에서 ☆ 즐겨찾기를 누르면 여기서 바로 지금 진료 중인지 볼 수 있어요."/>
     <NearNow/>
+    {/* 전국 수치(검색엔진·AI 답변용): 첫 화면을 가볍게 하려고 히어로에서 3초 답 아래로 내림(10/29 사용자) */}
+    <p className="muted small gj-facts">전국 병·의원 <b>{n(status.count)}곳</b>의 요일별 진료 시간으로 <b>지금 진료 중</b>인 곳을 과목별로 가까운 순으로 보여 드려요. 야간 {n(cond.night)}곳 · 일요일 {n(cond.sun)}곳 · 공휴일 {n(cond.hol)}곳 · 응급실 {n(erCount)}곳.</p>
     <AdSlot/>
     <section><h2>과목별 병원 (전국)</h2><div className="hp-dept-grid">{MAIN_DEPTS.map(k=><Link key={k} href={`/search?dept=${k}`}><span aria-hidden="true">{DEPT_ICON[k]}</span><b>{DEPTS[k]}</b><small>{n(nation[k]??0)}곳</small></Link>)}</div>
       <p className="muted small">병원이 신고한 진료과목 기준이에요(전문의 여부와는 달라요).</p></section>

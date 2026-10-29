@@ -15,9 +15,11 @@ export default function Home(){
   const top=[...regions].sort((a,b)=>b.kinds.kiosk-a.kinds.kiosk).slice(0,8);
   return <div className="page cv-home">
     <section className="cv-hero"><h1>떼고, 뽑고, 부치는 곳</h1>
-      <p>전국 무인민원발급기 <b>{n(k.kiosk)}대</b>(주말·공휴일에도 쓰는 곳 {n(weekendKiosks.length)}대) · 주민센터 {n(k.office)}곳 · 여권 발급 {n(k.passport)}곳 · 우체국 {n(k.post)}곳을 가까운 순으로, 지금 운영 중인 곳부터 보여 드려요.</p></section>
+      <p><b>지금 쓸 수 있는</b> 무인발급기·주민센터를 가까운 순으로</p></section>
     <FavList hint="상세에서 ☆ 즐겨찾기를 누르면 여기서 바로 볼 수 있어요."/>
     <NearCivil/>
+    {/* 전국 수치(검색엔진·AI 답변용): 첫 화면을 가볍게 하려고 히어로에서 3초 답 아래로 내림(10/29 사용자) */}
+    <p className="muted small gj-facts">전국 무인민원발급기 <b>{n(k.kiosk)}대</b>(주말·공휴일에도 쓰는 곳 {n(weekendKiosks.length)}대) · 주민센터 {n(k.office)}곳 · 여권 발급 {n(k.passport)}곳 · 우체국 {n(k.post)}곳을 가까운 순으로, 지금 운영 중인 곳부터 보여 드려요.</p>
     <DocChips items={docs}/>
     <div className="cv-jump"><Link href="/weekend">📅 주말·공휴일 발급기 <small>{n(weekendKiosks.length)}</small></Link>{allDayKiosks.length>0&&<Link href="/weekend#allday">🌙 24시간 발급기 <small>{n(allDayKiosks.length)}</small></Link>}<Link href="/cso">⏱️ 구청 민원실 실시간 대기 <small>{n(k.cso)}</small></Link><Link href="/passport">🛂 여권 발급</Link></div>
     <Ad/>

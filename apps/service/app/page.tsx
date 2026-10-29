@@ -14,8 +14,10 @@ export default function Home(){
   const top=[...regions].sort((a,b)=>b.kinds.repair-a.kinds.repair).slice(0,8);
   return <div className="page sv-home">
     <section className="sv-hero"><h1>고장 났다, 어디로 가지?</h1>
-      <p>지자체에 등록된 자동차 정비소 <b>{n(k.repair)}곳</b> · 검사소 {n(k.inspect)}곳 · 세차장 {n(k.wash)}곳 · 배출가스 정비 {n(k.emission)}곳을 가까운 순으로 찾아 드려요.</p></section>
+      <p>정비소·검사소·세차장을 <b>가까운 순</b>으로</p></section>
     <NearCenter/>
+    {/* 전국 수치(검색엔진·AI 답변용): 첫 화면을 가볍게 하려고 히어로에서 3초 답 아래로 내림(10/29 사용자) */}
+    <p className="muted small gj-facts">지자체에 등록된 자동차 정비소 <b>{n(k.repair)}곳</b> · 검사소 {n(k.inspect)}곳 · 세차장 {n(k.wash)}곳 · 배출가스 정비 {n(k.emission)}곳을 가까운 순으로 찾아 드려요.</p>
     <div className="sv-jump"><Link href="/inspection">🗓️ 검사 기한·과태료 계산기</Link><Link href="/inspection">{KINDS.inspect.icon} 내 주변 검사소 <small>{n(k.inspect)}</small></Link><Link href="/guide">✅ 맡기기 전 체크리스트</Link><Link href="/region">🗺️ 지역별 {KIND_ORDER.map(x=>KINDS[x].label).join('·')}</Link></div>
     <AdSlot/>
     <section><h2>📺 가전·휴대폰 서비스센터 <span className="muted">고객센터 번호</span></h2><div className="sv-brands">{BRANDS.map(b=><Link key={b.slug} href={`/brand/${b.slug}`} className="sv-brand"><span aria-hidden="true">{b.icon}</span><span><b>{b.name}</b><small>{b.phones[0]?.tel??'공식 지원 페이지'}</small></span></Link>)}</div></section>

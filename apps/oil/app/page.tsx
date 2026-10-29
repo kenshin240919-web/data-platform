@@ -21,9 +21,10 @@ export default function Home(){
   const gap=top[0]&&g?g-(top[0].prices.B027??g):0;
   return <div className="page oi-home">
     <section className="oi-hero"><h1>기름값 제일 싼 곳 어디?</h1>
-      <p>오늘 전국 평균 휘발유 <b>{won(g)}</b> · 경유 <b>{won(d)}</b>. 시군구마다 가장 싼 주유소 20곳씩, 전국 <b>{n(status.stations)}곳</b>의 오늘 가격으로 내 주변 최저가를 찾아 드려요.</p></section>
+      <p>오늘 전국 평균 휘발유 <b>{won(g)}</b> · 경유 <b>{won(d)}</b></p></section>
     <FavList hint="주유소 상세에서 ☆ 즐겨찾기를 누르면 여기서 바로 오늘 가격을 볼 수 있어요."/>
     <NearCheap avg={{B027:g,D047:d} as Record<Prod,number|null>}/>
+    <p className="muted small gj-facts">시군구마다 가장 싼 주유소 20곳씩, 전국 <b>{n(status.stations)}곳</b>의 오늘 가격으로 내 주변 최저가를 찾아 드려요.</p>
     <div className="oi-avg"><Avg label="휘발유" p="B027"/><Avg label="경유" p="D047"/><Avg label="고급휘발유" p="B034"/></div>
     <AdSlot/>
     <section><h2>오늘 전국에서 가장 싼 휘발유 TOP 10</h2>

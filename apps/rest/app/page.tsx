@@ -15,9 +15,11 @@ export default function Home(){
   const fresh=places.filter(p=>p.kind==='private'&&p.since).sort((a,b)=>b.since!.localeCompare(a.since!)).slice(0,6);
   return <div className="page rs-home">
     <section className="rs-hero"><h1>오늘 어디서 쉬지?</h1>
-      <p>지자체에 신고된 찜질방·사우나·목욕탕 <b>{n(k.sauna)}곳</b> · 1인 목욕·세신 {n(k.private)}곳 · 안마원 {n(k.anma)}곳 · 피부관리실 {n(k.skin)}곳을 가까운 순으로 찾아 드려요.</p></section>
+      <p>찜질방·사우나·목욕탕을 <b>가까운 순</b>으로</p></section>
     <FavList hint="업소 상세에서 ☆ 즐겨찾기를 누르면 여기서 바로 볼 수 있어요."/>
     <NearRest/>
+    {/* 전국 수치(검색엔진·AI 답변용): 첫 화면을 가볍게 하려고 히어로에서 3초 답 아래로 내림(10/29 사용자) */}
+    <p className="muted small gj-facts">지자체에 신고된 찜질방·사우나·목욕탕 <b>{n(k.sauna)}곳</b> · 1인 목욕·세신 {n(k.private)}곳 · 안마원 {n(k.anma)}곳 · 피부관리실 {n(k.skin)}곳을 가까운 순으로 찾아 드려요.</p>
     <div className="rs-jump"><Link href="/private">🛁 1인 목욕탕·세신샵 <small>{n(k.private)}</small></Link><Link href="/sauna">♨️ 찜질방·목욕탕 <small>{n(k.sauna)}</small></Link><Link href="/region">🗺️ 지역별</Link><Link href="/guide">📋 이용 안내</Link></div>
     <Ad/>
     <KindCards counts={k}/>

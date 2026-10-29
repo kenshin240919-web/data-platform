@@ -12,9 +12,11 @@ export default function Home(){
   const top=(c:Cond)=>[...regions].sort((a,b)=>b.cond[c]-a.cond[c]).slice(0,8);
   return <div className="page ph-home">
     <section className="ph-hero"><h1>지금 문 연 약국 어디?</h1>
-      <p>전국 약국 <b>{n(status.count)}곳</b>의 요일별 운영 시간으로 <b>지금 영업 중</b>인 곳을 가까운 순으로 보여 드려요. 심야 {n(nation.night)}곳 · 일요일 {n(nation.sunday)}곳 · 공휴일 {n(nation.holiday)}곳.</p></section>
+      <p><b>지금 영업 중</b>인 약국을 가까운 순으로</p></section>
     <FavList hint="약국 상세에서 ☆ 즐겨찾기를 누르면 여기서 바로 지금 영업 중인지 볼 수 있어요."/>
     <NearNow/>
+    {/* 전국 수치(검색엔진·AI 답변용): 첫 화면을 가볍게 하려고 히어로에서 3초 답 아래로 내림(10/29 사용자) */}
+    <p className="muted small gj-facts">전국 약국 <b>{n(status.count)}곳</b>의 요일별 운영 시간으로 <b>지금 영업 중</b>인 곳을 가까운 순으로 보여 드려요. 심야 {n(nation.night)}곳 · 일요일 {n(nation.sunday)}곳 · 공휴일 {n(nation.holiday)}곳.</p>
     <AdSlot/>
     {(['night','sunday','holiday'] as Cond[]).map(c=><section key={c}><h2>{CONDITIONS[c].title} 많은 지역</h2>
       <ol className="ph-rank">{top(c).map(r=><li key={r.id}><Link href={`/region/${r.id}/${c}`}><b>{r.name}</b><span>{n(r.cond[c])}곳</span></Link></li>)}</ol></section>)}
