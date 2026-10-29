@@ -13,6 +13,9 @@ type Res=Record<string,Card|null|undefined>;
 type Place={id:string;name:string;km:number;lat?:number;lon?:number;tel?:string|null};
 const U=L.SITE_URL;
 const call=(p:Place)=>p.tel?{label:'📞 전화',href:`tel:${p.tel.replace(/[^0-9]/g,'')}`}:null;
+/** 대략 위치(접속 지역·2km 칸)에서 잰 거리는 틀릴 수 있어 정확한 위치일 때만 보여 준다(10/29: 접속 지역 기준인데 '30m'로 나왔음). */
+let precise=false;
+const dist=(k:number)=>precise?` · ${km(k)}`:'';
 const acts=(...a:(Act|null|false|undefined)[])=>a.filter(Boolean) as Act[];
 
 /** 반경을 넓혀 가며 처음으로 결과가 나온 반경과 결과(모두 실패하면 null, 끝까지 0건이면 마지막 결과). */
@@ -24,7 +27,7 @@ async function widen<T extends {total:number}>(radii:number[],f:(km:number)=>Pro
 
 export function Dashboard({areas}:{areas:Area[]}){
   const {pos,status,request}=useMyPosition();const [res,setRes]=useState<Res>({});
-  const a=pos?L.nearestArea(areas,here(pos).lat,here(pos).lon):null;
+  const a=pos?L.nearestArea(areas,here(pos).lat,here(pos).lon):null;precise=!!pos?.precise;
   useEffect(()=>{if(!pos||!a)return;let on=true;const {lat,lon}=pos;setRes({});
     const put=(k:string,v:Card|null)=>{if(on)setRes(r=>({...r,[k]:v}));};
     L.weather(a).then(w=>{if(!w)return put('weather',null);const rain=(w.pop??0)>=60,bad=w.air==='나쁨'||w.air==='매우 나쁨';
@@ -33,49 +36,49 @@ export function Dashboard({areas}:{areas:Area[]}){
         href:`${U.weather}/region/${a.w}`,state:rain||bad?'warn':'good',acts:[{label:'⏱️ 48시간 예보',href:`${U.weather}/region/${a.w}`},{label:'👕 옷차림',href:`${U.weather}/wear`}]});});
     widen([2,5,10],r=>L.pharmacyOpen(lat,lon,r)).then(x=>{if(!x)return put('pharmacy',null);const p=x.d.items[0] as Place|undefined;
       put('pharmacy',{icon:'💊',title:'지금 문 연 약국',answer:x.d.total?`${x.r}km 안 ${n(x.d.total)}곳`:'10km 안에 없어요',badge:p?'지금 영업 중':undefined,
-        sub:p?`가장 가까운 곳 ${p.name} · ${km(p.km)}`:'밤·휴일 약국은 지역 페이지에서',href:p?`${U.pharmacy}/pharmacy/${p.id}`:`${U.pharmacy}/region/${a.c}`,state:x.d.total?'good':'warn',
+        sub:p?`${precise?'가장 가까운 곳':'근처'} ${p.name}${dist(p.km)}`:'밤·휴일 약국은 지역 페이지에서',href:p?`${U.pharmacy}/pharmacy/${p.id}`:`${U.pharmacy}/region/${a.c}`,state:x.d.total?'good':'warn',
         acts:p?acts(call(p),{label:'목록',href:`${U.pharmacy}/region/${a.c}`}):[{label:'🌙 밤·휴일 약국',href:`${U.pharmacy}/region/${a.c}`}]});});
     widen([2,5,10],r=>L.hospitalOpen(lat,lon,r)).then(x=>{if(!x)return put('hospital',null);const p=x.d.items[0] as (Place&{div?:string|null})|undefined;
       put('hospital',{icon:'🏥',title:'지금 진료하는 병원',answer:x.d.total?`${x.r}km 안 ${n(x.d.total)}곳`:'10km 안에 없어요',badge:p?'지금 진료 중':undefined,
-        sub:p?`가장 가까운 곳 ${p.name}${p.div?`(${p.div})`:''} · ${km(p.km)}`:'응급실은 24시간 — 남은 병상 보기',href:p?`${U.hospital}/hospital/${p.id}`:`${U.hospital}/er`,state:x.d.total?'good':'warn',
+        sub:p?`${precise?'가장 가까운 곳':'근처'} ${p.name}${p.div?`(${p.div})`:''}${dist(p.km)}`:'응급실은 24시간 — 남은 병상 보기',href:p?`${U.hospital}/hospital/${p.id}`:`${U.hospital}/er`,state:x.d.total?'good':'warn',
         acts:acts(p&&call(p),{label:'🚨 응급실',href:`${U.hospital}/er`})});});
     widen([3,5,10],r=>L.cheapOil(lat,lon,r)).then(x=>{if(!x)return put('oil',null);const b=x.d.best as (Place&{prices:{B027?:number|null}})|null;
-      put('oil',{icon:'⛽',title:'가까운 최저가 주유소',answer:b?`휘발유 ${n(b.prices.B027!)}원`:'가격 정보 없음',sub:b?`${b.name} · ${x.r}km 안 가장 싼 곳 · ${km(b.km)}`:'',
+      put('oil',{icon:'⛽',title:'가까운 최저가 주유소',answer:b?`휘발유 ${n(b.prices.B027!)}원`:'가격 정보 없음',sub:b?`${b.name} · ${x.r}km 안 가장 싼 곳${dist(b.km)}`:'',
         href:b?`${U.oil}/station/${b.id}`:a.o?`${U.oil}/region/${a.o}`:U.oil,acts:acts({label:'경유 최저가',href:`${U.oil}/diesel`})});});
     widen([1,3],r=>L.freeParking(lat,lon,r)).then(async x=>{if(!x)return put('parking',null);let p=x.d.items[0] as Place|undefined,free=!!p;
       if(!p){const any=await widen([1,3,5],r=>L.parking(lat,lon,r));p=any?.d.items[0] as Place|undefined;}  // 무료가 없으면 가장 가까운 주차장(유료)이라도
-      put('parking',{icon:'🅿️',title:free?'무료 공영 주차장':'가까운 공영 주차장',answer:free?`${x.r}km 안 무료 ${n(x.d.total)}곳`:p?`무료는 없어요 · 유료 ${km(p.km)}`:'5km 안에 없어요',
-        sub:p?`가장 가까운 곳 ${p.name} · ${km(p.km)}`:'시간별 예상 요금은 주차장 사이트에서',href:p?`${U.parking}/parking/${p.id}`:`${U.parking}/region/${a.c}`,state:free?'good':'none',
+      put('parking',{icon:'🅿️',title:free?'무료 공영 주차장':'가까운 공영 주차장',answer:free?`${x.r}km 안 무료 ${n(x.d.total)}곳`:p?`무료는 없어요${precise?` · 유료 ${km(p.km)}`:''}`:'5km 안에 없어요',
+        sub:p?`${precise?'가장 가까운 곳':'근처'} ${p.name}${dist(p.km)}`:'시간별 예상 요금은 주차장 사이트에서',href:p?`${U.parking}/parking/${p.id}`:`${U.parking}/region/${a.c}`,state:free?'good':'none',
         acts:acts({label:'💰 시간별 요금',href:U.parking})});});
     L.chargers(a).then(d=>put('charge',d?{icon:'⚡',title:`${a.n} 전기차 충전`,answer:`급속 ${n(d.ok)}대 비어 있음`,badge:d.ok?'지금 충전 가능':undefined,sub:`충전소 ${n(d.stations)}곳 · 급속 ${n(d.fast)}대`,
       href:`${U.charge}/region/${a.c}`,state:d.ok?'good':'warn',acts:[{label:'📍 가까운 순 보기',href:U.charge}]}:null));
     L.trip(lat,lon,'&kind=place,festival',20).then(d=>{const i=d?.items[0];put('trip',d?{icon:'🚗',title:'가까운 가볼만한곳',answer:d.total?`20km 안 ${n(d.total)}곳`:'20km 안에 없어요',sub:i?`가까운 곳 ${i.name}`:'',
       href:i?L.tripPath(i):`${U.trip}/search?lat=${lat.toFixed(4)}&lon=${lon.toFixed(4)}&radius_km=20`,acts:[{label:'전체 보기',href:`${U.trip}/search?lat=${lat.toFixed(4)}&lon=${lon.toFixed(4)}&radius_km=20`},{label:'🍽️ 맛집',href:`${U.trip}/search?lat=${lat.toFixed(4)}&lon=${lon.toFixed(4)}&radius_km=5&kind=food`}]}:null);});
     widen([2,5,10],r=>L.repair(lat,lon,'repair',r)).then(x=>{if(!x)return put('service',null);const p=x.d.items[0] as (Place&{sub?:string})|undefined;
-      put('service',{icon:'🔧',title:'자동차 정비소',answer:x.d.total?`${x.r}km 안 ${n(x.d.total)}곳`:'10km 안에 없어요',sub:p?`가장 가까운 곳 ${p.name}${p.sub?`(${p.sub})`:''} · ${km(p.km)}`:'',
+      put('service',{icon:'🔧',title:'자동차 정비소',answer:x.d.total?`${x.r}km 안 ${n(x.d.total)}곳`:'10km 안에 없어요',sub:p?`${precise?'가장 가까운 곳':'근처'} ${p.name}${p.sub?`(${p.sub})`:''}${dist(p.km)}`:'',
         href:p?`${U.service}/center/${p.id}`:`${U.service}/region/${a.c}`,acts:acts(p&&call(p),{label:'🔍 검사소',href:`${U.service}/inspection`})});});
     // 10/29 사용자: 16개 사이트 모두 카드로(위치를 알면 숫자, 모르면 바로 가기).
     L.benefit(a).then(d=>put('benefit',d?{icon:'🎁',title:`${d.name} 혜택·지원금`,answer:`받을 수 있는 혜택 ${n(d.total)}가지`,badge:d.dueN?`한 달 안 마감 ${n(d.dueN)}건`:undefined,
       sub:d.due[0]?`곧 마감: ${d.due[0][1]}`:`시군구 혜택 ${n(d.local)}가지`,href:`${U.benefit}/region/${a.c}`,state:'good',
       acts:[{label:'🎯 나에게 맞는 것만',href:`${U.benefit}/find`},{label:'📅 마감 임박',href:`${U.benefit}/deadline`}]}:null));
     widen([2,5,10],r=>L.petHospital(lat,lon,r)).then(x=>{if(!x)return put('pet',null);const p=x.d.items[0] as (Place&{sub?:string|null})|undefined;
-      put('pet',{icon:'🐾',title:'가까운 동물병원',answer:x.d.total?`${x.r}km 안 ${n(x.d.total)}곳`:'10km 안에 없어요',sub:p?`가장 가까운 곳 ${p.name}${p.sub?`(${p.sub})`:''} · ${km(p.km)}`:'',
+      put('pet',{icon:'🐾',title:'가까운 동물병원',answer:x.d.total?`${x.r}km 안 ${n(x.d.total)}곳`:'10km 안에 없어요',sub:p?`${precise?'가장 가까운 곳':'근처'} ${p.name}${p.sub?`(${p.sub})`:''}${dist(p.km)}`:'',
         href:p?`${U.pet}/place/${p.id}`:U.pet,acts:acts(p&&call(p),{label:'🌙 24시',href:`${U.pet}/24h`},{label:'💊 동물약국',href:`${U.pet}/pharmacy`})});});
     widen([1,2,5],r=>L.market(lat,lon,r)).then(x=>{if(!x)return put('market',null);const m=[...x.d.markets].sort((p,q)=>p.km-q.km)[0];
-      put('market',{icon:'🏪',title:'온누리상품권 쓰는 곳',answer:x.d.total?`${x.r}km 안 가맹점 ${n(x.d.total)}곳`:'5km 안에 없어요',sub:m?`가까운 시장 ${m.name} · ${km(m.km)}`:'',
+      put('market',{icon:'🏪',title:'온누리상품권 쓰는 곳',answer:x.d.total?`${x.r}km 안 가맹점 ${n(x.d.total)}곳`:'5km 안에 없어요',sub:m?`가까운 시장 ${m.name}${dist(m.km)}`:'',
         href:m?`${U.market}/market/${m.id}`:U.market,acts:[{label:'📅 오늘 장날',href:`${U.market}/jang`}]});});
     widen([1,2,5],r=>L.kiosk(lat,lon,r)).then(x=>{if(!x)return put('civil',null);const p=x.d.items[0] as Place|undefined;
-      put('civil',{icon:'🖨️',title:'지금 쓰는 무인민원발급기',answer:x.d.total?`${x.r}km 안 ${n(x.d.total)}대`:'5km 안에 없어요',sub:p?`가장 가까운 곳 ${p.name} · ${km(p.km)}`:'주민센터·우체국은 서류 사이트에서',
+      put('civil',{icon:'🖨️',title:'지금 쓰는 무인민원발급기',answer:x.d.total?`${x.r}km 안 ${n(x.d.total)}대`:'5km 안에 없어요',sub:p?`${precise?'가장 가까운 곳':'근처'} ${p.name}${dist(p.km)}`:'주민센터·우체국은 서류 사이트에서',
         href:p?`${U.civil}/place/${p.id}`:U.civil,state:x.d.total?'good':'none',acts:[{label:'📄 떼는 서류 찾기',href:`${U.civil}/doc`}]});});
     L.school(lat,lon,2).then(d=>{const p=d?.items[0];put('school',d?{icon:'🏫',title:'가까운 학교 · 오늘 급식',answer:d.total?`2km 안 학교 ${n(d.total)}곳`:'2km 안에 없어요',
-      sub:p?`가장 가까운 곳 ${p.name} · ${km(p.km)}`:'',href:p?`${U.school}/school/${p.code}`:U.school,acts:acts(p&&{label:'🍱 오늘 급식',href:`${U.school}/school/${p.code}`})}:null);});
+      sub:p?`${precise?'가장 가까운 곳':'근처'} ${p.name}${dist(p.km)}`:'',href:p?`${U.school}/school/${p.code}`:U.school,acts:acts(p&&{label:'🍱 오늘 급식',href:`${U.school}/school/${p.code}`})}:null);});
     widen([1,3],r=>L.academy(lat,lon,r)).then(x=>{if(!x)return put('academy',null);
       put('academy',{icon:'🎓',title:'우리 동네 학원',answer:x.d.total?`${x.r}km 안 ${n(x.d.total)}곳`:'3km 안에 없어요',sub:'수강료 공개 학원부터 보기',
         href:`${U.academy}/region/${a.c}`,acts:[{label:'💰 학원비 순위',href:`${U.academy}/rank`}]});});
     L.highway().then(d=>put('traffic',d?{icon:'🛣️',title:'전국 고속도로 지금',answer:`정체 ${n(d.jam)}구간`,sub:`서행 ${n(d.slow)}구간 · 내 근처 노선·CCTV는 고속도로 사이트에서`,
       href:U.traffic,state:d.jam>=30?'warn':'good',acts:[{label:'🚧 사고·공사',href:`${U.traffic}/incidents`}]}:null));
     widen([2,5,10],r=>L.sauna(lat,lon,r)).then(x=>{if(!x)return put('rest',null);const p=x.d.items[0] as Place|undefined;
-      put('rest',{icon:'♨️',title:'찜질방·사우나',answer:x.d.total?`${x.r}km 안 ${n(x.d.total)}곳`:'10km 안에 없어요',sub:p?`가장 가까운 곳 ${p.name} · ${km(p.km)}`:'',
+      put('rest',{icon:'♨️',title:'찜질방·사우나',answer:x.d.total?`${x.r}km 안 ${n(x.d.total)}곳`:'10km 안에 없어요',sub:p?`${precise?'가장 가까운 곳':'근처'} ${p.name}${dist(p.km)}`:'',
         href:p?`${U.rest}/shop/${p.id}`:U.rest,acts:acts(p&&call(p))});});
     return ()=>{on=false;};
   // eslint-disable-next-line react-hooks/exhaustive-deps

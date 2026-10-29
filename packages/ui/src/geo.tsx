@@ -77,8 +77,10 @@ function locate(quiet:boolean){
   if(watching)return;watching=true;
   if(!state.pos?.exact)set({status:'locating'});
   let best:Fix|null=null,w=-1,told=quiet;
-  const stop=()=>{if(w>=0)navigator.geolocation.clearWatch(w);w=-1;watching=false;if(state.status==='locating')set({status:best?'ok':quiet?'idle':'failed'});};
-  const ok=(p:GeolocationPosition)=>{const v:Fix={lat:p.coords.latitude,lon:p.coords.longitude,acc:Math.round(p.coords.accuracy),at:Date.now()};
+  const stop=()=>{clearTimeout(timer);if(w>=0)navigator.geolocation.clearWatch(w);w=-1;watching=false;if(state.status==='locating')set({status:best?'ok':quiet?'idle':'failed'});};
+  // 20초 다듬기는 첫 위치가 잡힌 뒤부터 센다(권한 창에 늦게 답해도 '못 잡음'으로 끝나지 않게). 첫 위치 전에는 최대 60초 기다린다.
+  let timer=setTimeout(stop,60000);
+  const ok=(p:GeolocationPosition)=>{if(!best){clearTimeout(timer);timer=setTimeout(stop,20000);}const v:Fix={lat:p.coords.latitude,lon:p.coords.longitude,acc:Math.round(p.coords.accuracy),at:Date.now()};
     if(best&&best.acc!=null&&v.acc!=null&&v.acc>=best.acc)return;best=v;save(v);
     const cur=state.pos,c=cell(v.lat,v.lon);
     if(!cur?.exact||cur.lat!==c.lat||cur.lon!==c.lon||cur.src!=='gps'||(cur.acc??1e9)>(v.acc??0)*2)set({pos:withCell(v,'gps'),status:'ok'});
@@ -88,7 +90,6 @@ function locate(quiet:boolean){
   const bad=(e:GeolocationPositionError)=>{if(e.code===1){stop();if(!best)set({status:quiet?'idle':'denied'});}};
   navigator.geolocation.getCurrentPosition(ok,bad,{enableHighAccuracy:false,timeout:8000,maximumAge:60e3});
   w=navigator.geolocation.watchPosition(ok,bad,{enableHighAccuracy:true,timeout:20000,maximumAge:0});
-  setTimeout(stop,20000);
 }
 function start(){
   if(started)return;started=true;
