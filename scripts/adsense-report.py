@@ -4,7 +4,7 @@ Secrets: ADSENSE_CLIENT_ID · ADSENSE_CLIENT_SECRET · ADSENSE_REFRESH_TOKEN(사
   --check      연결 시험: 계정·도메인 이름·행 수만 출력.
   --out DIR    지난 7일(어제까지)·그 전 7일 보고서를 DIR/주간-YYYY-MM-DD.md 로 쓴다.
 수익·클릭률 같은 숫자는 로그에 출력하지 않는다(공개 저장소의 Actions 로그는 누구나 봄). 보고서는 비공개 저장소
-guidejung-private-reports 에만 올린다(adsense-weekly.yml) — 애드센스 약관의 기밀 정보에 클릭률 등 실적 통계가 들어간다고 알려져 있어 보수적으로.
+ads 에만 올린다(adsense-weekly.yml) — 애드센스 약관의 기밀 정보에 클릭률 등 실적 통계가 들어간다고 알려져 있어 보수적으로.
 """
 import datetime as dt
 import os

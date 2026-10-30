@@ -1,5 +1,5 @@
 name: AdSense weekly
-# 매주 월요일 애드센스 주간 보고서(scripts/adsense-report.py) → 비공개 저장소 guidejung-private-reports 의 adsense/주간-YYYY-MM-DD.md.
+# 매주 월요일 애드센스 주간 보고서(scripts/adsense-report.py) → 비공개 저장소 ads 의 adsense/주간-YYYY-MM-DD.md.
 # 수익·클릭률은 이 공개 저장소·Actions 로그에 남기지 않는다(애드센스 약관 기밀 정보 — 보수적으로). 무료(AdSense Management API).
 # Secrets: ADSENSE_CLIENT_ID · ADSENSE_CLIENT_SECRET · ADSENSE_REFRESH_TOKEN, PRIVATE_REPORTS_TOKEN(그 비공개 저장소 Contents 쓰기만 되는 토큰).
 on:
@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
         with:
-          repository: ${{ github.repository_owner }}/guidejung-private-reports
+          repository: ${{ github.repository_owner }}/ads
           token: ${{ secrets.PRIVATE_REPORTS_TOKEN }}
           path: private
       - uses: actions/setup-python@v5
