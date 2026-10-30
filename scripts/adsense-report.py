@@ -129,11 +129,11 @@ def build(acc, out_dir):
     L += [f'## 사이트별 (내근처 합계 {money(ours_e)} · 전체의 {pct(ours_e / total) if total else "—"})', '',
           table(['도메인', '수익', '비중', '지난주 대비', '페이지 조회', '페이지 RPM', '클릭', '노출 클릭률'], rows), '']
     # 조회는 많은데 RPM이 낮은 곳 = 광고 배치·콘텐츠 개선 후보, RPM이 높은 곳 = 트래픽을 키울 곳.
-    ours = [r for r in this if site(r['DOMAIN_NAME']) and r['PAGE_VIEWS'] >= 100]
+    ours = [r for r in this if site(r['DOMAIN_NAME']) and r['PAGE_VIEWS'] >= 30]
     if ours:
         hi = sorted(ours, key=lambda r: -r['PAGE_VIEWS_RPM'])[:3]
         lo = sorted(ours, key=lambda r: r['PAGE_VIEWS_RPM'])[:3]
-        L += ['## 읽을 거리(조회 100회 이상 내근처 사이트)', '',
+        L += ['## 읽을 거리(조회 30회 이상 내근처 사이트)', '',
               '- RPM 높은 곳(트래픽을 키우면 수익이 잘 느는 곳): ' + ', '.join(f'{site(r["DOMAIN_NAME"])} {money(r["PAGE_VIEWS_RPM"])}' for r in hi),
               '- RPM 낮은 곳(광고 배치·체류 개선 후보): ' + ', '.join(f'{site(r["DOMAIN_NAME"])} {money(r["PAGE_VIEWS_RPM"])}' for r in lo), '']
     for dim, title in (('PLATFORM_TYPE_NAME', '기기별'), ('AD_UNIT_NAME', '광고 단위별(이름 없음 = 자동광고)')):
