@@ -1,0 +1,44 @@
+name: AdSense weekly
+# 매주 월요일 애드센스 주간 보고서(scripts/adsense-report.py) → 비공개 저장소 guidejung-private-reports 의 adsense/주간-YYYY-MM-DD.md.
+# 수익·클릭률은 이 공개 저장소·Actions 로그에 남기지 않는다(애드센스 약관 기밀 정보 — 보수적으로). 무료(AdSense Management API).
+# Secrets: ADSENSE_CLIENT_ID · ADSENSE_CLIENT_SECRET · ADSENSE_REFRESH_TOKEN, PRIVATE_REPORTS_TOKEN(그 비공개 저장소 Contents 쓰기만 되는 토큰).
+on:
+  schedule:
+    - cron: '33 23 * * 0' # 월요일 08:33 KST(GA 주간 보고서 뒤)
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: adsense-weekly
+  cancel-in-progress: false
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/guidejung-private-reports
+          token: ${{ secrets.PRIVATE_REPORTS_TOKEN }}
+          path: private
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -q requests
+      - name: Report
+        env:
+          ADSENSE_CLIENT_ID: ${{ secrets.ADSENSE_CLIENT_ID }}
+          ADSENSE_CLIENT_SECRET: ${{ secrets.ADSENSE_CLIENT_SECRET }}
+          ADSENSE_REFRESH_TOKEN: ${{ secrets.ADSENSE_REFRESH_TOKEN }}
+        run: python scripts/adsense-report.py --out private/adsense
+      - name: Commit to private repo
+        working-directory: private
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add adsense
+          if git diff --cached --quiet; then echo 'no change'; exit 0; fi
+          git commit -q -m '애드센스 주간 보고서'
+          for i in 1 2 3; do git pull -q --rebase && git push -q && echo 'pushed' && exit 0; sleep 10; done
+          exit 1
