@@ -1,0 +1,23 @@
+name: AdSense check
+# 애드센스 API 연결 시험(scripts/adsense-report.py --check): 계정·도메인 이름·행 수만 출력, 수익 숫자는 로그에 남기지 않음(공개 저장소).
+# Secrets: ADSENSE_CLIENT_ID · ADSENSE_CLIENT_SECRET · ADSENSE_REFRESH_TOKEN. 무료(AdSense Management API).
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -q requests
+      - name: Check
+        env:
+          ADSENSE_CLIENT_ID: ${{ secrets.ADSENSE_CLIENT_ID }}
+          ADSENSE_CLIENT_SECRET: ${{ secrets.ADSENSE_CLIENT_SECRET }}
+          ADSENSE_REFRESH_TOKEN: ${{ secrets.ADSENSE_REFRESH_TOKEN }}
+        run: python scripts/adsense-report.py --check
