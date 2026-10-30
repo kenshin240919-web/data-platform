@@ -3,7 +3,7 @@ name: Index picks
 # 요청 자체는 Search Console 브라우저에서 사용자가 함(공개 API 없음). Secret: GA_SERVICE_ACCOUNT_JSON(URL 검사로 이미 색인된 곳 빼기). 무료.
 on:
   schedule:
-    - cron: '27 23 * * *' # 08:27 KST
+    - cron: '7 19 * * *' # 04:07 KST — GitHub 예약이 3시간 넘게 늦어(10/30 11:42에 실행) 08:47 전달 전에 끝나도록 앞당김
   workflow_dispatch:
 permissions:
   contents: write
