@@ -4,7 +4,7 @@ name: AdSense weekly
 # Secrets: ADSENSE_CLIENT_ID · ADSENSE_CLIENT_SECRET · ADSENSE_REFRESH_TOKEN, PRIVATE_REPORTS_TOKEN(그 비공개 저장소 Contents 쓰기만 되는 토큰).
 on:
   schedule:
-    - cron: '33 23 * * 0' # 월요일 08:33 KST(GA 주간 보고서 뒤)
+    - cron: '7 20 * * 0' # 월요일 05:07 KST — GitHub 예약이 늦어 08:53 요약 전에 끝나도록 앞당김(11/2)
   workflow_dispatch:
 permissions:
   contents: read
