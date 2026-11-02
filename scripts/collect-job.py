@@ -243,6 +243,41 @@ def jurisdictions(items):
         log(f'  관할 센터를 못 찾은 시군구(가장 가까운 센터로 안내): {miss[:40]}')
 
 
+W24 = 'https://www.work24.go.kr/cm/c/d/0190/retrieveInstSrchLst.do'
+
+
+def homepages(items, prev_by_id):
+    """고용센터 홈페이지: 고용24 '기관찾기'(고용노동부 공식) 목록에 적힌 센터별 주소. 이름(…고용센터/…고용복지플러스센터)이나
+    대표전화로 맞춤. 못 받으면 지난 주소를 그대로."""
+    norm = lambda s: re.sub(r'(고용복지플러스센터|고용복지센터|고용센터|출장센터|출장소|센터)$', '', (s or '').replace(' ', ''))
+    digits = lambda s: re.sub(r'\D', '', s or '')
+    rows = []
+    try:
+        for page in range(1, 6):
+            q = urllib.parse.urlencode({'currentPageNo': page, 'recordCountPerPage': 100, 'tabNo': 1, 'bbsUrl': '/c/d/0190/retrieveInstSrchLstViewPost.do'})
+            html = http(f'{W24}?{q}', timeout=60).decode('utf-8', 'replace')
+            got = re.findall(r"fn_showMap\('([^']*)',\s*'[^']*',\s*'[^']*',\s*'[^']*',\s*'([^']*)',\s*'([^']*)'\)", html)
+            rows += got
+            if len(got) < 100:
+                break
+    except Exception as e:  # noqa: BLE001
+        log(f'고용24 기관찾기 실패: {e}')
+        rows = []
+    by_name = {norm(n): h for n, _, h in rows if h}
+    by_tel = {digits(t): h for _, t, h in rows if h and digits(t)}
+    hit = 0
+    for p in items:
+        if p['kind'] != 'center':
+            continue
+        h = by_name.get(norm(p['name'])) or by_tel.get(digits(p.get('tel')))
+        if h:
+            p['hp'] = h if h.startswith('http') else 'https://' + h.lstrip('/')
+            hit += 1
+        elif not rows and (prev_by_id.get(p['id']) or {}).get('hp'):
+            p['hp'] = prev_by_id[p['id']]['hp']
+    log(f'고용센터 홈페이지(고용24 기관찾기 {len(rows)}곳) 연결 {hit}/{sum(1 for p in items if p["kind"] == "center")}')
+
+
 def check_coords(items, key):
     """원본 좌표(직업소개소)가 맞는지: 표본 20곳을 카카오 주소 좌표와 비교해 중앙값 거리를 남김."""
     sample = [p for p in items if p['kind'] in ('agency', 'free') and p['lat'] is not None and p.get('addr')][:20]
@@ -287,6 +322,7 @@ def main():
         C.geocode(items, kakao)
     items = K.place(items, regions)
     jurisdictions(items)
+    homepages(items, prev_by_id)
     items = [compact(p) for p in items]
     items.sort(key=lambda p: (p['region'], p['kind'], p['name'], p['id']))
     if prev_items and len(items) < len(prev_items) * 0.8 and '--force' not in args:

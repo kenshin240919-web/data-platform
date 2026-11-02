@@ -6,6 +6,7 @@ import {Connect,linksNear} from '@guidejung/ui/network';
 import {PlaceList} from '../../_components/PlaceList';
 import {Ad} from '../../_components/Ad';
 import {Official} from '../../_components/Guide';
+import {HomeLinks} from '../../_components/HomeLinks';
 import {centerFor,COND_MIN,KIND_ORDER,KINDS,n,ordered,placePath,region,regions,SITE,slim,updated} from '../../../lib/data';
 export const dynamicParams=false;
 export function generateStaticParams(){return regions.map(r=>({code:r.id}));}
@@ -23,6 +24,7 @@ export default async function RegionPage({params}:P){
     <nav className="crumbs"><Link href="/">홈</Link> › <Link href="/region">지역별</Link> › {r.name}</nav>
     <h1>{r.name} 일자리 기관</h1>
     {c.list.map(x=><a key={x.id} className="jb-juris" href={placePath(x.id)}><span aria-hidden="true">🏛️</span><span><small>{r.name} {c.exact?'관할 고용센터':'에서 가까운 고용센터(관할은 센터에 확인)'}</small><b>{x.name}</b><small>{x.addr}{x.tel?` · ${x.tel}`:''}</small></span><em>실업급여·구직 신청 →</em></a>)}
+    <HomeLinks center={c.list[0]} region={r.id}/>
     <p className="jb-answer"><b>{r.name}</b>: {KIND_ORDER.filter(k=>r.kinds[k]&&k!=='center').map((k,i)=><span key={k}>{i>0&&' · '}{KINDS[k].label} <b>{n(r.kinds[k])}곳</b></span>)}. <span className="muted">({updated()} 기준)</span></p>
     <div className="jb-jump">{KIND_ORDER.filter(k=>r.kinds[k]>=COND_MIN).map(k=><Link key={k} href={`/region/${r.id}/${k}`}>{KINDS[k].icon} {r.zone} {KINDS[k].label} <small>{n(r.kinds[k])}</small></Link>)}</div>
     <section><h2>{r.name} 목록</h2>{list.length?<PlaceList items={list.map(slim)}/>:<p className="muted">이 지역에 등록된 기관이 없어요. 가까운 지역을 확인하세요.</p>}

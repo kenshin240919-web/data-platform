@@ -5,6 +5,7 @@ import {useEffect,useState} from 'react';
 import {LocateCard,PosNote,useMyPosition,fixKmNow,padKm,padLimit,within} from '@guidejung/ui/geo';
 import {KINDS,km,n,placePath,type Kind,type Slim} from '../../lib/fmt';
 import {PlaceList} from './PlaceList';
+import {HomeLinks} from './HomeLinks';
 type Res={counts:Record<Kind,number>;items:Slim[];area:{code:string;name:string}|null;juris:Slim[];exact:boolean};
 export function NearJob({kind}:{kind?:Kind}){
   const {pos,status,request}=useMyPosition();
@@ -26,6 +27,7 @@ export function NearJob({kind}:{kind?:Kind}){
       {(!kind||kind==='center')&&c&&<a className="jb-juris" href={placePath(c.id)}><span aria-hidden="true">🏛️</span><span>
         <small>{res.area?`📍 ${res.area.name} ${res.exact?'관할 고용센터':'에서 가까운 고용센터'}`:'가까운 고용센터'}</small>
         <b>{c.name}</b><small>{c.km!=null&&`${km(c.km)} · `}{c.addr}</small></span><em>실업급여·구직 신청 →</em></a>}
+      {(!kind||kind==='center')&&c&&<HomeLinks center={c} region={res.area?.code}/>}
       {(!kind||kind==='center')&&c&&<p className="muted small">지금 위치 기준이에요. 실업급여는 <b>주민등록 주소지</b> 관할 센터에서 신청하니, 주소지가 다르면 <a href="/center">시군구별 관할 표</a>에서 확인하세요.</p>}
       {!kind&&<p className="jb-answer">📍 {pos?.precise?'내 주변':'접속 위치 주변'} {radius}km 안 직업소개소 <b>{n(count('agency')+count('free'))}곳</b>{count('women')?<> · 새일센터 <b>{n(count('women'))}</b></>:null}{count('senior')?<> · 노인일자리 기관 <b>{n(count('senior'))}</b></>:null}</p>}
       {kind&&kind!=='center'&&<p className="jb-answer">📍 {pos?.precise?'내 주변':'접속 위치 주변'} {radius}km 안 {KINDS[kind].title} <b>{n(count(kind))}곳</b>{res.items[0]&&<> — 가장 가까운 곳 <a href={placePath(res.items[0].id)}><b>{res.items[0].name}</b></a> {res.items[0].km!=null&&km(res.items[0].km)}</>}</p>}

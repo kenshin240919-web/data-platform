@@ -74,3 +74,5 @@
 details summary{cursor:pointer;padding:6px 0}
 @media (max-width:900px){.jb-situ{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:760px){.jb-juris{flex-wrap:wrap}.jb-juris em{margin-left:0}.jb-table th{width:auto;display:block;border:0;padding-bottom:0}.jb-table td{display:block}}
+.jb-hp{display:flex;flex-wrap:wrap;gap:8px;margin:-4px 0 14px}.jb-hp a{background:white;color:var(--rs);border:1px solid #d8b4fe;border-radius:999px;padding:8px 14px;font-weight:700;font-size:14px;text-decoration:none}.jb-hp a.sub{color:var(--muted);border-color:var(--line,#e5e7eb)}
+.jb-table .hp{white-space:nowrap;font-weight:700}

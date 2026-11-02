@@ -10,7 +10,7 @@ export type Kind='center'|'agency'|'free'|'women'|'senior'|'campus';
 /** region: weather 시군구 코드(일반구는 시 코드). center: juris(관할 지역 코드)·juris_text(관할구역 원문)·org(청·지청).
  * agency: sub(이름으로 나눈 종류)·corp(개인/법인)·since(등록 연도). campus: org(관할 고용센터 이름). */
 export type Place={id:string;kind:Kind;name:string;addr:string|null;jibun?:string|null;lat:number|null;lon:number|null;region:string;region_name:string;
-  org?:string|null;tel?:string|null;juris?:string[];juris_text?:string|null;sub?:Sub|null;corp?:string|null;since?:string|null};
+  org?:string|null;tel?:string|null;juris?:string[];juris_text?:string|null;hp?:string|null;sub?:Sub|null;corp?:string|null;since?:string|null};
 export type Sub='care'|'home'|'labor'|'search'|'foreign';
 export const SUBS:Record<Sub,string>={labor:'인력·건설',care:'간병·요양',home:'가사·산후·돌봄',search:'헤드헌팅',foreign:'외국인·해외'};
 export const KINDS:Record<Kind,{label:string;icon:string;title:string;desc:string;ld:string;src:string}>={
@@ -41,9 +41,25 @@ export const tagsOf=(p:Pick<Place,'kind'|'sub'|'corp'|'since'|'org'>)=>[p.kind==
   (p.kind==='agency'||p.kind==='free')&&p.corp?p.corp:null].filter((x):x is string=>!!x);
 
 /** 브라우저로 보내는 가벼운 카드 */
-export const slim=(p:Place)=>({id:p.id,kind:p.kind,name:p.name,addr:p.addr??p.jibun??null,lat:p.lat,lon:p.lon,tel:p.tel??null,tags:tagsOf(p),region_name:p.region_name});
+export const slim=(p:Place)=>({id:p.id,kind:p.kind,name:p.name,addr:p.addr??p.jibun??null,lat:p.lat,lon:p.lon,tel:p.tel??null,tags:tagsOf(p),region_name:p.region_name,...(p.hp?{hp:p.hp}:{})});
 export type Slim=ReturnType<typeof slim>&{km?:number};
 export const COND_MIN=3;
 
 // 공식 안내(링크만 — 숫자·조건은 적지 않음)
-export const LINKS={work24:'https://www.work24.go.kr',senior:'https://www.seniorro.or.kr',saeil:'https://saeil.mogef.go.kr',moel:'https://www.moel.go.kr'};
+export const LINKS={work24:'https://www.work24.go.kr',w24find:'https://www.work24.go.kr/cm/c/d/0190/retrieveInstSrchLst.do',senior:'https://www.seniorro.or.kr',saeil:'https://saeil.mogef.go.kr',moel:'https://www.moel.go.kr'};
+/** 시도 공식 일자리 누리집(11/2 접속·제목 확인한 곳만). 키는 지역 코드 앞 두 자리. */
+export const SIDO_PORTALS:Record<string,{name:string;url:string}>={
+  '11':{name:'서울시 일자리포털',url:'https://job.seoul.go.kr'},
+  '26':{name:'부산일자리정보망',url:'https://busanjob.net'},
+  '28':{name:'인천일자리포털',url:'https://www.incheon.go.kr/job/index'},
+  '41':{name:'경기도일자리포털 잡아바',url:'https://job.gg.go.kr'},
+  '51':{name:'강원일자리포털',url:'https://job.gwd.go.kr'},
+};
+/** 홈페이지 링크 묶음: 고용센터 홈페이지(고용24 기관찾기에 적힌 주소)·시도 일자리 누리집. [이름, 주소] */
+export const homeLinks=(center:{name:string;hp?:string|null}|null|undefined,region:string|null|undefined):[string,string][]=>{
+  const out:[string,string][]=[];
+  if(center?.hp)out.push([`${center.name} 홈페이지`,center.hp]);
+  const sp=region?SIDO_PORTALS[region.slice(0,2)]:undefined;
+  if(sp)out.push([sp.name,sp.url]);
+  return out;
+};

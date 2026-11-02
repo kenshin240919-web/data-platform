@@ -6,7 +6,7 @@
 // 위치: 브라우저는 약 2km 칸 중심만 보낸다(packages/ui/src/geo.tsx) — 여기 오는 lat/lon은 칸 중심.
 import raw from '../data/places.json';
 import weatherRegions from '../../weather/data/regions.json';
-import {ADS,distKm,esc,eun,KIND_ORDER,KINDS,km,LINKS,mapUrl,naverUrl,placePath,SITE,slim,SUBS,tagsOf,telHref,type Kind,type Place} from '../lib/fmt';
+import {ADS,distKm,esc,eun,homeLinks,KIND_ORDER,KINDS,km,LINKS,mapUrl,naverUrl,placePath,SITE,slim,SUBS,tagsOf,telHref,type Kind,type Place} from '../lib/fmt';
 import {actionsHtml} from '../../../packages/ui/src/actions';
 import {aroundHtml} from '../../../packages/ui/src/live';
 
@@ -84,6 +84,7 @@ ${p.juris?.length?`<h3>관할 지역 ${p.juris.length}곳</h3><div class="jb-jum
   return `<section><h2>🎓 대학일자리플러스센터</h2><p>대학 안에서 진로·취업 상담을 하는 고용노동부 지원 센터예요. 이용 대상은 센터마다 달라 미리 확인하세요.</p></section>`;
 }
 
+const homeLinksHtml=(center:{name:string;hp?:string|null}|null|undefined,region:string|null|undefined)=>`<div class="jb-hp">${homeLinks(center,region).map(([t,u])=>`<a href="${esc(u)}" rel="noopener" target="_blank">🏠 ${esc(t)} ↗</a>`).join('')}<a class="sub" href="${LINKS.w24find}" rel="noopener" target="_blank">🔎 고용24 기관찾기 ↗</a></div>`;
 function detailHtml(p:Place,groups:[string,Near[]][],juris:ReturnType<typeof areaOf>|null){
   const addr=p.addr??p.jibun,K=KINDS[p.kind];
   const tags=tagsOf(p);
@@ -97,7 +98,7 @@ function detailHtml(p:Place,groups:[string,Near[]][],juris:ReturnType<typeof are
   const [sido,...rest]=p.region_name.split(' ');
   const ld={'@context':'https://schema.org','@type':K.ld,name:p.name,url:SITE+placePath(p.id),image:SITE+'/og.png?v=2',
     ...(addr?{address:{'@type':'PostalAddress',streetAddress:addr,addressLocality:rest.join(' ')||sido,addressRegion:sido,addressCountry:'KR'}}:{}),
-    ...(p.lat!=null?{geo:{'@type':'GeoCoordinates',latitude:p.lat,longitude:p.lon}}:{}),...(p.tel?{telephone:p.tel}:{}),
+    ...(p.lat!=null?{geo:{'@type':'GeoCoordinates',latitude:p.lat,longitude:p.lon}}:{}),...(p.tel?{telephone:p.tel}:{}),...(p.hp?{sameAs:p.hp}:{}),
     ...(p.kind==='center'&&p.juris?.length?{areaServed:p.juris.map(c=>regionName(c)).filter(Boolean).map(name=>({'@type':'AdministrativeArea',name}))}:{})};
   const crumbs={'@context':'https://schema.org','@type':'BreadcrumbList',itemListElement:[['내근처 일자리',SITE+'/'],['지역별',SITE+'/region'],[p.region_name,`${SITE}/region/${p.region}`],[p.name,SITE+placePath(p.id)]].map(([name,item],i)=>({'@type':'ListItem',position:i+1,name,item}))};
   const faqLd={'@context':'https://schema.org','@type':'FAQPage',mainEntity:faq.map(([q,x])=>({'@type':'Question',name:q,acceptedAnswer:{'@type':'Answer',text:x}}))};
@@ -107,8 +108,8 @@ function detailHtml(p:Place,groups:[string,Near[]][],juris:ReturnType<typeof are
   return `<nav class="crumbs"><a href="/">홈</a> › <a href="/region">지역별</a> › <a href="/region/${esc(p.region)}">${esc(p.region_name)}</a> › ${esc(p.name)}</nav>
 <div class="jb-head"><h1>${K.icon} ${esc(p.name)}</h1><p>${esc([p.region_name,K.title,...tags].join(' · '))}</p></div>${actionsHtml({id:p.id,name:p.name,sub:[K.label,p.region_name].join(' · '),url:placePath(p.id)})}
 <p class="jb-answer"><b>${esc(K.title)}</b>${addr?` · ${esc(addr)}`:''}${p.tel?` · ${esc(p.tel)}`:''}</p>
-<div class="jb-actions">${p.tel?`<a href="${esc(telHref(p.tel))}">📞 전화하기</a>`:''}<a class="${p.tel?'sub':''}" href="${esc(mapUrl(p))}" rel="noopener" target="_blank">🧭 길찾기</a><a class="naver" href="${esc(naverUrl(p))}" rel="noopener" target="_blank">🟢 네이버 지도에서 보기</a></div>
-${jur?`<a class="jb-juris" href="${placePath(jur.id)}"><span aria-hidden="true">🏛️</span><span><small>${esc(p.region_name)} ${juris!.exact?'관할 고용센터':'에서 가까운 고용센터'}</small><b>${esc(jur.name)}</b><small>${esc(jur.addr??'')}</small></span><em>실업급여·구직 신청 →</em></a>`:''}
+<div class="jb-actions">${p.tel?`<a href="${esc(telHref(p.tel))}">📞 전화하기</a>`:''}<a class="${p.tel?'sub':''}" href="${esc(mapUrl(p))}" rel="noopener" target="_blank">🧭 길찾기</a>${p.kind==='center'&&p.hp?`<a class="sub" href="${esc(p.hp)}" rel="noopener" target="_blank">🏠 센터 홈페이지 ↗</a>`:''}<a class="naver" href="${esc(naverUrl(p))}" rel="noopener" target="_blank">🟢 네이버 지도에서 보기</a></div>
+${jur?`<a class="jb-juris" href="${placePath(jur.id)}"><span aria-hidden="true">🏛️</span><span><small>${esc(p.region_name)} ${juris!.exact?'관할 고용센터':'에서 가까운 고용센터'}</small><b>${esc(jur.name)}</b><small>${esc(jur.addr??'')}</small></span><em>실업급여·구직 신청 →</em></a>${homeLinksHtml(jur,p.region)}`:homeLinksHtml(null,p.region)}
 ${kindNote(p)}
 ${groups.map(([title,list])=>list.length?`<section><h2>${esc(title)}</h2><div class="jb-cards">${list.map(cardHtml).join('')}</div></section>`:'').join('')}
 <p><a class="jb-more-link" href="/region/${esc(p.region)}">${esc(p.region_name)} 일자리 기관 모두 보기 →</a></p>
