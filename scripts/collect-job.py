@@ -125,12 +125,13 @@ def campus():
         return None
     out = []
     for r in rows:
-        univ = col(r, '대학교', '대학명', '학교명')
-        addr = col(r, '학교 주소', '학교주소', '주소', '소재지')
+        univ = col(r, '대학', '대학교', '대학명', '학교명')
+        addr = col(r, '학교주소', '학교 주소', '주소', '소재지')
         if not (univ and addr):
             continue
-        out.append({'id': hid('u', univ, addr), 'kind': 'campus', 'name': f'{univ} 대학일자리플러스센터', 'addr': addr, 'jibun': None, 'lat': None, 'lon': None,
-                    'org': col(r, '관할 고용복지플러스센터명', '관할고용복지플러스센터명', '관할 고용센터'), 'tel': col(r, '연락처', '전화번호')})
+        cname = col(r, '센터명') or ''
+        out.append({'id': hid('u', univ, addr), 'kind': 'campus', 'name': cname if '센터' in cname else f'{univ} 대학일자리플러스센터', 'addr': addr, 'jibun': None,
+                    'lat': None, 'lon': None, 'org': univ, 'tel': col(r, '연락처', '전화번호')})
     log(f'대학일자리플러스센터 {len(out):,}곳 (칸: {", ".join(rows[0].keys()) if rows else "-"})')
     return out
 
@@ -151,7 +152,7 @@ def lonlat(x, y):
 
 def agencies(key, kind):
     path = '1741000/paid_job_centers/info' if kind == 'agency' else '1741000/free_job_centers/info'
-    rows = C.pages(path, key, rows=1000)
+    rows = C.pages(path, key, rows=100)  # 이 API는 한 쪽에 100줄까지만 줌(1,000을 달라 해도 100 — 11/2 첫 수집에서 확인)
     if rows is None:
         return None
     log(f'  {kind} 영업상태: {Counter((r.get("SALS_STTS_CD"), r.get("SALS_STTS_NM")) for r in rows).most_common(8)}')
@@ -208,11 +209,15 @@ def jurisdictions(items):
         if p['kind'] != 'center':
             continue
         text = p.get('juris_text') or ''
+        # 괄호: '창원시(의창구성산구진해구)'·'칠곡군(석적읍 … 제외)'는 앞 낱말 전체를 관할로, '칠곡군(석적읍 중리 국가 산업단지)'처럼
+        # 일부 지역만 맡는 경우는 앞 낱말을 뺌(그 군은 따로 있는 센터가 맡음).
+        text = re.sub(r'([^\sㆍ·,/?]+)\(([^)]*)\)', lambda m: m.group(1) if ('제외' in m.group(2) or re.fullmatch(r'(\S+구)+', m.group(2).replace(' ', ''))) else '', text)
         sido = p['region'][:2]
         codes = []
-        for part in re.split(r'[ㆍ·,/]|\s및\s', text):
-            for w in part.split():
-                w = w.strip('()')
+        for part in re.split(r'[ㆍ·,/?]|\s및\s', text):
+            ws = [w.strip('() ') for w in part.split() if w.strip('() ')]
+            hit_any = False
+            for w in ws:
                 if w in SIDO_ALIAS:
                     sido = SIDO_ALIAS[w]
                     continue
@@ -220,6 +225,12 @@ def jurisdictions(items):
                 if not hit and len(w) > 1 and not w.endswith(('시', '군', '구')):
                     hit = names.get((sido, w + '시')) or names.get((sido, w + '군'))
                 for c in sorted(hit or ()):
+                    hit_any = True
+                    if c not in codes:
+                        codes.append(c)
+            # '대전광역시'·'제주도'처럼 시도 이름만 있으면 그 시도 전체
+            if ws and all(w in SIDO_ALIAS for w in ws) and not hit_any:
+                for c in sorted({q['region'] for q in items if q['region'][:2] == sido}):
                     if c not in codes:
                         codes.append(c)
         p['juris'] = codes or [p['region']]
