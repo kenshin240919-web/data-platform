@@ -1,0 +1,54 @@
+name: Job collect
+# Daily list for job.guidejung.com (내근처 일자리, A안 — 채용 공고 없음): 고용복지플러스센터(관할구역)·유료/무료 직업소개소·새일센터·
+# 노인일자리 수행기관·대학일자리플러스센터 (scripts/collect-job.py). apps/job/data/places.json is committed to main only when it changed.
+# Secrets: DATA_GO_KR_KEY, KAKAO_REST_KEY(좌표 없는 곳·30일 재확인, 캐시 runtime/job — Actions cache).
+on:
+  schedule:
+    - cron: '57 20 * * *' # 05:57 KST
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [scripts/collect-job.py]
+permissions:
+  contents: write
+concurrency:
+  group: job-collect
+  cancel-in-progress: false
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -q requests
+      - uses: actions/cache/restore@v4
+        with:
+          path: runtime/job
+          key: job-geo-${{ github.run_id }}
+          restore-keys: job-geo-
+      - name: Collect
+        env:
+          KAKAO_REST_KEY: ${{ secrets.KAKAO_REST_KEY }}
+          DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
+        run: python scripts/collect-job.py
+      - uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: runtime/job
+          key: job-geo-${{ github.run_id }}
+      - name: Commit job list
+        if: always()
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          [ -f apps/job/data/places.json ] || { echo 'no data yet'; exit 0; }
+          git add apps/job/data/places.json
+          if git diff --cached --quiet; then echo 'no change'; exit 0; fi
+          git commit -m 'job: 일자리 기관 목록 갱신'
+          for i in 1 2 3; do git pull --rebase origin main && git push origin HEAD:main && exit 0; sleep 10; done
+          exit 1
