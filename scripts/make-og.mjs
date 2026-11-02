@@ -20,6 +20,7 @@ const S={
  civil:['🖨️','내근처 서류','떼고, 뽑고, 부치는 곳','#364fc7','#5468e0'],
  market:['🏪','내근처 시장','온누리 어디서 써?','#be123c','#e11d48'],
  benefit:['🎁','내근처 혜택','우리 동네 지원금, 놓친 거 없어?','#15803d','#22a052'],
+ job:['💼','내근처 일자리','일자리 찾을 때 가는 곳','#6d28d9','#8b5cf6'],
 };
 const html=([icon,brand,tag,c1,c2])=>{const [a,...b]=brand.split(' ');const fs=Math.min(118,Math.floor(620/(brand.length*0.95)));
 return `<html><body style="margin:0;width:1200px;height:630px;background:radial-gradient(circle at 50% 38%,${c2},${c1} 70%);font-family:'Noto Sans KR';color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;word-break:keep-all;overflow:hidden">
