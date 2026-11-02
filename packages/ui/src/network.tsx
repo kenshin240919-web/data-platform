@@ -29,7 +29,7 @@ export const SITES:Record<Site,{url:string;icon:string;name:string;brand:string;
   civil:{url:'https://minwon.guidejung.com',icon:'🖨️',name:'서류',brand:'내근처 서류',tagline:'떼고, 뽑고, 부치는 곳'},
   market:{url:'https://market.guidejung.com',icon:'🏪',name:'시장',brand:'내근처 시장',tagline:'온누리 어디서 써?'},
   benefit:{url:'https://benefit.guidejung.com',icon:'🎁',name:'혜택',brand:'내근처 혜택',tagline:'우리 동네 지원금, 놓친 거 없어?'},
-  job:{url:'https://job.guidejung.com',icon:'💼',name:'일자리',brand:'내근처 일자리',tagline:'일자리 찾을 때 가는 곳',hidden:true},
+  job:{url:'https://job.guidejung.com',icon:'💼',name:'일자리',brand:'내근처 일자리',tagline:'일자리 찾을 때 가는 곳'},
 };
 const {trip:T,weather:W,traffic:R,charge:C}=Object.fromEntries(Object.entries(SITES).map(([k,v])=>[k,v.url])) as Record<Site,string>;
 
