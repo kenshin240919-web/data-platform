@@ -7,7 +7,7 @@
 // 정확한 좌표는 이 브라우저 밖으로 나가지 않는다. 페이지가 쓰는 pos.lat/lon은 약 2km 칸(위도 0.02°×경도 0.025°)의 중심이라
 // API 주소·링크·쿠키·GA에 들어가는 것은 칸 중심뿐이고, 정확한 위치(pos.exact)는 거리 계산·정렬에만 브라우저 안에서 쓴다(fixKm·here).
 import {useCallback,useEffect,useState} from 'react';
-import {externalUrl,inapp,isAndroid,isIos,isSamsung} from './inapp';
+import {externalUrl,inapp,isAndroid,isIos,isSamsung,twa} from './inapp';
 
 /** precise: 실제 내 위치(GPS·Wi-Fi)를 안다. exact·acc(오차 m)·at(잡은 시각)은 브라우저 안에서만 쓴다.
  * src: gps(이 사이트에서 잡음) · shared(다른 내근처 사이트에서 잡은 것, 이 휴대폰 안 공용 저장소) · cell(공용 쿠키의 칸 중심) · ip(접속 위치). */
@@ -108,6 +108,10 @@ function start(){
   // 이미 허용한 사이트면 묻지 않고 다시 잡는다(5분 넘은 위치만). 아니면 다른 내근처 사이트에서 잡은 위치 → 칸 쿠키 → 접속 위치 순.
   granted().then(g=>{
     if(g){if(!mine||Date.now()-mine.at>FRESH)locate(true);return;}
+    // 앱(TWA)은 '내 근처'를 보려고 설치한 사람이라 처음 열 때 한 번만 바로 묻는다(11/2 사용자 승인) — 웹사이트는 그대로 누를 때만.
+    // 안드로이드는 두 번 거절하면 권한 창을 더 띄우지 않으므로 자동으로는 한 번뿐, 그 뒤는 위치 카드·안내 상자로.
+    if(twa()){let asked=true;try{asked=localStorage.getItem('gj.twa.asked')==='1';if(!asked)localStorage.setItem('gj.twa.asked','1');}catch{}
+      if(!asked)setTimeout(()=>locate(false),1000);}
     if(mine)return;
     sharedGet().then(v=>{
       if(state.pos?.exact)return;

@@ -14,3 +14,5 @@ export function externalUrl(app:string|null,href=typeof location!=='undefined'?l
   if(isAndroid())return `intent://${href.replace(/^https?:\/\//,'')}#Intent;scheme=https;package=com.android.chrome;end`;
   return null;
 }
+/** 안드로이드 앱 '내근처'(TWA, apps/app)로 열었는지 — 시작 주소(?source=twa)·앱 referrer를 이 탭에서 기억해 둔다. */
+export const twa=()=>{try{if(/[?&]source=twa\b/.test(location.search)||document.referrer.startsWith('android-app://com.guidejung.near'))sessionStorage.setItem('gj.twa','1');return sessionStorage.getItem('gj.twa')==='1';}catch{return false;}};

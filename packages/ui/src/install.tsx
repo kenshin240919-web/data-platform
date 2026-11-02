@@ -6,7 +6,7 @@
 //  D GA 이벤트 install_hint(보임)·install_click(추가하기·브라우저로 열기)·install_done(설치 완료)
 // 이미 앱처럼 열었거나 ✕로 닫은 지 30일이 안 됐으면 숨김. 안드로이드 크롬 등은 브라우저 설치 창(beforeinstallprompt), 아이폰 사파리는 방법 안내.
 import {useEffect,useState} from 'react';
-import {externalUrl,inapp,isIos} from './inapp';
+import {externalUrl,inapp,isIos,twa} from './inapp';
 
 type BIP=Event&{prompt:()=>Promise<void>;userChoice:Promise<{outcome:string}>};
 type Mode='none'|'prompt'|'ios'|'inapp';
@@ -31,9 +31,7 @@ function visits(){
     return v.n;
   }catch{return 0;}
 }
-/** 안드로이드 앱 '내근처'(TWA, apps/app)로 열었는지. 앱 안은 보통 display-mode: standalone이지만, 시작 주소(?source=twa)·앱 referrer도 이 탭에서 기억해 둔다
- * (쿠키는 크롬 브라우저와 같이 쓰여서 쓰지 않음). */
-const twa=()=>{try{if(/[?&]source=twa\b/.test(location.search)||document.referrer.startsWith('android-app://com.guidejung.near'))sessionStorage.setItem('gj.twa','1');return sessionStorage.getItem('gj.twa')==='1';}catch{return false;}};
+/** 홈 화면 앱·안드로이드 앱(TWA — inapp.ts twa(), 쿠키는 크롬과 같이 쓰여서 쓰지 않음)으로 열었는지. */
 const standalone=()=>matchMedia('(display-mode: standalone)').matches||(navigator as {standalone?:boolean}).standalone===true||twa();
 const ios=isIos;
 /** 을/를 */
