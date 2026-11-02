@@ -83,23 +83,23 @@ export function nearRests(lat:number,lon:number,n=2,maxKm=40){
 
 /** Which sister sites matter most from each site (사이트 간 순환): first ones are shown first, up to MAX_LINKS. */
 const ORDER:Record<Site,Site[]>={
-  trip:['parking','weather','oil','charge','traffic','pharmacy','hospital','market','benefit'],
-  weather:['trip','parking','traffic','oil','charge','pharmacy','hospital','market','benefit'],
-  traffic:['oil','service','parking','trip','charge','weather','rest','benefit'],
-  charge:['trip','parking','weather','service','traffic','academy','rest','benefit'],
-  academy:['parking','hospital','pharmacy','school','trip','weather','civil','benefit'],
+  trip:['parking','hospital','weather','oil','charge','traffic','pharmacy','market','benefit'],
+  weather:['trip','hospital','parking','traffic','oil','charge','pharmacy','market','benefit'],
+  traffic:['oil','service','hospital','parking','trip','charge','weather','rest','benefit'],
+  charge:['trip','parking','hospital','weather','service','traffic','academy','rest','benefit'],
+  academy:['hospital','parking','pharmacy','school','trip','weather','civil','benefit'],
   school:['academy','hospital','pharmacy','parking','weather','trip','civil','benefit'],
   pharmacy:['hospital','parking','weather','trip','academy','school','pet','benefit'],
   hospital:['pharmacy','parking','weather','trip','academy','school','pet','benefit'],
-  oil:['service','charge','parking','traffic','trip','weather','market','benefit'],
-  parking:['trip','oil','charge','service','weather','pharmacy','rest','pet','benefit'],
-  service:['oil','parking','charge','traffic','weather','trip','civil','benefit'],
-  near:['weather','pharmacy','hospital','parking','oil','trip','charge','market','benefit'],
-  rest:['parking','trip','weather','pharmacy','hospital','oil','market','benefit'],
-  pet:['pharmacy','parking','weather','trip','hospital','rest','market','benefit'],
-  civil:['parking','pharmacy','weather','school','trip','hospital','market','benefit'],
-  market:['parking','trip','weather','pharmacy','oil','hospital','civil','benefit'],
-  benefit:['civil','hospital','pharmacy','school','academy','market','weather','parking'],
+  oil:['service','charge','hospital','parking','traffic','trip','weather','market','benefit'],
+  parking:['trip','hospital','oil','charge','service','weather','pharmacy','rest','pet','benefit'],
+  service:['oil','parking','hospital','charge','traffic','weather','trip','civil','benefit'],
+  near:['weather','hospital','pharmacy','parking','oil','trip','charge','market','benefit'],
+  rest:['parking','hospital','trip','weather','pharmacy','oil','market','benefit'],
+  pet:['pharmacy','parking','hospital','weather','trip','rest','market','benefit'],
+  civil:['parking','hospital','pharmacy','weather','school','trip','market','benefit'],
+  market:['parking','hospital','trip','weather','pharmacy','oil','civil','benefit'],
+  benefit:['hospital','civil','pharmacy','school','academy','market','weather','parking'],
 };
 const MAX_LINKS=8;
 /** Standard links for a spot: the sister sites' pages for the same 시군구 (or the spot itself), in the order that fits the current site. */
@@ -153,5 +153,7 @@ export const GENERIC:Record<Site,Link_>={
   market:{icon:'🏪',title:'온누리상품권 사용처',desc:'내 주변 전통시장·상점가 온누리 가맹점',href:SITES.market.url},
   benefit:{icon:'🎁',title:'우리 동네 지원금·혜택',desc:'나에게 맞는 혜택과 마감 임박 지원금',href:SITES.benefit.url},
 };
-export const genericFor=(skip:Site)=>(Object.keys(GENERIC) as Site[]).filter(k=>k!==skip&&!SITES[k].hidden).map(k=>GENERIC[k]);
+// 병원을 맨 앞에(11/2 애드센스 주간 보고서: 내근처 수익의 절반·RPM 가장 높음 — 사용자 승인).
+const FIRST:Site[]=['hospital'];
+export const genericFor=(skip:Site)=>[...FIRST,...(Object.keys(GENERIC) as Site[]).filter(k=>!FIRST.includes(k))].filter(k=>k!==skip&&!SITES[k].hidden).map(k=>GENERIC[k]);
 export {T as TRIP_URL,W as WEATHER_URL,R as TRAFFIC_URL,C as CHARGE_URL};

@@ -29,6 +29,7 @@ STATE = ROOT / 'reports/gsc/index-requests.json'
 REDO_DAYS = 21
 MAX_INSPECT = 80
 SKIP = re.compile(r'/(about|data-policy|privacy|search|compare|alerts)(/|$)')
+FOCUS = {'hospital': 3}  # 사이트 → 하루에 먼저 뽑을 개수
 HUB = re.compile(r'^/[a-z0-9-]+$')  # /region·/doc·/24h·/rank 같은 한 단계 모음 페이지
 
 
@@ -131,9 +132,15 @@ def main():
         queues.append((site, q))
         print(f'{site}: 후보 {len(ranked):,} · 남은 {len(q):,}')
     picks, inspected, indexed = [], 0, 0
+    # 병원은 하루 FOCUS개 먼저(11/2 애드센스: 내근처 수익의 절반·RPM 가장 높음 — 사용자 승인),
+    # 나머지는 날마다 시작 사이트를 바꿔 돌아가며(전에는 늘 앞쪽 사이트만 뽑혀 뒤쪽 사이트는 차례가 오지 않았음).
+    focus = [x for x in queues if x[0] in FOCUS]
+    rest = [x for x in queues if x[0] not in FOCUS]
+    off = today.toordinal() % max(1, len(rest))
+    order = [x for x in focus for _ in range(FOCUS[x[0]])] + rest[off:] + rest[:off]
     rnd = 0
     while len(picks) < n and any(q for _, q in queues) and inspected < MAX_INSPECT:
-        site, q = queues[rnd % len(queues)]
+        site, q = order[rnd % len(order)] if rnd < len(order) else rest[(off + rnd) % len(rest)]
         rnd += 1
         if not q:
             continue
