@@ -128,6 +128,13 @@ if key:
             out.append(f'- 시작일 칸 {dates[0]} 연월 분포: {dist([{"m": str(r.get(dates[0]) or "")[:7]} for r in rows], "m", 14)}')
     out.append('')
 
+    rows = probe('e새일 직업교육훈련일정(15106174)', 'https://apis.data.go.kr/1383000/nwis/workTrainningEducationScheduleService/getWorkTrainningEducationScheduleList',
+                 [{'type': 'json'}, {'returnType': 'json'}, {'resultType': 'json'}, {}])
+    if rows:
+        for c in list(rows[0].keys()):
+            out.append(f'- {c}: 예 {[str(r.get(c) or "") for r in rows[:3]]}')
+    out.append('')
+
     rows = probe('노인 자립형일자리 수행기관(15056961)', 'https://apis.data.go.kr/B552474/JobBsnInfoService/getJobOperInsttList',
                  [{'type': 'json'}, {'returnType': 'json'}, {'_type': 'json'}, {}])
     if rows:
