@@ -81,6 +81,7 @@ ${p.juris?.length?`<h3>관할 지역 ${p.juris.length}곳</h3><div class="jb-jum
   if(p.kind==='free')return `<section><h2>🤝 무료직업소개소</h2><p>지자체·공공기관·단체가 수수료 없이 운영하는 직업소개소예요(지자체 신고 정보, 영업 중). 운영 시간과 소개 분야는 전화로 확인하세요.</p></section>`;
   if(p.kind==='women')return `<section><h2>👩 새일센터에서 하는 일</h2><p>경력이 끊긴 여성의 구직 상담·직업교육·인턴을 안내해요. 교육 과정과 일정은 <a href="${LINKS.saeil}" rel="noopener" target="_blank">e새일</a>에서 확인하세요.</p></section>`;
   if(p.kind==='senior')return `<section><h2>👴 노인일자리 수행기관</h2><p>노인일자리 사업을 하는 기관이에요. 참여자 모집 공고는 <a href="${LINKS.senior}" rel="noopener" target="_blank">노인일자리 여기</a>에서 찾고, 기관에 직접 문의하세요. 원본 자료에서 전화번호가 가려져 있어 싣지 않았어요.</p></section>`;
+  if(p.kind==='exam')return `<section class="jb-guide"><h2>📝 이 시험장에 가기 전에</h2><ul><li>국가기술자격 시험장은 원서를 접수할 때 고르고, 시험 날에는 수험표에 적힌 시험장으로 가요. 종목·회차마다 쓰는 시험장이 달라요. 내 시험장·시험실·입실 시간은 <a href="${LINKS.qnet}" rel="noopener" target="_blank">큐넷</a> 수험표에서 확인하세요.</li><li>주차가 되는지는 시험장마다 달라요. 수험표 안내를 먼저 보고, 어려우면 아래 근처 공영주차장을 찾아 두세요.</li></ul>${p.rooms?.length?`<h3>이 주소의 시험실 ${p.rooms.length}곳</h3><ul class="jb-plain">${p.rooms.map(r=>`<li>${esc(r)}</li>`).join('')}</ul>`:''}${p.guide?`<p class="muted small">공단 위치 안내: ${esc(p.guide)}</p>`:''}<p><a class="jb-more-link" href="${LINKS.qnet}" rel="noopener" target="_blank">큐넷에서 시험 일정·원서 접수 ↗</a></p></section>`;
   return `<section><h2>🎓 대학일자리플러스센터</h2><p>대학 안에서 진로·취업 상담을 하는 고용노동부 지원 센터예요. 이용 대상은 센터마다 달라 미리 확인하세요.</p></section>`;
 }
 
@@ -88,11 +89,12 @@ const homeLinksHtml=(center:{name:string;hp?:string|null}|null|undefined,region:
 function detailHtml(p:Place,groups:[string,Near[]][],juris:ReturnType<typeof areaOf>|null){
   const addr=p.addr??p.jibun,K=KINDS[p.kind];
   const tags=tagsOf(p);
-  const jur=p.kind!=='center'&&juris?.juris[0]?juris.juris[0]:null;
+  const jur=p.kind!=='center'&&p.kind!=='exam'&&juris?.juris[0]?juris.juris[0]:null;
   const faq:[string,string][]=([
     [`${eun(p.name)} 어디에 있나요?`,addr?`${addr}에 있습니다${p.tel?`(전화 ${p.tel})`:''}.`:''],
     ...(p.kind==='center'?[[`${p.name} 관할 지역은?`,p.juris?.length?`${p.juris.map(c=>regionName(c)).filter(Boolean).join(', ')}입니다. 실업급여는 주민등록 주소지 관할 센터에서 신청합니다.`:''] as [string,string]]:[]),
     ...(p.kind==='agency'?[[`${eun(p.name)} 등록된 직업소개소인가요?`,`네. 지자체에 등록된 유료직업소개소(영업 중)입니다${p.since?` — ${p.since}년 등록`:''}. 유료직업소개소는 구직자에게 선급금을 받을 수 없습니다(직업안정법 제21조의2).`] as [string,string]]:[]),
+    ...(p.kind==='exam'?[[`${p.name}에서 어떤 시험을 보나요?`,`한국산업인력공단이 등록한 국가자격 시험장입니다${p.gb?`(${p.gb})`:''}. 국가기술자격 시험장은 원서를 접수할 때 고르고, 시험 날에는 수험표에 적힌 시험장으로 가요. 종목·회차마다 쓰는 시험장이 달라요. 큐넷 수험표에서 확인하세요.`] as [string,string]]:[]),
     ...(jur?[[`${p.region_name} 실업급여는 어디서 신청하나요?`,`${juris!.exact?'관할':'가까운'} 고용센터는 ${jur.name}입니다.`] as [string,string]]:[]),
   ] as [string,string][]).filter(([,x])=>x);
   const [sido,...rest]=p.region_name.split(' ');
@@ -104,16 +106,16 @@ function detailHtml(p:Place,groups:[string,Near[]][],juris:ReturnType<typeof are
   const faqLd={'@context':'https://schema.org','@type':'FAQPage',mainEntity:faq.map(([q,x])=>({'@type':'Question',name:q,acceptedAnswer:{'@type':'Answer',text:x}}))};
   const ldTag=(d:unknown)=>`<script type="application/ld+json">${JSON.stringify(d).replace(/</g,'\\u003c')}</script>`;
   const facts:[string,string|null|undefined][]=[['구분',K.title],['도로명 주소',p.addr],['지번 주소',p.addr?null:p.jibun],['전화',p.tel],['종류',p.kind==='agency'&&p.sub?SUBS[p.sub]:null],
-    ['운영 형태',p.corp],['등록 연도',p.since],['소속',p.kind==='center'?p.org:p.kind==='campus'?p.org:null],['지역',p.region_name]];
+    ['운영 형태',p.corp],['등록 연도',p.since],['소속',p.kind==='center'||p.kind==='campus'||p.kind==='exam'?p.org:null],['시험장 구분',p.kind==='exam'?p.gb:null],['지역',p.region_name]];
   return `<nav class="crumbs"><a href="/">홈</a> › <a href="/region">지역별</a> › <a href="/region/${esc(p.region)}">${esc(p.region_name)}</a> › ${esc(p.name)}</nav>
 <div class="jb-head"><h1>${K.icon} ${esc(p.name)}</h1><p>${esc([p.region_name,K.title,...tags].join(' · '))}</p></div>${actionsHtml({id:p.id,name:p.name,sub:[K.label,p.region_name].join(' · '),url:placePath(p.id)})}
 <p class="jb-answer"><b>${esc(K.title)}</b>${addr?` · ${esc(addr)}`:''}${p.tel?` · ${esc(p.tel)}`:''}</p>
 <div class="jb-actions">${p.tel?`<a href="${esc(telHref(p.tel))}">📞 전화하기</a>`:''}<a class="${p.tel?'sub':''}" href="${esc(mapUrl(p))}" rel="noopener" target="_blank">🧭 길찾기</a>${p.kind==='center'&&p.hp?`<a class="sub" href="${esc(p.hp)}" rel="noopener" target="_blank">🏠 센터 홈페이지 ↗</a>`:''}<a class="naver" href="${esc(naverUrl(p))}" rel="noopener" target="_blank">🟢 네이버 지도에서 보기</a></div>
-${jur?`<a class="jb-juris" href="${placePath(jur.id)}"><span aria-hidden="true">🏛️</span><span><small>${esc(p.region_name)} ${juris!.exact?'관할 고용센터':'에서 가까운 고용센터'}</small><b>${esc(jur.name)}</b><small>${esc(jur.addr??'')}</small></span><em>실업급여·구직 신청 →</em></a>${homeLinksHtml(jur,p.region)}`:homeLinksHtml(null,p.region)}
+${p.kind==='exam'?'':jur?`<a class="jb-juris" href="${placePath(jur.id)}"><span aria-hidden="true">🏛️</span><span><small>${esc(p.region_name)} ${juris!.exact?'관할 고용센터':'에서 가까운 고용센터'}</small><b>${esc(jur.name)}</b><small>${esc(jur.addr??'')}</small></span><em>실업급여·구직 신청 →</em></a>${homeLinksHtml(jur,p.region)}`:homeLinksHtml(null,p.region)}
 ${kindNote(p)}
 ${groups.map(([title,list])=>list.length?`<section><h2>${esc(title)}</h2><div class="jb-cards">${list.map(cardHtml).join('')}</div></section>`:'').join('')}
-<p><a class="jb-more-link" href="/region/${esc(p.region)}">${esc(p.region_name)} 일자리 기관 모두 보기 →</a></p>
-${p.lat!=null&&p.lon!=null?aroundHtml(p.lat,p.lon,'☕ 방문 김에 걸어서 갈 곳','CE7,CS2,BK9,FD6'):''}
+<p><a class="jb-more-link" href="/region/${esc(p.region)}${p.kind==='exam'?'/exam':''}">${esc(p.region_name)} ${p.kind==='exam'?'자격증 시험장':'일자리 기관'} 모두 보기 →</a></p>
+${p.lat!=null&&p.lon!=null?aroundHtml(p.lat,p.lon,p.kind==='exam'?'☕ 시험 전후 걸어서 갈 곳':'☕ 방문 김에 걸어서 갈 곳',p.kind==='exam'?'CS2,CE7,FD6':'CE7,CS2,BK9,FD6'):''}
 <section><h2>정보</h2><dl class="jb-facts">${facts.filter(([,v])=>v).map(([k,v])=>`<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl></section>
 <p class="jb-note">채용 공고는 이 사이트에 없어요. 공고는 <a href="${LINKS.work24}" rel="noopener" target="_blank">고용24</a>·<a href="${LINKS.senior}" rel="noopener" target="_blank">노인일자리 여기</a>·<a href="${LINKS.saeil}" rel="noopener" target="_blank">e새일</a>에서 찾으세요.</p>
 ${connectHtml(p)}
@@ -128,10 +130,10 @@ async function detail(p:Place,url:URL,env:Env,ctx:ExecutionContext){
   const at=(k:Kind,r:number,lim:number)=>p.lat!=null?near(p.lat,p.lon!,r,{limit:lim,kinds:[k],skip:p.id}).items:[];
   const K=KINDS[p.kind];
   const wide=p.kind==='center'||p.kind==='women'||p.kind==='campus';
-  const groups:[string,Near[]][]=[[`근처 다른 ${K.label}`,at(p.kind,wide?30:3,6)],
+  const groups:[string,Near[]][]=p.kind==='exam'?[['근처 다른 자격증 시험장',at('exam',15,6)]]:[[`근처 다른 ${K.label}`,at(p.kind,wide?30:3,6)],
     ...(['agency','free','women','senior'] as Kind[]).filter(k=>k!==p.kind).map(k=>[`근처 ${KINDS[k].label}`,at(k,k==='women'?20:5,3)] as [string,Near[]])];
   const juris=p.lat!=null?areaOf(p.lat,p.lon!):null;
-  const title=`${p.name} ${p.kind==='center'?'관할 지역·위치·전화':`${K.label} 위치·전화`} | 내근처 일자리`;
+  const title=`${p.name} ${p.kind==='center'?'관할 지역·위치·전화':p.kind==='exam'?'자격증 시험장 위치·가는 길':`${K.label} 위치·전화`} | 내근처 일자리`;
   const desc=`${p.region_name} ${p.name}(${K.title}): ${p.addr??p.jibun??''}${p.tel?` · ${p.tel}`:''}${p.kind==='center'&&p.juris?.length?` · 관할 ${p.juris.map(c=>regionName(c)).filter(Boolean).slice(0,6).join(', ')}`:''}`.replace(/\s+/g,' ').trim().slice(0,160);
   const canonical=SITE+placePath(p.id);
   let html=(await template(env,url.origin))

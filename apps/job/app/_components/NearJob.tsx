@@ -29,7 +29,7 @@ export function NearJob({kind}:{kind?:Kind}){
         <b>{c.name}</b><small>{c.km!=null&&`${km(c.km)} · `}{c.addr}</small></span><em>실업급여·구직 신청 →</em></a>}
       {(!kind||kind==='center')&&c&&<HomeLinks center={c} region={res.area?.code}/>}
       {(!kind||kind==='center')&&c&&<p className="muted small">지금 위치 기준이에요. 실업급여는 <b>주민등록 주소지</b> 관할 센터에서 신청하니, 주소지가 다르면 <a href="/center">시군구별 관할 표</a>에서 확인하세요.</p>}
-      {!kind&&<p className="jb-answer">📍 {pos?.precise?'내 주변':'접속 위치 주변'} {radius}km 안 직업소개소 <b>{n(count('agency')+count('free'))}곳</b>{count('women')?<> · 새일센터 <b>{n(count('women'))}</b></>:null}{count('senior')?<> · 노인일자리 기관 <b>{n(count('senior'))}</b></>:null}</p>}
+      {!kind&&<p className="jb-answer">📍 {pos?.precise?'내 주변':'접속 위치 주변'} {radius}km 안 직업소개소 <b>{n(count('agency')+count('free'))}곳</b>{count('women')?<> · 새일센터 <b>{n(count('women'))}</b></>:null}{count('senior')?<> · 노인일자리 기관 <b>{n(count('senior'))}</b></>:null}{count('exam')?<> · <a href="/exam">자격증 시험장</a> <b>{n(count('exam'))}</b></>:null}</p>}
       {kind&&kind!=='center'&&<p className="jb-answer">📍 {pos?.precise?'내 주변':'접속 위치 주변'} {radius}km 안 {KINDS[kind].title} <b>{n(count(kind))}곳</b>{res.items[0]&&<> — 가장 가까운 곳 <a href={placePath(res.items[0].id)}><b>{res.items[0].name}</b></a> {res.items[0].km!=null&&km(res.items[0].km)}</>}</p>}
       {res.items.length>0&&<PlaceList items={res.items} limit={12} kind={kind}/>}
       {!res.items.length&&<p className="muted">가까운 곳을 찾지 못했어요. 지역 목록에서 찾아보세요.</p>}

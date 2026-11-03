@@ -34,6 +34,7 @@ export default async function RegionPage({params}:P){
     <Faq items={([
       [`${r.name} 실업급여는 어디서 신청하나요?`,c.list.length?`${c.exact?'관할':'가까운'} 고용센터는 ${c.list.map(x=>`${x.name}(${x.addr??''})`).join(', ')}입니다.${c.exact?'':' 관할은 센터에 확인하세요.'}`:''],
       [`${r.name}에 직업소개소는 몇 곳인가요?`,`${updated()} 기준 유료 ${n(r.kinds.agency)}곳, 무료 ${n(r.kinds.free)}곳입니다.`],
+      [`${r.name} 자격증 시험장은 어디인가요?`,r.kinds.exam?`국가자격 시험장 ${n(r.kinds.exam)}곳: ${r.items.filter(p=>p.kind==='exam').slice(0,5).map(p=>p.name).join(', ')}${r.kinds.exam>5?' 등':''}입니다. 내 시험장은 큐넷 수험표에서 확인하세요.`:''],
       [`${r.name}에 새일센터가 있나요?`,r.kinds.women?`${r.items.filter(p=>p.kind==='women').map(p=>p.name).join(', ')}가 있습니다.`:''],
     ] as [string,string][]).filter(([,a])=>a)}/>
     <Connect items={linksNear(r.lat,r.lon,'job')}/>

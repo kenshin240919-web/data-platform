@@ -9,6 +9,8 @@ Sources (reports/job-설계안-2026-11-02.md A장 — 모두 공공데이터포�
 - 성평등가족부 여성새로일하기센터 현황(파일 3034802)       159곳 · 좌표 없음
 - 한국노인인력개발원 자립형일자리 수행기관(B552474)        약 1,500곳 · 전화는 원본에서 가려져 있음(******) → 이름·주소만
 - 고용노동부 대학일자리플러스센터 운영 현황(파일 15118836)   약 120곳
+- 한국산업인력공단 국가자격시험 시험장소(15068172, openapi.q-net.or.kr) 지사 00~24 약 2,500줄 → 주소가 같은 곳은 한 곳으로(시험실 목록)
+  · 교도소·가상 시험장은 뺌 · 큐넷 서버가 자주 연결 오류를 내서 지사마다 다시 시도, 끝내 못 받은 지사는 지난 목록(11/3)
 좌표 없는 곳은 카카오 주소 검색(collect-civil.py geocode — 30일마다 다시 확인, 캐시 runtime/job/geo.json).
 지역 코드는 날씨 사이트 시군구 코드(일반구는 시 코드 — collect-parking.py place()).
 Usage: DATA_GO_KR_KEY=... [KAKAO_REST_KEY=...] python scripts/collect-job.py [--force]
@@ -133,6 +135,76 @@ def campus():
         out.append({'id': hid('u', univ, addr), 'kind': 'campus', 'name': cname if '센터' in cname else f'{univ} 대학일자리플러스센터', 'addr': addr, 'jibun': None,
                     'lat': None, 'lon': None, 'org': univ, 'tel': col(r, '연락처', '전화번호')})
     log(f'대학일자리플러스센터 {len(out):,}곳 (칸: {", ".join(rows[0].keys()) if rows else "-"})')
+    return out
+
+
+QNET = 'http://openapi.q-net.or.kr/api/service/rest/InquiryExamAreaSVC/getList'
+EXAM_SKIP = re.compile(r'교도소|구치소|소년원|가상')
+
+
+def exam_rows(key, code):
+    """한 지사의 시험장 줄. 큐넷이 'Failed to validate a newly established connection'(resultCode 99)·시간 초과를 자주 냄 → 4번까지."""
+    import time
+    import xml.etree.ElementTree as ET
+    for tries in range(4):
+        try:
+            rows, page = [], 1
+            while page <= 5:
+                q = urllib.parse.urlencode({'ServiceKey': urllib.parse.unquote(key), 'brchCd': code, 'numOfRows': 1000, 'pageNo': page})
+                root = ET.fromstring(http(f'{QNET}?{q}', timeout=40))
+                got = [{c.tag: (c.text or '').strip() for c in it} for it in root.iter('item')]
+                if not got and root.findtext('.//resultCode') not in ('00', None):
+                    raise RuntimeError(root.findtext('.//resultMsg') or 'error')
+                rows += got
+                if len(got) < 1000:
+                    break
+                page += 1
+            return rows
+        except Exception as e:  # noqa: BLE001
+            log(f'  시험장 지사 {code} 시도 {tries + 1} 실패: {str(e)[:120]}')
+            time.sleep(5 * (tries + 1))
+    return None
+
+
+def exams(key, prev_items):
+    """국가자격 시험장. 주소가 같은 줄(같은 학교의 여러 시험실)은 한 곳으로 묶고 rooms에 시험실 이름. 못 받은 지사는 지난 목록."""
+    rows, failed = [], []
+    for b in range(25):
+        code = f'{b:02d}'
+        got = exam_rows(key, code)
+        if got is None:
+            failed.append(code)
+        else:
+            rows += [dict(r, _b=code) for r in got]
+    if not rows:
+        return None
+    if rows:
+        log(f'  시험장 칸: {", ".join(k for k in rows[0] if k != "_b")} · 안내 칸 예: {[r.get("plceLoctGid") for r in rows if r.get("plceLoctGid")][:3]}')
+    groups, skipped = {}, 0
+    for r in rows:
+        name, addr = txt(r.get('examAreaNm')), txt(r.get('address'))
+        if not (name and addr) or EXAM_SKIP.search(name) or EXAM_SKIP.search(r.get('examAreaGbNm') or ''):
+            skipped += 1
+            continue
+        addr = re.sub(r'\s+', ' ', addr)
+        k = re.sub(r'\s*\([^()]*\)\s*$', '', addr).replace(' ', '')
+        groups.setdefault(k, []).append((name, addr, r))
+    out = []
+    for k, g in groups.items():
+        base = sorted({re.sub(r'\s*[\[(][^\])]*[\])]\s*$', '', n).strip() or n for n, _, _ in g}, key=len)[0]
+        r0 = g[0][2]
+        rooms = sorted({n for n, _, _ in g if n != base})
+        gb = Counter(txt(x.get('examAreaGbNm')) for _, _, x in g if txt(x.get('examAreaGbNm'))).most_common(1)
+        guide = next((txt(x.get('plceLoctGid')) for _, _, x in g if txt(x.get('plceLoctGid'))), None)
+        out.append({'id': hid('q', k), 'kind': 'exam', 'name': base, 'addr': g[0][1], 'jibun': None, 'lat': None, 'lon': None,
+                    'org': f"한국산업인력공단 {txt(r0.get('brchNm')) or ''}".strip(), 'tel': txt(r0.get('telNo')), 'brch': r0['_b'],
+                    'gb': gb[0][0] if gb else None, 'rooms': rooms[:20] or None, 'guide': guide[:300] if guide else None})
+    if failed:
+        keep = [dict(p) for p in prev_items if p['kind'] == 'exam' and p.get('brch') in failed]
+        have = {p['id'] for p in out}
+        out += [p for p in keep if p['id'] not in have]
+        log(f'  시험장 못 받은 지사 {", ".join(failed)} → 지난 목록 {len(keep):,}곳')
+    log(f'국가자격 시험장 {len(out):,}곳 (원본 {len(rows):,}줄, 교도소·가상·빈 주소 {skipped:,}줄 뺌) · 구분 {Counter(p.get("gb") for p in out).most_common(6)}')
     return out
 
 
@@ -305,7 +377,8 @@ def main():
     prev_kind = defaultdict(list)
     for p in prev_items:
         prev_kind[p['kind']].append(p)
-    got = {'center': centers(), 'agency': agencies(key, 'agency'), 'free': agencies(key, 'free'), 'women': women(), 'senior': seniors(key), 'campus': campus()}
+    got = {'center': centers(), 'agency': agencies(key, 'agency'), 'free': agencies(key, 'free'), 'women': women(), 'senior': seniors(key), 'campus': campus(),
+           'exam': exams(key, prev_items)}
     items = []
     for kind, rows in got.items():
         if rows is None:

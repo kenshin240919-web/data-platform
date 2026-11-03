@@ -6,11 +6,13 @@ export const BRAND='내근처 일자리';
 export const TAGLINE='일자리 찾을 때 가는 곳';
 export const ADS=true;
 
-export type Kind='center'|'agency'|'free'|'women'|'senior'|'campus';
+export type Kind='center'|'agency'|'free'|'women'|'senior'|'campus'|'exam';
 /** region: weather 시군구 코드(일반구는 시 코드). center: juris(관할 지역 코드)·juris_text(관할구역 원문)·org(청·지청).
- * agency: sub(이름으로 나눈 종류)·corp(개인/법인)·since(등록 연도). campus: org(관할 고용센터 이름). */
+ * agency: sub(이름으로 나눈 종류)·corp(개인/법인)·since(등록 연도). campus: org(관할 고용센터 이름).
+ * exam(국가자격 시험장, 11/3): org(산업인력공단 지사)·gb(시험장 구분: 대학교·고등학교 등)·rooms(같은 주소의 시험실 이름)·guide(위치 안내 원문). */
 export type Place={id:string;kind:Kind;name:string;addr:string|null;jibun?:string|null;lat:number|null;lon:number|null;region:string;region_name:string;
-  org?:string|null;tel?:string|null;juris?:string[];juris_text?:string|null;hp?:string|null;sub?:Sub|null;corp?:string|null;since?:string|null};
+  org?:string|null;tel?:string|null;juris?:string[];juris_text?:string|null;hp?:string|null;sub?:Sub|null;corp?:string|null;since?:string|null;
+  gb?:string|null;rooms?:string[]|null;guide?:string|null;brch?:string|null};
 export type Sub='care'|'home'|'labor'|'search'|'foreign';
 export const SUBS:Record<Sub,string>={labor:'인력·건설',care:'간병·요양',home:'가사·산후·돌봄',search:'헤드헌팅',foreign:'외국인·해외'};
 export const KINDS:Record<Kind,{label:string;icon:string;title:string;desc:string;ld:string;src:string}>={
@@ -20,8 +22,9 @@ export const KINDS:Record<Kind,{label:string;icon:string;title:string;desc:strin
   women:{label:'새일센터',icon:'👩',title:'여성새로일하기센터',desc:'경력이 끊긴 여성의 구직 상담·직업교육·인턴을 하는 센터',ld:'GovernmentOffice',src:'성평등가족부 여성새로일하기센터 현황'},
   senior:{label:'노인일자리',icon:'👴',title:'노인일자리 수행기관',desc:'시니어클럽·노인복지관 등 노인일자리 사업을 하는 기관',ld:'LocalBusiness',src:'한국노인인력개발원 자립형일자리 수행기관 정보'},
   campus:{label:'대학일자리센터',icon:'🎓',title:'대학일자리플러스센터',desc:'대학 안에서 진로·취업 상담을 하는 고용노동부 지원 센터',ld:'GovernmentOffice',src:'고용노동부 대학일자리플러스센터 운영 현황'},
+  exam:{label:'자격증 시험장',icon:'📝',title:'국가자격 시험장',desc:'한국산업인력공단이 국가기술자격 등 국가자격 시험을 치르는 장소(학교·상설 시험장 등)',ld:'Place',src:'한국산업인력공단 국가자격시험 시험장소 정보'},
 };
-export const KIND_ORDER:Kind[]=['center','agency','free','women','senior','campus'];
+export const KIND_ORDER:Kind[]=['center','agency','free','women','senior','campus','exam'];
 export const n=(v:number)=>v.toLocaleString('ko-KR');
 export const esc=(s:unknown)=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]!);
 export const placePath=(id:string)=>`/place/${id}`;
@@ -37,7 +40,7 @@ export const telHref=(t:string)=>`tel:${t.replace(/[^0-9~-]/g,'').split('~')[0].
 export const distKm=(aLat:number,aLon:number,bLat:number,bLon:number)=>{const r=Math.PI/180,dLat=(bLat-aLat)*r,dLon=(bLon-aLon)*r;const h=Math.sin(dLat/2)**2+Math.cos(aLat*r)*Math.cos(bLat*r)*Math.sin(dLon/2)**2;return 12742*Math.asin(Math.sqrt(h));};
 export const unit=(k:Kind)=>k==='agency'||k==='free'?'곳':'곳';
 /** 카드 아래 작은 꼬리표 */
-export const tagsOf=(p:Pick<Place,'kind'|'sub'|'corp'|'since'|'org'>)=>[p.kind==='agency'&&p.sub?SUBS[p.sub]:null,p.kind==='center'&&p.org?`${p.org}${/청$/.test(p.org)?'':' 지청'}`.replace(/청 지청$/,'청'):null,
+export const tagsOf=(p:Pick<Place,'kind'|'sub'|'corp'|'since'|'org'|'gb'>)=>[p.kind==='agency'&&p.sub?SUBS[p.sub]:null,p.kind==='exam'&&p.gb?p.gb.replace(/\(.*\)$/,''):null,p.kind==='center'&&p.org?`${p.org}${/청$/.test(p.org)?'':' 지청'}`.replace(/청 지청$/,'청'):null,
   (p.kind==='agency'||p.kind==='free')&&p.corp?p.corp:null].filter((x):x is string=>!!x);
 
 /** 브라우저로 보내는 가벼운 카드 */
@@ -46,7 +49,7 @@ export type Slim=ReturnType<typeof slim>&{km?:number};
 export const COND_MIN=3;
 
 // 공식 안내(링크만 — 숫자·조건은 적지 않음)
-export const LINKS={work24:'https://www.work24.go.kr',w24find:'https://www.work24.go.kr/cm/c/d/0190/retrieveInstSrchLst.do',senior:'https://www.seniorro.or.kr',saeil:'https://saeil.mogef.go.kr',moel:'https://www.moel.go.kr'};
+export const LINKS={work24:'https://www.work24.go.kr',w24find:'https://www.work24.go.kr/cm/c/d/0190/retrieveInstSrchLst.do',senior:'https://www.seniorro.or.kr',saeil:'https://saeil.mogef.go.kr',moel:'https://www.moel.go.kr',qnet:'https://www.q-net.or.kr'};
 /** 시도 공식 일자리 누리집(11/2 접속·제목 확인한 곳만). 키는 지역 코드 앞 두 자리. */
 export const SIDO_PORTALS:Record<string,{name:string;url:string}>={
   '11':{name:'서울시 일자리포털',url:'https://job.seoul.go.kr'},

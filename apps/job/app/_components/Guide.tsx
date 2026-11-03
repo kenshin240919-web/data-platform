@@ -7,6 +7,7 @@ export const SITUATIONS:{id:string;icon:string;title:string;desc:string;href:str
   {id:'women',icon:'👩',title:'다시 일하고 싶어요',desc:'경력단절 여성 — 새일센터 상담·직업교육',href:'/guide#women'},
   {id:'senior',icon:'👴',title:'어르신 일자리',desc:'시니어클럽·노인복지관 노인일자리',href:'/guide#senior'},
   {id:'youth',icon:'🎓',title:'청년·대학생',desc:'대학일자리플러스센터·청년 지원',href:'/guide#youth'},
+  {id:'exam',icon:'📝',title:'자격증 시험 보러 가요',desc:'내 근처 국가자격 시험장',href:'/exam'},
 ];
 export function Situations(){
   return <section><h2>어떤 상황이세요?</h2><div className="jb-situ">{SITUATIONS.map(s=><Link key={s.id} href={s.href}><span aria-hidden="true">{s.icon}</span><span><b>{s.title}</b><small>{s.desc}</small></span></Link>)}</div></section>;

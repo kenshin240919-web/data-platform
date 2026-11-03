@@ -5,7 +5,7 @@ import {Faq,breadcrumbLd,JsonLd} from '@guidejung/ui/seo';
 import {NearJob} from '../_components/NearJob';
 import {Ad} from '../_components/Ad';
 import {Official} from '../_components/Guide';
-import {centers,COND_MIN,eun,ga,KIND_ORDER,KINDS,n,nation,places,placePath,regionName,regions,sidos,SITE,SUBS,updated,type Kind,type Sub} from '../../lib/data';
+import {centers,COND_MIN,eun,ga,KIND_ORDER,KINDS,LINKS,n,nation,places,placePath,regionName,regions,sidos,SITE,SUBS,updated,type Kind,type Sub} from '../../lib/data';
 
 export const dynamicParams=false;
 export function generateStaticParams(){return KIND_ORDER.map(kind=>({kind}));}
@@ -17,6 +17,7 @@ const META:Record<Kind,[string,string]>={
   women:['내 주변 여성새로일하기센터(새일센터)','경력이 끊긴 여성의 구직 상담·직업교육·인턴을 하는 새일센터 위치와 연락처.'],
   senior:['내 주변 노인일자리 기관(시니어클럽·노인복지관)','노인일자리 사업을 하는 수행기관을 가까운 순으로. 공고는 노인일자리 여기에서.'],
   campus:['대학일자리플러스센터','대학 안에서 진로·취업 상담을 하는 대학일자리플러스센터와 관할 고용센터.'],
+  exam:['내 근처 자격증 시험장(국가자격 시험장)','한국산업인력공단 국가자격 시험장을 가까운 순으로. 대학교·고등학교·상설 시험장의 주소와 시험실.'],
 };
 export async function generateMetadata({params}:P):Promise<Metadata>{
   const k=(await params).kind as Kind;if(!KINDS[k])return {};
@@ -26,7 +27,7 @@ export default async function KindHome({params}:P){
   const k=(await params).kind as Kind;if(!KINDS[k])notFound();
   const items=places.filter(p=>p.kind===k);
   const top=[...regions].filter(r=>r.kinds[k]>=COND_MIN).sort((a,b)=>b.kinds[k]-a.kinds[k]).slice(0,12);
-  const all=k==='center'||k==='women'||k==='campus'?sidos.map(s=>({name:s.name,items:items.filter(p=>s.regions.some(r=>r.id===p.region))})).filter(s=>s.items.length):[];
+  const all=k==='center'||k==='women'||k==='campus'||k==='exam'?sidos.map(s=>({name:s.name,items:items.filter(p=>s.regions.some(r=>r.id===p.region))})).filter(s=>s.items.length):[];
   const subs=k==='agency'?(Object.keys(SUBS) as Sub[]).map(s=>({s,items:items.filter(p=>p.sub===s)})).filter(x=>x.items.length):[];
   return <div className="page">
     <nav className="crumbs"><Link href="/">홈</Link> › {KINDS[k].label}</nav>
@@ -47,9 +48,15 @@ export default async function KindHome({params}:P){
       <li>유료직업소개소는 구직자에게 <b>선급금을 받을 수 없어요</b>(직업안정법 제21조의2). 소개 요금은 고용노동부가 정한 기준을 따라야 해요.</li>
       <li>일을 시작하기 전에 일하는 시간·임금이 적힌 근로계약서를 받으세요. 건설 현장은 건설업 기초안전보건교육 이수증이 필요해요.</li>
     </ul></section>}
+    {k==='exam'&&<section className="jb-guide"><h2>시험 보러 가기 전에</h2><ul>
+      <li>국가기술자격 시험장은 원서를 접수할 때 고르고, 시험 날에는 수험표에 적힌 시험장으로 가요. 종목·회차마다 쓰는 시험장이 달라요. 내 시험장은 <a href={LINKS.qnet} rel="noopener" target="_blank">큐넷</a>의 수험표에서 확인하세요.</li>
+      <li>여기 나온 곳은 한국산업인력공단이 등록한 시험장 전체예요(교도소 안 시험장은 뺐어요). 같은 주소의 시험실은 한 곳으로 묶었어요.</li>
+      <li>주차가 되는지는 시험장마다 달라요. 수험표 안내를 먼저 보고, 어려우면 근처 공영주차장을 찾아 두세요.</li>
+    </ul><p><a className="jb-more-link" href={LINKS.qnet} rel="noopener" target="_blank">큐넷에서 시험 일정·원서 접수 ↗</a></p></section>}
     <Official/>
     <Faq items={[[`${eun(KINDS[k].title)} 몇 곳인가요?`,`${updated()} 기준 전국 ${n(items.length)}곳입니다.`],
       ...(top[0]?[[`${ga(KINDS[k].label)} 가장 많은 지역은?`,`${top.slice(0,3).map(r=>`${r.name} ${n(r.kinds[k])}곳`).join(', ')} 순입니다.`] as [string,string]]:[]),
+      ...(k==='exam'?[['자격증 시험장은 어떻게 정해지나요?','국가기술자격 시험장은 원서를 접수할 때 고르고, 시험 날에는 수험표에 적힌 시험장으로 가요. 종목·회차마다 쓰는 시험장이 달라요. 내 시험장은 큐넷 수험표에서 확인하세요.'] as [string,string]]:[]),
       ...(k==='center'?[['실업급여는 어느 고용센터에서 신청하나요?','주민등록 주소지를 관할하는 고용센터에서 신청합니다. 위 표에서 내 시군구의 관할 센터를 확인하세요.'] as [string,string]]:[])]}/>
     <JsonLd data={breadcrumbLd([['내근처 일자리',SITE+'/'],[KINDS[k].label,`${SITE}/${k}`]])}/>
   </div>;
