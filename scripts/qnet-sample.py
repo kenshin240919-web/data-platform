@@ -61,7 +61,7 @@ out.append('')
 # 2) 시험장소: 지사 00~24
 out += ['## 국가자격시험 시험장소(15068172)', '', '`openapi.q-net.or.kr/api/service/rest/InquiryExamAreaSVC/getList`', '']
 all_rows = []
-for b in range(25):
+for b in range(1):  # 11/3: 시험장은 collect-job.py가 받음 — 여기선 시험일정 원인 확인만
     code = f'{b:02d}'
     msg = ''
     for tries in range(4):  # 큐넷 서버가 'Failed to validate a newly established connection'·시간 초과를 자주 냄 → 다시 시도
