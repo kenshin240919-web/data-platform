@@ -30,7 +30,7 @@ def fetch(key, code):
     rows, page = [], 1
     while page <= 30:
         q = urllib.parse.urlencode({'ServiceKey': key, 'brchCd': code, 'numOfRows': PAGE, 'pageNo': page})
-        for tries in range(3):
+        for tries in range(3 if page > 1 else 1):  # 첫 쪽이 안 오면 바로 다음 지사로(같은 시각엔 대개 계속 막힘)
             try:
                 req = urllib.request.Request(f'{URL}?{q}', headers={'User-Agent': UA})
                 with urllib.request.urlopen(req, timeout=45) as r:
@@ -40,7 +40,7 @@ def fetch(key, code):
                     raise RuntimeError(f'{rc} {(root.findtext(".//resultMsg") or "")[:80]}')
                 break
             except Exception as e:  # noqa: BLE001
-                if tries == 2:
+                if tries == (2 if page > 1 else 0):
                     raise RuntimeError(f'{page}쪽: {str(e)[:100]}') from e
                 time.sleep(2 + 3 * tries)
         got = [{k: v for k, v in ((c.tag, (c.text or '').strip()) for c in it) if v} for it in root.iter('item')]
@@ -60,7 +60,8 @@ def main():
     today = datetime.now(KST).date()
     data = json.loads(OUT.read_text(encoding='utf-8')) if OUT.exists() else {}
     age = lambda c: (today - datetime.fromisoformat(data[c]['at']).date()).days if c in data else 999  # noqa: E731
-    todo = sorted((c for c in (f'{b:02d}' for b in range(25)) if age(c) >= FRESH_DAYS), key=lambda c: -age(c))
+    hour = datetime.now(KST).hour  # 같은 지사만 먼저 시도하지 않게 매시간 시작 지사를 바꿈
+    todo = sorted((c for c in (f'{b:02d}' for b in range(25)) if age(c) >= FRESH_DAYS), key=lambda c: (-age(c), (int(c) - hour * 7) % 25))
     log(f'받아 둔 지사 {len(data)}/25 · 이번에 받을 지사 {len(todo)}: {", ".join(todo) or "-"}')
     until, new = time.time() + BUDGET_MIN * 60, 0
     for code in todo:
