@@ -22,11 +22,18 @@ async function near(env:Env,lat:number,lon:number,radius:number,dept:string|null
   if(cond&&COND_COL[cond])where.push(`${COND_COL[cond]} = 1`);
   if(er)where.push('er = 1');
   if(skip){where.push('id != ?');args.push(skip);}
-  const {results}=await env.DB.prepare(`SELECT lat,lon,card FROM hospitals WHERE ${where.join(' AND ')}`).bind(...args).all<{lat:number;lon:number;card:string}>();
+  const {results}=await env.DB.prepare(`SELECT lat,lon,card,region_id FROM hospitals WHERE ${where.join(' AND ')}`).bind(...args).all<{lat:number;lon:number;card:string;region_id:string}>();
   const now=kstNow();
-  const out=results.map(r=>({c:JSON.parse(r.card) as Card,d:distKm(lat,lon,r.lat,r.lon)})).filter(x=>x.d<=radius&&(cond!=='open'||statusOf(x.c,now).state!=='closed'))
+  const out=results.map(r=>({c:JSON.parse(r.card) as Card,d:distKm(lat,lon,r.lat,r.lon),r:r.region_id})).filter(x=>x.d<=radius&&(cond!=='open'||statusOf(x.c,now).state!=='closed'))
     .sort((a,b)=>a.d-b.d);
-  return {total:out.length,items:out.slice(0,limit).map(x=>({...x.c,km:Math.round(x.d*100)/100}))};
+  return {total:out.length,items:out.slice(0,limit).map(x=>({...x.c,km:Math.round(x.d*100)/100,region:x.r}))};
+}
+/** 내 주변 가까운 9곳의 시군구 다수결 → 그 시군구 페이지로 이어 주기(이름은 한 번만 읽음). */
+async function areaOf(env:Env,items:{region?:string}[]){
+  const cnt=new Map<string,number>();for(const x of items.slice(0,9))if(x.region)cnt.set(x.region,(cnt.get(x.region)??0)+1);
+  const code=[...cnt].sort((a,b)=>b[1]-a[1])[0]?.[0];if(!code)return null;
+  const r=await env.DB.prepare("SELECT json_extract(body,'$.region_name') AS name FROM hospitals WHERE region_id=? LIMIT 1").bind(code).first<{name:string|null}>().catch(()=>null);
+  return r?.name?{code,name:r.name}:null;
 }
 async function search(url:URL,env:Env){
   const p=url.searchParams,where:string[]=[],args:unknown[]=[];
@@ -244,7 +251,7 @@ export default {
         return json({items:rows.map(r=>{const c=JSON.parse(r.card) as Card,s=statusOf(c,now);return {id:r.id,state:s.state,label:s.label,line:[c.div,...c.depts.slice(0,2).map(deptLabel)].filter(Boolean).join(' · ')};})},200,60);}
       if(url.pathname==='/api/near'){const lat=num(p.get('lat')),lon=num(p.get('lon'));if(lat===null||lon===null)return json({error:'lat/lon'},400,0);
         const cond=p.get('cond');
-        return await edge(req,ctx,async()=>json(await near(env,lat,lon,Math.max(.3,Math.min(20,num(p.get('km'))??2)),deptOk(p.get('dept')),cond&&(cond==='open'||COND_COL[cond])?cond:null,Math.max(1,Math.min(100,num(p.get('limit'))??30)))));}
+        return await edge(req,ctx,async()=>{const r=await near(env,lat,lon,Math.max(.3,Math.min(20,num(p.get('km'))??2)),deptOk(p.get('dept')),cond&&(cond==='open'||COND_COL[cond])?cond:null,Math.max(1,Math.min(300,num(p.get('limit'))??30)));return json({...r,area:await areaOf(env,r.items)});});}
       if(url.pathname==='/api/search')return await edge(req,ctx,()=>search(url,env));
       if(url.pathname==='/api/er')return await er(url,env,ctx);
       if(url.pathname==='/api/where'){const cf=(req as any).cf??{};const lat=Number(cf.latitude),lon=Number(cf.longitude);

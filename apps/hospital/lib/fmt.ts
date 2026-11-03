@@ -47,6 +47,10 @@ export function statusOf(p:{hours:Hours},now=kstNow()):Status{
   if(today){const [s]=span(today);if(now.min<s)return {state:'closed',label:`오늘 ${hm(today[0])}부터 진료`,today:todayLabel};}
   return {state:'closed',label:today?'오늘 진료 끝':now.holiday?'공휴일 휴진':'오늘 휴진',today:todayLabel};
 }
+/** 오늘 진료가 끝나는 시각(0시부터 분, 새벽까지면 1440 넘음). 오늘 휴진이면 null. */
+export function closeToday(p:{hours:Hours},now=kstNow()){const t=hoursOn(p,now.day,now.holiday);return t?span(t)[1]:null;}
+/** 분 → '21:30' / '새벽 01:00' */
+export const hmMin=(m:number)=>hm(String(Math.floor(m/60)*100+m%60).padStart(4,'0'));
 /** 조건: 밤 10시 이후까지(평일 하루라도), 일요일, 공휴일, 토요일. */
 export const late=(p:{hours:Hours})=>['1','2','3','4','5'].some(d=>{const h=p.hours[d];return h&&span(h)[1]>20*60;});
 export const sunday=(p:{hours:Hours})=>!!p.hours['7'];
