@@ -9,8 +9,8 @@ Sources (reports/job-설계안-2026-11-02.md A장 — 모두 공공데이터포�
 - 성평등가족부 여성새로일하기센터 현황(파일 3034802)       159곳 · 좌표 없음
 - 한국노인인력개발원 자립형일자리 수행기관(B552474)        약 1,500곳 · 전화는 원본에서 가려져 있음(******) → 이름·주소만
 - 고용노동부 대학일자리플러스센터 운영 현황(파일 15118836)   약 120곳
-- 한국산업인력공단 국가자격시험 시험장소(15068172, openapi.q-net.or.kr) 지사 00~24 약 2,500줄 → 주소가 같은 곳은 한 곳으로(시험실 목록)
-  · 교도소·가상 시험장은 뺌 · 큐넷 서버가 자주 연결 오류를 내서 지사마다 다시 시도, 끝내 못 받은 지사는 지난 목록(11/3)
+- 한국산업인력공단 국가자격시험 시험장소(15068172) 지사 00~24 약 2,500줄 — scripts/collect-qnet.py가 받아 둔 qnet-areas.json을 읽음
+  → 주소가 같은 곳은 한 곳으로(시험실 목록) · 교도소·가상 시험장은 뺌 · 아직 못 받은 지사는 지난 목록(11/3)
 좌표 없는 곳은 카카오 주소 검색(collect-civil.py geocode — 30일마다 다시 확인, 캐시 runtime/job/geo.json).
 지역 코드는 날씨 사이트 시군구 코드(일반구는 시 코드 — collect-parking.py place()).
 Usage: DATA_GO_KR_KEY=... [KAKAO_REST_KEY=...] python scripts/collect-job.py [--force]
@@ -138,47 +138,18 @@ def campus():
     return out
 
 
-QNET = 'http://openapi.q-net.or.kr/api/service/rest/InquiryExamAreaSVC/getList'
+QNET_RAW = ROOT / 'apps/job/data/qnet-areas.json'
 EXAM_SKIP = re.compile(r'교도소|구치소|소년원|가상')
 
 
-EXAM_BUDGET = {'until': 0.0}  # 큐넷 전체에 쓰는 시간 상한(20분) — 넘으면 다시 시도하지 않음(11/3 표본: 다시 시도만 45분 넘게 걸림)
-
-
-def exam_rows(key, code):
-    """한 지사의 시험장 줄. 큐넷이 'Failed to validate a newly established connection'(resultCode 99)·시간 초과를 자주 냄 → 3번까지."""
-    import time
-    import xml.etree.ElementTree as ET
-    for tries in range(3):
-        if tries and time.time() > EXAM_BUDGET['until']:
-            break
-        try:
-            rows, page = [], 1
-            while page <= 5:
-                q = urllib.parse.urlencode({'ServiceKey': urllib.parse.unquote(key), 'brchCd': code, 'numOfRows': 1000, 'pageNo': page})
-                root = ET.fromstring(http(f'{QNET}?{q}', timeout=25))
-                got = [{c.tag: (c.text or '').strip() for c in it} for it in root.iter('item')]
-                if not got and root.findtext('.//resultCode') not in ('00', None):
-                    raise RuntimeError(root.findtext('.//resultMsg') or 'error')
-                rows += got
-                if len(got) < 1000:
-                    break
-                page += 1
-            return rows
-        except Exception as e:  # noqa: BLE001
-            log(f'  시험장 지사 {code} 시도 {tries + 1} 실패: {str(e)[:120]}')
-            time.sleep(4 * (tries + 1))
-    return None
-
-
-def exams(key, prev_items):
-    """국가자격 시험장. 주소가 같은 줄(같은 학교의 여러 시험실)은 한 곳으로 묶고 rooms에 시험실 이름. 못 받은 지사는 지난 목록."""
-    import time
-    EXAM_BUDGET['until'] = time.time() + 20 * 60
+def exams(prev_items):
+    """국가자격 시험장 — scripts/collect-qnet.py가 지사별로 받아 둔 apps/job/data/qnet-areas.json을 읽음(큐넷이 해외에서 자주 끊겨
+    매시간 못 받은 지사만 다시 시도). 주소가 같은 줄(같은 학교의 여러 시험실)은 한 곳으로 묶고 rooms에 시험실 이름. 없는 지사는 지난 목록."""
+    raw = json.loads(QNET_RAW.read_text(encoding='utf-8')) if QNET_RAW.exists() else {}
     rows, failed = [], []
     for b in range(25):
         code = f'{b:02d}'
-        got = exam_rows(key, code)
+        got = (raw.get(code) or {}).get('rows')
         if got is None:
             failed.append(code)
         else:
@@ -385,7 +356,7 @@ def main():
     for p in prev_items:
         prev_kind[p['kind']].append(p)
     got = {'center': centers(), 'agency': agencies(key, 'agency'), 'free': agencies(key, 'free'), 'women': women(), 'senior': seniors(key), 'campus': campus(),
-           'exam': exams(key, prev_items)}
+           'exam': exams(prev_items)}
     items = []
     for kind, rows in got.items():
         if rows is None:
