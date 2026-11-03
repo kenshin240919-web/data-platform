@@ -44,16 +44,23 @@ out += ['## 국가자격 시험일정 조회(15074408)', '', '`apis.data.go.kr/B
 for yy in ('2026', '2027'):
     for gb in ('T', 'S', 'C', 'W'):
         try:
-            text = get('http://apis.data.go.kr/B490007/qualExamSchd/getQualExamSchdList',
-                       {'numOfRows': 500, 'pageNo': 1, 'dataFormat': 'json', 'implYy': yy, 'qualgbCd': gb})
-            total, rows = rows_of(text)
+            rows, total, text = [], None, ''
+            for pg in range(1, 11):  # 한 쪽 최대 50줄(resultCode 930)
+                text = get('http://apis.data.go.kr/B490007/qualExamSchd/getQualExamSchdList',
+                           {'numOfRows': 50, 'pageNo': pg, 'dataFormat': 'json', 'implYy': yy, 'qualgbCd': gb})
+                total, got = rows_of(text)
+                rows += [r for r in got if r]
+                if len(got) < 50:
+                    break
             out.append(f'- {yy} {gb}: 전체 {total} · 받은 줄 {len(rows)}' + ('' if rows else f' — {head(text)}'))
             if yy == '2026' and gb == 'T':
                 out.append(f'  - 원문 앞부분: {head(text)}')
             if rows and yy == '2026' and gb == 'T':
                 out.append(f'  - 항목: {", ".join(rows[0].keys())}')
-                for r in rows[:4]:
-                    out.append('  - 예: ' + ' | '.join(f'{k}={v}' for k, v in r.items() if k in ('implSeq', 'description', 'docRegStartDt', 'docRegEndDt', 'docExamStartDt', 'docPassDt', 'pracRegStartDt', 'pracExamStartDt', 'pracPassDt')))
+                for r in rows[:3]:
+                    out.append('  - 전체 칸 예: ' + json.dumps(r, ensure_ascii=False)[:600])
+                for r in rows[:6]:
+                    out.append('  - 예: ' + ' | '.join(f'{k}={v}' for k, v in r.items() if k not in ('qualgbCd',) and k in ('implSeq', 'description', 'docRegStartDt', 'docRegEndDt', 'docExamStartDt', 'docPassDt', 'pracRegStartDt', 'pracExamStartDt', 'pracPassDt')))
         except Exception as e:  # noqa: BLE001
             out.append(f'- {yy} {gb}: 실패 {e}')
 out.append('')
