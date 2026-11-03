@@ -1,17 +1,18 @@
-# 내근처 일자리 데이터 표본 2026-11-02 22:18 KST
+# 내근처 일자리 데이터 표본 2026-11-03 10:27 KST
 
 ## 유료직업소개소(15155093)
 
 `apis.data.go.kr/1741000/paid_job_centers/info`
 
-- 매개변수 {'returnType': 'json'} → 전체 60,300줄, 받은 줄 8,100
+- 59쪽 실패 <urlopen error _ssl.c:999: The handshake operation timed out>
+- 매개변수 {'returnType': 'json'} → 전체 60,300줄, 받은 줄 5,800
 - 항목: BPLC_NM, CLSBIZ_YMD, CORP_SE_NM, CRD_INFO_X, CRD_INFO_Y, DAT_UPDT_PNT, DAT_UPDT_SE, DTL_SALS_STTS_CD, DTL_SALS_STTS_NM, LAST_MDFCN_PNT, LCPMT_YMD, LCTN_ZIP, LOTNO_ADDR, MNG_NO, OPN_ATMY_GRP_CD, ROAD_NM_ADDR, ROAD_NM_ZIP, SALS_STTS_CD, SALS_STTS_NM, SE_NM, TELNO
-- 영업상태(SALS_STTS_CD): 01 5,626, 03 2,079, 05 383, 04 12
-- 영업 중으로 본 줄 8,100 · 좌표 있음 7,882/8,100 (['CRD_INFO_X']/['CRD_INFO_Y'])
-- 시도(영업 중): 경기도 1,839, 서울특별시 1,174, 전남광주통합특별시 810, 경상남도 652, 충청남도 532, 경상북도 462, 부산광역시 398, 전북특별자치도 393, 대구광역시 381, 인천광역시 360, 충청북도 350, 대전광역시 224, 강원특별자치도 219, 울산광역시 163, 제주특별자치도 96, 세종특별자치시 37, (빈칸) 8, 광주광역시 2
-- 이름에 든 낱말(영업 중): 인력 3,486, 간병 617, 파출 172, 건설 78, 용역 62, 도우미 42, 산후 40, 서치 22, 가사 19, 외국인 17, 요양 11, 청소 6, 베이비 5, 경비 5, 해외 3, 헤드헌 3, 식당 1, 선원 1, 유흥 1
-- CORP_SE_NM: 개인 6,814, 법인 1,281, (빈칸) 5
-- SE_NM: 유료 8,095, (빈칸) 5
+- 영업상태(SALS_STTS_CD): 01 4,439, 03 1,129, 05 226, 04 6
+- 영업 중으로 본 줄 5,800 · 좌표 있음 5,644/5,800 (['CRD_INFO_X']/['CRD_INFO_Y'])
+- 시도(영업 중): 경기도 1,358, 서울특별시 823, 전남광주통합특별시 622, 경상남도 465, 충청남도 373, 경상북도 338, 전북특별자치도 277, 부산광역시 268, 대구광역시 266, 인천광역시 254, 충청북도 233, 강원특별자치도 158, 대전광역시 149, 울산광역시 112, 제주특별자치도 68, 세종특별자치시 28, (빈칸) 7, 광주광역시 1
+- 이름에 든 낱말(영업 중): 인력 2,450, 간병 512, 파출 115, 건설 58, 용역 44, 도우미 33, 산후 30, 가사 15, 외국인 13, 서치 11, 요양 7, 청소 4, 베이비 3, 경비 3, 해외 3, 헤드헌 3, 식당 1, 선원 1
+- CORP_SE_NM: 개인 4,885, 법인 911, (빈칸) 4
+- SE_NM: 유료 5,796, (빈칸) 4
 
 ## 무료직업소개소(15155099)
 
@@ -53,10 +54,10 @@
 
 - {'type': 'json'}: 줄 없음 — '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><response><header><resultCode>00</resultCode><resultMsg>NORMAL SERVICE.</resultMsg></header><body><items><item><dtlAddr>317-25</dtlAddr><faxNum>******</faxNum><orgCd>0000002</orgCd><orgName>성가정노인종합복지관</orgName><orgTypeNm>수행기관</orgTypeNm><telNum>'
 - {'returnType': 'json'}: 줄 없음 — '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><response><header><resultCode>00</resultCode><resultMsg>NORMAL SERVICE.</resultMsg></header><body><items><item><dtlAddr>317-25</dtlAddr><faxNum>******</faxNum><orgCd>0000002</orgCd><orgName>성가정노인종합복지관</orgName><orgTypeNm>수행기관</orgTypeNm><telNum>'
-- 매개변수 {'_type': 'json'} → 전체 1,482줄, 받은 줄 582
+- 매개변수 {'_type': 'json'} → 전체 1,481줄, 받은 줄 581
 - 항목: dtlAddr, faxNum, orgCd, orgName, orgTypeNm, telNum, zipAddr, zipCode
 - 첫 줄 예(주소 등): {"dtlAddr": "317-25", "faxNum": "******", "orgCd": "0000002", "orgName": "성가정노인종합복지관", "orgTypeNm": "수행기관", "telNum": "******", "zipAddr": "서울특별시 강동구고덕동 ", "zipCode": 134878}
-- orgTypeNm: 수행기관 582
+- orgTypeNm: 수행기관 581
 
 ## 고용복지플러스센터 현황(파일) 15066368
 
@@ -69,4 +70,4 @@
 - 159줄 · 항목: 연번, 시도, 기초, 센터명, 리플릿 번호, 주소
 - 시도: 경기 29, 서울 25, 부산 11, 충남 11, 강원 10, 인천 9, 전북 9, 전남 9, 경북 9, 경남 9, 충북 6, 대구 5, 광주 5, 울산 5, 대전 3, 제주 3, 세종 1
 
-API·파일 호출 185회
+API·파일 호출 163회
