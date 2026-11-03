@@ -1,10 +1,10 @@
 name: GSC weekly
-# 매주 월요일 Search Console 점검(scripts/gsc-report.py): 내근처 사이트 사이트맵 없거나 깨진 것 제출 + 사이트맵 상태 + 색인 표본(URL 검사)
-# → reports/gsc/주간-YYYY-MM-DD.md main 커밋(실행 기록은 reports/gsc/last-run.log). 10/26 사용자 승인.
+# 사흘마다 Search Console 점검(scripts/gsc-report.py): 내근처 사이트 사이트맵 없거나 깨진 것 제출 + 사이트맵 상태 + 색인 표본(URL 검사)
+# → reports/gsc/점검-YYYY-MM-DD.md main 커밋(실행 기록은 reports/gsc/last-run.log). 10/26 사용자 승인.
 # Secret: GA_SERVICE_ACCOUNT_JSON(서비스 계정 ga-reader, Search Console 도메인 속성 '전체' 권한). 무료(Search Console API).
 on:
   schedule:
-    - cron: '3 23 * * 0' # 월요일 08:03 KST
+    - cron: '3 23 */3 * *' # 사흘마다 08:03 KST(11/3 사용자: 매주 → 3일마다, 매달 1·4·7…일 UTC 기준이라 달이 바뀔 땐 하루 이틀 차이)
   workflow_dispatch:
   push:
     branches: [main]
@@ -40,6 +40,6 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add reports/gsc
           if git diff --cached --quiet; then echo 'no change'; exit 0; fi
-          git commit -m 'Search Console 주간 점검'
+          git commit -m 'Search Console 점검'
           for i in 1 2 3; do git pull --rebase origin main && git push origin HEAD:main && exit 0; sleep 10; done
           exit 1

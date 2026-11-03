@@ -1,9 +1,9 @@
-"""Search Console 주간 점검(서비스 계정 ga-reader, 도메인 속성 sc-domain:guidejung.com '전체' 권한 — 10/26 사용자 추가).
+"""Search Console 점검(사흘마다)(서비스 계정 ga-reader, 도메인 속성 sc-domain:guidejung.com '전체' 권한 — 10/26 사용자 추가).
 
 1. 내근처 사이트(packages/ui/src/network.tsx SITES)마다 sitemap.xml·rss.xml이 속성에 없거나, 오류가 있는데 한 번도 못 읽었으면 제출(PUT).
 2. 사이트맵 상태: 마지막 제출·마지막 읽음·대기·오류·경고·제출된 주소 수.
 3. 색인 표본: 사이트마다 첫 화면 + 사이트맵에서 고른 4쪽을 URL 검사(주 약 70건, 하루 한도 2,000건) → 색인됨/안 됨·이유·마지막 수집일.
-결과는 reports/gsc/주간-YYYY-MM-DD.md(공개 저장소). 클릭·노출 같은 검색 실적 숫자는 넣지 않는다. 우리 사이트 말고 다른 속성(WordPress 등)은 다루지 않는다.
+결과는 reports/gsc/점검-YYYY-MM-DD.md(공개 저장소). 클릭·노출 같은 검색 실적 숫자는 넣지 않는다. 우리 사이트 말고 다른 속성(WordPress 등)은 다루지 않는다.
 Usage: GA_SERVICE_ACCOUNT_JSON=... python scripts/gsc-report.py [--no-submit]
 """
 import json
@@ -117,7 +117,7 @@ def main():
     ix = r.json().get('inspectionResult', {}).get('indexStatusResult', {}) if r.ok else {}
     lines.append(f"| (비교용) | {VERDICT.get(ix.get('verdict', ''), ix.get('verdict', '-')) if r.ok else f'확인 실패 {r.status_code}'} | {CONTROL} | {ix.get('coverageState', '-')} | {str(ix.get('lastCrawlTime', '-'))[:10]} |")
     lines += ['', '## 사이트별 요약', '', '| 사이트 | 표본 중 색인됨 |', '|---|---|'] + [f'| {k} | {p}/{n} |' for k, (p, n) in tally.items()] + ['']
-    out = ROOT / f'reports/gsc/주간-{now:%Y-%m-%d}.md'
+    out = ROOT / f'reports/gsc/점검-{now:%Y-%m-%d}.md'
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text('\n'.join(lines) + '\n', encoding='utf-8')
     print('저장', out.relative_to(ROOT), '· 제출', len(done), '· 표본', sum(n for _, n in tally.values()), '· 색인됨', sum(p for p, _ in tally.values()))
