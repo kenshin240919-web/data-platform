@@ -15,27 +15,39 @@ URL = 'http://openapi.q-net.or.kr/api/service/rest/InquiryExamAreaSVC/getList'
 UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36'
 KST = timezone(timedelta(hours=9))
 FRESH_DAYS = 7
-BUDGET_MIN = 12
+BUDGET_MIN = 15
 
 
 def log(*a):
     print(*a, flush=True)
 
 
+PAGE = 100  # 1,000줄 한 쪽은 큐넷이 25초 안에 못 만들어 시간 초과(11/3) → 작은 쪽으로 여러 번
+
+
 def fetch(key, code):
-    """한 지사 전체(한 쪽 1,000줄씩). 실패하면 예외."""
+    """한 지사 전체(한 쪽 100줄씩, 쪽마다 3번까지). 실패하면 예외."""
     rows, page = [], 1
-    while page <= 5:
-        q = urllib.parse.urlencode({'ServiceKey': key, 'brchCd': code, 'numOfRows': 1000, 'pageNo': page})
-        req = urllib.request.Request(f'{URL}?{q}', headers={'User-Agent': UA})
-        with urllib.request.urlopen(req, timeout=25) as r:
-            root = ET.fromstring(r.read())
-        rc = root.findtext('.//resultCode')
-        if rc not in ('00', None):
-            raise RuntimeError(f'{rc} {(root.findtext(".//resultMsg") or "")[:80]}')
-        got = [{c.tag: (c.text or '').strip() for c in it} for it in root.iter('item')]
-        rows += [{k: v for k, v in r.items() if v} for r in got]
-        if len(got) < 1000:
+    while page <= 30:
+        q = urllib.parse.urlencode({'ServiceKey': key, 'brchCd': code, 'numOfRows': PAGE, 'pageNo': page})
+        for tries in range(3):
+            try:
+                req = urllib.request.Request(f'{URL}?{q}', headers={'User-Agent': UA})
+                with urllib.request.urlopen(req, timeout=45) as r:
+                    root = ET.fromstring(r.read())
+                rc = root.findtext('.//resultCode')
+                if rc not in ('00', None):
+                    raise RuntimeError(f'{rc} {(root.findtext(".//resultMsg") or "")[:80]}')
+                break
+            except Exception as e:  # noqa: BLE001
+                if tries == 2:
+                    raise RuntimeError(f'{page}쪽: {str(e)[:100]}') from e
+                time.sleep(2 + 3 * tries)
+        got = [{k: v for k, v in ((c.tag, (c.text or '').strip()) for c in it) if v} for it in root.iter('item')]
+        if got and rows and got[0] == rows[0]:  # pageNo를 안 따르면 같은 쪽이 다시 옴 → 멈춤
+            return rows
+        rows += got
+        if len(got) < PAGE:
             return rows
         page += 1
     return rows
@@ -55,7 +67,7 @@ def main():
         if time.time() > until:
             log('시간 상한 — 다음 실행에서 이어서')
             break
-        for tries in range(2):
+        for tries in range(1):
             try:
                 rows = fetch(key, code)
                 if not rows:
@@ -65,11 +77,10 @@ def main():
                     raise RuntimeError(f'{old} → {len(rows)}줄로 줄어 저장 안 함')
                 data[code] = {'at': today.isoformat(), 'rows': rows}
                 new += 1
-                log(f'  지사 {code}: {len(rows):,}줄 (시도 {tries + 1})')
+                log(f'  지사 {code}: {len(rows):,}줄')
                 break
             except Exception as e:  # noqa: BLE001
-                log(f'  지사 {code} 시도 {tries + 1} 실패: {str(e)[:120]}')
-                time.sleep(3)
+                log(f'  지사 {code} 실패: {str(e)[:120]}')
     if new:
         OUT.parent.mkdir(parents=True, exist_ok=True)
         OUT.write_text(json.dumps(dict(sorted(data.items())), ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
