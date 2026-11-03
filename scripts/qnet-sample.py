@@ -1,7 +1,7 @@
 """One-off: 국가자격 시험일정(15074408)·시험장소(15068172) 표본 → reports/job/qnet-sample.md.
 건수·항목·분포만 남김(키·원문은 남기지 않음). 11/3 사용자 활용신청.
 Usage: DATA_GO_KR_KEY=... python scripts/qnet-sample.py"""
-import json, os, urllib.parse, urllib.request, xml.etree.ElementTree as ET
+import json, os, time, urllib.parse, urllib.request, xml.etree.ElementTree as ET
 from collections import Counter
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -15,7 +15,7 @@ out = [f'# 국가자격 시험일정·시험장 표본 {datetime.now(KST):%Y-%m-
 def get(url, params, key_name='serviceKey'):
     q = urllib.parse.urlencode({key_name: key, **params})
     req = urllib.request.Request(f'{url}?{q}', headers={'User-Agent': UA})
-    with urllib.request.urlopen(req, timeout=60) as r:
+    with urllib.request.urlopen(req, timeout=30) as r:
         return r.read().decode('utf-8', 'replace')
 
 
@@ -48,6 +48,8 @@ for yy in ('2026', '2027'):
                        {'numOfRows': 500, 'pageNo': 1, 'dataFormat': 'json', 'implYy': yy, 'qualgbCd': gb})
             total, rows = rows_of(text)
             out.append(f'- {yy} {gb}: 전체 {total} · 받은 줄 {len(rows)}' + ('' if rows else f' — {head(text)}'))
+            if yy == '2026' and gb == 'T':
+                out.append(f'  - 원문 앞부분: {head(text)}')
             if rows and yy == '2026' and gb == 'T':
                 out.append(f'  - 항목: {", ".join(rows[0].keys())}')
                 for r in rows[:4]:
@@ -61,13 +63,20 @@ out += ['## 국가자격시험 시험장소(15068172)', '', '`openapi.q-net.or.k
 all_rows = []
 for b in range(25):
     code = f'{b:02d}'
-    try:
-        text = get('http://openapi.q-net.or.kr/api/service/rest/InquiryExamAreaSVC/getList', {'brchCd': code, 'numOfRows': 500, 'pageNo': 1}, 'ServiceKey')
-        total, rows = rows_of(text)
-        all_rows += rows
-        out.append(f'- 지사 {code}: 전체 {total} · 받은 줄 {len(rows)}' + ('' if rows else f' — {head(text)}'))
-    except Exception as e:  # noqa: BLE001
-        out.append(f'- 지사 {code}: 실패 {e}')
+    msg = ''
+    for tries in range(4):  # 큐넷 서버가 'Failed to validate a newly established connection'·시간 초과를 자주 냄 → 다시 시도
+        try:
+            text = get('http://openapi.q-net.or.kr/api/service/rest/InquiryExamAreaSVC/getList', {'brchCd': code, 'numOfRows': 1000, 'pageNo': 1}, 'ServiceKey')
+            total, rows = rows_of(text)
+            if rows:
+                all_rows += rows
+                msg = f'- 지사 {code}: 전체 {total} · 받은 줄 {len(rows)} (시도 {tries + 1})'
+                break
+            msg = f'- 지사 {code}: 0줄 — {head(text)[:160]}'
+        except Exception as e:  # noqa: BLE001
+            msg = f'- 지사 {code}: 실패 {e}'
+        time.sleep(5 * (tries + 1))
+    out.append(msg)
 if all_rows:
     out += ['', f'- 합계 {len(all_rows):,}줄 · 항목: {", ".join(all_rows[0].keys())}',
             f'- 주소 있음 {sum(1 for r in all_rows if r.get("address")):,} · 구분 {Counter(r.get("examAreaGbNm") for r in all_rows).most_common(8)}',
