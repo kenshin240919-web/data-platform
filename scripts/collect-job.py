@@ -142,16 +142,21 @@ QNET = 'http://openapi.q-net.or.kr/api/service/rest/InquiryExamAreaSVC/getList'
 EXAM_SKIP = re.compile(r'교도소|구치소|소년원|가상')
 
 
+EXAM_BUDGET = {'until': 0.0}  # 큐넷 전체에 쓰는 시간 상한(20분) — 넘으면 다시 시도하지 않음(11/3 표본: 다시 시도만 45분 넘게 걸림)
+
+
 def exam_rows(key, code):
-    """한 지사의 시험장 줄. 큐넷이 'Failed to validate a newly established connection'(resultCode 99)·시간 초과를 자주 냄 → 4번까지."""
+    """한 지사의 시험장 줄. 큐넷이 'Failed to validate a newly established connection'(resultCode 99)·시간 초과를 자주 냄 → 3번까지."""
     import time
     import xml.etree.ElementTree as ET
-    for tries in range(4):
+    for tries in range(3):
+        if tries and time.time() > EXAM_BUDGET['until']:
+            break
         try:
             rows, page = [], 1
             while page <= 5:
                 q = urllib.parse.urlencode({'ServiceKey': urllib.parse.unquote(key), 'brchCd': code, 'numOfRows': 1000, 'pageNo': page})
-                root = ET.fromstring(http(f'{QNET}?{q}', timeout=40))
+                root = ET.fromstring(http(f'{QNET}?{q}', timeout=25))
                 got = [{c.tag: (c.text or '').strip() for c in it} for it in root.iter('item')]
                 if not got and root.findtext('.//resultCode') not in ('00', None):
                     raise RuntimeError(root.findtext('.//resultMsg') or 'error')
@@ -162,12 +167,14 @@ def exam_rows(key, code):
             return rows
         except Exception as e:  # noqa: BLE001
             log(f'  시험장 지사 {code} 시도 {tries + 1} 실패: {str(e)[:120]}')
-            time.sleep(5 * (tries + 1))
+            time.sleep(4 * (tries + 1))
     return None
 
 
 def exams(key, prev_items):
     """국가자격 시험장. 주소가 같은 줄(같은 학교의 여러 시험실)은 한 곳으로 묶고 rooms에 시험실 이름. 못 받은 지사는 지난 목록."""
+    import time
+    EXAM_BUDGET['until'] = time.time() + 20 * 60
     rows, failed = [], []
     for b in range(25):
         code = f'{b:02d}'
