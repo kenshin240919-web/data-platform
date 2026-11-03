@@ -169,7 +169,15 @@ def exams(prev_items):
         groups.setdefault(k, []).append((name, addr, r))
     out = []
     for k, g in groups.items():
-        base = sorted({re.sub(r'\s*[\[(][^\])]*[\])]\s*$', '', n).strip() or n for n, _, _ in g}, key=len)[0]
+        def strip(n):  # 끝 괄호를 모두 뗌: '전남서부국가자격시험장(CBT 1실)(목포)' → '전남서부국가자격시험장'
+            while True:
+                m = re.sub(r'\s*[\[(][^\[\]()]*[\])]\s*$', '', n).strip()
+                if m == n or not m:
+                    return n
+                n = m
+        bases = Counter(strip(n) for n, _, _ in g)
+        good = [b for b in bases if not re.match(r'^[0-9]', b)] or list(bases)  # '00시험장' 같은 이름은 뒤로
+        base = sorted(good, key=lambda b: (-bases[b], len(b)))[0]
         r0 = g[0][2]
         rooms = sorted({n for n, _, _ in g if n != base})
         gb = Counter(txt(x.get('examAreaGbNm')) for _, _, x in g if txt(x.get('examAreaGbNm'))).most_common(1)
