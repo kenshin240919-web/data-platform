@@ -21,3 +21,4 @@ Disallow: /api/
 
 # Site summary for AI: https://job.guidejung.com/llms.txt
 Sitemap: https://job.guidejung.com/sitemap.xml
+#DaumWebMasterTool:750286e70a313ee054046fda2e62e54624310234b827f9f1295ef6b2c93c73d3:e72ZaETHYmtl8bFrs60rSQ==
