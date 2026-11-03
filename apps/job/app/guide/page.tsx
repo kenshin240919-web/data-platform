@@ -13,6 +13,7 @@ export default function Guide(){
     <section id="quit"><h2>😮‍💨 일을 그만뒀어요</h2><ol>
       <li><b>회사에 이직 확인 처리를 물어보세요</b><span>실업급여 심사에 회사가 내는 서류(이직확인서)가 쓰여요.</span></li>
       <li><b>고용24에서 구직 신청</b><span><a href={LINKS.work24} rel="noopener" target="_blank">고용24</a>에서 구직 신청과 수급자격 신청 전 교육을 안내받을 수 있어요.</span></li>
+      <li><b>받을 금액 어림해 보기</b><span><Link href="/calc/unemployment">실업급여 계산기</Link>·<Link href="/calc/severance">퇴직금 계산기</Link>로 하루 금액·날수·퇴직금을 어림할 수 있어요.</span></li>
       <li><b>관할 고용센터에 신청</b><span>주민등록 주소지를 관할하는 고용센터(전국 {n(k.center)}곳)에서 신청해요. <Link href="/center">시군구별 관할 고용센터 보기</Link></span></li>
       <li><b>받을 수 있는 다른 지원도 확인</b><span>지자체의 구직·청년·중장년 지원은 <a href="https://benefit.guidejung.com/topic">내근처 혜택</a>에서 우리 동네 것만 모아 볼 수 있어요.</span></li>
     </ol></section>
