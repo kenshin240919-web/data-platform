@@ -350,12 +350,76 @@ def check_coords(items, key):
         log(f'좌표 점검(직업소개소 원본 vs 카카오 주소) 표본 {len(ds)}곳 · 거리 중앙값 {statistics.median(ds) * 1000:.0f}m · 최대 {max(ds) * 1000:.0f}m')
 
 
+SCHED_OUT = ROOT / 'apps/job/data/exam-schedule.json'
+SCHED_URL = 'http://apis.data.go.kr/B490007/qualExamSchd/getQualExamSchdList'
+
+
+def schedules(key, now):
+    """국가자격 시험일정(15074408, 한국산업인력공단) — 올해·내년 × 자격 구분 T·S·C·W, 한 쪽 최대 50줄(넘기면 resultCode 930).
+    회차 단위(종목별 아님). 하나라도 못 받으면 그 구분은 지난 파일 것을 씀. → apps/job/data/exam-schedule.json"""
+    prev = json.loads(SCHED_OUT.read_text(encoding='utf-8')) if SCHED_OUT.exists() else {}
+    prev_rows = {(r['y'], r['gb']): [] for r in prev.get('rows', [])}
+    for r in prev.get('rows', []):
+        prev_rows[(r['y'], r['gb'])].append(r)
+    d8 = lambda v: f'{v[:4]}-{v[4:6]}-{v[6:8]}' if v and len(v) == 8 and v.isdigit() else None  # noqa: E731
+    rows, names, calls = [], {}, 0
+    for yy in (now.year, now.year + 1):
+        for gb in ('T', 'S', 'C', 'W'):
+            got, ok = [], True
+            for page in range(1, 21):
+                q = urllib.parse.urlencode({'serviceKey': urllib.parse.unquote(key), 'numOfRows': 50, 'pageNo': page, 'dataFormat': 'json', 'implYy': yy, 'qualgbCd': gb})
+                try:
+                    calls += 1
+                    d = json.loads(http(f'{SCHED_URL}?{q}', timeout=40))
+                except Exception as e:  # noqa: BLE001
+                    log(f'  시험일정 {yy} {gb} {page}쪽 실패: {str(e)[:100]}')
+                    ok = False
+                    break
+                if (d.get('header') or {}).get('resultCode') not in ('00', None):
+                    log(f'  시험일정 {yy} {gb}: {d.get("header")}')
+                    ok = False
+                    break
+                items = ((d.get('body') or {}).get('items')) or []
+                if isinstance(items, dict):
+                    items = items.get('item') or []
+                    items = [items] if isinstance(items, dict) else items
+                got += items
+                if len(items) < 50:
+                    break
+            if not ok:
+                rows += prev_rows.get((yy, gb), [])
+                continue
+            for r in got:
+                names[gb] = txt(r.get('qualgbNm')) or names.get(gb)
+                rows.append({k: v for k, v in {
+                    'y': yy, 'gb': gb, 'seq': r.get('implSeq'), 'desc': txt(r.get('description')),
+                    'dr': [d8(r.get('docRegStartDt')), d8(r.get('docRegEndDt'))], 'de': [d8(r.get('docExamStartDt')), d8(r.get('docExamEndDt'))],
+                    'dp': d8(r.get('docPassDt')),
+                    'pr': [d8(r.get('pracRegStartDt')), d8(r.get('pracRegEndDt'))], 'pe': [d8(r.get('pracExamStartDt')), d8(r.get('pracExamEndDt'))],
+                    'pp': d8(r.get('pracPassDt')),
+                }.items() if v not in (None, '', [None, None])})
+    rows = [r for r in rows if r.get('desc')]
+    rows.sort(key=lambda r: (r['gb'], r['y'], str((r.get('dr') or r.get('pr') or [''])[0] or ''), r.get('seq') or 0))
+    if not rows:
+        log('시험일정: 받은 것 없음 — 지난 파일 유지')
+        return
+    names = {**(prev.get('names') or {}), **names}
+    out = {'updated_at': now.isoformat(timespec='seconds'), 'names': names, 'rows': rows}
+    if prev.get('rows') == rows and prev.get('names') == names:
+        log(f'시험일정 변경 없음 ({len(rows):,}회차)')
+        return
+    SCHED_OUT.parent.mkdir(parents=True, exist_ok=True)
+    SCHED_OUT.write_text(json.dumps(out, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
+    log(f'시험일정 {len(rows):,}회차 {dict(Counter((r["y"], r["gb"]) for r in rows))} · 호출 {calls}회 · 구분 {names}')
+
+
 def main():
     args = sys.argv[1:]
     key = os.environ.get('DATA_GO_KR_KEY', '').strip()
     if not key:
         raise SystemExit('DATA_GO_KR_KEY missing')
     now = datetime.now(KST)
+    schedules(key, now)
     regions = A.weather_regions()
     prev = json.loads(OUT.read_text(encoding='utf-8')) if OUT.exists() else {}
     prev_items = prev.get('items') or []

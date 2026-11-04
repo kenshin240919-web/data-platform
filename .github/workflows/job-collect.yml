@@ -50,6 +50,7 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           [ -f apps/job/data/places.json ] || { echo 'no data yet'; exit 0; }
           git add apps/job/data/places.json
+          [ -f apps/job/data/exam-schedule.json ] && git add apps/job/data/exam-schedule.json
           if git diff --cached --quiet; then echo 'no change'; exit 0; fi
           git commit -m 'job: 일자리 기관 목록 갱신'
           for i in 1 2 3; do git pull --rebase origin main && git push origin HEAD:main && echo "pushed=1" >> "$GITHUB_OUTPUT" && exit 0; sleep 10; done
