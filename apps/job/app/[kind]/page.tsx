@@ -52,7 +52,7 @@ export default async function KindHome({params}:P){
       <li>국가기술자격 시험장은 원서를 접수할 때 고르고, 시험 날에는 수험표에 적힌 시험장으로 가요. 종목·회차마다 쓰는 시험장이 달라요. 내 시험장은 <a href={LINKS.qnet} rel="noopener" target="_blank">큐넷</a>의 수험표에서 확인하세요.</li>
       <li>여기 나온 곳은 한국산업인력공단이 등록한 시험장 전체예요(교도소 안 시험장은 뺐어요). 같은 주소의 시험실은 한 곳으로 묶었어요.</li>
       <li>주차가 되는지는 시험장마다 달라요. 수험표 안내를 먼저 보고, 어려우면 근처 공영주차장을 찾아 두세요.</li>
-    </ul><p><a className="jb-more-link" href={LINKS.qnet} rel="noopener" target="_blank">큐넷에서 시험 일정·원서 접수 ↗</a></p></section>}
+    </ul><p><a className="jb-more-link" href="/schedule">📅 자격증 시험 일정 — 지금 접수 중인 회차 →</a> · <a className="jb-more-link" href={LINKS.qnet} rel="noopener" target="_blank">큐넷 원서 접수 ↗</a></p></section>}
     <Official/>
     <Faq items={[[`${eun(KINDS[k].title)} 몇 곳인가요?`,`${updated()} 기준 전국 ${n(items.length)}곳입니다.`],
       ...(top[0]?[[`${ga(KINDS[k].label)} 가장 많은 지역은?`,`${top.slice(0,3).map(r=>`${r.name} ${n(r.kinds[k])}곳`).join(', ')} 순입니다.`] as [string,string]]:[]),

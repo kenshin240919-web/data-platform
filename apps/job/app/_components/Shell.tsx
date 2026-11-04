@@ -5,7 +5,7 @@ export function Shell({children}:{children:React.ReactNode}){
     <NetworkBar current="job"/>
     <header className="header"><div className="header-inner">
       <Link href="/" className="brand"><span aria-hidden="true">💼</span><span>내근처 일자리</span></Link>
-      <nav aria-label="주요 메뉴" className="jb-nav"><Link href="/">내 주변</Link><Link href="/center">고용센터</Link><Link href="/agency">직업소개소</Link><Link href="/women">새일센터</Link><Link href="/senior">노인일자리</Link><Link href="/guide">상황별 안내</Link><Link href="/calc">계산기</Link><Link href="/region">지역별</Link><Link href="/search">찾기</Link></nav>
+      <nav aria-label="주요 메뉴" className="jb-nav"><Link href="/">내 주변</Link><Link href="/center">고용센터</Link><Link href="/agency">직업소개소</Link><Link href="/women">새일센터</Link><Link href="/senior">노인일자리</Link><Link href="/guide">상황별 안내</Link><Link href="/schedule">시험 일정</Link><Link href="/exam">시험장</Link><Link href="/calc">계산기</Link><Link href="/region">지역별</Link><Link href="/search">찾기</Link></nav>
       <span className="header-note">일자리 찾을 때 가는 곳</span>
     </div></header>
     <main>{children}</main>

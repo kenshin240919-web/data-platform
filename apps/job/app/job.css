@@ -81,3 +81,10 @@ details summary{cursor:pointer;padding:6px 0}
 .jb-result{background:white;border-radius:12px;margin-top:14px}.jb-result b{color:var(--rs);font-size:17px}
 .jb-warn{background:#fff4e5;border-radius:10px;padding:10px 14px;color:#9a3412}
 @media (max-width:760px){.jb-field{grid-template-columns:1fr}.jb-field>small{grid-column:1}}
+
+/* 자격증 시험 일정(11/4) */
+.jb-sc h2{margin-top:22px}.jb-sclist{list-style:none;padding:0;margin:8px 0;display:grid;gap:8px}
+.jb-sclist a{display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:12px;padding:11px 14px}.jb-sclist a:hover{border-color:var(--rs)}
+.jb-sclist b{display:block}.jb-sclist small{color:var(--muted);font-size:13px}.jb-sclist em{margin-left:auto;font-style:normal;font-weight:800;color:var(--rs);white-space:nowrap;font-size:14px}
+.jb-sc-icon{font-size:22px}.jb-tablewrap{overflow-x:auto}.jb-sctable{min-width:640px;font-size:14px}.jb-sctable th{width:auto}.jb-sctable th,.jb-sctable td{white-space:nowrap;padding:8px 10px}.jb-sctable thead th{color:var(--muted);font-weight:600;text-align:left}
+.jb-sctable tbody tr:target{background:var(--jb-soft)}

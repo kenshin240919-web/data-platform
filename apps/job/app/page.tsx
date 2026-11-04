@@ -19,6 +19,7 @@ export default function Home(){
     <FavList hint="상세에서 ☆ 즐겨찾기를 누르면 여기서 바로 볼 수 있어요."/>
     <NearJob/>
     <Situations/>
+    <section><h2>📝 자격증</h2><div className="jb-jump"><Link href="/schedule">📅 시험 일정 — 지금 접수 중</Link><Link href="/exam">📍 내 근처 시험장</Link></div></section>
     <section><h2>🧮 계산기</h2><div className="jb-jump"><Link href="/calc/wage">⏱️ 시급·주휴수당·월급</Link><Link href="/calc/unemployment">🧾 실업급여</Link><Link href="/calc/severance">💼 퇴직금</Link><Link href="/calc/insurance">🧮 4대보험</Link></div></section>
     <p className="muted small gj-facts">전국 고용복지플러스센터 <b>{n(k.center)}곳</b> · 직업소개소 <b>{n(k.agency+k.free)}곳</b>(유료 {n(k.agency)}·무료 {n(k.free)}) · 여성새로일하기센터 {n(k.women)}곳 · 노인일자리 수행기관 {n(k.senior)}곳 · 대학일자리플러스센터 {n(k.campus)}곳 · 국가자격 시험장 {n(k.exam)}곳을 가까운 순으로 보여 드려요.</p>
     <Ad/>
