@@ -83,6 +83,7 @@ function parse(css) {
 }
 
 function darkRule(r) {
+  if (r.sel.includes('.gj-network')) return '';  // 연결 바는 밝은·어두운 화면 모두 남색
   const decls = r.body.split(';').map((d) => d.trim()).filter(Boolean).map((d) => { const k = d.indexOf(':'); return [d.slice(0, k), d.slice(k + 1)]; });
   // 같은 규칙에 진한(유지되는) 배경이 있으면 그 위 글자색은 그대로.
   const keepText = decls.some(([p, v]) => BG.test(p.trim()) && (v.match(COLOR) ?? []).some((c) => light(c) < 0.8 && !/^#[0-9a-f]{8}$/i.test(c)));

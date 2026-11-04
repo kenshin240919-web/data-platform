@@ -39,11 +39,12 @@ export function Contact(){return <>담당자: 가이드정 · 문의: <a href="m
 
 // '🔔 알림 받기'(near /alerts): 이미 이 브라우저에서 알림을 받는 중이면(공용 쿠키 gj_alerts=1, AlertSetup이 씀) 숨김. 누르면 GA alert_click.
 const ALERT_JS=`(function(){try{if(/(?:^|; )gj_alerts=1/.test(document.cookie))document.documentElement.classList.add('gj-alerted');}catch(e){}
-document.addEventListener('click',function(e){var a=e.target&&e.target.closest&&e.target.closest('.gj-network-alert');if(!a)return;try{window.gtag&&gtag('event','alert_click',{site:a.getAttribute('data-site')||''});}catch(x){}});})();`;
+document.addEventListener('click',function(e){var a=e.target&&e.target.closest&&e.target.closest('.gj-network-alert');if(!a)return;try{window.gtag&&gtag('event','alert_click',{site:a.getAttribute('data-site')||''});}catch(x){}});
+document.addEventListener('DOMContentLoaded',function(){var p=location.pathname.replace(/\\/$/,'')||'/',best=null,len=-1;document.querySelectorAll('.header nav a').forEach(function(a){if(a.origin!==location.origin)return;var h=a.pathname.replace(/\\/$/,'')||'/';if((h===p||(h!=='/'&&p.indexOf(h+'/')===0))&&h.length>len){best=a;len=h.length;}});if(best){best.classList.add('active');best.setAttribute('aria-current','page');}});})();`;
 export function NetworkBar({current}:{current:Site}){
-  return <><nav className="gj-network" aria-label="내근처 서비스"><div>{current==='near'?<b className="gj-network-brand">📍 내근처</b>:<a className="gj-network-brand" href={SITES.near.url}>📍 내근처</a>}<a className="gj-network-alert" href={`${SITES.near.url}/alerts?from=${current}`} data-site={current}>🔔 알림 받기</a>{(Object.keys(SITES) as Site[]).filter(k=>!SITES[k].hidden||k===current).sort((a,b)=>+(a==='near')-+(b==='near')).map(k=>k===current
-    ?<span key={k} className="on" aria-current="page">{SITES[k].icon} {SITES[k].name}</span>
-    :<a key={k} href={SITES[k].url}>{SITES[k].icon} {SITES[k].name}</a>)}</div></nav><SeasonBanner site={current}/><InstallHint brand={SITES[current].brand}/><script dangerouslySetInnerHTML={{__html:ALERT_JS}}/><script dangerouslySetInnerHTML={{__html:ACTIONS_JS}}/><script dangerouslySetInnerHTML={{__html:LIVE_JS}}/></>;
+  return <><nav className="gj-network" aria-label="내근처 서비스"><div>{current==='near'?<b className="gj-network-brand on" aria-current="page"><i>📍</i>내근처</b>:<a className="gj-network-brand" href={SITES.near.url}><i>📍</i>내근처</a>}<a className="gj-network-alert" href={`${SITES.near.url}/alerts?from=${current}`} data-site={current}>🔔 알림 받기</a>{(Object.keys(SITES) as Site[]).filter(k=>k!=='near'&&(!SITES[k].hidden||k===current)).map(k=>k===current
+    ?<span key={k} className="on" aria-current="page"><i>{SITES[k].icon}</i>{SITES[k].name}</span>
+    :<a key={k} href={SITES[k].url}><i>{SITES[k].icon}</i>{SITES[k].name}</a>)}</div></nav><SeasonBanner site={current}/><InstallHint brand={SITES[current].brand}/><script dangerouslySetInnerHTML={{__html:ALERT_JS}}/><script dangerouslySetInnerHTML={{__html:ACTIONS_JS}}/><script dangerouslySetInnerHTML={{__html:LIVE_JS}}/></>;
 }
 
 export type Link_={icon:string;title:string;desc:string;href:string};
