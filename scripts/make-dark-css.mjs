@@ -4,8 +4,9 @@
 // CSS를 고친 뒤에는 다시 실행: node scripts/make-dark-css.mjs  (결과 파일은 직접 고치지 않는다)
 import fs from 'node:fs';
 import path from 'node:path';
+import {fileURLToPath} from 'node:url';
 
-const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PAIRS = [['packages/ui/src/styles.css', 'packages/ui/src/dark.css']];
 for (const app of fs.readdirSync(path.join(ROOT, 'apps'))) {
   const src = `apps/${app}/app/${app}.css`;
