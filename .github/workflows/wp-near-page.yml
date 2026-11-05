@@ -1,0 +1,27 @@
+name: WP near page
+# guidejung.com(워드프레스)에 '내근처 서비스 모음' 페이지(slug near-sites) 1개만 만들거나 내용을 바꿈 — 11/5 사용자 요청.
+# Secrets: WP_USER, WP_APP_PASSWORD(워드프레스 사용자 → 프로필 → 응용 프로그램 비밀번호). 수동 실행만.
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: check(확인만) 또는 publish(게시)
+        default: check
+permissions:
+  contents: read
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - env:
+          WP_USER: ${{ secrets.WP_USER }}
+          WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD }}
+          MODE: ${{ inputs.mode }}
+        run: |
+          case "$MODE" in check|publish) ;; *) echo "mode는 check 또는 publish"; exit 1;; esac
+          python scripts/wp/near-page.py "$MODE"
