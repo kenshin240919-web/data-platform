@@ -14,7 +14,8 @@ AUTH = 'Basic ' + base64.b64encode(f'{user}:{pw}'.encode()).decode()
 
 
 def api(path, data=None, method=None):
-    req = urllib.request.Request(f'{SITE}/wp-json/wp/v2/{path}', data=json.dumps(data).encode() if data is not None else None,
+    p, _, q = path.partition('?')  # 11/5: guidejung.com은 /wp-json/이 404, ?rest_route= 형태는 200
+    req = urllib.request.Request(f'{SITE}/?rest_route=/wp/v2/{p}' + (f'&{q}' if q else ''), data=json.dumps(data).encode() if data is not None else None,
                                  method=method or ('POST' if data is not None else 'GET'),
                                  headers={'Authorization': AUTH, 'Content-Type': 'application/json', 'User-Agent': 'guidejung-near-page/1.0'})
     try:
