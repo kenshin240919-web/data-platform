@@ -1,3 +1,4 @@
+import type {Metadata} from 'next';
 import Link from 'next/link';
 import {AREAS,SITES,type Site} from '@guidejung/ui/network';
 import {AdSlot} from '@guidejung/ui/ads';
@@ -8,7 +9,8 @@ import {SEASONS} from '../lib/seasons';
 import {SITE} from '../lib/site';
 
 // 사이트마다 한 줄 소개(정적 HTML에 남는 내용 — 검색·AI 답변용).
-const ABOUT:Partial<Record<Site,string>>={trip:'한국관광공사 공식 데이터로 내 주변 가볼만한곳·축제·맛집·숙소를 가까운 순으로',weather:'기상청·에어코리아 데이터로 지금 날씨·48시간·10일 예보·미세먼지',traffic:'한국도로공사 실시간 고속도로 정체·CCTV·휴게소 기름값',charge:'한국환경공단 데이터로 지금 충전 가능한 전기차 급속·완속 충전기',academy:'교육청 공개 수강료로 우리 동네 학원과 학원비',school:'나이스 데이터로 우리 학교 오늘 급식·학사일정·시간표',pharmacy:'국립중앙의료원 데이터로 지금 문 연 약국·심야·일요일·공휴일 약국',hospital:'국립중앙의료원 데이터로 지금 진료 중인 병원·응급실 남은 병상',oil:'오피넷 데이터로 내 주변 휘발유·경유 최저가 주유소',parking:'전국주차장정보표준데이터로 무료 공영 주차장과 시간별 예상 요금',service:'공공데이터로 자동차 정비소·검사소·세차장, 가전·휴대폰 서비스센터 안내'};
+const ABOUT:Partial<Record<Site,string>>={trip:'한국관광공사 공식 데이터로 내 주변 가볼만한곳·축제·맛집·숙소를 가까운 순으로',weather:'기상청·에어코리아 데이터로 지금 날씨·48시간·10일 예보·미세먼지',traffic:'한국도로공사 실시간 고속도로 정체·CCTV·휴게소 기름값',charge:'한국환경공단 데이터로 지금 충전 가능한 전기차 급속·완속 충전기',academy:'교육청 공개 수강료로 우리 동네 학원과 학원비',school:'나이스 데이터로 우리 학교 오늘 급식·학사일정·시간표',pharmacy:'국립중앙의료원 데이터로 지금 문 연 약국·심야·일요일·공휴일 약국',hospital:'국립중앙의료원 데이터로 지금 진료 중인 병원·응급실 남은 병상',oil:'오피넷 데이터로 내 주변 휘발유·경유 최저가 주유소',parking:'전국주차장정보표준데이터로 무료 공영 주차장과 시간별 예상 요금',service:'공공데이터로 자동차 정비소·검사소·세차장, 가전·휴대폰 서비스센터 안내',rest:'지자체 인허가 데이터로 내 주변 찜질방·사우나·목욕탕',pet:'지자체 인허가 데이터로 동물병원·24시 동물병원·지금 문 연 동물약국',civil:'행정안전부 데이터로 지금 쓰는 무인민원발급기·주민센터·우체국',market:'소상공인시장진흥공단 데이터로 온누리상품권 쓰는 전통시장·가맹점과 오늘 장날',benefit:'정부24 공공서비스 데이터로 우리 동네 지원금·혜택과 마감 임박',job:'고용노동부 데이터로 관할 고용센터·직업소개소·자격증 시험장·시험 일정'};
+export const metadata:Metadata={alternates:{canonical:'/'}};
 const LIST=(Object.keys(SITES) as Site[]).filter(k=>k!=='near'&&!SITES[k].hidden);
 
 export default function Home(){
