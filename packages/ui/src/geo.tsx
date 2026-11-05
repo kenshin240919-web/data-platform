@@ -65,7 +65,7 @@ let approx:Promise<Pos|null>|null=null;
 export function approximate(){return approx??=fetch('/api/where').then(r=>r.ok?r.json():null).then(d=>d&&Number.isFinite(d.lat)?{...cell(d.lat,d.lon),precise:false,src:'ip' as const}:null).catch(()=>null);}
 
 // One shared state per page, so every section (and the card that asks for permission) sees the same position.
-let state:{pos:Pos|null;status:Status}={pos:null,status:'idle'};let started=false;
+let state:{pos:Pos|null;status:Status;refining?:boolean;slow?:boolean}={pos:null,status:'idle'};let started=false;
 const subs=new Set<()=>void>();
 function set(next:Partial<typeof state>){state={...state,...next};subs.forEach(f=>f());}
 const granted=()=>(navigator.permissions?.query({name:'geolocation' as PermissionName})??Promise.reject()).then(r=>r.state==='granted',()=>false);
@@ -79,26 +79,31 @@ function locate(quiet:boolean){
   if(!('geolocation' in navigator)){set({status:'unsupported'});return;}
   if(cancel){if(quiet)return;cancel();}
   const before=state.pos?.exact;
-  if(!quiet||!before)set({status:'locating'});
+  if(!quiet||!before)set({status:'locating',slow:false});
   let best:Fix|null=null,w=-1,told=quiet,done=false;
-  const end=(reload:boolean)=>{if(done)return;done=true;cancel=null;clearTimeout(timer);if(w>=0)navigator.geolocation.clearWatch(w);w=-1;
+  const end=(reload:boolean)=>{if(done)return;done=true;cancel=null;if(state.refining||state.slow)set({refining:false,slow:false});clearTimeout(timer);clearTimeout(slowT);if(w>=0)navigator.geolocation.clearWatch(w);w=-1;
     if(state.status==='locating')set({status:best?'ok':quiet?'idle':'failed'});
     if(reload&&!quiet&&best&&before&&state.pos?.src==='gps'){const c=cell(best.lat,best.lon),b=cell(before.lat,before.lon);
       if(c.lat===b.lat&&c.lon===b.lon&&moved(before,best)>25)location.reload();}};
   const stop=()=>end(true);
   cancel=()=>end(false);
   // 20초 다듬기는 첫 위치가 잡힌 뒤부터 센다(권한 창에 늦게 답해도 '못 잡음'으로 끝나지 않게). 첫 위치 전에는 최대 60초 기다린다.
-  let timer=setTimeout(stop,60000);
-  const ok=(p:GeolocationPosition)=>{if(done)return;const first=!best;if(first){clearTimeout(timer);timer=setTimeout(stop,20000);}const v:Fix={lat:p.coords.latitude,lon:p.coords.longitude,acc:Math.round(p.coords.accuracy),at:Date.now()};
+  // 권한이 이미 허용돼 있거나 방금 허용되면 그때부터 25초(11/5: GPS가 안 잡히는 실내에서 60초 동안 '찾는 중'만 떠 있었음).
+  let timer=setTimeout(stop,60000),slowT=setTimeout(()=>{if(!best&&!done)set({slow:true});},6000);
+  const shorten=()=>{if(!best&&!done){clearTimeout(timer);timer=setTimeout(stop,25000);}};
+  navigator.permissions?.query({name:'geolocation' as PermissionName}).then(r=>{if(r.state==='granted')shorten();else r.onchange=()=>{if(r.state==='granted')shorten();};},()=>{});
+  const ok=(p:GeolocationPosition)=>{if(done)return;const first=!best;if(first){clearTimeout(timer);clearTimeout(slowT);timer=setTimeout(stop,20000);if(state.slow)set({slow:false});}const v:Fix={lat:p.coords.latitude,lon:p.coords.longitude,acc:Math.round(p.coords.accuracy),at:Date.now()};
     if(best&&best.acc!=null&&v.acc!=null&&v.acc>=best.acc)return;best=v;save(v);
     const cur=state.pos,c=cell(v.lat,v.lon);
     // 직접 누른 경우 첫 결과는 같은 칸이어도 바로 반영('방금'·오차가 바뀌어 눌린 것이 보이게).
-    if((!quiet&&first)||!cur?.exact||cur.lat!==c.lat||cur.lon!==c.lon||cur.src!=='gps'||(cur.acc??1e9)>(v.acc??0)*2)set({pos:withCell(v,'gps'),status:(v.acc??1e9)<=50||quiet?'ok':state.status});
+    if((!quiet&&first)||!cur?.exact||cur.lat!==c.lat||cur.lon!==c.lon||cur.src!=='gps'||(cur.acc??1e9)>(v.acc??0)*2)set({pos:withCell(v,'gps'),status:'ok'});
+    // 첫 위치가 오면 바로 결과를 보여 주고(11/5: 'GPS로 정확하게 잡는 중'이 최대 20초 떠 있었음), GPS 다듬기는 뒤에서 조용히 — PosNote에 작은 글씨로만.
+    if(!quiet&&first&&(v.acc??1e9)>50&&!state.refining)set({refining:true});
     // 위치를 처음 허용해 결과가 나온 순간 → '홈 화면에 추가' 안내(install.tsx)
     if(!told){told=true;setTimeout(()=>{try{dispatchEvent(new CustomEvent('gj-moment',{detail:'located'}));}catch{}},3000);}
     if((v.acc??1e9)<=50)stop();};
   const bad=(e:GeolocationPositionError)=>{if(done)return;if(e.code===1){stop();if(!best)set({status:quiet?'idle':'denied'});}};
-  navigator.geolocation.getCurrentPosition(ok,bad,{enableHighAccuracy:false,timeout:8000,maximumAge:quiet?60e3:0});
+  navigator.geolocation.getCurrentPosition(ok,bad,{enableHighAccuracy:false,timeout:8000,maximumAge:quiet?60e3:before?0:600e3});
   w=navigator.geolocation.watchPosition(ok,bad,{enableHighAccuracy:true,timeout:20000,maximumAge:0});
 }
 function start(){
@@ -144,17 +149,17 @@ export function useMyPosition(){
   const [,tick]=useState(0);
   useEffect(()=>{const f=()=>tick(n=>n+1);subs.add(f);start();f();return ()=>{subs.delete(f);};},[]);
   const request=useCallback(()=>locate(false),[]);
-  return {pos:state.pos,status:state.status,request};
+  return {pos:state.pos,status:state.status,refining:!!state.refining,request};
 }
 
 const ago=(at?:number)=>{if(!at)return '';const m=Math.round((Date.now()-at)/60e3);return m<1?'방금':`${m}분 전`;};
 const accText=(m?:number)=>m==null?'':m<1000?`오차 약 ${m<20?Math.max(5,Math.round(m/5)*5):Math.round(m/10)*10}m`:`오차 약 ${(m/1000).toFixed(1)}km`;
 /** 정확한 위치를 쓸 때 맨 위 한 줄: '📍 내 위치 기준 · 오차 약 30m · 방금 [다시 찾기]'. 오차가 크거나(500m↑) 오래됐으면(5분↑) 다시 찾기를 강조. */
 export function PosNote(){
-  const {pos,status,request}=useMyPosition();
+  const {pos,status,refining,request}=useMyPosition();
   if(!pos?.precise)return null;
   const weak=(pos.acc??0)>500||Date.now()-(pos.at??Date.now())>FRESH;
-  return <p className={`gj-posnote${weak?' weak':''}`}>📍 내 위치 기준{pos.acc!=null&&<> · {accText(pos.acc)}</>}{pos.at&&<> · {ago(pos.at)}{pos.src==='shared'&&' 다른 내근처 사이트에서 확인'}</>}
+  return <p className={`gj-posnote${weak?' weak':''}`}>📍 내 위치 기준{pos.acc!=null&&<> · {accText(pos.acc)}</>}{pos.at&&<> · {ago(pos.at)}{pos.src==='shared'&&' 다른 내근처 사이트에서 확인'}</>}{refining&&<small> · 더 정확하게 다듬는 중</small>}
     <button type="button" onClick={request} disabled={status==='locating'}>{status==='locating'?'찾는 중…':weak?'정확하게 다시 찾기':'다시 찾기'}</button></p>;
 }
 
@@ -186,7 +191,7 @@ export function LocateCard({title,desc,status,onClick,approxLabel}:{title:string
   return <><div className="gj-locate">
     <button type="button" onClick={onClick} disabled={status==='locating'}>
       <span className="gj-locate-icon" aria-hidden="true">📍</span>
-      <span className="gj-locate-text"><b>{status==='locating'?'위치 확인 중… (GPS로 정확하게 잡는 중)':title}</b><small>{desc}</small></span>
+      <span className="gj-locate-text"><b>{status==='locating'?state.slow?'신호 기다리는 중… 실내면 조금 걸려요':'내 위치 찾는 중…':title}</b><small>{desc}</small></span>
       <span className="gj-locate-go" aria-hidden="true">→</span>
     </button>
     {status!=='denied'&&status!=='failed'&&<p className="gj-locate-note">{status==='unsupported'?'이 브라우저는 위치 확인을 지원하지 않아요. 지역을 직접 골라 주세요.':
