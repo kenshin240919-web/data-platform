@@ -1,0 +1,2047 @@
+{
+ "date": "2026-11-05",
+ "window": "last 24h",
+ "sites": {
+  "job": {
+   "all": [
+    {
+     "metricName": "DeadClickCount",
+     "information": [
+      {
+       "sessionsCount": 17,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "ExcessiveScroll",
+     "information": [
+      {
+       "sessionsCount": 17,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "RageClickCount",
+     "information": [
+      {
+       "sessionsCount": 17,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "QuickbackClick",
+     "information": [
+      {
+       "sessionsCount": 17,
+       "sessionsWithMetricPercentage": 11.76,
+       "sessionsWithoutMetricPercentage": 88.24,
+       "pagesViews": 2,
+       "subTotal": 2
+      }
+     ]
+    },
+    {
+     "metricName": "ScriptErrorCount",
+     "information": [
+      {
+       "sessionsCount": 17,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "ErrorClickCount",
+     "information": [
+      {
+       "sessionsCount": 17,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "ScrollDepth",
+     "information": [
+      {
+       "averageScrollDepth": 54.86
+      }
+     ]
+    },
+    {
+     "metricName": "Traffic",
+     "information": [
+      {
+       "totalSessionCount": 17,
+       "totalBotSessionCount": 3,
+       "distinctUserCount": 15,
+       "pagesPerSessionPercentage": 1.7058823529411764
+      }
+     ]
+    },
+    {
+     "metricName": "EngagementTime",
+     "information": [
+      {
+       "totalTime": 143,
+       "activeTime": 74
+      }
+     ]
+    },
+    {
+     "metricName": "Browser",
+     "information": [
+      {
+       "name": "ChromeMobile",
+       "sessionsCount": 9
+      },
+      {
+       "name": "Edge",
+       "sessionsCount": 3
+      },
+      {
+       "name": "SamsungInternet",
+       "sessionsCount": 2
+      },
+      {
+       "name": "Chrome",
+       "sessionsCount": 2
+      },
+      {
+       "name": "MobileSafari",
+       "sessionsCount": 1
+      }
+     ]
+    },
+    {
+     "metricName": "Device",
+     "information": [
+      {
+       "name": "Mobile",
+       "sessionsCount": 12
+      },
+      {
+       "name": "PC",
+       "sessionsCount": 5
+      }
+     ]
+    },
+    {
+     "metricName": "OS",
+     "information": [
+      {
+       "name": "Android",
+       "sessionsCount": 11
+      },
+      {
+       "name": "Windows",
+       "sessionsCount": 4
+      },
+      {
+       "name": "IOS",
+       "sessionsCount": 1
+      },
+      {
+       "name": "Linux",
+       "sessionsCount": 1
+      }
+     ]
+    },
+    {
+     "metricName": "Country",
+     "information": [
+      {
+       "name": "Korea, Republic of",
+       "sessionsCount": 17
+      }
+     ]
+    },
+    {
+     "metricName": "PageTitle",
+     "information": [
+      {
+       "name": "경기 성남시 무료직업소개소 12곳 | 내근처 일자리",
+       "sessionsCount": 2
+      },
+      {
+       "name": "경기 성남시 유료직업소개소(인력사무소) 240곳 | 내근처 일자리",
+       "sessionsCount": 2
+      },
+      {
+       "name": "서울 강북구 유료직업소개소(인력사무소) 52곳 | 내근처 일자리",
+       "sessionsCount": 2
+      },
+      {
+       "name": "가람인력개발 직업소개소 위치·전화 | 내근처 일자리",
+       "sessionsCount": 1
+      },
+      {
+       "name": "강북여성인력개발센터 무료 소개소 위치·전화 | 내근처 일자리",
+       "sessionsCount": 1
+      },
+      {
+       "name": "강원 강릉시 노인일자리 수행기관 5곳 | 내근처 일자리",
+       "sessionsCount": 1
+      },
+      {
+       "name": "강원 철원군 관할 고용센터·직업소개소 13곳 | 내근처 일자리",
+       "sessionsCount": 1
+      },
+      {
+       "name": "경기 의왕시 노인일자리 수행기관 4곳 | 내근처 일자리",
+       "sessionsCount": 1
+      },
+      {
+       "name": "경기 파주시 유료직업소개소(인력사무소) 97곳 | 내근처 일자리",
+       "sessionsCount": 1
+      },
+      {
+       "name": "경북 경산시 관할 고용센터·직업소개소 90곳 | 내근처 일자리",
+       "sessionsCount": 1
+      }
+     ]
+    },
+    {
+     "metricName": "ReferrerUrl",
+     "information": [
+      {
+       "name": "m.search.daum.net",
+       "sessionsCount": 11
+      },
+      {
+       "name": "job.guidejung.com",
+       "sessionsCount": 6
+      },
+      {
+       "name": "search.daum.net",
+       "sessionsCount": 4
+      },
+      {
+       "name": "daum.net",
+       "sessionsCount": 1
+      }
+     ]
+    },
+    {
+     "metricName": "PopularPages",
+     "information": [
+      {
+       "url": "https://job.guidejung.com/region/11305/agency",
+       "visitsCount": 2
+      },
+      {
+       "url": "https://job.guidejung.com/region/41130/agency",
+       "visitsCount": 2
+      },
+      {
+       "url": "https://job.guidejung.com/region/41130/free",
+       "visitsCount": 2
+      },
+      {
+       "url": "https://job.guidejung.com/",
+       "visitsCount": 1
+      },
+      {
+       "url": "https://job.guidejung.com/center",
+       "visitsCount": 1
+      },
+      {
+       "url": "https://job.guidejung.com/place/a061b99a920",
+       "visitsCount": 1
+      },
+      {
+       "url": "https://job.guidejung.com/place/a46ba9b1971",
+       "visitsCount": 1
+      },
+      {
+       "url": "https://job.guidejung.com/place/ad9413cf094",
+       "visitsCount": 1
+      },
+      {
+       "url": "https://job.guidejung.com/place/ada907cde3b",
+       "visitsCount": 1
+      },
+      {
+       "url": "https://job.guidejung.com/place/e4183f04d3a",
+       "visitsCount": 1
+      }
+     ]
+    }
+   ],
+   "url": [
+    {
+     "metricName": "DeadClickCount",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/41130/free"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/11305/agency#google_vignette"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/12240/agency"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/41130/agency"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/41430/senior"
+      },
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/11305/agency"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/47290"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/47750"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/place/a061b99a920"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/place/fb7f84b21a8"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/51150/senior"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/place/a46ba9b1971"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/center"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/41130/agency#google_vignette"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/11170"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/place/e4183f04d3a"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/place/ad9413cf094"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/11110"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/51780"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/11500"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/41480/agency"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/43750"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/place/ada907cde3b"
+      }
+     ]
+    },
+    {
+     "metricName": "ExcessiveScroll",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/41130/free"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/11305/agency#google_vignette"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/12240/agency"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/41130/agency"
+      },
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/11305/agency"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/41430/senior"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/47750"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/47290"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/place/a061b99a920"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/place/fb7f84b21a8"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/51150/senior"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/place/a46ba9b1971"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/center"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/41130/agency#google_vignette"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/11170"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/place/e4183f04d3a"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/place/ad9413cf094"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/11110"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/51780"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/11500"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/41480/agency"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/place/ada907cde3b"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/43750"
+      }
+     ]
+    },
+    {
+     "metricName": "RageClickCount",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/41130/free"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/11305/agency#google_vignette"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/12240/agency"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/41130/agency"
+      },
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/11305/agency"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/41430/senior"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/47750"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/47290"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/place/a061b99a920"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/place/fb7f84b21a8"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/51150/senior"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/place/a46ba9b1971"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/center"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/41130/agency#google_vignette"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/11170"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/place/e4183f04d3a"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/place/ad9413cf094"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/11110"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/51780"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/11500"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/41480/agency"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/43750"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/place/ada907cde3b"
+      }
+     ]
+    },
+    {
+     "metricName": "QuickbackClick",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/41130/free"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/11305/agency#google_vignette"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 100,
+       "sessionsWithoutMetricPercentage": 0,
+       "pagesViews": 1,
+       "subTotal": 1,
+       "Url": "https://job.guidejung.com/region/12240/agency"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/41130/agency"
+      },
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 50,
+       "sessionsWithoutMetricPercentage": 50,
+       "pagesViews": 1,
+       "subTotal": 1,
+       "Url": "https://job.guidejung.com/region/11305/agency"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/41430/senior"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/47290"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/47750"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/place/a061b99a920"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/place/fb7f84b21a8"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/51150/senior"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/place/a46ba9b1971"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/center"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/41130/agency#google_vignette"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/11170"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/place/e4183f04d3a"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/place/ad9413cf094"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/11110"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/51780"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/11500"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/41480/agency"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/43750"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/place/ada907cde3b"
+      }
+     ]
+    },
+    {
+     "metricName": "ScriptErrorCount",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/41130/free"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/11305/agency#google_vignette"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/12240/agency"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/41130/agency"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/41430/senior"
+      },
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/11305/agency"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/47290"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/47750"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/place/a061b99a920"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/place/fb7f84b21a8"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/51150/senior"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/place/a46ba9b1971"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/center"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/41130/agency#google_vignette"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/11170"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/place/e4183f04d3a"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/place/ad9413cf094"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/11110"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/51780"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/11500"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/41480/agency"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/43750"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/place/ada907cde3b"
+      }
+     ]
+    },
+    {
+     "metricName": "ErrorClickCount",
+     "information": [
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/41130/free"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/11305/agency#google_vignette"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/12240/agency"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/41130/agency"
+      },
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/11305/agency"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/41430/senior"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/47290"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/47750"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/place/a061b99a920"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/place/fb7f84b21a8"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/51150/senior"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/place/a46ba9b1971"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/center"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/41130/agency#google_vignette"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/11170"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/place/e4183f04d3a"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/place/ad9413cf094"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/11110"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/51780"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/11500"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/41480/agency"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/region/43750"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://job.guidejung.com/place/ada907cde3b"
+      }
+     ]
+    },
+    {
+     "metricName": "ScrollDepth",
+     "information": [
+      {
+       "averageScrollDepth": 19,
+       "Url": "https://job.guidejung.com/region/41130/free"
+      },
+      {
+       "averageScrollDepth": 100,
+       "Url": "https://job.guidejung.com/region/11305/agency#google_vignette"
+      },
+      {
+       "averageScrollDepth": 75.5,
+       "Url": "https://job.guidejung.com/region/12240/agency"
+      },
+      {
+       "averageScrollDepth": 14,
+       "Url": "https://job.guidejung.com/region/41130/agency"
+      },
+      {
+       "averageScrollDepth": 79,
+       "Url": "https://job.guidejung.com/region/41430/senior"
+      },
+      {
+       "averageScrollDepth": 78.5,
+       "Url": "https://job.guidejung.com/region/11305/agency"
+      },
+      {
+       "averageScrollDepth": 22,
+       "Url": "https://job.guidejung.com/region/47750"
+      },
+      {
+       "averageScrollDepth": 14,
+       "Url": "https://job.guidejung.com/region/47290"
+      },
+      {
+       "averageScrollDepth": 42,
+       "Url": "https://job.guidejung.com/place/a061b99a920"
+      },
+      {
+       "averageScrollDepth": 13,
+       "Url": "https://job.guidejung.com/"
+      },
+      {
+       "averageScrollDepth": 100,
+       "Url": "https://job.guidejung.com/place/fb7f84b21a8"
+      },
+      {
+       "averageScrollDepth": 97,
+       "Url": "https://job.guidejung.com/region/51150/senior"
+      },
+      {
+       "averageScrollDepth": 44,
+       "Url": "https://job.guidejung.com/place/a46ba9b1971"
+      },
+      {
+       "averageScrollDepth": 100,
+       "Url": "https://job.guidejung.com/center"
+      },
+      {
+       "averageScrollDepth": 18,
+       "Url": "https://job.guidejung.com/region/41130/agency#google_vignette"
+      },
+      {
+       "averageScrollDepth": 25,
+       "Url": "https://job.guidejung.com/region/11170"
+      },
+      {
+       "averageScrollDepth": 66,
+       "Url": "https://job.guidejung.com/place/e4183f04d3a"
+      },
+      {
+       "averageScrollDepth": 54,
+       "Url": "https://job.guidejung.com/place/ad9413cf094"
+      },
+      {
+       "averageScrollDepth": 14,
+       "Url": "https://job.guidejung.com/region/11110"
+      },
+      {
+       "averageScrollDepth": 54,
+       "Url": "https://job.guidejung.com/region/51780"
+      },
+      {
+       "averageScrollDepth": 36,
+       "Url": "https://job.guidejung.com/region/11500"
+      },
+      {
+       "averageScrollDepth": 85,
+       "Url": "https://job.guidejung.com/region/41480/agency"
+      },
+      {
+       "averageScrollDepth": 100,
+       "Url": "https://job.guidejung.com/region/43750"
+      },
+      {
+       "averageScrollDepth": 100,
+       "Url": "https://job.guidejung.com/place/ada907cde3b"
+      }
+     ]
+    },
+    {
+     "metricName": "Traffic",
+     "information": [
+      {
+       "totalSessionCount": 2,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 2.5,
+       "Url": "https://job.guidejung.com/region/41130/free"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 4,
+       "Url": "https://job.guidejung.com/region/11305/agency#google_vignette"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 4,
+       "Url": "https://job.guidejung.com/region/12240/agency"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 1,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 3,
+       "Url": "https://job.guidejung.com/region/41130/agency"
+      },
+      {
+       "totalSessionCount": 2,
+       "totalBotSessionCount": 1,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 2.5,
+       "Url": "https://job.guidejung.com/region/11305/agency"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 1,
+       "Url": "https://job.guidejung.com/region/41430/senior"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 1,
+       "Url": "https://job.guidejung.com/region/47290"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 1,
+       "Url": "https://job.guidejung.com/region/47750"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 3,
+       "Url": "https://job.guidejung.com/place/a061b99a920"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 1,
+       "Url": "https://job.guidejung.com/"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 1,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 4,
+       "Url": "https://job.guidejung.com/place/fb7f84b21a8"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 1,
+       "Url": "https://job.guidejung.com/region/51150/senior"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 4,
+       "Url": "https://job.guidejung.com/place/a46ba9b1971"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 1,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 1,
+       "Url": "https://job.guidejung.com/center"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 2,
+       "Url": "https://job.guidejung.com/region/41130/agency#google_vignette"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 2,
+       "Url": "https://job.guidejung.com/region/11170"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 2,
+       "Url": "https://job.guidejung.com/place/e4183f04d3a"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 4,
+       "Url": "https://job.guidejung.com/place/ad9413cf094"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 1,
+       "Url": "https://job.guidejung.com/region/11110"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 1,
+       "Url": "https://job.guidejung.com/region/51780"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 1,
+       "Url": "https://job.guidejung.com/region/11500"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 3,
+       "Url": "https://job.guidejung.com/region/41480/agency"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 3,
+       "Url": "https://job.guidejung.com/place/ada907cde3b"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 1,
+       "Url": "https://job.guidejung.com/region/43750"
+      }
+     ]
+    },
+    {
+     "metricName": "EngagementTime",
+     "information": [
+      {
+       "totalTime": 31,
+       "activeTime": 15,
+       "Url": "https://job.guidejung.com/region/41130/free"
+      },
+      {
+       "totalTime": 210,
+       "activeTime": 14,
+       "Url": "https://job.guidejung.com/region/11305/agency#google_vignette"
+      },
+      {
+       "totalTime": 52,
+       "activeTime": 52,
+       "Url": "https://job.guidejung.com/region/12240/agency"
+      },
+      {
+       "totalTime": 514,
+       "activeTime": 30,
+       "Url": "https://job.guidejung.com/region/41130/agency"
+      },
+      {
+       "totalTime": 4,
+       "activeTime": 4,
+       "Url": "https://job.guidejung.com/region/41430/senior"
+      },
+      {
+       "totalTime": 80,
+       "activeTime": 80,
+       "Url": "https://job.guidejung.com/region/11305/agency"
+      },
+      {
+       "totalTime": 15,
+       "activeTime": 15,
+       "Url": "https://job.guidejung.com/region/47290"
+      },
+      {
+       "totalTime": 5,
+       "activeTime": 5,
+       "Url": "https://job.guidejung.com/region/47750"
+      },
+      {
+       "totalTime": 43,
+       "activeTime": 43,
+       "Url": "https://job.guidejung.com/place/a061b99a920"
+      },
+      {
+       "totalTime": 1,
+       "activeTime": 1,
+       "Url": "https://job.guidejung.com/"
+      },
+      {
+       "totalTime": 227,
+       "activeTime": 96,
+       "Url": "https://job.guidejung.com/place/fb7f84b21a8"
+      },
+      {
+       "totalTime": 200,
+       "activeTime": 57,
+       "Url": "https://job.guidejung.com/region/51150/senior"
+      },
+      {
+       "totalTime": 17,
+       "activeTime": 17,
+       "Url": "https://job.guidejung.com/place/a46ba9b1971"
+      },
+      {
+       "totalTime": 131,
+       "activeTime": 77,
+       "Url": "https://job.guidejung.com/center"
+      },
+      {
+       "totalTime": 98,
+       "activeTime": 6,
+       "Url": "https://job.guidejung.com/region/41130/agency#google_vignette"
+      },
+      {
+       "totalTime": 23,
+       "activeTime": 23,
+       "Url": "https://job.guidejung.com/region/11170"
+      },
+      {
+       "totalTime": 73,
+       "activeTime": 50,
+       "Url": "https://job.guidejung.com/place/e4183f04d3a"
+      },
+      {
+       "totalTime": 41,
+       "activeTime": 41,
+       "Url": "https://job.guidejung.com/place/ad9413cf094"
+      },
+      {
+       "totalTime": 15,
+       "activeTime": 14,
+       "Url": "https://job.guidejung.com/region/11110"
+      },
+      {
+       "totalTime": 106,
+       "activeTime": 106,
+       "Url": "https://job.guidejung.com/region/51780"
+      },
+      {
+       "totalTime": 56,
+       "activeTime": 56,
+       "Url": "https://job.guidejung.com/region/11500"
+      },
+      {
+       "totalTime": 148,
+       "activeTime": 148,
+       "Url": "https://job.guidejung.com/region/41480/agency"
+      },
+      {
+       "totalTime": 145,
+       "activeTime": 128,
+       "Url": "https://job.guidejung.com/place/ada907cde3b"
+      },
+      {
+       "totalTime": 78,
+       "activeTime": 78,
+       "Url": "https://job.guidejung.com/region/43750"
+      }
+     ]
+    }
+   ],
+   "device": [
+    {
+     "metricName": "DeadClickCount",
+     "information": [
+      {
+       "sessionsCount": 12,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Mobile"
+      },
+      {
+       "sessionsCount": 5,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "ExcessiveScroll",
+     "information": [
+      {
+       "sessionsCount": 12,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Mobile"
+      },
+      {
+       "sessionsCount": 5,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "RageClickCount",
+     "information": [
+      {
+       "sessionsCount": 12,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Mobile"
+      },
+      {
+       "sessionsCount": 5,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "QuickbackClick",
+     "information": [
+      {
+       "sessionsCount": 12,
+       "sessionsWithMetricPercentage": 16.67,
+       "sessionsWithoutMetricPercentage": 83.33,
+       "pagesViews": 2,
+       "subTotal": 2,
+       "Device": "Mobile"
+      },
+      {
+       "sessionsCount": 5,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "ScriptErrorCount",
+     "information": [
+      {
+       "sessionsCount": 12,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Mobile"
+      },
+      {
+       "sessionsCount": 5,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "ErrorClickCount",
+     "information": [
+      {
+       "sessionsCount": 12,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Mobile"
+      },
+      {
+       "sessionsCount": 5,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "ScrollDepth",
+     "information": [
+      {
+       "averageScrollDepth": 50.48,
+       "Device": "Mobile"
+      },
+      {
+       "averageScrollDepth": 66.38,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "Traffic",
+     "information": [
+      {
+       "totalSessionCount": 12,
+       "totalBotSessionCount": 3,
+       "distinctUserCount": 10,
+       "pagesPerSessionPercentage": 1.75,
+       "Device": "Mobile"
+      },
+      {
+       "totalSessionCount": 5,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 5,
+       "pagesPerSessionPercentage": 1.6,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "EngagementTime",
+     "information": [
+      {
+       "totalTime": 149,
+       "activeTime": 59,
+       "Device": "Mobile"
+      },
+      {
+       "totalTime": 129,
+       "activeTime": 110,
+       "Device": "PC"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}
