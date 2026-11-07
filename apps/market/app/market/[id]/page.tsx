@@ -7,7 +7,7 @@ import {MarketCard} from '../../_components/Cards';
 import {StoreTable,type Row} from '../../_components/StoreTable';
 import {Ad} from '../../_components/Ad';
 import {JangInfo} from '../../_components/JangInfo';
-import {baseLabel,CATS,eun,exact,fairOf,jangDaysText,jangLabel,isMarket,located,mapUrl,market,marketPath,markets,n,nearMarkets,pct,SITE,sidoFull,sidoSlug,status,storesOf,topCats,type Market} from '../../../lib/data';
+import {baseLabel,CATS,eun,exact,fairOf,jangDaysText,jangLabel,isMarket,located,mapUrl,market,naverUrl,marketPath,markets,n,nearMarkets,pct,SITE,sidoFull,sidoSlug,status,storesOf,topCats,type Market} from '../../../lib/data';
 
 export const dynamicParams=false;
 export function generateStaticParams(){return markets.map(m=>({id:m.id}));}
@@ -41,7 +41,7 @@ export default async function MarketPage({params}:P){
     <p className="mk-answer">✅ 온누리상품권 가맹점 <b>{n(m.n)}곳</b> · 📱 디지털도 되는 곳 <b>{n(m.d)}곳</b>{m.new>0&&<> · 🆕 {status.latest_year}년 새로 가맹 {n(m.new)}곳</>}</p>
     <div className="mk-actions">{<a href={mapUrl({name:m.name,lat:pin?m.lat:null,lon:pin?m.lon:null,addr:m.addr??`${sidoFull(m.sido)} ${m.name}`})} target="_blank" rel="noopener">🧭 시장 길찾기</a>}
       {s?.tel&&<a className="sub" href={`tel:${s.tel.replace(/[^0-9]/g,'')}`}>📞 시장 전화</a>}
-      <a className="naver" href={`https://map.naver.com/p/search/${encodeURIComponent(`${m.name} ${where(m).split(' ').slice(-1)[0]}`)}`} target="_blank" rel="noopener">🟢 네이버 지도에서 보기</a></div>
+      <a className="naver" href={naverUrl(m.name,where(m).split(' ').slice(-1)[0])} target="_blank" rel="noopener">🟢 네이버 지도에서 보기</a></div>
     <p className="mk-lead">{lead}</p>
     {fr&&<JangInfo f={fr} name={m.name}/>}
     <section><h2>가맹점 목록 <span className="muted">{n(m.n)}곳</span></h2><StoreTable rows={rows} latest={status.latest_year}/></section>

@@ -6,7 +6,7 @@ import {Connect,genericFor,linksNear} from '@guidejung/ui/network';
 import {JangInfo} from '../../_components/JangInfo';
 import {MarketCard} from '../../_components/Cards';
 import {Ad} from '../../_components/Ad';
-import {distKm,eun,fair,fairPath,fairs,jangDaysText,jangLabel,km,mapUrl,n,nearMarkets,ownFairs,SITE,sidoFull,sidoSlug,type Fair} from '../../../lib/data';
+import {distKm,eun,fair,fairPath,fairs,jangDaysText,jangLabel,km,mapUrl,n,naverUrl,nearMarkets,ownFairs,SITE,sidoFull,sidoSlug,type Fair} from '../../../lib/data';
 
 // 온누리 시장과 이어지지 않은 5일장만(이어진 곳은 /market/{id}#jang)
 export const dynamicParams=false;
@@ -34,7 +34,7 @@ export default async function FairPage({params}:P){
     <div className="mk-head"><h1>🧺 {f.name} 장날</h1><p>{where(f)} · {jangLabel(f)}{f.stores?` · 점포 ${n(+f.stores)}개`:''}</p></div>
     <div className="mk-actions"><a href={mapUrl({name:f.name,lat:f.lat,lon:f.lon,addr:f.addr??f.jibun})} target="_blank" rel="noopener">🧭 시장 길찾기</a>
       {f.tel&&<a className="sub" href={`tel:${f.tel.replace(/[^0-9]/g,'')}`}>📞 시장 전화</a>}
-      <a className="naver" href={`https://map.naver.com/p/search/${encodeURIComponent(`${f.name} ${where(f).split(' ').slice(-1)[0]}`)}`} target="_blank" rel="noopener">🟢 네이버 지도에서 보기</a></div>
+      <a className="naver" href={naverUrl(f.name,where(f).split(' ').slice(-1)[0])} target="_blank" rel="noopener">🟢 네이버 지도에서 보기</a></div>
     <JangInfo f={f} name={f.name}/>
     <Ad/>
     <section><h2>시장 정보</h2><dl className="mk-facts">{facts.filter(([,v])=>v).map(([k,v])=><div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}</dl></section>

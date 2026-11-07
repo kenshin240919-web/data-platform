@@ -5,7 +5,7 @@
 // /api/where, /api/status, 가게 상세 /store/{id} (server-rendered into /store/shell, noindex — 원본에 가게 주소가 없어 내용이 얇음),
 // /sitemap.xml (index → /sitemap-pages.xml from Next).
 import raw from '../data/market.json';
-import {CATS,distKm,esc,eun,located,mapUrl,marketPath,n,pct,SITE,slimMarket,storePath,type Cat,type Data,type Market,type StoreRow} from '../lib/fmt';
+import {CATS,distKm,esc,eun,located,mapUrl,marketPath,n,naverUrl,pct,SITE,slimMarket,storePath,type Cat,type Data,type Market,type StoreRow} from '../lib/fmt';
 import {actionsHtml} from '../../../packages/ui/src/actions';
 
 interface Env{ASSETS:Fetcher;KAKAO_REST_KEY?:string}
@@ -87,7 +87,7 @@ function detailHtml(s:StoreRow,m:Market){
 <div class="mk-head"><h1>${C.icon} ${esc(s[1])}</h1><p>${esc([m.name,where,s[4]??C.label].join(' · '))}</p></div>${actionsHtml({id:s[0],name:s[1],sub:`${m.name} · 온누리 가맹점`,url:storePath(s[0])})}
 <p class="mk-answer">✅ <b>온누리상품권 가맹점</b> · 지류형 ✔ · 디지털형(모바일·카드) ${s[5]?'✔':'✘'}${s[6]?` <span class="muted">· ${s[6]}년 가맹</span>`:''}</p>
 <section class="mk-place" id="mk-place" data-id="${esc(s[0])}"><p class="muted">지도에서 가게 위치를 찾는 중…</p></section>
-<div class="mk-actions">${loc||m.addr?`<a class="sub" href="${esc(mapUrl({name:m.name,lat:loc?m.lat:null,lon:loc?m.lon:null,addr:m.addr??m.jibun}))}" target="_blank" rel="noopener">🧭 ${esc(m.name)} 길찾기</a>`:''}<a class="naver" href="https://map.naver.com/p/search/${encodeURIComponent(`${s[1]} ${m.name}`)}" target="_blank" rel="noopener">🟢 네이버 지도에서 보기</a><a class="sub" href="${marketPath(m.id)}">🏪 ${esc(m.name)} 가맹점 ${n(m.n)}곳</a></div>
+<div class="mk-actions">${loc||m.addr?`<a class="sub" href="${esc(mapUrl({name:m.name,lat:loc?m.lat:null,lon:loc?m.lon:null,addr:m.addr??m.jibun}))}" target="_blank" rel="noopener">🧭 ${esc(m.name)} 길찾기</a>`:''}<a class="naver" href="${esc(naverUrl(s[1],m.name))}" target="_blank" rel="noopener">🟢 네이버 지도에서 보기</a><a class="sub" href="${marketPath(m.id)}">🏪 ${esc(m.name)} 가맹점 ${n(m.n)}곳</a></div>
 <section><h2>정보</h2><dl class="mk-facts">${([['가게 이름',s[1]],['취급 품목',s[4]],['분류',C.label],['소속 시장·상점가',m.name],['지역',where],['시장 주소',m.addr??m.jibun],['지류형(종이)','가맹'],['디지털형(모바일·카드)',s[5]?'가맹':'가맹 안 함'],['가맹 등록',s[6]?`${s[6]}년`:null]] as [string,string|null|undefined][]).filter(([,v])=>v).map(([k,v])=>`<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl></section>
 ${same.length?`<section><h2>${esc(m.name)}의 다른 ${esc(C.label)} 가맹점</h2><ul class="mk-stores">${same.map(row).join('')}</ul></section>`:''}
 ${other.length?`<section><h2>${esc(m.name)}의 다른 가맹점</h2><ul class="mk-stores">${other.map(row).join('')}</ul><p><a class="mk-more-link" href="${marketPath(m.id)}">${esc(m.name)} 가맹점 ${n(m.n)}곳 모두 보기 →</a></p></section>`:''}

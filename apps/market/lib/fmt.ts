@@ -54,6 +54,8 @@ export const exact=(m:Pick<Market,'geo'>)=>m.geo==='std'||m.geo==='kakao';
 export const located=(m:Pick<Market,'geo'>)=>m.geo==='std'||m.geo==='kakao'||m.geo==='dong';
 export const km=(v:number)=>v<1?`${Math.round(v*1000)}m`:`${v.toFixed(1)}km`;
 export const distKm=(aLat:number,aLon:number,bLat:number,bLon:number)=>{const r=Math.PI/180,dLat=(bLat-aLat)*r,dLon=(bLon-aLon)*r;const h=Math.sin(dLat/2)**2+Math.cos(aLat*r)*Math.cos(bLat*r)*Math.sin(dLon/2)**2;return 12742*Math.asin(Math.sqrt(h));};
+// 네이버 지도 검색은 괄호가 있으면 못 찾음('원당시장(구 원당전통시장) 고양시' → 결과 없음): 괄호 안은 빼고 묻는다.
+export const naverUrl=(...words:(string|null|undefined)[])=>`https://map.naver.com/p/search/${encodeURIComponent(words.map(w=>(w??'').replace(/\([^)]*\)?/g,' ')).join(' ').replace(/\s+/g,' ').trim())}`;
 export const mapUrl=(p:{name:string;lat?:number|null;lon?:number|null;addr?:string|null})=>p.lat!=null&&p.lon!=null?`https://map.kakao.com/link/to/${encodeURIComponent(p.name)},${p.lat},${p.lon}`:`https://map.kakao.com/?q=${encodeURIComponent(p.addr??p.name)}`;
 export const telHref=(t:string)=>`tel:${t.replace(/[^0-9]/g,'')}`;
 const jong=(w:string)=>{const t=w.trim(),c=(t[t.length-1]??'').charCodeAt(0)-0xac00;return c>=0&&c<11172&&c%28!==0;};
