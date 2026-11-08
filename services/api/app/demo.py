@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta, timezone
 from sqlalchemy import select
 from .models import Region, RegionVersion
 from .pipeline import active_dataset, ingest
@@ -27,7 +27,8 @@ def seed(session):
     records=[]
     for i,(name,rid,address,lat,lon,description,conditions) in enumerate(places):
         records.append({'contentid':f'demo-{i+1}','contenttypeid':'12','title':name,'addr1':address,'mapy':lat,'mapx':lon,'overview':description,'demo_region_id':rid,'condition_evidence':{k:{'value':v,'source':'개발 샘플 — 실제 정책 아님','verified_at':date.today().isoformat()} for k,v in conditions.items()}})
-    today=date.today();sat=today+timedelta(days=(5-today.weekday())%7)
+    # main.search(when=weekend)와 같은 규칙(한국 날짜, 일요일엔 어제 토요일) — 실행 요일·시간대와 상관없이 '이번 주말'에 걸리게
+    today=datetime.now(timezone(timedelta(hours=9))).date();sat=today-timedelta(days=1) if today.weekday()==6 else today+timedelta(days=(5-today.weekday())%7)
     for i,rid in enumerate(('gangneung','seoul','busan')):
         example=next(r for r in records if r['demo_region_id']==rid)
         records.append({**example,'contentid':f'demo-event-{i}','contenttypeid':'15','title':['강릉 주말 행사 · 화면 예시','서울 문화 행사 · 화면 예시','부산 주말 행사 · 화면 예시'][i],'eventstartdate':sat.isoformat(),'eventenddate':(sat+timedelta(days=1)).isoformat(),'overview':'일정 필터와 행사 상세 기능을 확인하기 위한 가상의 행사입니다. 실제 개최 일정이 아닙니다. 샘플 모드에서만 표시됩니다.'})
