@@ -13,13 +13,16 @@ const ABOUT:Partial<Record<Site,string>>={trip:'한국관광공사 공식 데이
 export const metadata:Metadata={alternates:{canonical:'/'}};
 const LIST=(Object.keys(SITES) as Site[]).filter(k=>k!=='near'&&!SITES[k].hidden);
 
+const GO:Record<string,string>={'sick-kid':'아이가 아파요',weekend:'주말 어디 가지?','car-trouble':'차가 고장 났어요'};
 export default function Home(){
   const areas=AREAS;
   const qa:[string,string][]=[['내근처는 어떤 서비스인가요?',`위치 하나로 날씨·문 연 약국·진료 중인 병원·최저가 주유소·무료 주차장·전기차 충전기·가볼만한곳을 한 화면에 보여 주는 서비스예요. ${LIST.length}개 내근처 사이트의 공공데이터를 함께 씁니다.`],
     ['내 위치는 저장되나요?','위치는 버튼을 눌러 허용한 경우에만 쓰고, 이 브라우저와 내근처 사이트 안에서 30분 동안만 기억해요. 서버에 위치를 저장하지 않아요.'],
     ['정보는 얼마나 자주 바뀌나요?','약국·병원 진료 여부는 지금 시각 기준으로 계산하고, 날씨·충전기·응급실 병상은 실시간에 가깝게, 주유소 가격은 매일 갱신해요.']];
   return <div className="page">
-    <section className="nr-hero top"><h1>내 근처에 뭐가 있지?</h1><p>약국·병원·날씨·혜택까지 <b>16가지</b>를 내 위치로 한 번에</p></section>
+    {/* 상황 입구는 맨 위 메뉴 대신 여기 큰 버튼으로(11/8 사용자: 메뉴 줄은 위 연결 바와 겹치고, 상자 오른쪽이 비어 보임) */}
+    <section className="nr-hero top"><div className="nr-hero-txt"><h1>내 근처에 뭐가 있지?</h1><p>약국·병원·날씨·혜택까지 <b>16가지</b>를 내 위치로 한 번에</p></div>
+      <nav className="nr-hero-go" aria-label="상황별로 찾기">{SITUATIONS.map(s=><Link key={s.slug} href={`/situation/${s.slug}`}><span aria-hidden="true">{s.icon}</span>{GO[s.slug]}</Link>)}</nav></section>
     <Dashboard areas={areas}/>
     {/* 전국 수치(검색엔진·AI 답변용): 첫 화면을 가볍게 하려고 히어로에서 3초 답 아래로 내림(10/29 사용자) */}
     <p className="muted small gj-facts">날씨 · 문 연 약국 · 진료 중인 병원 · 최저가 주유소 · 무료 주차장 · 충전기 · 가볼만한곳을 한 번에</p>
