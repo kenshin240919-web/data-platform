@@ -6,7 +6,7 @@ export function Shell({children}:{children:React.ReactNode}){
     <NetworkBar current="cvs"/>
     <header className="header"><div className="header-inner">
       <Link href="/" className="brand"><span aria-hidden="true">🌙</span><span>내근처 편의점</span></Link>
-      <nav aria-label="주요 메뉴" className="cv-nav"><Link href="/">내 주변</Link><Link href="/medicine">상비약 안내</Link><Link href="/region">지역별</Link><Link href="/search">찾기</Link></nav>
+      <nav aria-label="주요 메뉴" className="cv-nav"><Link href="/">내 주변</Link><Link href="/medicine">상비약 안내</Link><Link href="/bungeoppang">붕어빵</Link><Link href="/region">지역별</Link><Link href="/search">찾기</Link></nav>
       <span className="header-note">밤에도 상비약 어디서?</span>
     </div></header>
     <main>{children}</main>

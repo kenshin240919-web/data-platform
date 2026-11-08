@@ -1,7 +1,7 @@
 // Cloudflare Worker for cvs.guidejung.com (내근처 편의점). Static pages: ./out (Next.js export).
 // The list ships with the Worker (data/stores.json, scripts/collect-cvs.py — LOCALDATA 안전상비의약품 판매업소 + 가장 가까운
 // 약국·응급실; no database), imported as text (wrangler.jsonc rules) and parsed on first use.
-// Routes: /api/near, /api/search, /api/fav, /api/where, /api/status, 상세 /store/{id} (server-rendered into /store/shell),
+// Routes: /api/near, /api/gs25(붕어빵 등 GS25 매장 서비스, 실시간), /api/search, /api/fav, /api/where, /api/status, 상세 /store/{id} (server-rendered into /store/shell),
 // /sitemap.xml (index) → /sitemap-pages.xml (Next) + /sitemap-stores-{n}.xml (here, SITEMAP_STAGE까지, 40,000 each).
 import raw from '../data/stores.json';
 import weatherRegions from '../../weather/data/regions.json';
@@ -130,6 +130,34 @@ function sitemap(path:string){
   return xml(`<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${items.slice(i*PER_SITEMAP,(i+1)*PER_SITEMAP).map(p=>`<url><loc>${SITE}${storePath(p.id)}</loc></url>`).join('')}</urlset>`);
 }
 
+// ---- GS25 매장 서비스(붕어빵·군고구마 등) --------------------------------------------------------------------------------
+// GS25 앱 정보를 다시 부르는 공개 중계(mcp.aka.page, 비공식)에서 방문 때만 받아 보여 줌 — 모아 두거나 정적 페이지로 만들지 않음.
+// 중계는 좌표 주변 약 1km·최대 50곳을 줌 → 약 2km 칸을 덮도록 칸 중심 둘레 4곳을 2개씩 부르고, 같은 칸 요청은 10분 동안 데이터센터 캐시를 함께 씀.
+const AKA='https://mcp.aka.page/api/gs25/stores';
+type Gs={storeCode:string;storeName:string;address?:string;phone?:string;latitude:number;longitude:number;propertyNames?:string[]};
+const snap=(v:number,d:number)=>+((Math.floor(v/d)+0.5)*d).toFixed(4);
+async function gs25(lat:number,lon:number,ctx:ExecutionContext){
+  const cLat=snap(lat,0.02),cLon=snap(lon,0.025);
+  const key=new Request(`${SITE}/__gs25/v1/${cLat},${cLon}`),cache=(caches as any).default as Cache;
+  const hit=await cache.match(key);if(hit)return hit;
+  const pts=[[.006,.0075],[-.006,-.0075],[.006,-.0075],[-.006,.0075]].map(([a,b])=>[+(cLat+a).toFixed(4),+(cLon+b).toFixed(4)]);
+  const one=([a,b]:number[])=>fetch(`${AKA}?lat=${a}&lng=${b}&limit=50`,{headers:{'user-agent':'guidejung-cvs (https://cvs.guidejung.com)'},signal:AbortSignal.timeout(9000)})
+    .then(r=>r.ok?r.json() as Promise<{success?:boolean;data?:{stores?:Gs[]}}>:null).then(d=>d?.success?d.data?.stores??[]:null).catch(()=>null);
+  const got:(Gs[]|null)[]=[];
+  for(let i=0;i<pts.length;i+=2)got.push(...await Promise.all(pts.slice(i,i+2).map(one))); // ponytail: 중계 동시 호출을 2개로 제한(6개 동시에 502가 났음)
+  const ok=got.filter(Boolean).length;
+  if(!ok)return json({error:'unavailable'},503,0);
+  const ours=near(cLat,cLon,3.5,{brand:'gs25',limit:3000}).items; // 우리 상세(/store/…)가 있는 매장은 그쪽으로 연결
+  const seen=new Map<string,Gs>();for(const s of got.flat())if(s&&!seen.has(s.storeCode)&&Number.isFinite(s.latitude))seen.set(s.storeCode,s);
+  const items=[...seen.values()].map(s=>{const k=distKm(cLat,cLon,s.latitude,s.longitude);
+    const m=ours.find(o=>distKm(o.lat!,o.lon!,s.latitude,s.longitude)<0.08);
+    return {name:`GS25 ${s.storeName}`,addr:(s.address??'').replace(/\s+/g,' ').trim(),tel:s.phone||null,lat:+s.latitude.toFixed(6),lon:+s.longitude.toFixed(6),
+      km:Math.round(k*100)/100,props:s.propertyNames??[],sid:m?.id??null};}).sort((a,b)=>a.km-b.km);
+  const res=json({at:new Date().toISOString(),partial:ok<pts.length,items},200,ok<pts.length?120:600);
+  if(ok===pts.length)ctx.waitUntil(cache.put(key,res.clone()));
+  return res;
+}
+
 export default {
   async fetch(req:Request,env:Env,ctx:ExecutionContext):Promise<Response>{
     const url=new URL(req.url),p=url.searchParams;
@@ -140,6 +168,8 @@ export default {
         const b=p.get('brand') as BrandKey|null;
         const r=near(lat,lon,Math.max(.2,Math.min(30,num(p.get('km'))??1)),{limit:Math.max(1,Math.min(300,num(p.get('limit'))??60)),brand:b&&b in BRANDS?b:null});
         return json({total:r.total,items:r.items.map(x=>({...slim(x),km:x.km}))},200,300);}
+      if(url.pathname==='/api/gs25'){const lat=num(p.get('lat')),lon=num(p.get('lon'));if(lat===null||lon===null||lat<33||lat>39||lon<124||lon>132)return json({error:'lat/lon'},400,0);
+        return await gs25(lat,lon,ctx);}
       if(url.pathname==='/api/search'){const q=flat(p.get('q')??'').slice(0,30);if(!q)return json({total:0,items:[]});
         const words=(p.get('q')??'').trim().toLowerCase().split(/\s+/).filter(Boolean).slice(0,4).map(flat);
         const hit=data().items.filter(x=>{const name=flat(x.name),where=flat(x.region_name+(x.addr??'')+(x.jibun??'')+BRANDS[x.brand].title);return words.every(w=>name.includes(w)||where.includes(w));});

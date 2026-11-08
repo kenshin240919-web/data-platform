@@ -64,3 +64,5 @@
 .cv-state{display:inline-block;border-radius:20px;padding:1px 9px;font-size:12px;font-weight:700;margin-left:6px;background:#f1f3f6;color:#55606e}.cv-state.open{background:#e9f8ef;color:#1f9d55}.cv-state.soon{background:#fff6d6;color:#b25f00}
 /* 어두운 화면: 남색 강조 글자가 묻혀서 밝은 파랑으로(배경으로 쓰는 --cv는 그대로) */
 @media (prefers-color-scheme:dark){.cv-answer b,.cv-answer a,.cv-km,.cv-more-link,.cv-rank a::before,.cv-types dt,.cv-card-body small .cv-tag,.cv-jump a:hover,.cv-ph-go{color:#9db1f7}.cv-answer.night b{color:#fde68a}.cv-ph b{color:#6ee7b7}}
+.cv-season{display:inline-block;margin-top:12px;background:#fff7ed;color:#9a3412;border-radius:30px;padding:8px 16px;font-weight:700;font-size:15px}.cv-season:hover{background:#ffedd5}
+@media (prefers-color-scheme:dark){.cv-season{background:#431407;color:#fed7aa}}
