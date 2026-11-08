@@ -277,7 +277,18 @@ export function fixKm<T>(data:T,pos:Pos|null|undefined):T{
 export function km(aLat:number,aLon:number,bLat:number,bLon:number){
   const r=Math.PI/180,dLat=(bLat-aLat)*r,dLon=(bLon-aLon)*r;const h=Math.sin(dLat/2)**2+Math.cos(aLat*r)*Math.cos(bLat*r)*Math.sin(dLon/2)**2;return 12742*Math.asin(Math.sqrt(h));
 }
-export function nearest<T extends {lat:number;lon?:number;lng?:number}>(items:T[],lat:number,lon:number){
+/** 직접 고른 곳(pos.pick, 예: '경기 김포시 고촌읍 신곡리')의 주소에 이 지역의 시·군·구 이름이 모두 들어 있나.
+ * 시도 이름은 '강원특별자치도'·'경기'처럼 표기가 달라 비교하지 않는다(같은 이름 중구·동구는 그중 가까운 쪽으로). */
+const sggWords=(s:string)=>s.split(/[\s·]+/).filter(x=>/[시군구]$/.test(x)&&!/(특별|광역|자치)시$/.test(x));
+/** 직접 고른 곳에서 시·군·구 이름만('김포시', '수원시 팔달구') — 서버가 지역을 고를 때 넘기는 값(칸 중심보다 넓은 정보). */
+export const pickArea=(pick?:string)=>pick?sggWords(pick).join(' '):'';
+export function inPick(name:string|undefined,pick:string|undefined){
+  if(!pick||!name)return false;const w=new Set(sggWords(pick)),p=sggWords(name);
+  return p.length>0&&p.every(x=>w.has(x));
+}
+/** 가장 가까운 곳. pick(직접 고른 곳의 주소)을 주면 그 주소 속 시군구와 이름이 맞는 곳 중에서 — 중심점만 보면 김포시 고촌읍이 서울 강서구로 잡힘(11/8). */
+export function nearest<T extends {lat:number;lon?:number;lng?:number}>(items:T[],lat:number,lon:number,pick?:string){
+  if(pick){const x=(t:T)=>{const o=t as {name?:string;label?:string};return o.name??o.label;};const hit=items.filter(t=>inPick(x(t),pick));if(hit.length)items=hit;}
   return items.reduce((a,b)=>km(lat,lon,b.lat,(b.lon??b.lng)!)<km(lat,lon,a.lat,(a.lon??a.lng)!)?b:a);
 }
 

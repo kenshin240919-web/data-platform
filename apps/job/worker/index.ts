@@ -40,13 +40,16 @@ function near(lat:number,lon:number,radius:number,opt:{limit?:number;per?:number
 type WR={code:string;name:string;sidoShort:string;lat:number;lon:number};
 const WREG=weatherRegions as WR[];
 /** 가장 가까운 시군구(우리 지역 코드: 일반구는 시 코드)와 그 관할 고용센터. 못 맞춘 곳은 가장 가까운 센터. */
-function areaOf(lat:number,lon:number){
+// '동네 직접 고르기'로 고른 곳의 시·군·구 이름(sgg, packages/ui geo.tsx pickArea)이 오면 그 이름의 시군구 중 가까운 곳(11/8: 고촌읍이 강서구로 잡혀 강서센터가 나왔음).
+const sggWords=(s:string)=>s.split(/\s+/).filter(x=>/[시군구]$/.test(x)&&!/(특별|광역|자치)시$/.test(x));
+function areaOf(lat:number,lon:number,sgg?:string|null){
   // 시군구 중심점이 가장 가까운 곳은 경계에서 자주 틀림(강남역 → 서초구) → 1.5km 안 가까운 기관 9곳의 주소 시군구 다수결, 없으면 중심점.
   const close=near(lat,lon,1.5,{limit:9}).items;
   const vote=new Map<string,number>();for(const x of close)vote.set(x.region,(vote.get(x.region)??0)+1);
   const top=[...vote].sort((a,b)=>b[1]-a[1])[0];
-  const r=WREG.reduce((x,y)=>distKm(lat,lon,y.lat,y.lon)<distKm(lat,lon,x.lat,x.lon)?y:x);
-  const code=top&&top[1]>=3?top[0]:r.name.includes(' ')?r.code.slice(0,4)+'0':r.code;
+  const want=new Set(sggWords(sgg??'')),hint=want.size?WREG.filter(y=>{const p=sggWords(y.name);return p.length>0&&p.every(x=>want.has(x));}):[];
+  const r=(hint.length?hint:WREG).reduce((x,y)=>distKm(lat,lon,y.lat,y.lon)<distKm(lat,lon,x.lat,x.lon)?y:x);
+  const code=!hint.length&&top&&top[1]>=3?top[0]:r.name.includes(' ')?r.code.slice(0,4)+'0':r.code;
   const cs=data().items.filter(p=>p.kind==='center');
   const own=cs.filter(c=>c.juris?.includes(code)||c.juris?.includes(r.code));
   const list=(own.length?own:cs.filter(c=>c.lat!=null).sort((a,b)=>distKm(lat,lon,a.lat!,a.lon!)-distKm(lat,lon,b.lat!,b.lon!)).slice(0,1))
@@ -166,7 +169,7 @@ export default {
         const kinds=(p.get('kind')??'').split(',').filter(k=>k in KINDS) as Kind[];
         const per=num(p.get('per'));
         const r=near(lat,lon,Math.max(.2,Math.min(50,num(p.get('km'))??2)),{limit:Math.max(1,Math.min(600,num(p.get('limit'))??100)),per:per?Math.max(1,Math.min(200,per)):undefined,kinds:kinds.length?kinds:null});
-        const a=areaOf(lat,lon);
+        const a=areaOf(lat,lon,(p.get('sgg')??'').slice(0,30));
         return json({total:r.total,counts:r.counts,items:r.items.map(x=>({...slim(x),km:x.km})),area:a.area,exact:a.exact,juris:a.juris.map(x=>({...slim(x),km:x.km}))},200,300);}
       if(url.pathname==='/api/search'){const q=flat(p.get('q')??'').slice(0,30);if(!q)return json({total:0,items:[]});
         const words=(p.get('q')??'').trim().toLowerCase().split(/\s+/).filter(Boolean).slice(0,4).map(flat);

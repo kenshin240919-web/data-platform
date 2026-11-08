@@ -16,7 +16,7 @@ export function HomeNearby({regions,fallback}:{regions:R[];fallback:string}){
   const [code,setCode]=useState(fallback);const [picked,setPicked]=useState(false);const [fromRecent,setFromRecent]=useState(false);
   const [recents,setRecents]=useState<{code:string;label:string}[]>([]);
   useEffect(()=>{const r=recent();setRecents(r);if(r[0]&&regions.some(x=>x.code===r[0].code)){setCode(r[0].code);setFromRecent(true);}},[regions]);
-  useEffect(()=>{if(!pos||picked||(fromRecent&&!pos.precise))return;setCode(nearest(regions,here(pos).lat,here(pos).lon).code);},[pos,picked,fromRecent,regions]);
+  useEffect(()=>{if(!pos||picked||(fromRecent&&!pos.precise))return;setCode(nearest(regions,here(pos).lat,here(pos).lon,pos.pick).code);},[pos,picked,fromRecent,regions]);
   const region=regions.find(r=>r.code===code)??regions[0];
   const origin=pos?.precise&&!picked?here(pos):null;
   // 내 주변: also the next districts whose centre is within 15km (at most 3), so a spot near a border is not cut off.

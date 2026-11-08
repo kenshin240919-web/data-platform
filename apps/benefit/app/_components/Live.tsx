@@ -2,13 +2,13 @@
 // 브라우저 쪽: 첫 화면 '우리 동네'(내 위치에서 가장 가까운 시군구 — 위치는 휴대폰 안에서만 쓰고 시군구 코드로만 요약을 받음),
 // 맞춤 찾기(조건은 이 브라우저에만 저장), 검색. 목록은 정적 파일(/rows.json, /r/{시군구})이라 서버로 답이 가지 않는다.
 import {useEffect,useMemo,useState} from 'react';
-import {LocateCard,PosNote,here,useMyPosition} from '@guidejung/ui/geo';
+import {LocateCard,PosNote,here,inPick,useMyPosition} from '@guidejung/ui/geo';
 import {BIZ,CODE_LABEL,FIELDS,FIELD_ORDER,HOUSE,INCOME,LIFE,benefitPath,dueLabel,kstToday,matches,n,openTo,won,type Ask,type Code,type Field,type Row} from '../../lib/fmt';
 
 export type RegionLite={c:string;n:string;s:string;a:number;o:number};
 let rowsP:Promise<Row[]>|null=null;
 const loadRows=()=>rowsP??=fetch('/rows.json').then(r=>r.json() as Promise<Row[]>).catch(()=>{rowsP=null;return [];});
-const nearestRegion=(regions:RegionLite[],lat:number,lon:number)=>regions.reduce((b,r)=>{const d=(r.a-lat)**2+((r.o-lon)*0.8)**2;return d<b.d?{r,d}:b;},{r:regions[0],d:1e9}).r;
+const nearestRegion=(all:RegionLite[],lat:number,lon:number,pick?:string)=>{const hit=all.filter(r=>inPick(r.n,pick)),regions=hit.length?hit:all;return regions.reduce((b,r)=>{const d=(r.a-lat)**2+((r.o-lon)*0.8)**2;return d<b.d?{r,d}:b;},{r:regions[0],d:1e9}).r;};
 const scopeChip=(key:string)=>key===''?'전국':/^\d/.test(key)?'우리 동네':`${key} 전체`;
 
 export function RowItem({r,today}:{r:Row;today:string}){
@@ -22,7 +22,7 @@ type Area={code:string;name:string;zone:string;sido:string;local:number;sidoN:nu
 /** 첫 화면 3초 답: 📍 ○○구에서 받을 수 있는 혜택 N가지 — 한 달 안 마감 M건 */
 export function MyArea({regions}:{regions:RegionLite[]}){
   const {pos,status,request}=useMyPosition();const [a,setA]=useState<Area|null>(null);const today=kstToday();
-  useEffect(()=>{if(!pos)return;const p=here(pos);const r=nearestRegion(regions,p.lat,p.lon);let live=true;
+  useEffect(()=>{if(!pos)return;const p=here(pos);const r=nearestRegion(regions,p.lat,p.lon,pos.pick);let live=true;
     fetch(`/r/${r.c}`).then(x=>x.json()).then((d:Area)=>{if(live)setA(d);}).catch(()=>{});return ()=>{live=false;};},[pos?.lat,pos?.lon]); // eslint-disable-line react-hooks/exhaustive-deps
   return <section className="bf-near">
     <PosNote/>{!pos?.precise&&<LocateCard title="우리 동네 혜택 보기" desc="내 위치로 사는 시군구를 찾아 받을 수 있는 혜택을 보여 드려요(위치는 휴대폰 안에서만 써요)" status={status} onClick={request} approxLabel={pos?'접속 지역':undefined}/>}
@@ -49,7 +49,7 @@ export function Find({regions}:{regions:RegionLite[]}){
   const [field,setField]=useState<Field|null>(null);const [more,setMore]=useState(20);
   useEffect(()=>{loadRows().then(setRows);const s=read();const q=new URLSearchParams(location.search).get('r');
     if(q||s.r)setR(q??s.r!);if(s.age!=null)setAge(s.age);if(s.inc!=null)setInc(s.inc);setLife(s.life??[]);setHouse(s.house??[]);setBiz(s.biz??null);},[]);
-  useEffect(()=>{if(!r&&pos){const p=here(pos);setR(nearestRegion(regions,p.lat,p.lon).c);}},[pos?.lat,pos?.lon]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(()=>{if(!r&&pos){const p=here(pos);setR(nearestRegion(regions,p.lat,p.lon,pos.pick).c);}},[pos?.lat,pos?.lon]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(()=>{try{localStorage.setItem(STORE,JSON.stringify({r,age,inc,life,house,biz}));}catch{}},[r,age,inc,life,house,biz]);
   const reg=regions.find(x=>x.c===r);
   const ask:Ask={region:r||undefined,sido:reg?.s,age,inc,life,house,biz};

@@ -26,7 +26,7 @@ export function NearMe({routes,rests,places}:{routes:Route[];rests:RestLite[];pl
       if(k<0){const n=near.find(x=>x.r.routeNo===r.no);if(n)d=n.d+1;}return {r,segs,k,d};});
     return list.filter(x=>Number.isFinite(x.d)).sort((a,b)=>a.d-b.d).slice(0,3);
   },[pos,routes,near]);
-  const area=pos?nearest(places,here(pos).lat,here(pos).lon):undefined;const place=pos&&!pos.precise?broadArea(places,here(pos).lat,here(pos).lon):area?.label;
+  const area=pos?nearest(places,here(pos).lat,here(pos).lon,pos.pick):undefined;const place=pos&&!pos.precise?broadArea(places,here(pos).lat,here(pos).lon):area?.label;
   const where=pos?.precise?'내 근처':place?`${place} 부근`:'접속 위치 부근';
   return <section className="section tf-near">
     <PosNote/>{!pos?.precise&&<LocateCard title="내 근처 고속도로 상황 보기" desc="가까운 고속도로의 구간별 속도·CCTV·휴게소를 먼저 보여 드려요" status={status} onClick={request} approxLabel={place}/>}

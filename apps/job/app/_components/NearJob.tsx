@@ -2,7 +2,7 @@
 // 메인 3초 답: 내 위치(이미 허용 → 정확, 아니면 접속 위치)가 속한 시군구의 '관할 고용센터'와 가까운 직업소개소·새일센터·노인일자리 기관.
 // 위치는 약 2km 칸 중심만 서버로(padKm으로 넓혀 받고 within으로 정확한 거리로 다시 자름 — packages/ui/src/geo.tsx).
 import {useEffect,useState} from 'react';
-import {LocateCard,PosNote,useMyPosition,fixKmNow,padKm,padLimit,within} from '@guidejung/ui/geo';
+import {LocateCard,PosNote,useMyPosition,fixKmNow,padKm,padLimit,pickArea,within} from '@guidejung/ui/geo';
 import {KINDS,km,n,placePath,type Kind,type Slim} from '../../lib/fmt';
 import {PlaceList} from './PlaceList';
 import {HomeLinks} from './HomeLinks';
@@ -13,11 +13,11 @@ export function NearJob({kind}:{kind?:Kind}){
   useEffect(()=>{if(!pos)return;let live=true;
     const wide=kind==='center'||kind==='women'||kind==='campus';
     const steps=wide?[5,10,20,50]:pos.precise?[2,5,10,20]:[3,6,10,20];
-    const q=(k:number)=>`/api/near?lat=${pos.lat.toFixed(4)}&lon=${pos.lon.toFixed(4)}&km=${padKm(k)}&per=${padLimit(kind?60:12,200)}&limit=${padLimit(100,600)}${kind?`&kind=${kind}`:''}`;
+    const q=(k:number)=>`/api/near?lat=${pos.lat.toFixed(4)}&lon=${pos.lon.toFixed(4)}&km=${padKm(k)}&per=${padLimit(kind?60:12,200)}&limit=${padLimit(100,600)}${kind?`&kind=${kind}`:''}${pos.pick&&pickArea(pos.pick)?`&sgg=${encodeURIComponent(pickArea(pos.pick))}`:''}`;
     const load=(i:number):Promise<void>=>fetch(q(steps[i])).then(x=>x.json()).then(fixKmNow).then(within(steps[i])).then((d:Res):Promise<void>|void=>{if(!live)return;
       const mine=kind?d.items.filter(p=>p.kind===kind).length:d.items.length;if(mine<3&&i<steps.length-1)return load(i+1);setRes(d);setRadius(steps[i]);});
     load(0).catch(()=>{if(live)setRes({counts:{} as Res['counts'],items:[],area:null,juris:[],exact:false});});
-    return ()=>{live=false;};},[pos?.lat,pos?.lon,pos?.precise,kind]); // eslint-disable-line react-hooks/exhaustive-deps
+    return ()=>{live=false;};},[pos?.lat,pos?.lon,pos?.precise,pos?.pick,kind]); // eslint-disable-line react-hooks/exhaustive-deps
   const count=(k:Kind)=>res?.items.filter(p=>p.kind===k).length??0;
   const c=res?.juris?.[0];
   return <section className="jb-near">

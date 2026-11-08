@@ -15,7 +15,7 @@ export function HomeWeather({regions,fallback}:{regions:Slim[];fallback:string})
   const {pos,status,request}=useMyPosition();
   const [code,setCode]=useState(fallback);const [picked,setPicked]=useState(false);const [fromLast,setFromLast]=useState(false);
   useEffect(()=>{const last=lastViewed();if(last&&regions.some(r=>r.code===last.code)){setCode(last.code);setFromLast(true);}},[regions]);
-  useEffect(()=>{if(!pos||picked||(fromLast&&!pos.precise))return;setCode(nearest(regions,here(pos).lat,here(pos).lon).code);},[pos,picked,fromLast,regions]);
+  useEffect(()=>{if(!pos||picked||(fromLast&&!pos.precise))return;setCode(nearest(regions,here(pos).lat,here(pos).lon,pos.pick).code);},[pos,picked,fromLast,regions]);
   const region=regions.find(r=>r.code===code)??regions[0];
   const mine=!!pos?.precise&&!picked;
   return <>
