@@ -1,8 +1,22 @@
 name: Cvs deploy
 # Deploys cvs.guidejung.com (Worker guidejung-cvs) with wrangler from GitHub Actions (not connected to Cloudflare Workers
 # Builds). Secrets: CLOUDFLARE_API_TOKEN (github-d1: Workers Scripts edit …), CLOUDFLARE_ACCOUNT_ID.
-# 지금은 수동 실행만(첫 배포·도메인 연결은 사용자 승인 뒤). 승인 뒤 push(apps/cvs 등)·매일 수집 후(workflow_run)를 켬.
+# Runs when the cvs app (or what it imports) changes on main, after the daily list commit, or by hand (11/8 사용자 승인).
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/cvs/**'
+      - 'apps/weather/data/**'
+      - 'apps/traffic/data/**'
+      - 'packages/**'
+      - 'scripts/prune-rsc.mjs'
+      - 'package.json'
+      - 'package-lock.json'
+  # 매일 목록 커밋은 GITHUB_TOKEN으로 push돼 push 이벤트가 안 생김 → 수집 작업이 끝나면 따로 배포.
+  workflow_run:
+    workflows: ['Cvs collect']
+    types: [completed]
   workflow_dispatch:
 permissions:
   contents: read
@@ -11,6 +25,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   deploy:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
