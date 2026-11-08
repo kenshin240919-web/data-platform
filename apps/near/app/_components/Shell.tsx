@@ -3,10 +3,8 @@ import {Contact,NetworkBar,SITES,type Site} from '@guidejung/ui/network';
 const ALL=(Object.keys(SITES) as Site[]).filter(k=>k!=='near'&&!SITES[k].hidden);
 export function Shell({children}:{children:React.ReactNode}){
   return <>
+    {/* 로고 줄 없음(11/8 사용자): 맨 위 연결 바의 '📍 내근처'가 같은 곳(첫 화면)으로 감 */}
     <NetworkBar current="near"/>
-    <header className="header"><div className="header-inner">
-      <Link href="/" className="brand"><span aria-hidden="true">📍</span><span>내근처</span></Link>
-    </div></header>
     <main>{children}</main>
     <footer>
       <div><Link href="/" className="footer-brand">📍 내근처</Link><p>여행·날씨·약국·병원·주유소·주차장… 내 주변 정보를 한 곳에서</p></div>
