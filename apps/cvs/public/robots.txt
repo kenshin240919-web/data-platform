@@ -21,3 +21,4 @@ Disallow: /api/
 
 # Site summary for AI: https://cvs.guidejung.com/llms.txt
 Sitemap: https://cvs.guidejung.com/sitemap.xml
+#DaumWebMasterTool:3f184aea8ccf86f72797061a9d677f09af62fddf525821baa34854e9da8abe5f:8eDCqJCqTZrYCvf1G9zNRA==
