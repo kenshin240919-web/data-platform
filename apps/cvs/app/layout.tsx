@@ -12,7 +12,7 @@ import { SITES } from '@guidejung/ui/network';
 import { ADS, SITE } from '../lib/fmt';
 
 // GA·Clarity ID는 사용자에게 받아 넣음(새 사이트 규칙). 비어 있으면 스크립트를 넣지 않음.
-const GA_ID:string='',CLARITY_ID:string='';
+const GA_ID='G-FC3F88WGY4',CLARITY_ID='zac9wzdb3n';
 // 직접 만든 어두운 화면을 쓰도록 알림(휴대폰 브라우저가 색을 강제로 뒤집어 글자가 노랗게 보이던 것 방지).
 export const viewport:Viewport={colorScheme:'light dark'};
 export const metadata:Metadata={metadataBase:new URL(SITE),icons:{icon:'/icon.svg',apple:'/apple-touch-icon.png'},manifest:'/manifest.webmanifest',title:{default:'내근처 편의점 | 밤에도 상비약 어디서? 내 주변 상비약 파는 편의점',template:'%s | 내근처 편의점'},
