@@ -51,7 +51,7 @@ export function AlertSetup({areas}:{areas:Area[]}){
     navigator.serviceWorker.addEventListener('message',onMsg);
     return ()=>navigator.serviceWorker.removeEventListener('message',onMsg);
   },[]);
-  useEffect(()=>{if(!w&&pos){const p=here(pos);setW(nearestArea(areas,p.lat,p.lon).w);}},[pos,w,areas]);
+  useEffect(()=>{if(!w&&pos){const p=here(pos);setW(nearestArea(areas,p.lat,p.lon,pos.pick).w);}},[pos,w,areas]);
   const area=areas.find(a=>a.w===w);
   const post=(path:string,body:unknown)=>fetch(`/api/push/${path}`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)}).then(r=>r.json() as Promise<{ok?:boolean;error?:string;result?:string}>);
   async function on(){

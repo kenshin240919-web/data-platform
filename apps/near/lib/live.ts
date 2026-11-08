@@ -12,7 +12,10 @@ async function get<T>(url:string,ms=8000):Promise<T|null>{
 }
 const ll=(lat:number,lon:number)=>`lat=${lat.toFixed(4)}&lon=${lon.toFixed(4)}`;
 const dist=(a:{lat:number;lon:number},lat:number,lon:number)=>{const x=(a.lon-lon)*Math.cos(lat*Math.PI/180);return Math.hypot(a.lat-lat,x)*111;};
-export const nearestArea=(areas:Area[],lat:number,lon:number)=>areas.reduce((a,b)=>dist(b,lat,lon)<dist(a,lat,lon)?b:a);
+/** 중심점이 가장 가까운 시군구. hint(직접 고른 곳의 주소)에 시군구 이름이 있으면 그 시군구를 먼저(시도 이름은 '강원특별자치도'처럼 달라 비교하지 않고, 같은 이름 중구·동구는 가까운 쪽) — 중심점만 보면 김포시 고촌읍이 서울 강서구로 잡힘(11/8). */
+export const nearestArea=(areas:Area[],lat:number,lon:number,hint?:string)=>{
+  const w=new Set((hint??'').split(/[\s·]+/)),hit=hint?areas.filter(a=>{const p=a.n.split(' ').slice(1);return p.length>0&&p.every(x=>w.has(x));}):[];
+  return (hit.length?hit:areas).reduce((a,b)=>dist(b,lat,lon)<dist(a,lat,lon)?b:a);};
 
 type Near<T>={total:number;items:(T&{km:number})[]};
 const GRADE=['','좋음','보통','나쁨','매우 나쁨'];

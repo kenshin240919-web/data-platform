@@ -55,7 +55,7 @@ function run(s){if(s.classList.contains('gj-blog'))blog(s);else around(s)}
 function scan(){document.querySelectorAll('.gj-blog:not([data-w]),.gj-around:not([data-w])').forEach(function(s){s.setAttribute('data-w','1');io?io.observe(s):run(s)});mapBtn()}
 /* SDK 불러오기 */
 var sdk=null;function kakao(){return sdk||(sdk=new Promise(function(ok,no){var s=document.createElement('script');s.src='https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js';s.onload=function(){try{window.Kakao.isInitialized()||window.Kakao.init(KEY);ok(window.Kakao)}catch(x){no(x)}};s.onerror=no;document.head.appendChild(s)}))}
-var mapsdk=null;function maps(){return mapsdk||(mapsdk=new Promise(function(ok,no){var s=document.createElement('script');s.src='https://dapi.kakao.com/v2/maps/sdk.js?autoload=false&appkey='+KEY;s.onload=function(){window.kakao.maps.load(function(){ok(window.kakao.maps)})};s.onerror=no;document.head.appendChild(s)}))}
+var mapsdk=null;function maps(){return mapsdk||(mapsdk=new Promise(function(ok,no){if(window.kakao&&window.kakao.maps){window.kakao.maps.load(function(){ok(window.kakao.maps)});return}var s=document.createElement('script');s.src='https://dapi.kakao.com/v2/maps/sdk.js?autoload=false&libraries=services&appkey='+KEY;s.onload=function(){window.kakao.maps.load(function(){ok(window.kakao.maps)})};s.onerror=no;document.head.appendChild(s)}))}
 /* ③ 길안내 앱 고르기 */
 function parse(h){var m=h.match(/^https:\\/\\/map\\.kakao\\.com\\/link\\/to\\/(.+),(-?[\\d.]+),(-?[\\d.]+)$/);if(!m)return null;var n=m[1];try{n=decodeURIComponent(n)}catch(x){}return{name:n,lat:+m[2],lon:+m[3],href:h}}
 function app(u,fb){var t=Date.now(),gone=false,h=function(){if(document.hidden)gone=true};document.addEventListener('visibilitychange',h);location.href=u;

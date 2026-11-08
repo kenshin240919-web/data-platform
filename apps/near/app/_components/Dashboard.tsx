@@ -27,7 +27,7 @@ async function widen<T extends {total:number}>(radii:number[],f:(km:number)=>Pro
 
 export function Dashboard({areas}:{areas:Area[]}){
   const {pos,status,request}=useMyPosition();const [res,setRes]=useState<Res>({});
-  const a=pos?L.nearestArea(areas,here(pos).lat,here(pos).lon):null;precise=!!pos?.precise;
+  const a=pos?L.nearestArea(areas,here(pos).lat,here(pos).lon,pos.pick):null;precise=!!pos?.precise;
   useEffect(()=>{if(!pos||!a)return;let on=true;const {lat,lon}=pos;setRes({});
     const put=(k:string,v:Card|null)=>{if(on)setRes(r=>({...r,[k]:v}));};
     L.weather(a).then(w=>{if(!w)return put('weather',null);const rain=(w.pop??0)>=60,bad=w.air==='나쁨'||w.air==='매우 나쁨';

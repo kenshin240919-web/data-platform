@@ -70,7 +70,7 @@ async function blocks(kind:string,a:Area,lat:number,lon:number,put:(b:Block)=>vo
 
 export function SituationLive({kind,areas,day}:{kind:string;areas:Area[];day?:string}){
   const {pos,status,request}=useMyPosition();const [list,setList]=useState<Record<string,Block>>({});
-  const a=pos?L.nearestArea(areas,here(pos).lat,here(pos).lon):null;
+  const a=pos?L.nearestArea(areas,here(pos).lat,here(pos).lon,pos.pick):null;
   useEffect(()=>{if(!pos||!a)return;let on=true;setList({});blocks(kind,a,pos.lat,pos.lon,b=>{if(on)setList(l=>({...l,[b.key]:b}));},day);return ()=>{on=false;};
   // eslint-disable-next-line react-hooks/exhaustive-deps
   },[pos?.lat,pos?.lon,kind]);

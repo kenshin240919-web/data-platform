@@ -8,21 +8,23 @@
 // API 주소·링크·쿠키·GA에 들어가는 것은 칸 중심뿐이고, 정확한 위치(pos.exact)는 거리 계산·정렬에만 브라우저 안에서 쓴다(fixKm·here).
 import {useCallback,useEffect,useState} from 'react';
 import {externalUrl,inapp,isAndroid,isIos,isSamsung,twa} from './inapp';
+import {KAKAO_APPS} from './live';
 
 /** precise: 실제 내 위치(GPS·Wi-Fi)를 안다. exact·acc(오차 m)·at(잡은 시각)은 브라우저 안에서만 쓴다.
- * src: gps(이 사이트에서 잡음) · shared(다른 내근처 사이트에서 잡은 것, 이 휴대폰 안 공용 저장소) · cell(공용 쿠키의 칸 중심) · ip(접속 위치). */
-export type Pos={lat:number;lon:number;precise:boolean;exact?:{lat:number;lon:number};acc?:number;at?:number;src?:'gps'|'shared'|'cell'|'ip'};
+ * src: gps(이 사이트에서 잡음) · shared(다른 내근처 사이트에서 잡은 것, 이 휴대폰 안 공용 저장소) · cell(공용 쿠키의 칸 중심) · ip(접속 위치)
+ *  · pick(사용자가 '동네 직접 고르기'로 고른 곳, pick=이름 — 컴퓨터는 GPS가 없어 브라우저 위치가 몇 km 틀릴 때가 있음, 11/8 사용자). */
+export type Pos={lat:number;lon:number;precise:boolean;exact?:{lat:number;lon:number};acc?:number;at?:number;src?:'gps'|'shared'|'cell'|'ip'|'pick';pick?:string};
 type Status='idle'|'locating'|'ok'|'denied'|'failed'|'unsupported';
-const KEY='gj.pos',MAX_AGE=30*60e3,FRESH=5*60e3;
-type Fix={lat:number;lon:number;acc?:number;at:number};
+const KEY='gj.pos',MAX_AGE=30*60e3,FRESH=5*60e3,PICK_AGE=30*864e5;  // 직접 고른 곳은 30일
+type Fix={lat:number;lon:number;acc?:number;at:number;pick?:string};
 
 /** 약 2km 칸(위도 0.02°≈2.2km, 경도 0.025°≈2.2km)의 중심. 서버로 보내는 위치는 이것뿐. */
 const DLAT=0.02,DLON=0.025;
 export function cell(lat:number,lon:number){return {lat:+((Math.floor(lat/DLAT)+0.5)*DLAT).toFixed(4),lon:+((Math.floor(lon/DLON)+0.5)*DLON).toFixed(4)};}
-const withCell=(p:Fix,src:'gps'|'shared'):Pos=>({...cell(p.lat,p.lon),precise:true,exact:{lat:p.lat,lon:p.lon},acc:p.acc,at:p.at,src});
+const withCell=(p:Fix,src:'gps'|'shared'):Pos=>({...cell(p.lat,p.lon),precise:true,exact:{lat:p.lat,lon:p.lon},acc:p.acc,at:p.at,src:p.pick?'pick':src,pick:p.pick});
 /** 거리 계산용 위치: 브라우저 안에만 있는 정확한 위치(없으면 칸 중심). */
 export const here=(p:Pos)=>p.exact??{lat:p.lat,lon:p.lon};
-const okFix=(v:unknown,maxAge=MAX_AGE):Fix|null=>{const x=v as Fix|null;return x&&typeof x.lat==='number'&&typeof x.lon==='number'&&x.lat>33&&x.lat<39&&x.lon>124&&x.lon<132&&typeof x.at==='number'&&Date.now()-x.at<maxAge?x:null;};
+const okFix=(v:unknown,maxAge=MAX_AGE):Fix|null=>{const x=v as Fix|null;return x&&typeof x.lat==='number'&&typeof x.lon==='number'&&x.lat>33&&x.lat<39&&x.lon>124&&x.lon<132&&typeof x.at==='number'&&(x.pick==null||typeof x.pick==='string')&&Date.now()-x.at<(x.pick?PICK_AGE:maxAge)?x:null;};
 
 // 내근처 사이트끼리(*.guidejung.com) 옮겨 다닐 때 다시 묻지 않도록:
 //  ① 정확한 위치는 이 휴대폰 안 공용 저장소(near.guidejung.com/pos 를 숨은 iframe으로 열어 그쪽 localStorage)에 30분 — 서버로는 가지 않는다.
@@ -111,15 +113,18 @@ function start(){
   const mine=saved();
   if(mine){set({pos:withCell(mine,'gps'),status:'ok'});}
   // 이미 허용한 사이트면 묻지 않고 다시 잡는다(5분 넘은 위치만). 아니면 다른 내근처 사이트에서 잡은 위치 → 칸 쿠키 → 접속 위치 순.
+  // 직접 고른 곳이 있으면 GPS로 덮지 않는다(다시 바꾸려면 '내 위치 찾기'를 직접 누름).
   granted().then(g=>{
-    if(g){if(!mine||Date.now()-mine.at>FRESH)locate(true);return;}
+    if(mine?.pick)return;
     // 앱(TWA)은 '내 근처'를 보려고 설치한 사람이라 처음 열 때 한 번만 바로 묻는다(11/2 사용자 승인) — 웹사이트는 그대로 누를 때만.
     // 안드로이드는 두 번 거절하면 권한 창을 더 띄우지 않으므로 자동으로는 한 번뿐, 그 뒤는 위치 카드·안내 상자로.
-    if(twa()){let asked=true;try{asked=localStorage.getItem('gj.twa.asked')==='1';if(!asked)localStorage.setItem('gj.twa.asked','1');}catch{}
+    if(!g&&twa()){let asked=true;try{asked=localStorage.getItem('gj.twa.asked')==='1';if(!asked)localStorage.setItem('gj.twa.asked','1');}catch{}
       if(!asked)setTimeout(()=>locate(false),1000);}
-    if(mine)return;
     sharedGet().then(v=>{
-      if(state.pos?.exact)return;
+      // 다른 내근처 사이트에서 이 사이트 위치보다 나중에 '직접 고른' 곳이 있으면 그것을 따른다(GPS로 다시 잡지 않음).
+      if(v?.pick&&(!mine||v.at>mine.at)){set({pos:withCell(v,'shared'),status:'ok'});try{localStorage.setItem(KEY,JSON.stringify(v));}catch{}return;}
+      if(g){if(!mine&&v&&!state.pos?.exact)set({pos:withCell(v,'shared'),status:'ok'});if(!mine||Date.now()-mine.at>FRESH)locate(true);return;}
+      if(mine||state.pos?.exact)return;
       if(v){set({pos:withCell(v,'shared'),status:'ok'});return;}
       const c=shared()?fromCookie():null;
       if(c&&!state.pos){set({pos:{...c,precise:false,src:'cell'}});return;}
@@ -128,7 +133,7 @@ function start(){
   });
   // 화면으로 돌아왔을 때(다른 앱·탭에서) 위치가 5분 넘게 묵었으면 허용된 경우에만 조용히 다시.
   document.addEventListener('visibilitychange',()=>{const p=state.pos;
-    if(document.visibilityState==='visible'&&p?.exact&&Date.now()-(p.at??0)>FRESH)granted().then(g=>{if(g)locate(true);});});
+    if(document.visibilityState==='visible'&&p?.exact&&!p.pick&&Date.now()-(p.at??0)>FRESH)granted().then(g=>{if(g)locate(true);});});
 }
 
 /** 지금 페이지의 위치(공유 상태) — 훅 밖의 fetch 도우미가 fixKm에 쓰도록. */
@@ -152,15 +157,60 @@ export function useMyPosition(){
   return {pos:state.pos,status:state.status,refining:!!state.refining,request};
 }
 
+/** '동네 직접 고르기': 고른 곳을 내 위치로(30일, 이 브라우저·내근처 공용 저장소에만) 저장하고 페이지를 다시 불러 모든 목록을 새로 받는다. */
+export function pickPlace(lat:number,lon:number,name:string){
+  cancel?.();const v:Fix={lat,lon,at:Date.now(),pick:name.slice(0,60)};save(v);set({pos:withCell(v,'gps'),status:'ok',refining:false});
+  try{(window as {gtag?:(...a:unknown[])=>void}).gtag?.('event','locate_pick',{});}catch{}
+  setTimeout(()=>location.reload(),400);  // 공용 저장소(iframe)에 쓸 시간
+}
+// 검색은 이 브라우저에서 카카오 지도 검색(JavaScript SDK services)으로 바로 — 우리 서버를 거치지 않고, 결과는 고른 한 곳의 좌표만 남긴다.
+const kakaoKey=()=>{if(typeof location==='undefined')return '';const h=location.hostname.split('.')[0];return KAKAO_APPS.find(a=>a.hosts.includes(h))?.key??'';};
+type KS={Geocoder:new()=>{addressSearch:(q:string,cb:(r:{address_name:string;x:string;y:string}[],st:string)=>void)=>void};Places:new()=>{keywordSearch:(q:string,cb:(r:{place_name:string;address_name:string;road_address_name:string;x:string;y:string}[],st:string)=>void,o?:{size:number})=>void};Status:{OK:string}};
+type KW={kakao?:{maps?:{load:(f:()=>void)=>void;services?:KS}}};
+let svc:Promise<KS>|null=null;
+function services(){return svc??=new Promise<KS>((ok,no)=>{
+  const w=window as KW,done=()=>{const s=w.kakao?.maps?.services;if(s)ok(s);else{svc=null;no();}};
+  if(w.kakao?.maps){w.kakao.maps.load(done);return;}
+  const key=kakaoKey();if(!key){svc=null;no();return;}
+  const s=document.createElement('script');s.src=`https://dapi.kakao.com/v2/maps/sdk.js?autoload=false&libraries=services&appkey=${key}`;
+  s.onload=()=>w.kakao?.maps?w.kakao.maps.load(done):no();s.onerror=()=>{svc=null;no();};document.head.appendChild(s);});}
+type Hit={name:string;addr:string;lat:number;lon:number};
+function searchPlaces(q:string){
+  return services().then(S=>Promise.all([
+    new Promise<Hit[]>(ok=>new S.Geocoder().addressSearch(q,(r,st)=>ok(st===S.Status.OK?r.slice(0,3).map(x=>({name:x.address_name,addr:'주소',lat:+x.y,lon:+x.x})):[]))),
+    new Promise<Hit[]>(ok=>new S.Places().keywordSearch(q,(r,st)=>ok(st===S.Status.OK?r.map(x=>({name:x.place_name,addr:x.road_address_name||x.address_name,lat:+x.y,lon:+x.x})):[]),{size:5})),
+  ])).then(([a,b])=>{const seen=new Set<string>();return [...a,...b].filter(h=>h.lat>33&&h.lat<39&&h.lon>124&&h.lon<132&&!seen.has(h.name)&&!!seen.add(h.name)).slice(0,6);});
+}
+function PickBox({onClose}:{onClose:()=>void}){
+  const [q,setQ]=useState(''),[hits,setHits]=useState<Hit[]|null>(null),[busy,setBusy]=useState(false),[err,setErr]=useState('');
+  const go=(e:{preventDefault:()=>void})=>{e.preventDefault();const t=q.trim();if(!t)return;setBusy(true);setErr('');
+    searchPlaces(t).then(h=>{setHits(h);if(!h.length)setErr('찾지 못했어요. 동·읍·면 이름이나 도로명 주소로 다시 찾아 보세요.');},()=>setErr('지금은 검색할 수 없어요. 잠시 뒤 다시 해 주세요.')).finally(()=>setBusy(false));};
+  return <form className="gj-pick" onSubmit={go}>
+    <b>🏘️ 동네 직접 고르기</b>
+    <div className="gj-pick-row"><input value={q} onChange={e=>setQ(e.target.value)} placeholder="예: 고촌읍 신곡리, 목동역, 시청" aria-label="동네·주소·장소 이름" enterKeyHint="search" autoFocus/>
+      <button type="submit" disabled={busy}>{busy?'찾는 중…':'찾기'}</button><button type="button" className="gj-pick-x" onClick={onClose} aria-label="닫기">✕</button></div>
+    {err&&<p className="gj-pick-err">{err}</p>}
+    {!!hits?.length&&<ul>{hits.map(h=><li key={h.name+h.lat}><button type="button" onClick={()=>pickPlace(h.lat,h.lon,h.addr==='주소'?h.name:`${h.name} · ${h.addr}`)}><b>{h.name}</b><small>{h.addr}</small></button></li>)}</ul>}
+    <p className="gj-pick-note">고른 곳은 이 브라우저에만 30일 기억해요. 검색어는 카카오 지도 검색으로 바로 보내고 저장하지 않아요.</p>
+  </form>;
+}
+/** 카카오 키가 있는 사이트에서만(키는 사이트 주소마다 등록). 서버 렌더와 어긋나지 않게 화면에 붙은 뒤에 판단. */
+function useCanPick(){const [c,setC]=useState(false);useEffect(()=>setC(!!kakaoKey()),[]);return c;}
+
 const ago=(at?:number)=>{if(!at)return '';const m=Math.round((Date.now()-at)/60e3);return m<1?'방금':`${m}분 전`;};
 const accText=(m?:number)=>m==null?'':m<1000?`오차 약 ${m<20?Math.max(5,Math.round(m/5)*5):Math.round(m/10)*10}m`:`오차 약 ${(m/1000).toFixed(1)}km`;
 /** 정확한 위치를 쓸 때 맨 위 한 줄: '📍 내 위치 기준 · 오차 약 30m · 방금 [다시 찾기]'. 오차가 크거나(500m↑) 오래됐으면(5분↑) 다시 찾기를 강조. */
 export function PosNote(){
   const {pos,status,refining,request}=useMyPosition();
+  const [open,setOpen]=useState(false),can=useCanPick();
   if(!pos?.precise)return null;
+  const box=open&&<PickBox onClose={()=>setOpen(false)}/>;
+  if(pos.src==='pick')return <><p className="gj-posnote">📍 직접 고른 위치 · <b>{pos.pick}</b> 기준
+    {can&&<button type="button" onClick={()=>setOpen(o=>!o)}>바꾸기</button>}<button type="button" onClick={request} disabled={status==='locating'}>{status==='locating'?'찾는 중…':'내 위치 찾기'}</button></p>{box}</>;
   const weak=(pos.acc??0)>500||Date.now()-(pos.at??Date.now())>FRESH;
-  return <p className={`gj-posnote${weak?' weak':''}`}>📍 내 위치 기준{pos.acc!=null&&<> · {accText(pos.acc)}</>}{pos.at&&<> · {ago(pos.at)}{pos.src==='shared'&&' 다른 내근처 사이트에서 확인'}</>}{refining&&<small> · 더 정확하게 다듬는 중</small>}
-    <button type="button" onClick={request} disabled={status==='locating'}>{status==='locating'?'찾는 중…':weak?'정확하게 다시 찾기':'다시 찾기'}</button></p>;
+  return <><p className={`gj-posnote${weak?' weak':''}`}>📍 내 위치 기준{pos.acc!=null&&<> · {accText(pos.acc)}</>}{pos.at&&<> · {ago(pos.at)}{pos.src==='shared'&&' 다른 내근처 사이트에서 확인'}</>}{refining&&<small> · 더 정확하게 다듬는 중</small>}
+    <button type="button" onClick={request} disabled={status==='locating'}>{status==='locating'?'찾는 중…':weak?'정확하게 다시 찾기':'다시 찾기'}</button>
+    {can&&<button type="button" className="gj-posnote-pick" onClick={()=>setOpen(o=>!o)}>위치가 틀려요? 직접 고르기</button>}</p>{box}</>;
 }
 
 /** 위치를 못 쓸 때 큰 안내 상자: 앱 안 브라우저면 바깥 브라우저로 여는 버튼, 아니면 이 브라우저에서 위치를 켜는 순서. */
@@ -187,7 +237,7 @@ function LocateHelp({status,onRetry}:{status:'denied'|'failed';onRetry:()=>void}
 
 /** 이유를 먼저 보여 주고, 누르면 그때 브라우저 위치 권한을 묻는 카드. 못 쓰면(거부·실패) 큰 안내 상자. */
 export function LocateCard({title,desc,status,onClick,approxLabel}:{title:string;desc:string;status:Status;onClick:()=>void;approxLabel?:string}){
-  const cellOnly=state.pos?.src==='cell';
+  const cellOnly=state.pos?.src==='cell';const [open,setOpen]=useState(false),can=useCanPick();
   return <><div className="gj-locate">
     <button type="button" onClick={onClick} disabled={status==='locating'}>
       <span className="gj-locate-icon" aria-hidden="true">📍</span>
@@ -196,6 +246,8 @@ export function LocateCard({title,desc,status,onClick,approxLabel}:{title:string
     </button>
     {status!=='denied'&&status!=='failed'&&<p className="gj-locate-note">{status==='unsupported'?'이 브라우저는 위치 확인을 지원하지 않아요. 지역을 직접 골라 주세요.':
       `${cellOnly?'지금은 대략적인 내 위치(약 2km 범위) 기준이에요. ':approxLabel?`지금은 접속 위치(${approxLabel} 부근) 기준으로 보여 드려요. `:''}한 번 허용하면 30분 동안 다른 내근처 사이트에서도 다시 묻지 않아요. 정확한 위치는 휴대폰 밖으로 보내지 않아요.`}</p>}
+    {can&&!open&&<button type="button" className="gj-locate-pick" onClick={()=>setOpen(true)}>🏘️ 위치를 못 쓰거나 틀리면 동네 직접 고르기</button>}
+    {open&&<PickBox onClose={()=>setOpen(false)}/>}
   </div>{(status==='denied'||status==='failed')&&<LocateHelp status={status} onRetry={onClick}/>}</>;
 }
 
