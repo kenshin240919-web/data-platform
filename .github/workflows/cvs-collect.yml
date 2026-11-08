@@ -1,0 +1,38 @@
+name: Cvs collect
+# Daily list for cvs.guidejung.com (내근처 편의점): LOCALDATA 안전상비의약품 판매업소 파일 (scripts/collect-cvs.py), with the
+# nearest pharmacy / 응급실 from the pharmacy (04:27) and hospital (04:57) files committed earlier the same morning.
+# apps/cvs/data/stores.json is committed to main only when it changed (cvs-deploy.yml deploys after this run).
+# Secrets: KAKAO_REST_KEY (좌표 없는 곳만).
+on:
+  schedule:
+    - cron: '12 21 * * *' # 06:12 KST
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: cvs-collect
+  cancel-in-progress: false
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Collect
+        env:
+          KAKAO_REST_KEY: ${{ secrets.KAKAO_REST_KEY }}
+        run: python scripts/collect-cvs.py
+      - name: Commit cvs list
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add apps/cvs/data/stores.json
+          if git diff --cached --quiet; then echo 'no change'; exit 0; fi
+          git commit -m 'cvs: 상비약 편의점 목록 갱신'
+          for i in 1 2 3; do git pull --rebase origin main && git push origin HEAD:main && exit 0; sleep 10; done
+          exit 1

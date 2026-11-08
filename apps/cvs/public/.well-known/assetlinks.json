@@ -1,0 +1,17 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.guidejung.near",
+      "sha256_cert_fingerprints": [
+        "05:28:37:D7:30:FB:A1:04:63:A6:2E:DE:FF:1B:3D:CC:31:C3:3C:9F:98:BD:00:6D:7B:C4:15:EE:EF:76:6D:34",
+        "52:79:03:1D:81:17:FC:B2:62:43:17:B4:1B:49:70:0C:22:E1:C3:97:9C:C2:86:19:B6:DA:88:B2:D0:BC:E4:64",
+        "FC:8A:0B:23:AF:2F:7A:90:9C:E9:3C:37:22:5A:FC:56:F8:DE:09:9E:4B:1D:BF:35:62:CA:0A:17:E0:CE:F2:FD",
+        "70:BD:9F:44:2D:00:45:24:12:78:56:C9:84:31:2D:C9:38:2F:5A:11:26:E2:D3:B7:37:3E:D5:2A:D2:17:0D:25"
+      ]
+    }
+  }
+]

@@ -1,0 +1,29 @@
+name: Cvs deploy
+# Deploys cvs.guidejung.com (Worker guidejung-cvs) with wrangler from GitHub Actions (not connected to Cloudflare Workers
+# Builds). Secrets: CLOUDFLARE_API_TOKEN (github-d1: Workers Scripts edit …), CLOUDFLARE_ACCOUNT_ID.
+# 지금은 수동 실행만(첫 배포·도메인 연결은 사용자 승인 뒤). 승인 뒤 push(apps/cvs 등)·매일 수집 후(workflow_run)를 켬.
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: cvs-deploy
+  cancel-in-progress: true
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Build and deploy
+        run: npx wrangler deploy -c apps/cvs/wrangler.jsonc

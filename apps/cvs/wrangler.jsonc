@@ -1,0 +1,19 @@
+// Cloudflare Worker for cvs.guidejung.com (내근처 편의점), separate from the other sites.
+// Run from the repo root: npx wrangler deploy -c apps/cvs/wrangler.jsonc (builds with npm run build:cvs).
+// Static pages: ./out. Worker: /api/*, 상세 /store/{id}, sitemap index. The list ships with the Worker (data/stores.json).
+{
+  "name": "guidejung-cvs",
+  "main": "worker/index.ts",
+  "compatibility_date": "2025-09-01",
+  "build": { "command": "npm run build:cvs" },
+  "assets": {
+    "directory": "./out",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    "run_worker_first": ["/api/*", "/store/*", "/sitemap.xml", "/sitemap-stores-*"]
+  },
+  // The list is imported as text and parsed on first use (a large object literal slows the Worker start).
+  "rules": [{ "type": "Text", "globs": ["**/data/stores.json"], "fallthrough": true }],
+  "observability": { "enabled": true },
+  "routes": [{ "pattern": "cvs.guidejung.com", "custom_domain": true }]
+}
