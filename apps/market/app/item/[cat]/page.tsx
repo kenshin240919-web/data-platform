@@ -3,7 +3,6 @@ import Link from 'next/link';
 import {notFound} from 'next/navigation';
 import {Faq,breadcrumbLd,JsonLd} from '@guidejung/ui/seo';
 import {NearMarket} from '../../_components/NearMarket';
-import {Ad} from '../../_components/Ad';
 import {baseLabel,CAT_ORDER,CATS,markets,n,nation,pct,regions,SITE,sidos,status,stores,type Cat} from '../../../lib/data';
 
 export const dynamicParams=false;
@@ -26,7 +25,6 @@ export default async function ItemPage({params}:P){
     <h1>{CATS[c].icon} 온누리상품권 {CATS[c].label} 사용처</h1>
     <p className="mk-lead">온누리상품권 되는 {CATS[c].label} 가맹점은 전국 {n(total)}곳이에요({baseLabel(status.base)} 기준). 이 중 {n(d)}곳({pct(d,total)}%)은 디지털(모바일·카드)도 받아요.{items.length?` 가게가 직접 적은 품목은 ${items.slice(0,6).map(([k,v])=>`${k} ${n(v)}곳`).join(', ')} 순으로 많아요.`:''}</p>
     <NearMarket cat={c}/>
-    <Ad/>
     <section><h2>{CATS[c].label} 가맹점이 많은 시군구</h2><ol className="mk-rank">{topR.map(r=><li key={r.id}><Link href={`/region/${r.id}${r.cats[c]>=10?`/${c}`:''}`}><b>{r.name}</b><span>{n(r.cats[c])}곳</span></Link></li>)}</ol></section>
     <section><h2>{CATS[c].label} 가맹점이 많은 시장·상점가</h2><ol className="mk-rank">{topM.map(m=><li key={m.id}><Link href={`/market/${m.id}`}><b>{m.name}</b><span>{n(m.cats[c]!)}곳</span></Link></li>)}</ol></section>
     <section><h2>시도별</h2><div className="mk-regions">{sidos.filter(s=>s.cats[c]).map(s=><Link key={s.slug} href={`/sido/${s.slug}`}>{s.full}<span>{n(s.cats[c])}곳</span></Link>)}</div></section>

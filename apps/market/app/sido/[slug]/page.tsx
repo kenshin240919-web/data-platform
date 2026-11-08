@@ -25,8 +25,8 @@ export default async function SidoPage({params}:P){
     <p className="mk-lead">{eun(s.full)} 온누리상품권을 쓸 수 있는 가맹점이 {n(s.n)}곳 등록돼 있어요({baseLabel(status.base)} 기준). {n(s.markets.length)}개 전통시장·상점가에 시장당 평균 {n(avg)}곳이 있고, 가맹점이 가장 많은 곳은 {s.markets.slice(0,3).map(m=>`${m.name}(${n(m.n)}곳)`).join(', ')}이에요. {n(s.d)}곳({pct(s.d,s.n)}%)은 디지털(모바일·카드) 온누리상품권도 받아요.{top.length?` 품목은 ${top.map(c=>`${CATS[c].label} ${n(s.cats[c])}곳`).join(', ')} 순이에요.`:''}</p>
     {s.regions.length>0&&<section><h2>시군구별</h2><div className="mk-regions">{[...s.regions].sort((a,b)=>b.n-a.n).map(r=><Link key={r.id} href={`/region/${r.id}`}>{r.zone}<span>{n(r.n)}곳</span></Link>)}</div></section>}
     <section><h2>품목별 가맹점</h2><div className="mk-bars">{CAT_ORDER.filter(c=>s.cats[c]>0).sort((a,b)=>s.cats[b]-s.cats[a]).map(c=><Link key={c} href={`/item/${c}`}><b>{CATS[c].icon} {CATS[c].label}</b><i style={{width:`${Math.max(2,s.cats[c]/max*100)}%`}}/><span>{n(s.cats[c])}곳</span></Link>)}</div></section>
-    <Ad/>
-    <section><h2>시장·상점가별 가맹점 <span className="muted">{n(s.markets.length)}곳</span></h2><div className="mk-cards">{s.markets.slice(0,60).map(m=><MarketCard key={m.id} m={m}/>)}</div>
+    <section><h2>시장·상점가별 가맹점 <span className="muted">{n(s.markets.length)}곳</span></h2><div className="mk-cards">{s.markets.slice(0,2).map(m=><MarketCard key={m.id} m={m}/>)}</div><Ad/>
+      <div className="mk-cards">{s.markets.slice(2,60).map(m=><MarketCard key={m.id} m={m}/>)}</div>
       {s.markets.length>60&&<details><summary className="mk-more-link">나머지 {n(s.markets.length-60)}곳 보기</summary><div className="mk-cards">{s.markets.slice(60).map(m=><MarketCard key={m.id} m={m}/>)}</div></details>}</section>
     <Faq title={`${s.full} 온누리상품권 자주 묻는 질문`} items={[
       [`${s.full} 온누리상품권 사용처는 몇 곳인가요?`,`${baseLabel(status.base)} 기준 ${n(s.n)}곳이에요(전통시장·상점가 ${n(s.markets.length)}곳).`],

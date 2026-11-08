@@ -3,6 +3,7 @@
 // 위치는 가게가 아니라 소속 시장·상점가 단위(원본에 가게 주소가 없음). 품목 칩을 누르면 그 품목 가게만.
 // /api/near: 반경 안 시장(가까운 순)과 가맹점 수·품목별 수, cat이 있으면 그 품목 가게 목록.
 import {useEffect,useState} from 'react';
+import {AdSlot} from '@guidejung/ui/ads';
 import {LocateCard,PosNote,useMyPosition,fixKmNow,padKm,padLimit} from '@guidejung/ui/geo';
 import {CAT_ORDER,CATS,km,marketPath,n,storePath,type Cat,type SlimMarket,type SlimStore} from '../../lib/fmt';
 type Res={km:number;total:number;markets:SlimMarket[];cats:Partial<Record<Cat,number>>;stores:SlimStore[]};
@@ -20,6 +21,14 @@ export function NearMarket({cat:c0}:{cat?:Cat}){
     load(0).catch(()=>{if(live)setRes({km:0,total:0,markets:[],cats:{},stores:[]});});
     return ()=>{live=false;};},[pos?.lat,pos?.lon,pos?.precise,cat]); // eslint-disable-line react-hooks/exhaustive-deps
   const first=res?.markets[0];
+  // 광고 한 칸은 첫 결과 바로 아래(11/8): 품목을 골랐으면 가게 6곳 뒤, 아니면 시장 2곳 뒤.
+  const store=(s:SlimStore)=><li key={s.id}><a href={storePath(s.id)} data-gj-pt={s.lat!=null?`${s.lat},${s.lon}`:undefined} data-gj-name={s.market}><b>{s.name}</b>
+          <small>{s.km!=null&&<span className="mk-km">{km(s.km)}</span>}{s.item??CATS[s.cat].label} · {s.market}</small></a></li>;
+  const card=(m:SlimMarket)=><a key={m.id} className="mk-card" href={marketPath(m.id)} data-gj-pt={m.lat!=null?`${m.lat},${m.lon}`:undefined} data-gj-name={m.name}>
+          <span className="mk-icon" aria-hidden="true">🏪</span>
+          <span className="mk-card-body"><b>{m.name}</b><small>{m.km!=null&&<span className="mk-km">{km(m.km)}</span>}{m.top.map(c=>CATS[c].label).join('·')}</small></span>
+          <span className="mk-card-n"><b>{n(cat?m.hit??0:m.n)}</b><small>{cat?CATS[cat].label:'가맹점'}</small></span></a>;
+  const storeAd=!!(cat&&res&&res.stores.length>0),sCut=Math.min(6,more*3);
   return <section className="mk-near">
     <PosNote/>{!pos?.precise&&<LocateCard title="내 주변 온누리상품권 사용처 보기" desc="가까운 전통시장·상점가 가맹점을 보여 드려요" status={status} onClick={request} approxLabel={pos?'접속 지역':undefined}/>}
     {pos&&!res&&<p className="mk-answer muted">내 주변 찾는 중…</p>}
@@ -32,14 +41,13 @@ export function NearMarket({cat:c0}:{cat?:Cat}){
         {CAT_ORDER.filter(c=>c!=='etc').map(c=><button type="button" key={c} className={cat===c?'mk-chip on':'mk-chip'} aria-pressed={cat===c} onClick={()=>setCat(c)}>{CATS[c].icon} {CATS[c].label}{!cat&&res.cats[c]?<> <small>{n(res.cats[c]!)}</small></>:null}</button>)}
       </div>
       {cat&&res.stores.length>0&&<><h2 className="mk-list-title">{CATS[cat].icon} 가까운 {CATS[cat].label} 가맹점</h2>
-        <ul className="mk-stores">{res.stores.slice(0,more*3).map(s=><li key={s.id}><a href={storePath(s.id)} data-gj-pt={s.lat!=null?`${s.lat},${s.lon}`:undefined} data-gj-name={s.market}><b>{s.name}</b>
-          <small>{s.km!=null&&<span className="mk-km">{km(s.km)}</span>}{s.item??CATS[s.cat].label} · {s.market}</small></a></li>)}</ul>
+        <ul className="mk-stores">{res.stores.slice(0,sCut).map(store)}</ul><AdSlot/>
+        {res.stores.length>sCut&&<ul className="mk-stores">{res.stores.slice(sCut,more*3).map(store)}</ul>}
         {res.stores.length>more*3&&<button type="button" className="mk-more" onClick={()=>setMore(x=>x+8)}>가게 더 보기</button>}</>}
       {res.markets.length>0&&<><h2 className="mk-list-title">🏪 가까운 시장·상점가</h2>
-        <div className="mk-cards">{res.markets.slice(0,more).map(m=><a key={m.id} className="mk-card" href={marketPath(m.id)} data-gj-pt={m.lat!=null?`${m.lat},${m.lon}`:undefined} data-gj-name={m.name}>
-          <span className="mk-icon" aria-hidden="true">🏪</span>
-          <span className="mk-card-body"><b>{m.name}</b><small>{m.km!=null&&<span className="mk-km">{km(m.km)}</span>}{m.top.map(c=>CATS[c].label).join('·')}</small></span>
-          <span className="mk-card-n"><b>{n(cat?m.hit??0:m.n)}</b><small>{cat?CATS[cat].label:'가맹점'}</small></span></a>)}</div>
+        {storeAd?<div className="mk-cards">{res.markets.slice(0,more).map(card)}</div>:<>
+          <div className="mk-cards">{res.markets.slice(0,2).map(card)}</div><AdSlot/>
+          {res.markets.length>2&&<div className="mk-cards">{res.markets.slice(2,more).map(card)}</div>}</>}
         {res.markets.length>more&&!cat&&<button type="button" className="mk-more" onClick={()=>setMore(x=>x+8)}>시장 더 보기 ({n(res.markets.length-more)}곳 남음)</button>}</>}
     </>}
   </section>;

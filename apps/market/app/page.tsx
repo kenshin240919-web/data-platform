@@ -4,7 +4,6 @@ import {Faq,breadcrumbLd,JsonLd} from '@guidejung/ui/seo';
 import {Connect,genericFor} from '@guidejung/ui/network';
 import {NearMarket} from './_components/NearMarket';
 import {MarketCard} from './_components/Cards';
-import {Ad} from './_components/Ad';
 import {JangToday} from './_components/Jang';
 import {baseLabel,CAT_ORDER,CATS,markets,n,nation,pct,SITE,sidos,status,updated} from '../lib/data';
 
@@ -24,7 +23,6 @@ export default function Home(){
     <p className="muted small gj-facts">전국 온누리상품권 가맹점 <b>{n(nation.n)}곳</b>(전통시장·상점가 {n(nation.markets)}곳)을 내 주변부터, 품목별로 찾아 드려요. {base} 기준 소상공인시장진흥공단 공식 가맹점 목록이에요.</p>
     <JangToday/>
     <NearMarket/>
-    <Ad/>
     <section><h2>품목으로 찾기</h2><div className="mk-cats">{CAT_ORDER.filter(c=>c!=='etc').map(c=><Link key={c} href={`/item/${c}`}><span aria-hidden="true">{CATS[c].icon}</span><span><b>{CATS[c].label}</b><small>{n(nation.cats[c])}곳</small></span></Link>)}</div></section>
     <section><h2>시도별 온누리상품권 사용처</h2><div className="mk-sidos">{sidos.map(s=><Link key={s.slug} href={`/sido/${s.slug}`}><b>{s.full}</b><em>{n(s.n)}</em><small>시장·상점가 {n(s.markets.length)}곳 · 디지털 {pct(s.d,s.n)}%</small></Link>)}</div></section>
     <section><h2>가맹점이 가장 많은 시장·상점가</h2><div className="mk-cards">{top.map(m=><MarketCard key={m.id} m={m}/>)}</div></section>

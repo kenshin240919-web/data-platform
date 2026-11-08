@@ -5,7 +5,6 @@ import {Faq,breadcrumbLd,JsonLd} from '@guidejung/ui/seo';
 import {Connect,genericFor,linksNear} from '@guidejung/ui/network';
 import {MarketCard} from '../../_components/Cards';
 import {StoreTable,type Row} from '../../_components/StoreTable';
-import {Ad} from '../../_components/Ad';
 import {JangInfo} from '../../_components/JangInfo';
 import {baseLabel,CATS,eun,exact,fairOf,jangDaysText,jangLabel,isMarket,located,mapUrl,market,naverUrl,marketPath,markets,n,nearMarkets,pct,SITE,sidoFull,sidoSlug,status,storesOf,topCats,type Market} from '../../../lib/data';
 
@@ -44,8 +43,7 @@ export default async function MarketPage({params}:P){
       <a className="naver" href={naverUrl(m.name,where(m).split(' ').slice(-1)[0])} target="_blank" rel="noopener">🟢 네이버 지도에서 보기</a></div>
     <p className="mk-lead">{lead}</p>
     {fr&&<JangInfo f={fr} name={m.name}/>}
-    <section><h2>가맹점 목록 <span className="muted">{n(m.n)}곳</span></h2><StoreTable rows={rows} latest={status.latest_year}/></section>
-    <Ad/>
+    <section><h2>가맹점 목록 <span className="muted">{n(m.n)}곳</span></h2><StoreTable rows={rows} latest={status.latest_year} ad={6}/></section>
     <section><h2>시장 정보</h2><dl className="mk-facts">{facts.filter(([,v])=>v).map(([k,v])=><div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}</dl>
       {m.geo==='kakao'&&<p className="muted small">위치는 카카오 지도 검색으로 찾은 곳이에요.</p>}{m.geo==='dong'&&<p className="muted small">정확한 위치를 찾지 못해 {m.jibun} 중심을 기준으로 보여 드려요(대략).</p>}{m.geo==='area'&&<p className="muted small">정확한 위치를 찾지 못해 {m.region_name} 기준으로 보여 드려요.</p>}</section>
     {near.length>0&&<section><h2>가까운 다른 시장·상점가</h2><div className="mk-cards">{near.map(x=><MarketCard key={x.m.id} m={x.m} dist={x.km}/>)}</div></section>}

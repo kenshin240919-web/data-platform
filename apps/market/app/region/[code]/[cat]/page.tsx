@@ -3,7 +3,6 @@ import Link from 'next/link';
 import {notFound} from 'next/navigation';
 import {Faq,breadcrumbLd,JsonLd} from '@guidejung/ui/seo';
 import {StoreTable,type Row} from '../../../_components/StoreTable';
-import {Ad} from '../../../_components/Ad';
 import {baseLabel,CATS,n,pct,region,regionCats,regions,SITE,sidoFull,sidoSlug,status,storesIn,type Cat} from '../../../../lib/data';
 
 export const dynamicParams=false;
@@ -25,8 +24,7 @@ export default async function RegionCat({params}:P){
     <h1>{CATS[c].icon} {r.name} 온누리상품권 {CATS[c].label}</h1>
     <p className="mk-answer">온누리상품권 되는 {CATS[c].label} <b>{n(list.length)}곳</b> · 디지털도 되는 곳 {n(d)}곳({pct(d,list.length)}%)</p>
     <p className="mk-lead">{r.name}의 {CATS[c].label} 온누리 가맹점은 {byM.slice(0,3).map(x=>`${x.m.name} ${n(x.k)}곳`).join(', ')} 순으로 많아요.</p>
-    <StoreTable rows={rows} latest={status.latest_year} cat={c}/>
-    <Ad/>
+    <StoreTable rows={rows} latest={status.latest_year} cat={c} ad={6}/>
     <section><h2>{CATS[c].label} 가맹점이 많은 시장·상점가</h2><ol className="mk-rank">{byM.slice(0,10).map(x=><li key={x.m.id}><Link href={`/market/${x.m.id}`}><b>{x.m.name}</b><span>{n(x.k)}곳</span></Link></li>)}</ol></section>
     <p><Link className="mk-more-link" href={`/region/${r.id}`}>{r.name} 온누리상품권 사용처 전체 →</Link> · <Link className="mk-more-link" href={`/item/${c}`}>전국 {CATS[c].label} →</Link></p>
     <Faq items={[[`${r.name}에서 온누리상품권 되는 ${CATS[c].label}은 몇 곳인가요?`,`${baseLabel(status.base)} 기준 ${n(list.length)}곳이에요. ${byM.slice(0,3).map(x=>`${x.m.name} ${n(x.k)}곳`).join(', ')}.`]]}/>
