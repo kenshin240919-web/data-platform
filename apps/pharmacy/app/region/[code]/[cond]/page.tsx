@@ -1,7 +1,6 @@
 import type {Metadata} from 'next';
 import Link from 'next/link';
 import {notFound} from 'next/navigation';
-import {AdSlot} from '@guidejung/ui/ads';
 import {Faq,breadcrumbLd,JsonLd} from '@guidejung/ui/seo';
 import {StatusList} from '../../../_components/StatusList';
 import {CONDITIONS,DAY_LABEL,hm,n,pharmacyPath,region,regions,SITE,slim,updated,type Cond} from '../../../../lib/data';
@@ -25,9 +24,8 @@ export default async function CondPage({params}:P){
     <h1>{r.name} {c.title}</h1>
     <p className="ph-answer"><b>{r.name}</b>에서 {c.desc} 약국은 <b>{n(items.length)}곳</b>이에요.{latest?.hours[d]&&<> {cond==='night'?'평일':DAY_LABEL[d]} 가장 늦게까지 여는 곳은 <a href={pharmacyPath(latest.id)}><b>{latest.name}</b></a>({hm(latest.hours[d][1])}까지)예요.</>} <span className="muted">({updated()} 기준)</span></p>
     <div className="ph-jump">{(Object.keys(CONDITIONS) as Cond[]).filter(k=>k!==cond&&r.cond[k]).map(k=><Link key={k} href={`/region/${r.id}/${k}`}>{r.zone} {CONDITIONS[k].title} <small>{n(r.cond[k])}</small></Link>)}<Link href={`/region/${r.id}`}>{r.zone} 약국 전체 <small>{n(r.count)}</small></Link></div>
-    <section><h2>{r.name} {c.title} 목록</h2><StatusList items={items.map(slim)}/>
+    <section><h2>{r.name} {c.title} 목록</h2><StatusList items={items.map(slim)} ad={3}/>
       <noscript><ul>{items.map(p=><li key={p.id}><a href={pharmacyPath(p.id)}>{p.name}</a>{p.hours[d]&&<> · {DAY_LABEL[d]} {hm(p.hours[d][0])}~{hm(p.hours[d][1])}</>}</li>)}</ul></noscript></section>
-    <AdSlot/>
     <Faq items={[
       [`${r.name} ${c.title}은 몇 곳인가요?`,`${updated()} 기준 ${r.name}에서 ${c.desc} 약국은 ${n(items.length)}곳입니다.`],
       [`${r.name}에서 ${cond==='night'?'평일':DAY_LABEL[d]} 가장 늦게까지 여는 약국은?`,latest?.hours[d]?`${latest.name}이 ${hm(latest.hours[d][1])}까지 엽니다(${latest.address??''}).`:''],

@@ -26,7 +26,7 @@ export function NearNow(){
       <p className={`hp-answer ${first?'open':'closed'}`}><span className="hp-dot" aria-hidden="true"></span>{first?<>📍 {pos?.precise?'내 주변':'접속 위치 주변'} {radius}km 안 <b>지금 진료 중 {label} {open.length.toLocaleString('ko-KR')}곳</b> · 가장 가까운 곳 <a href={hospitalPath(first.id)}><b>{first.name}</b></a> {first.km!=null&&km(first.km)} ({statusOf(first,now).label})</>
         :<>📍 {radius}km 안에 지금 진료 중인 {label}이 없어요. 아래에서 진료 시간을 확인하거나 응급실을 이용하세요.</>}</p>
       {late[0]&&late[0].c>now.min+60&&<p className="hp-late">🌙 오늘 가장 늦게까지 <a href={hospitalPath(late[0].p.id)}><b>{late[0].p.name}</b></a> <b className="hp-late-t">{hmMin(late[0].c)}까지</b>{late[0].p.km!=null&&<> · {km(late[0].p.km)}</>}{after8>1&&<span className="muted"> · 저녁 8시 넘어서까지 {after8.toLocaleString('ko-KR')}곳</span>}</p>}
-      <StatusList items={items} initial={first?'open':'all'} sortOpen={false} limit={10}/>
+      <StatusList items={items} initial={first?'open':'all'} sortOpen={false} limit={10} ad={1}/>
       {area&&<p className="hp-area"><a href={`/region/${area.code}`}>📍 <b>{area.name}</b> 병원 전체 보기 <small>야간·일요일·공휴일·과목별</small> →</a></p>}
     </>}
     {er&&er.length>0&&<div className="hp-er"><h2>🚑 가까운 응급실</h2><div className="hp-er-list">{er.slice(0,4).map(e=><a key={e.id} href={hospitalPath(e.id)} className="hp-er-card"><b>{e.name}</b><span>{e.km!=null&&km(e.km)}{e.beds!=null&&<> · 응급실 남은 병상 <strong>{e.beds}</strong></>}</span>{e.updated&&<small className="muted">{e.updated} 기준</small>}</a>)}</div><p><a className="hp-more-link" href="/er">응급실 더 보기 →</a></p></div>}

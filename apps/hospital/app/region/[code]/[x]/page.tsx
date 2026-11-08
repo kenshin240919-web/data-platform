@@ -1,7 +1,6 @@
 import type {Metadata} from 'next';
 import Link from 'next/link';
 import {notFound} from 'next/navigation';
-import {AdSlot} from '@guidejung/ui/ads';
 import {Faq,breadcrumbLd,JsonLd} from '@guidejung/ui/seo';
 import {LiveList} from '../../../_components/LiveList';
 import {CONDITIONS,COND_KEY,DEPTS,MIN_DEPT,n,region,regions,SITE,updated,zoneOf,type Card} from '../../../../lib/data';
@@ -36,9 +35,8 @@ export default async function Page({params}:P){
     <h1>{v.title}</h1>
     <p className="hp-answer">{v.desc} <span className="muted">({updated()} 기준)</span></p>
     <div className="hp-jump">{Object.entries(COND_KEY).filter(([s,k])=>s!==v.x&&r.cond[k]).map(([s,k])=><Link key={s} href={`/region/${r.id}/${s}`}>{zoneOf(r)} {CONDITIONS[s as keyof typeof CONDITIONS].title} <small>{n(r.cond[k])}</small></Link>)}<Link href={`/region/${r.id}`}>{zoneOf(r)} 병원 전체 <small>{n(r.count)}</small></Link></div>
-    <LiveList title={`${v.title} 목록`} query={v.query} initial={v.top} deptChips={!v.query.dept} filter={v.filter}/>
+    <LiveList title={`${v.title} 목록`} query={v.query} initial={v.top} deptChips={!v.query.dept} filter={v.filter} ad={3}/>
     <noscript><ul>{v.top.map(c=><li key={c.id}><a href={`/hospital/${c.id}`}>{c.name}</a> · {c.address}</li>)}</ul></noscript>
-    <AdSlot/>
     <Faq items={v.faq}/>
     <JsonLd data={breadcrumbLd([['내근처 병원',SITE+'/'],['지역별 병원',SITE+'/region'],[r.name,`${SITE}/region/${r.id}`],[v.title,`${SITE}/region/${r.id}/${v.x}`]])}/>
   </div>;

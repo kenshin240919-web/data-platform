@@ -1,7 +1,6 @@
 import type {Metadata} from 'next';
 import Link from 'next/link';
 import {notFound} from 'next/navigation';
-import {AdSlot} from '@guidejung/ui/ads';
 import {Faq,breadcrumbLd,JsonLd} from '@guidejung/ui/seo';
 import {Connect,linksNear} from '@guidejung/ui/network';
 import {LiveList} from '../../_components/LiveList';
@@ -23,8 +22,7 @@ export default async function RegionPage({params}:P){
     <p className="hp-answer"><b>{r.name}</b> 병·의원 <b>{n(r.count)}곳</b> 중 야간 진료 {n(r.cond.night)}곳, 일요일 {n(r.cond.sun)}곳, 공휴일 {n(r.cond.hol)}곳{r.er.length?<>, 응급실 {n(r.er.length)}곳</>:''}이에요. <span className="muted">({updated()} 기준)</span></p>
     <div className="hp-dept-grid">{ds.map(([k,d])=><Link key={k} href={`/region/${r.id}/${k}`}><span aria-hidden="true">{DEPT_ICON[k]}</span><b>{DEPTS[k]}</b><small>{n(d.count)}곳{d.sun?` · 일요일 ${n(d.sun)}`:''}</small></Link>)}</div>
     <div className="hp-jump">{Object.entries(COND_KEY).filter(([,k])=>r.cond[k]).map(([slug,k])=><Link key={slug} href={`/region/${r.id}/${slug}`}>{zoneOf(r)} {CONDITIONS[slug as keyof typeof CONDITIONS].title} <small>{n(r.cond[k])}</small></Link>)}</div>
-    <LiveList title={`${r.name} 병원 목록`} query={{region:r.id}} initial={r.top}/>
-    <AdSlot/>
+    <LiveList title={`${r.name} 병원 목록`} query={{region:r.id}} initial={r.top} ad={3}/>
     {r.er.length>0&&<section><h2>🚑 {r.name} 응급실</h2><ul className="hp-links">{r.er.map(c=><li key={c.id}><a href={`/hospital/${c.id}`}>{c.name}</a> <span className="muted">· {c.address}</span></li>)}</ul></section>}
     <Faq items={[
       [`${r.name}에 병원은 몇 곳인가요?`,`${updated()} 기준 ${r.name}에는 병·의원 ${n(r.count)}곳(${Object.entries(r.divs).slice(0,4).map(([k,v])=>`${k} ${n(v)}곳`).join(', ')})이 있습니다.`],

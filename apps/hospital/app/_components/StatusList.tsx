@@ -1,6 +1,7 @@
 'use client';
 // 병원 목록: 지금 시각으로 진료 상태를 브라우저에서 계산(1분마다 다시), 조건 칩(지금 진료 중·야간·일요일·공휴일).
 import {useEffect,useMemo,useState} from 'react';
+import {AdSlot} from '@guidejung/ui/ads';
 import {CONDITIONS,deptLabel,hospitalPath,km,kstNow,statusOf,weekLine,type Card} from '../../lib/fmt';
 
 type Filter='all'|'open'|keyof typeof CONDITIONS;
@@ -15,8 +16,10 @@ export function HospitalCard({c,now}:{c:Card;now:ReturnType<typeof kstNow>|null}
     {c.tel&&<a className="hp-tel" href={`tel:${c.tel.replace(/[^0-9]/g,'')}`} aria-label={`${c.name} 전화`}>📞</a>}
   </div>;
 }
-export function StatusList({items,initial='all',sortOpen=true,limit=30,empty='조건에 맞는 병원이 없어요.'}:{items:Card[];initial?:Filter;sortOpen?:boolean;limit?:number;empty?:string}){
+export function StatusList({items,initial='all',sortOpen=true,limit=30,empty='조건에 맞는 병원이 없어요.',ad}:{items:Card[];initial?:Filter;sortOpen?:boolean;limit?:number;empty?:string;ad?:number}){
+  // ad: 앞의 몇 곳 뒤에 광고 한 칸(11/8 — 맨 아래 광고는 화면에 보이는 비율이 30%대). 자리는 늘 같은 위치라 칩을 눌러도 광고를 다시 받지 않음.
   const now=useNow();const [f,setF]=useState<Filter>(initial);const [more,setMore]=useState(limit);
+  const cut=ad?Math.min(ad,more):more;
   useEffect(()=>setF(initial),[initial]);
   const rows=useMemo(()=>{
     const pass=items.filter(p=>f==='all'?true:f==='open'?(now?statusOf(p,now).state!=='closed':true):CONDITIONS[f].test(p));
@@ -26,7 +29,9 @@ export function StatusList({items,initial='all',sortOpen=true,limit=30,empty='�
   const chips:[Filter,string][]=[['all','전체'],['open','🟢 지금 진료 중'],['night','🌙 야간'],['sunday','일요일'],['holiday','공휴일']];
   return <div className="hp-list">
     <div className="hp-chips" role="group" aria-label="조건">{chips.map(([k,l])=><button type="button" key={k} className={f===k?'hp-chip on':'hp-chip'} aria-pressed={f===k} onClick={()=>{setF(k);setMore(limit);}}>{l} <small>{count(k).toLocaleString('ko-KR')}</small></button>)}</div>
-    {!rows.length?<p className="muted">{empty}</p>:<div className="hp-cards">{rows.slice(0,more).map(c=><HospitalCard key={c.id} c={c} now={now}/>)}</div>}
+    {!rows.length?<p className="muted">{empty}</p>:<div className="hp-cards">{rows.slice(0,cut).map(c=><HospitalCard key={c.id} c={c} now={now}/>)}</div>}
+    {ad?<AdSlot/>:null}
+    {ad&&rows.length>cut?<div className="hp-cards">{rows.slice(cut,more).map(c=><HospitalCard key={c.id} c={c} now={now}/>)}</div>:null}
     {rows.length>more&&<button type="button" className="hp-more" onClick={()=>setMore(m=>m+limit)}>더 보기 ({(rows.length-more).toLocaleString('ko-KR')}곳 남음)</button>}
   </div>;
 }

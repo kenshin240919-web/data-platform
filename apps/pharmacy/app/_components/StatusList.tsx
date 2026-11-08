@@ -1,13 +1,15 @@
 'use client';
 // 약국 목록: 지금 시각으로 영업 상태를 브라우저에서 계산(1분마다 다시), 조건 칩(지금 영업·밤 10시 이후·일요일·공휴일).
 import {useEffect,useMemo,useState} from 'react';
+import {AdSlot} from '@guidejung/ui/ads';
 import {CONDITIONS,km,kstNow,pharmacyPath,statusOf,weekLine,type Pharmacy} from '../../lib/fmt';
 
 export type Item=Pick<Pharmacy,'id'|'name'|'address'|'tel'|'hours'|'lat'|'lon'>&{km?:number};
 type Filter='all'|'open'|keyof typeof CONDITIONS;
 export function useNow(){const [now,setNow]=useState<ReturnType<typeof kstNow>|null>(null);
   useEffect(()=>{const f=()=>setNow(kstNow());f();const t=setInterval(f,60e3);return ()=>clearInterval(t);},[]);return now;}
-export function StatusList({items,initial='all',sortOpen=true,limit=40,empty='조건에 맞는 약국이 없어요.'}:{items:Item[];initial?:Filter;sortOpen?:boolean;limit?:number;empty?:string}){
+export function StatusList({items,initial='all',sortOpen=true,limit=40,empty='조건에 맞는 약국이 없어요.',ad}:{items:Item[];initial?:Filter;sortOpen?:boolean;limit?:number;empty?:string;ad?:number}){
+  // ad: 앞의 몇 곳 뒤에 광고 한 칸(11/8 — 맨 아래 광고는 화면에 보이는 비율이 30%대). 자리는 늘 같은 위치라 칩을 눌러도 광고를 다시 받지 않음.
   const now=useNow();const [f,setF]=useState<Filter>(initial);const [more,setMore]=useState(limit);
   const rows=useMemo(()=>{
     const withS=items.map(p=>({p,s:now?statusOf(p,now):null}));
@@ -17,13 +19,17 @@ export function StatusList({items,initial='all',sortOpen=true,limit=40,empty='�
   },[items,now,f,sortOpen]);
   const count=(x:Filter)=>x==='all'?items.length:x==='open'?(now?items.filter(p=>statusOf(p,now).state!=='closed').length:0):items.filter(CONDITIONS[x].test).length;
   const chips:[Filter,string][]=[['all','전체'],['open','🟢 지금 영업 중'],['night','🌙 밤 10시 이후'],['sunday','일요일'],['holiday','공휴일']];
-  return <div className="ph-list">
-    <div className="ph-chips" role="group" aria-label="조건">{chips.map(([k,l])=><button type="button" key={k} className={f===k?'ph-chip on':'ph-chip'} aria-pressed={f===k} onClick={()=>{setF(k);setMore(limit);}}>{l} <small>{count(k).toLocaleString('ko-KR')}</small></button>)}</div>
-    {!rows.length?<p className="muted">{empty}</p>:<div className="ph-cards">{rows.slice(0,more).map(({p,s})=><div key={p.id} className={`ph-card ${s?.state??''}`}>
+  const cut=ad?Math.min(ad,more):more;
+  const card=({p,s}:{p:Item;s:ReturnType<typeof statusOf>|null})=><div key={p.id} className={`ph-card ${s?.state??''}`}>
       <a className="ph-card-main" data-gj-pt={p.lat!=null&&p.lon!=null?`${p.lat},${p.lon}`:undefined} data-gj-name={p.name} href={pharmacyPath(p.id)}><span className="ph-dot" aria-hidden="true"></span><span className="ph-card-body"><b>{p.name}</b>
         <small>{p.km!=null&&<>{km(p.km)} · </>}{s?s.label:weekLine(p)}</small><small className="muted">{weekLine(p)}</small></span></a>
       {p.tel&&<a className="ph-tel" href={`tel:${p.tel.replace(/[^0-9]/g,'')}`} aria-label={`${p.name} 전화`}>📞</a>}
-    </div>)}</div>}
+    </div>;
+  return <div className="ph-list">
+    <div className="ph-chips" role="group" aria-label="조건">{chips.map(([k,l])=><button type="button" key={k} className={f===k?'ph-chip on':'ph-chip'} aria-pressed={f===k} onClick={()=>{setF(k);setMore(limit);}}>{l} <small>{count(k).toLocaleString('ko-KR')}</small></button>)}</div>
+    {!rows.length?<p className="muted">{empty}</p>:<div className="ph-cards">{rows.slice(0,cut).map(card)}</div>}
+    {ad?<AdSlot/>:null}
+    {ad&&rows.length>cut?<div className="ph-cards">{rows.slice(cut,more).map(card)}</div>:null}
     {rows.length>more&&<button type="button" className="ph-more" onClick={()=>setMore(m=>m+limit)}>더 보기 ({(rows.length-more).toLocaleString('ko-KR')}곳 남음)</button>}
   </div>;
 }

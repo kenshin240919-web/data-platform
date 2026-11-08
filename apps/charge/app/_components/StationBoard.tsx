@@ -1,5 +1,5 @@
 'use client';
-import {Fragment,useEffect,useMemo,useRef,useState} from 'react';
+import {useEffect,useMemo,useRef,useState} from 'react';
 import {AdSlot} from '@guidejung/ui/ads';
 import type {ChargeRegion} from '../../lib/regions';
 import type {Station,StationsResponse} from '../../lib/types';
@@ -50,23 +50,19 @@ export function StationBoard({region,label,origin,snap,road,extra=[]}:{region:Ch
     setTimeout(()=>document.getElementById(`station-${id}`)?.scrollIntoView({block:'start'}),80);
   },[rows]);
 
-  if(failed)return <><p className="notice" role="alert">실시간 상태를 불러오지 못했습니다. 잠시 후 새로고침해 주세요.</p>{snap&&<StaticList snap={snap} label={label}/>}</>;
-  if(!data||!merged)return snap?<StaticList snap={snap} label={label} loading/>:<div className="loading" role="status">{label} 충전소와 실시간 상태를 불러오고 있습니다.</div>;
+  // 광고 한 칸은 늘 같은 자리(조각의 두 번째)에 둠: 정적 목록 → 실시간 목록으로 바뀌어도 광고를 다시 받지 않고, 실시간 목록이 늦게 와도 처음부터 보임
+  // (11/8 — 전에는 실시간 목록이 온 뒤 6번째 줄에만 있어 쪽마다 노출 1.1개). 앞 3곳 뒤에 한 칸, 목록 끝에 한 칸.
+  if(failed){const st=snap?staticParts(snap,label):null;
+    return <><><p className="notice" role="alert">실시간 상태를 불러오지 못했습니다. 잠시 후 새로고침해 주세요.</p>{st?.top}</><AdSlot/>{st?.rest??null}</>;}
+  if(!data||!merged){const st=snap?staticParts(snap,label,true):null;
+    return <>{st?st.top:<div className="loading" role="status">{label} 충전소와 실시간 상태를 불러오고 있습니다.</div>}<AdSlot/>{st?.rest??null}</>;}
   const all=merged.stations.map(summary);const fastOk=all.reduce((n,s)=>n+s.fastOk,0),ok=all.reduce((n,s)=>n+s.ok,0),chargers=all.reduce((n,s)=>n+s.total,0);
   // 내 주변: 3km → 5km → 10km, the first radius with at least 3 fast chargers free now (else 10km).
   const nearKm=origin?[3,5,10].find(k=>rows.filter(r=>r.km!==null&&r.km<=k).reduce((n,r)=>n+r.sum.fastOk,0)>=3)??10:0;
   const near=origin?rows.filter(r=>r.km!==null&&r.km<=nearKm).reduce((n,r)=>n+r.sum.fastOk,0):null;
   const chip=(k:keyof Filters,text:string)=><button type="button" className={`chip${f[k]?' on':''}`} aria-pressed={f[k]} onClick={()=>{setF({...f,[k]:!f[k]});setLimit(30);}}>{text}</button>;
-
-  return <div className="ev">
-    <section className="ev-hero">
-      <p className="ev-answer">{near!==null?<>내 주변 {nearKm}km 안에 지금 충전 가능한 급속 <b>{near}대</b></>:<>{label}에 지금 충전 가능한 급속 <b>{fastOk}대</b></>}</p>
-      <p className="ev-sub">충전소 {merged.stations.length.toLocaleString()}곳 · 충전기 {chargers.toLocaleString()}대 중 지금 사용 가능 {ok.toLocaleString()}대 · {fmtTime(data.fetched)} 기준{data.stale?' (지연된 정보)':data.refreshing?' · 최신 상태 확인 중':''}</p>
-    </section>
-    <div className="ev-chips">{chip('ok','지금 사용 가능')}{chip('fast','급속만')}{chip('free','무료 주차')}{chip('h24','24시간')}</div>
-    <p className="muted small">{rows.length.toLocaleString()}곳 · {origin?'가까운 순':'사용 가능한 급속이 많은 순'}</p>
-    <ul className="ev-list">{rows.slice(0,limit).map(({s,sum,km},i)=>{const isOpen=open===s.id;
-      return <Fragment key={s.id}>{i===5&&<li className="ev-ad"><AdSlot/></li>}<li id={`station-${s.id}`} className={`ev-item tone-${sum.tone}${isOpen?' open':''}`}>
+  const item=({s,sum,km}:typeof rows[number])=>{const isOpen=open===s.id;
+      return <li key={s.id} id={`station-${s.id}`} className={`ev-item tone-${sum.tone}${isOpen?' open':''}`}>
         <button type="button" className="ev-row" aria-expanded={isOpen} onClick={()=>{setOpen(isOpen?null:s.id);history.replaceState(null,'',isOpen?location.pathname:`#station-${s.id}`);}}>
           <span className="ev-name"><b>{s.name}</b><small>{TONE_LABEL[sum.tone as keyof typeof TONE_LABEL]}</small></span>
           <span className="ev-count"><b>{sum.ok}</b>/{sum.total}<small>사용 가능</small></span>
@@ -84,27 +80,42 @@ export function StationBoard({region,label,origin,snap,road,extra=[]}:{region:Ch
           <section className="gj-around gj-around-inline" data-lat={s.lat} data-lon={s.lng} data-cats="CE7,CS2,FD6" data-r="500" aria-label="충전하는 동안 걸어서 갈 곳"><h3>☕ 충전하는 동안 걸어서 갈 곳</h3></section>
           <dl className="ev-facts"><div><dt>이용시간</dt><dd>{s.useTime||'확인 필요'}</dd></div><div><dt>운영기관</dt><dd>{s.busi}{s.call&&<> · <a href={`tel:${s.call}`}>{s.call}</a></>}</dd></div><div><dt>주차</dt><dd>{s.freeParking?'무료 주차':'유료이거나 확인 필요'}</dd></div>{s.limited&&<div><dt>이용 제한</dt><dd>{s.limited}</dd></div>}</dl>
         </div>}
-      </li></Fragment>;})}</ul>
+      </li>;};
+  const cut=Math.min(3,limit);
+  return <><div className="ev">
+    <section className="ev-hero">
+      <p className="ev-answer">{near!==null?<>내 주변 {nearKm}km 안에 지금 충전 가능한 급속 <b>{near}대</b></>:<>{label}에 지금 충전 가능한 급속 <b>{fastOk}대</b></>}</p>
+      <p className="ev-sub">충전소 {merged.stations.length.toLocaleString()}곳 · 충전기 {chargers.toLocaleString()}대 중 지금 사용 가능 {ok.toLocaleString()}대 · {fmtTime(data.fetched)} 기준{data.stale?' (지연된 정보)':data.refreshing?' · 최신 상태 확인 중':''}</p>
+    </section>
+    <div className="ev-chips">{chip('ok','지금 사용 가능')}{chip('fast','급속만')}{chip('free','무료 주차')}{chip('h24','24시간')}</div>
+    <p className="muted small">{rows.length.toLocaleString()}곳 · {origin?'가까운 순':'사용 가능한 급속이 많은 순'}</p>
+    <ul className="ev-list">{rows.slice(0,cut).map(item)}</ul>
+  </div><AdSlot/><div className="ev">
+    {rows.length>cut&&<ul className="ev-list">{rows.slice(cut,limit).map(item)}</ul>}
     {rows.length>limit&&<button type="button" className="ev-more" onClick={()=>setLimit(limit+30)}>충전소 더 보기 ({(rows.length-limit).toLocaleString()}곳 남음)</button>}
     {!rows.length&&<p className="notice">조건에 맞는 충전소가 없습니다. 조건을 줄여 보세요.</p>}
     <AdSlot/>
-  </div>;
+  </div></>;
 }
 
-/** Daily snapshot shown (and prerendered for search engines) until the live list arrives: counts and the largest stations. */
-function StaticList({snap,label,loading}:{snap:SnapRegion;label:string;loading?:boolean}){
-  return <div className="ev">
-    <section className="ev-hero">
-      <p className="ev-answer">{label} 충전소 <b>{snap.stations.toLocaleString()}곳</b></p>
-      <p className="ev-sub">충전기 {snap.chargers.toLocaleString()}대(급속 {snap.fast.toLocaleString()}대) · 무료 주차 {snap.freeParking.toLocaleString()}곳 · 24시간 {snap.h24.toLocaleString()}곳{loading&&<> · <span role="status">지금 사용 가능한 충전기를 확인하고 있어요…</span></>}</p>
-    </section>
-    <p className="muted small">충전기가 많은 충전소 {Number(snap.list.length).toLocaleString()}곳{snap.stations>snap.list.length?` (전체 ${snap.stations.toLocaleString()}곳은 실시간 목록에서)`:''}</p>
-    <ul className="ev-list">{snap.list.map(s=><li key={s.id} id={`station-${s.id}`} className="ev-item">
+/** Daily snapshot shown (and prerendered for search engines) until the live list arrives: counts and the largest stations.
+ * top(요약·앞 3곳)·rest(나머지)로 나눠 돌려줌 — 사이에 광고 한 칸(StationBoard). */
+function staticParts(snap:SnapRegion,label:string,loading?:boolean){
+  const card=(s:SnapRegion['list'][number])=><li key={s.id} id={`station-${s.id}`} className="ev-item">
       <div className="ev-row">
         <span className="ev-name"><b>{s.name}</b><small>{s.addr}</small></span>
         <span className="ev-count"><b>{s.fast+s.slow}</b>대<small>충전기</small></span>
         <span className="ev-meta">{s.fast>0&&<span className="tag fast">급속 {s.fast}</span>}{s.slow>0&&<span className="tag">완속 {s.slow}</span>}{s.maxKw>0&&<span className="tag">최대 {s.maxKw}kW</span>}{s.freeParking&&<span className="tag">무료 주차</span>}{/24/.test(s.useTime)&&<span className="tag">24시간</span>}{s.limited&&<span className="tag">이용 제한</span>}</span>
       </div>
-    </li>)}</ul>
+    </li>;
+  const top=<div className="ev">
+    <section className="ev-hero">
+      <p className="ev-answer">{label} 충전소 <b>{snap.stations.toLocaleString()}곳</b></p>
+      <p className="ev-sub">충전기 {snap.chargers.toLocaleString()}대(급속 {snap.fast.toLocaleString()}대) · 무료 주차 {snap.freeParking.toLocaleString()}곳 · 24시간 {snap.h24.toLocaleString()}곳{loading&&<> · <span role="status">지금 사용 가능한 충전기를 확인하고 있어요…</span></>}</p>
+    </section>
+    <p className="muted small">충전기가 많은 충전소 {Number(snap.list.length).toLocaleString()}곳{snap.stations>snap.list.length?` (전체 ${snap.stations.toLocaleString()}곳은 실시간 목록에서)`:''}</p>
+    <ul className="ev-list">{snap.list.slice(0,3).map(card)}</ul>
   </div>;
+  const rest=snap.list.length>3?<div className="ev"><ul className="ev-list">{snap.list.slice(3).map(card)}</ul></div>:null;
+  return {top,rest};
 }

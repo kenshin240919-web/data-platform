@@ -20,7 +20,7 @@ export function NearNow(){
     {items&&now&&<>
       <p className={`ph-answer ${first?'open':'closed'}`}><span className="ph-dot" aria-hidden="true"></span>{first?<>📍 {pos?.precise?'내 주변':'접속 위치 주변'} {radius}km 안 <b>지금 문 연 약국 {open.length.toLocaleString('ko-KR')}곳</b> · 가장 가까운 곳 <a href={pharmacyPath(first.id)}><b>{first.name}</b></a> {first.km!=null&&km(first.km)} ({statusOf(first,now).label})</>
         :<>📍 {radius}km 안에 지금 문 연 약국이 없어요. 아래에서 여는 시간을 확인하세요.</>}</p>
-      <StatusList items={items} initial={first?'open':'all'} sortOpen={false} limit={12}/>
+      <StatusList items={items} initial={first?'open':'all'} sortOpen={false} limit={12} ad={1}/>
     </>}
   </section>;
 }
