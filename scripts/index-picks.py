@@ -26,6 +26,8 @@ INSPECT = 'https://searchconsole.googleapis.com/v1/urlInspection/index:inspect'
 KST = timezone(timedelta(hours=9))
 UA = {'User-Agent': 'Mozilla/5.0 (compatible; GuideJungGSC/1.0; +https://near.guidejung.com)'}
 STATE = ROOT / 'reports/gsc/index-requests.json'
+# 할당량 초과로 못 넣은 주소(11/9 사용자 '내일 다시 알려줘'): [[사이트, 주소], …] — 다음 실행이 맨 앞에 다시 내고 비움.
+RETRY = ROOT / 'reports/gsc/index-retry.json'
 REDO_DAYS = 21
 MAX_INSPECT = 80
 SKIP = re.compile(r'/(about|data-policy|privacy|search|compare|alerts)(/|$)')
@@ -131,7 +133,13 @@ def main():
         q = [u for _, u in ranked if u not in state or (today - date.fromisoformat(state[u])).days >= REDO_DAYS]
         queues.append((site, q))
         print(f'{site}: 후보 {len(ranked):,} · 남은 {len(q):,}')
-    picks, inspected, indexed = [], 0, 0
+    retry = json.loads(RETRY.read_text(encoding='utf-8')) if RETRY.exists() else []
+    picks, inspected, indexed = [(s, u) for s, u in retry][:n], 0, 0
+    again = {u for _, u in picks}
+    for _, q in queues:
+        q[:] = [u for u in q if u not in again]
+    if picks:
+        print(f'어제 못 넣은 주소 {len(picks)}개를 먼저')
     # 병원은 하루 FOCUS개 먼저(11/2 애드센스: 내근처 수익의 절반·RPM 가장 높음 — 사용자 승인),
     # 나머지는 날마다 시작 사이트를 바꿔 돌아가며(전에는 늘 앞쪽 사이트만 뽑혀 뒤쪽 사이트는 차례가 오지 않았음).
     focus = [x for x in queues if x[0] in FOCUS]
@@ -170,6 +178,12 @@ def main():
     (out / '색인요청-오늘.md').write_text(text, encoding='utf-8')
     (out / f'색인요청-{today.isoformat()}.md').write_text(text, encoding='utf-8')
     STATE.write_text(json.dumps(dict(sorted(state.items())), ensure_ascii=False, indent=0), encoding='utf-8')
+    if RETRY.exists():
+        rest_retry = retry[n:]
+        if rest_retry:
+            RETRY.write_text(json.dumps(rest_retry, ensure_ascii=False, indent=0), encoding='utf-8')
+        else:
+            RETRY.unlink()
 
 
 if __name__ == '__main__':
