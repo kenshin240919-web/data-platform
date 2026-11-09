@@ -1,0 +1,18 @@
+// Cloudflare Worker for movie.guidejung.com (내근처 영화관), separate from the other sites.
+// Run from the repo root: npx wrangler deploy -c apps/movie/wrangler.jsonc (builds with npm run build:movie).
+// Static pages: ./out (theaters, regions, chains). Worker: /api/* only. Secret KOBIS_API_KEY (movie-deploy.yml).
+{
+  "name": "guidejung-movie",
+  "main": "worker/index.ts",
+  "compatibility_date": "2025-09-01",
+  "build": { "command": "npm run build:movie" },
+  "assets": {
+    "directory": "./out",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    "run_worker_first": ["/api/*"]
+  },
+  "rules": [{ "type": "Text", "globs": ["**/data/theaters.json"], "fallthrough": true }],
+  "observability": { "enabled": true },
+  "routes": [{ "pattern": "movie.guidejung.com", "custom_domain": true }]
+}

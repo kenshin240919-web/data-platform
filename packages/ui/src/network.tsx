@@ -8,7 +8,7 @@ import {SeasonBanner} from './season';
 import {ACTIONS_JS} from './actions';
 import {LIVE_JS} from './live';
 
-export type Site='trip'|'weather'|'traffic'|'charge'|'academy'|'school'|'pharmacy'|'hospital'|'oil'|'parking'|'service'|'near'|'rest'|'pet'|'civil'|'market'|'benefit'|'job'|'cvs';
+export type Site='trip'|'weather'|'traffic'|'charge'|'academy'|'school'|'pharmacy'|'hospital'|'oil'|'parking'|'service'|'near'|'rest'|'pet'|'civil'|'market'|'benefit'|'job'|'cvs'|'movie';
 // brand: 사이트 이름(로고·탭 제목), tagline: 부제(질문형 후킹). 10/17 사용자 결정: "내근처" 시리즈.
 // hidden: 아직 배포 전인 사이트(그 사이트 자신의 연결 바에만 보임).
 export const SITES:Record<Site,{url:string;icon:string;name:string;brand:string;tagline:string;hidden?:boolean}>={
@@ -31,6 +31,7 @@ export const SITES:Record<Site,{url:string;icon:string;name:string;brand:string;
   benefit:{url:'https://benefit.guidejung.com',icon:'🎁',name:'혜택',brand:'내근처 혜택',tagline:'우리 동네 지원금, 놓친 거 없어?'},
   job:{url:'https://job.guidejung.com',icon:'💼',name:'일자리',brand:'내근처 일자리',tagline:'일자리 찾을 때 가는 곳'},
   cvs:{url:'https://cvs.guidejung.com',icon:'🌙',name:'편의점',brand:'내근처 편의점',tagline:'밤에도 상비약 어디서?'},
+  movie:{url:'https://movie.guidejung.com',icon:'🎬',name:'영화관',brand:'내근처 영화관',tagline:'지금 뭐 볼 수 있어?',hidden:true},
 };
 const {trip:T,weather:W,traffic:R,charge:C}=Object.fromEntries(Object.entries(SITES).map(([k,v])=>[k,v.url])) as Record<Site,string>;
 
@@ -105,6 +106,7 @@ const ORDER:Record<Site,Site[]>={
   benefit:['hospital','job','civil','pharmacy','school','academy','market','weather','parking','cvs'],
   job:['benefit','hospital','civil','parking','academy','weather','trip','market','cvs'],
   cvs:['pharmacy','hospital','parking','weather','pet','trip','oil','market'],
+  movie:['parking','trip','weather','market','cvs','oil','charge','benefit'],
 };
 const MAX_LINKS=8;
 /** Standard links for a spot: the sister sites' pages for the same 시군구 (or the spot itself), in the order that fits the current site. */
@@ -130,6 +132,7 @@ export function linksNear(lat:number,lon:number,skip:Site){
     market:[{icon:'🏪',title:`${a.label} 온누리상품권 사용처`,desc:'전통시장·상점가 온누리 가맹점',href:`${SITES.market.url}/region/${a.charge}`}],
     benefit:[{icon:'🎁',title:`${a.label} 지원금·혜택`,desc:'우리 동네가 주는 지원금과 마감 임박 혜택',href:`${SITES.benefit.url}/region/${a.charge}`}],
     job:[{icon:'💼',title:`${a.label} 고용센터·직업소개소`,desc:'관할 고용센터(실업급여)와 가까운 인력사무소·새일센터',href:`${SITES.job.url}/region/${a.charge}`}],
+    movie:[{icon:'🎬',title:`${a.label} 영화관`,desc:'오늘 남은 상영 시간·남은 좌석',href:`${SITES.movie.url}/region/${a.charge}`}],
     cvs:[{icon:'🌙',title:`${a.label} 상비약 파는 편의점`,desc:'약국이 닫은 밤에도 해열제·소화제 살 곳',href:`${SITES.cvs.url}/region/${a.charge}`}],
     service:[{icon:'🔧',title:`${a.label} 자동차 정비소·검사소`,desc:'정비소·검사소·세차장, 맡기기 전 체크리스트',href:`${SITES.service.url}/region/${a.charge}`}],
   };
@@ -161,6 +164,7 @@ export const GENERIC:Record<Site,Link_>={
   benefit:{icon:'🎁',title:'우리 동네 지원금·혜택',desc:'나에게 맞는 혜택과 마감 임박 지원금',href:SITES.benefit.url},
   job:{icon:'💼',title:'일자리 찾을 때 가는 곳',desc:'내 관할 고용센터·가까운 직업소개소·새일센터',href:SITES.job.url},
   cvs:{icon:'🌙',title:'상비약 파는 편의점',desc:'약국이 닫은 밤에도 해열제·소화제 살 곳',href:SITES.cvs.url},
+  movie:{icon:'🎬',title:'지금 볼 수 있는 영화',desc:'내 주변 극장 오늘 남은 상영·좌석',href:SITES.movie.url},
 };
 // 병원을 맨 앞에(11/2 애드센스 주간 보고서: 내근처 수익의 절반·RPM 가장 높음 — 사용자 승인).
 const FIRST:Site[]=['hospital'];

@@ -29,6 +29,7 @@
     "build:civil": "npm run build -w @guidejung/civil",
     "build:job": "npm run build -w @guidejung/job",
     "build:cvs": "npm run build -w @guidejung/cvs",
+    "build:movie": "npm run build -w @guidejung/movie",
     "build:hospital": "npm run build -w @guidejung/hospital"
   },
   "devDependencies": {

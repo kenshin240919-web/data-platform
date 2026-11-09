@@ -1,0 +1,38 @@
+name: Movie collect
+# Daily list for movie.guidejung.com (내근처 영화관): LOCALDATA 영화상영관 파일 (scripts/collect-movie.py) grouped into theaters,
+# with the nearest public parking from apps/parking/data (04:37). KOBIS 박스오피스는 저장하지 않음(Worker가 방문 때 조회).
+# apps/movie/data/theaters.json is committed to main only when it changed (movie-deploy.yml deploys after this run).
+# Secrets: KAKAO_REST_KEY (좌표 없는 곳만).
+on:
+  schedule:
+    - cron: '22 21 * * *' # 06:22 KST
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: movie-collect
+  cancel-in-progress: false
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Collect
+        env:
+          KAKAO_REST_KEY: ${{ secrets.KAKAO_REST_KEY }}
+        run: python scripts/collect-movie.py
+      - name: Commit movie list
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add apps/movie/data/theaters.json
+          if git diff --cached --quiet; then echo 'no change'; exit 0; fi
+          git commit -m 'movie: 영화관 목록 갱신'
+          for i in 1 2 3; do git pull --rebase origin main && git push origin HEAD:main && exit 0; sleep 10; done
+          exit 1

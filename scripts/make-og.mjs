@@ -22,6 +22,7 @@ const S={
  benefit:['🎁','내근처 혜택','우리 동네 지원금, 놓친 거 없어?','#15803d','#22a052'],
  job:['💼','내근처 일자리','일자리 찾을 때 가는 곳','#6d28d9','#8b5cf6'],
   cvs:['🌙','내근처 편의점','밤에도 상비약 어디서?','#1e3a8a','#2f55c9'],
+  movie:['🎬','내근처 영화관','지금 뭐 볼 수 있어?','#7c2d12','#b45309'],
 };
 const html=([icon,brand,tag,c1,c2])=>{const [a,...b]=brand.split(' ');const fs=Math.min(118,Math.floor(620/(brand.length*0.95)));
 return `<html><body style="margin:0;width:1200px;height:630px;background:radial-gradient(circle at 50% 38%,${c2},${c1} 70%);font-family:'Noto Sans KR';color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;word-break:keep-all;overflow:hidden">
