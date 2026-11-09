@@ -1,0 +1,29 @@
+name: Kobis check
+# KOBIS 오픈API 키 동작 시험(수동). 결과는 건수·응답 시간만 출력하고 저장하지 않음(약관 제6조 ②). 호출 2회.
+on: workflow_dispatch
+permissions: {}
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Call daily box office and movie list
+        env:
+          KOBIS_API_KEY: ${{ secrets.KOBIS_API_KEY }}
+        run: |
+          python3 - <<'EOF'
+          import json, os, time, urllib.request, datetime
+          key = os.environ['KOBIS_API_KEY']
+          base = 'https://www.kobis.or.kr/kobisopenapi/webservice/rest'
+          day = (datetime.datetime.utcnow() + datetime.timedelta(hours=9) - datetime.timedelta(days=1)).strftime('%Y%m%d')
+          for name, path in [('daily', f'/boxoffice/searchDailyBoxOfficeList.json?targetDt={day}'), ('movies', '/movie/searchMovieList.json?itemPerPage=10&openStartDt=2026')]:
+              t = time.time()
+              d = json.load(urllib.request.urlopen(f'{base}{path}&key={key}', timeout=30))
+              ms = int((time.time() - t) * 1000)
+              if 'faultInfo' in d:
+                  print(name, 'ERROR', d['faultInfo'].get('errorCode'), d['faultInfo'].get('message'))
+              elif name == 'daily':
+                  print(name, day, 'rows', len(d['boxOfficeResult']['dailyBoxOfficeList']), f'{ms}ms', 'keys', sorted(d['boxOfficeResult']['dailyBoxOfficeList'][0].keys()))
+              else:
+                  print(name, 'total', d['movieListResult']['totCnt'], f'{ms}ms')
+          EOF
