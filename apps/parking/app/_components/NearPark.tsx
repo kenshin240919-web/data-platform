@@ -23,7 +23,7 @@ export function NearPark(){
       <p className="pk-answer">{first?<>📍 {pos?.precise?'내 주변':'접속 위치 주변'} {radius}km 안 공영 주차장 <b>{n(items.length)}곳</b>{items.length>=60?'+':''} · 무료 <b>{n(free.length)}곳</b>
         {cheap&&<> — 1시간 가장 싼 곳 <a href={lotPath(cheap.id)}><b>{cheap.name}</b></a> {km(cheap.km!)} · {feeFor(cheap,60)===0?'무료':`${n(feeFor(cheap,60)!)}원`}</>}</>
         :<>📍 {radius}km 안에 등록된 공영 주차장이 없어요. 지역 목록에서 찾아보세요.</>}</p>
-      {first&&<LotList items={items} limit={12}/>}
+      {first&&<LotList items={items} limit={12} ad={2}/>}
     </>}
   </section>;
 }

@@ -73,7 +73,7 @@ export function nearArea(lat:number,lon:number){
 
 type Route={no:string;name:string;pts?:[number,number][]};type Rest={code:string;name:string;lat:number;lng:number;dir:string};
 const routes=(traffic as unknown as {routes:Route[]}).routes,rests=(traffic as unknown as {rests:Rest[]}).rests;
-const road=(n:string)=>{const base=n.replace(/\(.+\)$/,''),sub=n.match(/\(.+\)$/)?.[0]??'';return /선$/.test(base)?base.replace(/선$/,'고속도로')+sub:n;};
+const road=(n:string)=>{if(!n)return "고속도로";const base=n.replace(/\(.+\)$/,''),sub=n.match(/\(.+\)$/)?.[0]??'';return /선$/.test(base)?base.replace(/선$/,'고속도로')+sub:n;};
 /** Nearest highway (by its IC points) and km to it. */
 export function nearRoad(lat:number,lon:number){
   let best:{r:Route;d:number}|null=null;

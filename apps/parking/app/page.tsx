@@ -1,6 +1,5 @@
 import type {Metadata} from 'next';
 import Link from 'next/link';
-import {AdSlot} from '@guidejung/ui/ads';
 import {Faq,breadcrumbLd,JsonLd} from '@guidejung/ui/seo';
 import {Connect,genericFor} from '@guidejung/ui/network';
 import {NearPark} from './_components/NearPark';
@@ -18,7 +17,6 @@ export default function Home(){
     <NearPark/>
     {/* 전국 수치(검색엔진·AI 답변용): 첫 화면을 가볍게 하려고 히어로에서 3초 답 아래로 내림(10/29 사용자) */}
     <p className="muted small gj-facts">지자체가 등록한 전국 주차장 <b>{n(status.count)}곳</b>(대부분 공영)에서 가까운 곳과 싼 곳을 찾아 드려요. 무료 {n(nation.free)}곳{nation.hour!=null&&<> · 유료 1시간 보통 {n(nation.hour)}원</>}.</p>
-    <AdSlot/>
     <section><h2>무료 주차장 많은 지역</h2>
       <ol className="pk-rank">{free.map(r=><li key={r.id}><Link href={`/region/${r.id}/free`}><b>{r.name}</b><span>{n(r.cond.free)}곳</span></Link></li>)}</ol></section>
     {cheap.length>0&&<section><h2>공영 주차장 1시간 요금이 싼 지역 <span className="muted">유료 10곳 이상</span></h2>

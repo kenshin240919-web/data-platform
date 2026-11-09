@@ -137,6 +137,22 @@ def main():
                                'E': [[k, v] for k, v in e], 'S': [[k, v] for k, v in s]})
     if len(route_list) < 30:
         sys.exit(f'only {len(route_list)} routes; not writing')
+    # 11/9: 실시간 원본의 routeName이 모두 비어 옴(69개 노선 이름 None → 모든 사이트 빌드의 고속도로 연결 카드가 깨짐).
+    # 이름이 빈 노선은 지난 스냅샷의 이름으로 채우고, 그래도 없으면 노선 번호로.
+    old_names = {}
+    old_snap = dest_dir / 'snapshot.json'
+    if old_snap.exists():
+        try:
+            old_names = {r['no']: r['name'] for r in json.loads(old_snap.read_text(encoding='utf-8'))['routes'] if r.get('name')}
+        except Exception:  # noqa: BLE001
+            old_names = {}
+    missing = 0
+    for r in route_list:
+        if not r.get('name'):
+            missing += 1
+            r['name'] = old_names.get(r['no']) or f"{int(r['no']) // 10}번 고속도로"
+    if missing:
+        print(f'노선 이름 없음 {missing}개 — 지난 스냅샷 이름으로 채움')
 
     ics = get(key, 'locationinfo/locationinfoIc', {'numOfRows': 999, 'pageNo': 1}, cache).get('list') or []
     units = get_all(key, 'locationinfo/locationinfoUnit', cache)

@@ -1,7 +1,6 @@
 import type {Metadata} from 'next';
 import Link from 'next/link';
 import {notFound} from 'next/navigation';
-import {AdSlot} from '@guidejung/ui/ads';
 import {Faq,breadcrumbLd,JsonLd} from '@guidejung/ui/seo';
 import {LotList} from '../../../_components/LotList';
 import {CONDITIONS,COND_MIN,feeLine,lotPath,n,refMonth,region,regions,SITE,slim,type Cond} from '../../../../lib/data';
@@ -24,9 +23,8 @@ export default async function CondPage({params}:P){
     <h1>{r.name} {c.title}</h1>
     <p className="pk-answer"><b>{r.name}</b>에서 {c.desc} 주차장은 <b>{n(items.length)}곳</b>이에요.{big?.spaces?<> 가장 큰 곳은 <a href={lotPath(big.id)}><b>{big.name}</b></a>({n(big.spaces)}면)예요.</>:null} <span className="muted">(지자체 기준일 {refMonth(items)})</span></p>
     <div className="pk-jump">{(Object.keys(CONDITIONS) as Cond[]).filter(k=>k!==cond&&r.cond[k]>=COND_MIN).map(k=><Link key={k} href={`/region/${r.id}/${k}`}>{r.zone} {CONDITIONS[k].title} <small>{n(r.cond[k])}</small></Link>)}<Link href={`/region/${r.id}`}>{r.zone} 주차장 전체 <small>{n(r.count)}</small></Link></div>
-    <section><h2>{r.name} {c.title} 목록</h2><LotList items={items.map(slim)}/>
+    <section><h2>{r.name} {c.title} 목록</h2><LotList items={items.map(slim)} ad={4}/>
       <noscript><ul>{items.map(p=><li key={p.id}><a href={lotPath(p.id)}>{p.name}</a> · {feeLine(p)}</li>)}</ul></noscript></section>
-    <AdSlot/>
     <Faq items={[
       [`${r.name} ${c.title}은 몇 곳인가요?`,`지자체 등록 기준 ${r.name}에서 ${c.desc} 주차장은 ${n(items.length)}곳입니다.`],
       ...(big?.spaces?[[`${r.name} ${c.title} 중 가장 큰 곳은?`,`${big.name}(${n(big.spaces)}면)입니다${big.addr?` — ${big.addr}`:''}.`] as [string,string]]:[]),
