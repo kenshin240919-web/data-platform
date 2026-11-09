@@ -2,9 +2,22 @@ name: Movie deploy
 # Deploys movie.guidejung.com (Worker guidejung-movie) with wrangler from GitHub Actions (not connected to Cloudflare Workers
 # Builds). Secrets: CLOUDFLARE_API_TOKEN (github-d1: Workers Scripts edit …), CLOUDFLARE_ACCOUNT_ID.
 # Runs when the movie app (or what it imports) changes on main, after the daily list commit, or by hand. Secret KOBIS_API_KEY → Worker.
-# 첫 배포·도메인 연결은 사용자 승인 뒤(CLAUDE.md) — 승인 전에는 수동 실행만. 승인 뒤 push(apps/movie/**·packages/** 등)·
-# workflow_run('Movie collect')를 cvs-deploy.yml처럼 다시 넣을 것.
+# 11/9 사용자 승인으로 첫 배포·도메인 연결.
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/movie/**'
+      - 'apps/weather/data/**'
+      - 'apps/traffic/data/**'
+      - 'packages/**'
+      - 'scripts/prune-rsc.mjs'
+      - 'package.json'
+      - 'package-lock.json'
+  # 매일 목록 커밋은 GITHUB_TOKEN으로 push돼 push 이벤트가 안 생김 → 수집 작업이 끝나면 따로 배포.
+  workflow_run:
+    workflows: ['Movie collect']
+    types: [completed]
   workflow_dispatch:
 permissions:
   contents: read
