@@ -110,19 +110,60 @@ def fetch(url, referer=None, timeout=120, tries=4):
     raise SystemExit(f'내려받기 실패 {url}: {err}')
 
 
+def portal_file(page):
+    """공공데이터포털 파일데이터 내려받기 → (내용, 기준일 'YYYY-MM-DD'|None).
+    11/9 포털 개편: 페이지에 fileDownload.do 주소가 없어지고, 같은 세션에서 selectFileDataDownload.do(POST)로 파일 번호를 받은 뒤 내려받음.
+    옛 방식(페이지 안 주소)도 남겨 둠."""
+    import http.cookiejar
+    op = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
+    def call(url, data=None, timeout=120, ajax=False):
+        err = None
+        for n in range(4):
+            try:
+                h = {'User-Agent': UA, 'Referer': page}
+                if ajax:
+                    h['X-Requested-With'] = 'XMLHttpRequest'
+                req = urllib.request.Request(url, data=urllib.parse.urlencode(data).encode() if data is not None else None, headers=h)
+                with op.open(req, timeout=timeout) as r:
+                    return r.read()
+            except Exception as e:  # noqa: BLE001
+                err = e
+                time.sleep(5 * (n + 1))
+        raise SystemExit(f'내려받기 실패 {url}: {err}')
+    html = call(page).decode('utf-8', 'replace')
+    d = re.search(r'현황_(\d{8})', html)
+    base = f'{d[1][:4]}-{d[1][4:6]}-{d[1][6:]}' if d else None
+    m = re.search(r'fileDownload\.do\?atchFileId=(FILE_\d+)&(?:amp;)?fileDetailSn=(\d+)', html)
+    if m:
+        fid, sn = m[1], m[2]
+    else:
+        f = re.search(r"fn_fileDataDown\('(\d+)',\s*'([^']+)',\s*'([^']*)',\s*'(\d+)'", html)
+        if not f:
+            raise SystemExit('가맹점 파일 주소를 데이터 페이지에서 찾지 못함(포털 화면이 또 바뀜)')
+        j = json.loads(call('https://www.data.go.kr/tcs/dss/selectFileDataDownload.do', {
+            'publicDataDetailPk': f[2], 'publicDataPk': f[1], 'atchFileId': f[3], 'fileDetailSn': f[4], 'publicDataTyCode': 'PR0051'}, ajax=True))
+        if not j.get('status') or not j.get('atchFileId'):
+            raise SystemExit(f'가맹점 파일 번호를 받지 못함: {str(j.get("error") or "")[:80]}')
+        fid, sn = j['atchFileId'], str(j.get('fileDetailSn') or f[4])
+        try:  # 포털 화면이 내려받기 전에 부르는 확인(많이 받으면 자동입력 방지 문자가 필요하다고 답함)
+            lim = json.loads(call('https://www.data.go.kr/cmm/cmm/check-limit.json', {'atchFileId': fid, 'fileDetailSn': sn}, 30, ajax=True))
+            if lim.get('needCaptcha'):
+                raise SystemExit('포털이 자동입력 방지 문자를 요구함 — 오늘은 지난 목록 유지')
+        except (ValueError, KeyError):
+            pass
+    raw = call(f'https://www.data.go.kr/cmm/cmm/fileDownload.do?atchFileId={fid}&fileDetailSn={sn}&insertDataPrcus=N', timeout=300)
+    if raw[:15].lstrip().lower().startswith((b'<!doctype', b'<html')):
+        raise SystemExit('가맹점 파일 대신 웹 페이지가 옴(내려받기 막힘)')
+    return raw, base
+
+
 def onnuri_rows(path=None):
     """가맹점 파일(CSV). 기준일은 파일 이름(…현황_20260731)에서."""
     base = None
     if path:
         raw = Path(path).read_bytes()
     else:
-        html = fetch(PAGE).decode('utf-8', 'replace')
-        m = re.search(r'fileDownload\.do\?atchFileId=(FILE_\d+)&(?:amp;)?fileDetailSn=(\d+)', html)
-        if not m:
-            raise SystemExit('가맹점 파일 주소를 데이터 페이지에서 찾지 못함')
-        d = re.search(r'가맹점 현황_(\d{8})', html)
-        base = f'{d[1][:4]}-{d[1][4:6]}-{d[1][6:]}' if d else None
-        raw = fetch(f'https://www.data.go.kr/cmm/cmm/fileDownload.do?atchFileId={m[1]}&fileDetailSn={m[2]}&insertDataPrcus=N', PAGE, 300)
+        raw, base = portal_file(PAGE)
     for enc in ('utf-8-sig', 'cp949'):
         try:
             text = raw.decode(enc)
