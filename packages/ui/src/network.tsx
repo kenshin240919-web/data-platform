@@ -31,7 +31,7 @@ export const SITES:Record<Site,{url:string;icon:string;name:string;brand:string;
   benefit:{url:'https://benefit.guidejung.com',icon:'🎁',name:'혜택',brand:'내근처 혜택',tagline:'우리 동네 지원금, 놓친 거 없어?'},
   job:{url:'https://job.guidejung.com',icon:'💼',name:'일자리',brand:'내근처 일자리',tagline:'일자리 찾을 때 가는 곳'},
   cvs:{url:'https://cvs.guidejung.com',icon:'🌙',name:'편의점',brand:'내근처 편의점',tagline:'밤에도 상비약 어디서?'},
-  movie:{url:'https://movie.guidejung.com',icon:'🎬',name:'영화관',brand:'내근처 영화관',tagline:'지금 뭐 볼 수 있어?',hidden:true},
+  movie:{url:'https://movie.guidejung.com',icon:'🎬',name:'영화관',brand:'내근처 영화관',tagline:'지금 뭐 볼 수 있어?'},
 };
 const {trip:T,weather:W,traffic:R,charge:C}=Object.fromEntries(Object.entries(SITES).map(([k,v])=>[k,v.url])) as Record<Site,string>;
 
@@ -87,25 +87,25 @@ export function nearRests(lat:number,lon:number,n=2,maxKm=40){
 
 /** Which sister sites matter most from each site (사이트 간 순환): first ones are shown first, up to MAX_LINKS. */
 const ORDER:Record<Site,Site[]>={
-  trip:['parking','hospital','weather','oil','charge','traffic','pharmacy','market','benefit','cvs'],
-  weather:['trip','hospital','parking','traffic','oil','charge','pharmacy','market','benefit','cvs'],
+  trip:['parking','hospital','weather','oil','charge','traffic','pharmacy','market','benefit','cvs','movie'],
+  weather:['trip','hospital','parking','traffic','oil','charge','pharmacy','market','benefit','cvs','movie'],
   traffic:['oil','service','hospital','parking','trip','charge','weather','rest','benefit','cvs'],
-  charge:['trip','parking','hospital','weather','service','traffic','academy','rest','benefit','cvs'],
+  charge:['trip','parking','hospital','weather','service','traffic','academy','rest','benefit','cvs','movie'],
   academy:['hospital','parking','pharmacy','school','trip','weather','civil','benefit','cvs'],
   school:['academy','hospital','pharmacy','parking','weather','trip','civil','benefit','cvs'],
   pharmacy:['hospital','cvs','parking','weather','trip','academy','school','pet','benefit'],
   hospital:['pharmacy','cvs','parking','weather','trip','academy','school','pet','benefit'],
-  oil:['service','charge','hospital','parking','traffic','trip','weather','market','benefit','cvs'],
-  parking:['trip','hospital','oil','charge','service','weather','pharmacy','rest','pet','benefit','cvs'],
+  oil:['service','charge','hospital','parking','traffic','trip','weather','market','benefit','cvs','movie'],
+  parking:['trip','hospital','oil','charge','service','weather','pharmacy','rest','pet','benefit','cvs','movie'],
   service:['oil','parking','hospital','charge','traffic','weather','trip','civil','benefit','cvs'],
-  near:['weather','hospital','pharmacy','parking','oil','trip','charge','market','benefit','cvs'],
-  rest:['parking','hospital','trip','weather','pharmacy','oil','market','benefit','cvs'],
+  near:['weather','hospital','pharmacy','parking','oil','trip','charge','market','benefit','cvs','movie'],
+  rest:['parking','hospital','trip','weather','pharmacy','oil','market','benefit','cvs','movie'],
   pet:['pharmacy','parking','hospital','weather','trip','rest','market','benefit','cvs'],
   civil:['parking','hospital','pharmacy','weather','school','trip','market','benefit','job','cvs'],
-  market:['parking','hospital','trip','weather','pharmacy','oil','civil','benefit','cvs'],
+  market:['parking','hospital','trip','weather','pharmacy','oil','civil','benefit','cvs','movie'],
   benefit:['hospital','job','civil','pharmacy','school','academy','market','weather','parking','cvs'],
   job:['benefit','hospital','civil','parking','academy','weather','trip','market','cvs'],
-  cvs:['pharmacy','hospital','parking','weather','pet','trip','oil','market'],
+  cvs:['pharmacy','hospital','parking','weather','pet','trip','oil','market','movie'],
   movie:['parking','trip','weather','market','cvs','oil','charge','benefit'],
 };
 const MAX_LINKS=8;
