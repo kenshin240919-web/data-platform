@@ -45,6 +45,7 @@ jobs:
           CLARITY_TOKEN_JOB: ${{ secrets.CLARITY_TOKEN_JOB }}
           CLARITY_TOKEN_CVS: ${{ secrets.CLARITY_TOKEN_CVS }}
           CLARITY_TOKEN_MOVIE: ${{ secrets.CLARITY_TOKEN_MOVIE }}
+          CLARITY_TOKEN_STOCK: ${{ secrets.CLARITY_TOKEN_STOCK }}
         run: python scripts/collect-clarity.py
       - name: Commit
         run: |

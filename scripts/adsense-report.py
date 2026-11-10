@@ -18,7 +18,7 @@ KST = dt.timezone(dt.timedelta(hours=9))
 METRICS = ['ESTIMATED_EARNINGS', 'PAGE_VIEWS', 'PAGE_VIEWS_RPM', 'IMPRESSIONS', 'CLICKS', 'IMPRESSIONS_CTR']
 # guidejung.com 쪽(워드프레스 등)은 읽기만 하고 '그 밖'으로 묶어 보여 준다.
 OURS = ('trip', 'weather', 'traffic', 'charge', 'academy', 'school', 'pharmacy', 'hospital', 'oil', 'parking',
-        'service', 'near', 'rest', 'pet', 'minwon', 'market', 'benefit', 'job', 'cvs', 'movie')
+        'service', 'near', 'rest', 'pet', 'minwon', 'market', 'benefit', 'job', 'cvs', 'movie', 'stock')
 
 
 def token():

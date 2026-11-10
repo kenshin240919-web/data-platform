@@ -8,7 +8,7 @@ import {SeasonBanner} from './season';
 import {ACTIONS_JS} from './actions';
 import {LIVE_JS} from './live';
 
-export type Site='trip'|'weather'|'traffic'|'charge'|'academy'|'school'|'pharmacy'|'hospital'|'oil'|'parking'|'service'|'near'|'rest'|'pet'|'civil'|'market'|'benefit'|'job'|'cvs'|'movie';
+export type Site='trip'|'weather'|'traffic'|'charge'|'academy'|'school'|'pharmacy'|'hospital'|'oil'|'parking'|'service'|'near'|'rest'|'pet'|'civil'|'market'|'benefit'|'job'|'cvs'|'movie'|'stock';
 // brand: 사이트 이름(로고·탭 제목), tagline: 부제(질문형 후킹). 10/17 사용자 결정: "내근처" 시리즈.
 // hidden: 아직 배포 전인 사이트(그 사이트 자신의 연결 바에만 보임).
 export const SITES:Record<Site,{url:string;icon:string;name:string;brand:string;tagline:string;hidden?:boolean}>={
@@ -32,6 +32,7 @@ export const SITES:Record<Site,{url:string;icon:string;name:string;brand:string;
   job:{url:'https://job.guidejung.com',icon:'💼',name:'일자리',brand:'내근처 일자리',tagline:'일자리 찾을 때 가는 곳'},
   cvs:{url:'https://cvs.guidejung.com',icon:'🌙',name:'편의점',brand:'내근처 편의점',tagline:'밤에도 상비약 어디서?'},
   movie:{url:'https://movie.guidejung.com',icon:'🎬',name:'영화관',brand:'내근처 영화관',tagline:'지금 뭐 볼 수 있어?'},
+  stock:{url:'https://stock.guidejung.com',icon:'🧺',name:'재고',brand:'내근처 재고',tagline:'그거 근처 매장에 있어?',hidden:true},
 };
 const {trip:T,weather:W,traffic:R,charge:C}=Object.fromEntries(Object.entries(SITES).map(([k,v])=>[k,v.url])) as Record<Site,string>;
 
@@ -107,6 +108,7 @@ const ORDER:Record<Site,Site[]>={
   job:['benefit','hospital','civil','parking','academy','weather','trip','market','cvs'],
   cvs:['pharmacy','hospital','parking','weather','pet','trip','oil','market','movie'],
   movie:['parking','trip','weather','market','cvs','oil','charge','benefit'],
+  stock:['cvs','market','parking','weather','pharmacy','benefit','trip','movie'],
 };
 const MAX_LINKS=8;
 /** Standard links for a spot: the sister sites' pages for the same 시군구 (or the spot itself), in the order that fits the current site. */
@@ -165,6 +167,7 @@ export const GENERIC:Record<Site,Link_>={
   job:{icon:'💼',title:'일자리 찾을 때 가는 곳',desc:'내 관할 고용센터·가까운 직업소개소·새일센터',href:SITES.job.url},
   cvs:{icon:'🌙',title:'상비약 파는 편의점',desc:'약국이 닫은 밤에도 해열제·소화제 살 곳',href:SITES.cvs.url},
   movie:{icon:'🎬',title:'지금 볼 수 있는 영화',desc:'내 주변 극장 오늘 남은 상영·좌석',href:SITES.movie.url},
+  stock:{icon:'🧺',title:'그거 근처 매장에 있어?',desc:'핫팩·건전지·우산 내 동네 다이소 재고',href:SITES.stock.url},
 };
 // 병원을 맨 앞에(11/2 애드센스 주간 보고서: 내근처 수익의 절반·RPM 가장 높음 — 사용자 승인).
 const FIRST:Site[]=['hospital'];
