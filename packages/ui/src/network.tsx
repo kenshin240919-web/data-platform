@@ -32,7 +32,7 @@ export const SITES:Record<Site,{url:string;icon:string;name:string;brand:string;
   job:{url:'https://job.guidejung.com',icon:'💼',name:'일자리',brand:'내근처 일자리',tagline:'일자리 찾을 때 가는 곳'},
   cvs:{url:'https://cvs.guidejung.com',icon:'🌙',name:'편의점',brand:'내근처 편의점',tagline:'밤에도 상비약 어디서?'},
   movie:{url:'https://movie.guidejung.com',icon:'🎬',name:'영화관',brand:'내근처 영화관',tagline:'지금 뭐 볼 수 있어?'},
-  stock:{url:'https://stock.guidejung.com',icon:'🧺',name:'재고',brand:'내근처 재고',tagline:'그거 근처 매장에 있어?',hidden:true},
+  stock:{url:'https://stock.guidejung.com',icon:'🧺',name:'재고',brand:'내근처 재고',tagline:'그거 근처 매장에 있어?'},
 };
 const {trip:T,weather:W,traffic:R,charge:C}=Object.fromEntries(Object.entries(SITES).map(([k,v])=>[k,v.url])) as Record<Site,string>;
 
