@@ -1,8 +1,16 @@
 name: Stock deploy
 # Deploys stock.guidejung.com (Worker guidejung-stock) with wrangler from GitHub Actions. Secrets: CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID.
-# 수집 없음(재고는 방문 때 공개 중계에서 조회, 저장 안 함). 첫 배포·도메인 연결은 사용자 승인 뒤(CLAUDE.md) — 승인 전에는 수동 실행만.
-# 승인 뒤 push(apps/stock/**·apps/weather/data/**·packages/** 등)를 movie-deploy.yml처럼 넣을 것.
+# 수집 없음(재고는 방문 때 공개 중계에서 조회, 저장 안 함). 11/10 사용자 승인으로 첫 배포·도메인 연결.
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/stock/**'
+      - 'apps/weather/data/regions.json'
+      - 'packages/**'
+      - 'scripts/prune-rsc.mjs'
+      - 'package.json'
+      - 'package-lock.json'
   workflow_dispatch:
 permissions:
   contents: read
