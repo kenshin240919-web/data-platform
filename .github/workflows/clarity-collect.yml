@@ -1,6 +1,6 @@
 name: Clarity collect
 # 매일 내근처 12개 Clarity 프로젝트의 최근 24시간 지표(scripts/collect-clarity.py, 프로젝트당 3회/한도 10회)
-# → reports/clarity/raw/YYYY-MM-DD.json main 커밋. 공개 저장소(10/25 사용자 A안). Secret: CLARITY_TOKENS. 무료.
+# → reports/clarity/raw/YYYY-MM-DD.json main 커밋. 공개 저장소(10/25 사용자 A안). Secrets: 사이트마다 CLARITY_TOKEN_{사이트}(11/10부터) + 예전 CLARITY_TOKENS. 무료.
 on:
   schedule:
     - cron: '23 22 * * *' # 07:23 KST
@@ -25,6 +25,26 @@ jobs:
       - name: Collect
         env:
           CLARITY_TOKENS: ${{ secrets.CLARITY_TOKENS }}
+          CLARITY_TOKEN_TRIP: ${{ secrets.CLARITY_TOKEN_TRIP }}
+          CLARITY_TOKEN_WEATHER: ${{ secrets.CLARITY_TOKEN_WEATHER }}
+          CLARITY_TOKEN_TRAFFIC: ${{ secrets.CLARITY_TOKEN_TRAFFIC }}
+          CLARITY_TOKEN_CHARGE: ${{ secrets.CLARITY_TOKEN_CHARGE }}
+          CLARITY_TOKEN_ACADEMY: ${{ secrets.CLARITY_TOKEN_ACADEMY }}
+          CLARITY_TOKEN_SCHOOL: ${{ secrets.CLARITY_TOKEN_SCHOOL }}
+          CLARITY_TOKEN_PHARMACY: ${{ secrets.CLARITY_TOKEN_PHARMACY }}
+          CLARITY_TOKEN_HOSPITAL: ${{ secrets.CLARITY_TOKEN_HOSPITAL }}
+          CLARITY_TOKEN_OIL: ${{ secrets.CLARITY_TOKEN_OIL }}
+          CLARITY_TOKEN_PARKING: ${{ secrets.CLARITY_TOKEN_PARKING }}
+          CLARITY_TOKEN_SERVICE: ${{ secrets.CLARITY_TOKEN_SERVICE }}
+          CLARITY_TOKEN_NEAR: ${{ secrets.CLARITY_TOKEN_NEAR }}
+          CLARITY_TOKEN_REST: ${{ secrets.CLARITY_TOKEN_REST }}
+          CLARITY_TOKEN_PET: ${{ secrets.CLARITY_TOKEN_PET }}
+          CLARITY_TOKEN_CIVIL: ${{ secrets.CLARITY_TOKEN_CIVIL }}
+          CLARITY_TOKEN_MARKET: ${{ secrets.CLARITY_TOKEN_MARKET }}
+          CLARITY_TOKEN_BENEFIT: ${{ secrets.CLARITY_TOKEN_BENEFIT }}
+          CLARITY_TOKEN_JOB: ${{ secrets.CLARITY_TOKEN_JOB }}
+          CLARITY_TOKEN_CVS: ${{ secrets.CLARITY_TOKEN_CVS }}
+          CLARITY_TOKEN_MOVIE: ${{ secrets.CLARITY_TOKEN_MOVIE }}
         run: python scripts/collect-clarity.py
       - name: Commit
         run: |

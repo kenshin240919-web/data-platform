@@ -1,7 +1,8 @@
 """Clarity 하루 수집: 12개 프로젝트의 최근 24시간 지표(전체·URL별·기기별)를 받아
 reports/clarity/raw/YYYY-MM-DD.json 으로 저장한다(공개 저장소 — 10/25 사용자 A안 승인).
 
-Secret CLARITY_TOKENS: 한 줄에 `사이트=토큰`. Clarity Data Export API는 무료,
+Secrets: 사이트마다 따로 `CLARITY_TOKEN_{사이트 대문자}`(예: CLARITY_TOKEN_MOVIE, 11/10부터 — 새 사이트를 넣을 때 다른 사이트 토큰을
+덮어쓰지 않게) + 예전 방식 CLARITY_TOKENS(한 줄에 `사이트=토큰`, 같은 사이트가 둘 다 있으면 따로 넣은 쪽). Clarity Data Export API는 무료,
 프로젝트당 하루 10번·최근 1~3일만 → 매일 3번(전체·URL·기기) 받아 쌓는다.
 """
 import datetime as dt
@@ -24,8 +25,13 @@ for line in os.environ.get('CLARITY_TOKENS', '').splitlines():
         k, v = line.split('=', 1)
         if k.strip() and v.strip():
             tokens[k.strip().lower()] = v.strip()
+for site in SITES:  # 사이트별 Secret이 있으면 그것을 씀
+    v = os.environ.get(f'CLARITY_TOKEN_{site.upper()}', '').strip()
+    if v:
+        tokens[site] = v
 if not tokens:
-    sys.exit('CLARITY_TOKENS 비어 있음')
+    sys.exit('Clarity 토큰이 하나도 없음')
+print('토큰 있는 사이트', len([s for s in SITES if s in tokens]), '/', len(SITES))
 unknown = sorted(set(tokens) - set(SITES))
 if unknown:
     print('모르는 사이트 이름(무시):', ', '.join(unknown))
