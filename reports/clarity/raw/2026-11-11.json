@@ -1,0 +1,851 @@
+{
+ "date": "2026-11-11",
+ "window": "last 24h",
+ "sites": {
+  "movie": {
+   "all": [
+    {
+     "metricName": "DeadClickCount",
+     "information": [
+      {
+       "sessionsCount": 6,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "ExcessiveScroll",
+     "information": [
+      {
+       "sessionsCount": 6,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "RageClickCount",
+     "information": [
+      {
+       "sessionsCount": 6,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "QuickbackClick",
+     "information": [
+      {
+       "sessionsCount": 6,
+       "sessionsWithMetricPercentage": 16.67,
+       "sessionsWithoutMetricPercentage": 83.33,
+       "pagesViews": 1,
+       "subTotal": 1
+      }
+     ]
+    },
+    {
+     "metricName": "ScriptErrorCount",
+     "information": [
+      {
+       "sessionsCount": 6,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "ErrorClickCount",
+     "information": [
+      {
+       "sessionsCount": 6,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0
+      }
+     ]
+    },
+    {
+     "metricName": "ScrollDepth",
+     "information": [
+      {
+       "averageScrollDepth": 52.71
+      }
+     ]
+    },
+    {
+     "metricName": "Traffic",
+     "information": [
+      {
+       "totalSessionCount": 6,
+       "totalBotSessionCount": 2,
+       "distinctUserCount": 6,
+       "pagesPerSessionPercentage": 1.1666666666666667
+      }
+     ]
+    },
+    {
+     "metricName": "EngagementTime",
+     "information": [
+      {
+       "totalTime": 161,
+       "activeTime": 18
+      }
+     ]
+    },
+    {
+     "metricName": "Browser",
+     "information": [
+      {
+       "name": "Chrome",
+       "sessionsCount": 3
+      },
+      {
+       "name": "Edge",
+       "sessionsCount": 2
+      },
+      {
+       "name": "ChromeMobile",
+       "sessionsCount": 1
+      }
+     ]
+    },
+    {
+     "metricName": "Device",
+     "information": [
+      {
+       "name": "PC",
+       "sessionsCount": 5
+      },
+      {
+       "name": "Mobile",
+       "sessionsCount": 1
+      }
+     ]
+    },
+    {
+     "metricName": "OS",
+     "information": [
+      {
+       "name": "Windows",
+       "sessionsCount": 4
+      },
+      {
+       "name": "Android",
+       "sessionsCount": 1
+      },
+      {
+       "name": "Linux",
+       "sessionsCount": 1
+      }
+     ]
+    },
+    {
+     "metricName": "Country",
+     "information": [
+      {
+       "name": "Korea, Republic of",
+       "sessionsCount": 5
+      },
+      {
+       "name": "China",
+       "sessionsCount": 1
+      }
+     ]
+    },
+    {
+     "metricName": "PageTitle",
+     "information": [
+      {
+       "name": "내근처 영화관 | 지금 뭐 볼 수 있어? 내 주변 극장 오늘 남은 상영",
+       "sessionsCount": 2
+      },
+      {
+       "name": "가람영화관 오늘 상영 시간표·남은 좌석 | 내근처 영화관",
+       "sessionsCount": 1
+      },
+      {
+       "name": "강원 삼척시 영화관 3곳 · 오늘 상영 시간표 | 내근처 영화관",
+       "sessionsCount": 1
+      },
+      {
+       "name": "서울 서대문구 영화관 5곳 · 오늘 상영 시간표 | 내근처 영화관",
+       "sessionsCount": 1
+      },
+      {
+       "name": "서울 종로구 영화관 6곳 · 오늘 상영 시간표 | 내근처 영화관",
+       "sessionsCount": 1
+      },
+      {
+       "name": "전남광주 구례군 영화관 1곳 · 오늘 상영 시간표 | 내근처 영화관",
+       "sessionsCount": 1
+      }
+     ]
+    },
+    {
+     "metricName": "ReferrerUrl",
+     "information": [
+      {
+       "name": "search.daum.net",
+       "sessionsCount": 2
+      },
+      {
+       "name": "m.search.daum.net",
+       "sessionsCount": 1
+      },
+      {
+       "name": "movie.guidejung.com",
+       "sessionsCount": 1
+      }
+     ]
+    },
+    {
+     "metricName": "PopularPages",
+     "information": [
+      {
+       "url": "https://movie.guidejung.com/",
+       "visitsCount": 2
+      },
+      {
+       "url": "https://movie.guidejung.com/region/11110",
+       "visitsCount": 1
+      },
+      {
+       "url": "https://movie.guidejung.com/region/11410",
+       "visitsCount": 1
+      },
+      {
+       "url": "https://movie.guidejung.com/region/12730",
+       "visitsCount": 1
+      },
+      {
+       "url": "https://movie.guidejung.com/region/51230",
+       "visitsCount": 1
+      },
+      {
+       "url": "https://movie.guidejung.com/theater/m-209520f49b",
+       "visitsCount": 1
+      }
+     ]
+    }
+   ],
+   "url": [
+    {
+     "metricName": "DeadClickCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://movie.guidejung.com/region/11410"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://movie.guidejung.com/region/11110"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://movie.guidejung.com/region/51230"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://movie.guidejung.com/region/12730"
+      },
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://movie.guidejung.com/"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://movie.guidejung.com/theater/m-209520f49b"
+      }
+     ]
+    },
+    {
+     "metricName": "ExcessiveScroll",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://movie.guidejung.com/region/11410"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://movie.guidejung.com/region/11110"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://movie.guidejung.com/region/51230"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://movie.guidejung.com/region/12730"
+      },
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://movie.guidejung.com/"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://movie.guidejung.com/theater/m-209520f49b"
+      }
+     ]
+    },
+    {
+     "metricName": "RageClickCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://movie.guidejung.com/region/11410"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://movie.guidejung.com/region/11110"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://movie.guidejung.com/region/51230"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://movie.guidejung.com/region/12730"
+      },
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://movie.guidejung.com/"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://movie.guidejung.com/theater/m-209520f49b"
+      }
+     ]
+    },
+    {
+     "metricName": "QuickbackClick",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://movie.guidejung.com/region/11410"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://movie.guidejung.com/region/11110"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 100,
+       "sessionsWithoutMetricPercentage": 0,
+       "pagesViews": 1,
+       "subTotal": 1,
+       "Url": "https://movie.guidejung.com/region/51230"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://movie.guidejung.com/region/12730"
+      },
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://movie.guidejung.com/"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://movie.guidejung.com/theater/m-209520f49b"
+      }
+     ]
+    },
+    {
+     "metricName": "ScriptErrorCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://movie.guidejung.com/region/11410"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://movie.guidejung.com/region/11110"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://movie.guidejung.com/region/51230"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://movie.guidejung.com/region/12730"
+      },
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://movie.guidejung.com/"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://movie.guidejung.com/theater/m-209520f49b"
+      }
+     ]
+    },
+    {
+     "metricName": "ErrorClickCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://movie.guidejung.com/region/11410"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://movie.guidejung.com/region/11110"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://movie.guidejung.com/region/51230"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://movie.guidejung.com/region/12730"
+      },
+      {
+       "sessionsCount": 2,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://movie.guidejung.com/"
+      },
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Url": "https://movie.guidejung.com/theater/m-209520f49b"
+      }
+     ]
+    },
+    {
+     "metricName": "ScrollDepth",
+     "information": [
+      {
+       "averageScrollDepth": 42,
+       "Url": "https://movie.guidejung.com/region/11410"
+      },
+      {
+       "averageScrollDepth": 38,
+       "Url": "https://movie.guidejung.com/region/11110"
+      },
+      {
+       "averageScrollDepth": 49,
+       "Url": "https://movie.guidejung.com/region/51230"
+      },
+      {
+       "averageScrollDepth": 100,
+       "Url": "https://movie.guidejung.com/region/12730"
+      },
+      {
+       "averageScrollDepth": 21.5,
+       "Url": "https://movie.guidejung.com/"
+      },
+      {
+       "averageScrollDepth": 97,
+       "Url": "https://movie.guidejung.com/theater/m-209520f49b"
+      }
+     ]
+    },
+    {
+     "metricName": "Traffic",
+     "information": [
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 1,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 1,
+       "Url": "https://movie.guidejung.com/region/11410"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 1,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 1,
+       "Url": "https://movie.guidejung.com/region/11110"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 1,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 2,
+       "Url": "https://movie.guidejung.com/region/51230"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 1,
+       "Url": "https://movie.guidejung.com/region/12730"
+      },
+      {
+       "totalSessionCount": 2,
+       "totalBotSessionCount": 1,
+       "distinctUserCount": 2,
+       "pagesPerSessionPercentage": 1,
+       "Url": "https://movie.guidejung.com/"
+      },
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 2,
+       "Url": "https://movie.guidejung.com/theater/m-209520f49b"
+      }
+     ]
+    },
+    {
+     "metricName": "EngagementTime",
+     "information": [
+      {
+       "totalTime": 38,
+       "activeTime": 38,
+       "Url": "https://movie.guidejung.com/region/11410"
+      },
+      {
+       "totalTime": 903,
+       "activeTime": 45,
+       "Url": "https://movie.guidejung.com/region/11110"
+      },
+      {
+       "totalTime": 6,
+       "activeTime": 6,
+       "Url": "https://movie.guidejung.com/region/51230"
+      },
+      {
+       "totalTime": 8,
+       "activeTime": 8,
+       "Url": "https://movie.guidejung.com/region/12730"
+      },
+      {
+       "totalTime": 1,
+       "activeTime": 1,
+       "Url": "https://movie.guidejung.com/"
+      },
+      {
+       "totalTime": 10,
+       "activeTime": 10,
+       "Url": "https://movie.guidejung.com/theater/m-209520f49b"
+      }
+     ]
+    }
+   ],
+   "device": [
+    {
+     "metricName": "DeadClickCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Mobile"
+      },
+      {
+       "sessionsCount": 5,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "ExcessiveScroll",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Mobile"
+      },
+      {
+       "sessionsCount": 5,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "RageClickCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Mobile"
+      },
+      {
+       "sessionsCount": 5,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "QuickbackClick",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Mobile"
+      },
+      {
+       "sessionsCount": 5,
+       "sessionsWithMetricPercentage": 20,
+       "sessionsWithoutMetricPercentage": 80,
+       "pagesViews": 1,
+       "subTotal": 1,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "ScriptErrorCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Mobile"
+      },
+      {
+       "sessionsCount": 5,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "ErrorClickCount",
+     "information": [
+      {
+       "sessionsCount": 1,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "Mobile"
+      },
+      {
+       "sessionsCount": 5,
+       "sessionsWithMetricPercentage": 0,
+       "sessionsWithoutMetricPercentage": 100,
+       "pagesViews": 0,
+       "subTotal": 0,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "ScrollDepth",
+     "information": [
+      {
+       "averageScrollDepth": 42,
+       "Device": "Mobile"
+      },
+      {
+       "averageScrollDepth": 54.5,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "Traffic",
+     "information": [
+      {
+       "totalSessionCount": 1,
+       "totalBotSessionCount": 2,
+       "distinctUserCount": 1,
+       "pagesPerSessionPercentage": 1,
+       "Device": "Mobile"
+      },
+      {
+       "totalSessionCount": 5,
+       "totalBotSessionCount": 0,
+       "distinctUserCount": 5,
+       "pagesPerSessionPercentage": 1.2,
+       "Device": "PC"
+      }
+     ]
+    },
+    {
+     "metricName": "EngagementTime",
+     "information": [
+      {
+       "totalTime": 38,
+       "activeTime": 38,
+       "Device": "Mobile"
+      },
+      {
+       "totalTime": 186,
+       "activeTime": 14,
+       "Device": "PC"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}
