@@ -138,6 +138,7 @@ for site in ORDER:
         'sources': top(pid, 'sessionSource', 'sessions'),
         'pages': top(pid, 'pagePath', 'screenPageViews'),
         'landing': top(pid, 'landingPage', 'sessions'),
+        'days': top(pid, 'date', 'screenPageViews', 7),
         'events': dict(top(pid, 'eventName', 'eventCount', 10, {'dimensionFilter': {'filter': {
             'fieldName': 'eventName', 'inListFilter': {'values': ['share', 'favorite', 'install_hint', 'install_click', 'install_done', 'alert_click', 'push_subscribe']}}}})),
     }
@@ -148,6 +149,19 @@ sum_u = sum(d['this']['activeUsers'] for d in data.values())
 sum_p = sum(d['prev']['activeUsers'] for d in data.values())
 sum_v = sum(d['this']['screenPageViews'] for d in data.values())
 L += [f'**전체**: 사용자 {n(sum_u)}명({pct(sum_u, sum_p)}) · 조회 {n(sum_v)}회 · 사이트 {len(data)}/{len(SITES)}', '']
+GOAL = 250  # 하루 1,000달러 기획안(11/8)의 핵심 지표: 사이트 하나가 하루 평균 250회 조회를 넘었는지
+avg = lambda t: t['screenPageViews'] / 7
+hit = [s for s in data if avg(data[s]['this']) >= GOAL]
+hit_prev = [s for s in data if avg(data[s]['prev']) >= GOAL]
+L += [f'## 🎯 하루 조회 {GOAL}회 넘은 사이트: {len(hit)}곳 (지난주 {len(hit_prev)}곳)', '',
+      f'지난 7일 조회 수 ÷ 7 기준. 목표는 모든 사이트가 하루 {GOAL}회를 넘는 것.', '',
+      '| 사이트 | 하루 평균 조회 | 지난주 | 가장 많은 날 | 목표까지 |', '|---|---:|---:|---:|---:|']
+for site in sorted(data, key=lambda s: -avg(data[s]['this'])):
+    t, p, days = data[site]['this'], data[site]['prev'], data[site]['days']
+    a = avg(t)
+    best = f"{int(days[0][0][4:6])}/{int(days[0][0][6:])} {n(days[0][1])}회" if days else '–'
+    L.append(f"| {site} | {n(a)} | {n(avg(p))} | {best} | {'✅ 달성' if a >= GOAL else n(GOAL - a) + '회 더'} |")
+L.append('')
 L += ['## 한눈에 보기', '',
       '| 사이트 | 사용자 | 증감 | 신규 | 세션 | 조회 | 세션당 조회 | 1인 참여 시간 | 참여율 | 공유 | 즐겨찾기 | 설치 안내 | 설치 누름 | 설치 | 알림 누름 | 알림 등록 시도 |',
       '|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|']

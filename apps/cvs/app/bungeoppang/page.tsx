@@ -3,6 +3,7 @@ import Link from 'next/link';
 import {Faq,breadcrumbLd,JsonLd} from '@guidejung/ui/seo';
 import {Gs25Near} from '../_components/Gs25Near';
 import {Ad} from '../_components/Ad';
+import {GsLinks} from '../_components/GsLinks';
 import {COND_MIN,n,nation,regions,SITE} from '../../lib/data';
 export const metadata:Metadata={title:'붕어빵 파는 편의점 · 내 주변 GS25 붕어빵·군고구마',description:'내 위치에서 1.5km 안 붕어빵·군고구마 파는 GS25를 가까운 순으로. GS25 앱에 매장이 등록한 서비스 정보를 방문할 때 바로 확인해 보여 드리고, 전화번호·거리도 함께 알려 드려요.',alternates:{canonical:'/bungeoppang'}};
 const PICKS=[{key:'fish',label:'붕어빵',props:['붕어빵']},{key:'yam',label:'군고구마',props:['군고구마']},{key:'both',label:'붕어빵·군고구마',props:['붕어빵','군고구마']}];
@@ -19,6 +20,7 @@ export default function Bungeoppang(){
       <li><b>가까운 곳 두세 곳을 함께 보세요</b><span>목록은 가까운 순이에요. 첫 매장이 다 팔렸으면 다음 매장으로.</span></li>
       <li><b>목록에 없는 매장도 있어요</b><span>GS25 앱에 등록한 서비스만 보여 드려요. CU·세븐일레븐·이마트24 등은 이 정보를 받을 수 없어 보이지 않을 뿐이에요.</span></li>
     </ol></section>
+    <GsLinks here="/bungeoppang"/>
     <section><h2>GS25 매장이 많은 지역</h2><p className="muted small">상비약 판매자로 등록된 GS25 기준이에요. 지역 페이지에서 매장 주소·전화를 볼 수 있어요.</p>
       <ol className="cv-rank">{top.map(r=><li key={r.id}><Link href={`/region/${r.id}/gs25`}><b>{r.name}</b><span>{n(r.brands.gs25)}곳</span></Link></li>)}</ol></section>
     <Faq items={[

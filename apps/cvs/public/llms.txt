@@ -5,6 +5,9 @@
 ## 주요 페이지
 - [상비약 안내](https://cvs.guidejung.com/medicine): 안전상비의약품이란, 판매자 등록·24시간 연중 무휴 기준, 밤에 아플 때 순서(약사법 원문 기준)
 - [붕어빵 파는 편의점](https://cvs.guidejung.com/bungeoppang): 내 위치 1.5km 안 붕어빵·군고구마 서비스를 등록한 GS25(GS25 앱 매장 정보를 방문 때 확인, 비공식·저장 안 함)
+- [반값택배 되는 편의점](https://cvs.guidejung.com/half-delivery): 내 위치 1.5km 안 반값택배 접수·픽업, 국내택배 접수를 등록한 GS25
+- [현금 출금 되는 편의점](https://cvs.guidejung.com/atm): 내 위치 1.5km 안 현금 출금·입금·스마트ATM을 등록한 GS25
+- [마감할인 하는 편의점](https://cvs.guidejung.com/closing-sale): 내 위치 1.5km 안 마감할인 서비스를 등록한 GS25(상품·가격은 보여 주지 않음)
 - 브랜드별 `/brand/cu|gs25|seven|emart24|ministop`: 전국 수·내 주변·많은 지역(상호 기준, 본사 공식 목록 아님)
 - [지역별](https://cvs.guidejung.com/region): 시군구 `/region/{시군구코드}`, 브랜드별 `/region/{코드}/{브랜드}`, 가장 가까운 약국까지 거리 중앙값·1km 안에 약국 없는 곳 수
 - 상세 `/store/{id}`: 이름·주소·전화·등록일·가장 가까운 약국(평일 마감·일요일)·밤 10시 넘어 여는 약국·가장 가까운 응급실
