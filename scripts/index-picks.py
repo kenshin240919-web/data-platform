@@ -133,8 +133,11 @@ def main():
         q = [u for _, u in ranked if u not in state or (today - date.fromisoformat(state[u])).days >= REDO_DAYS]
         queues.append((site, q))
         print(f'{site}: 후보 {len(ranked):,} · 남은 {len(q):,}')
-    retry = json.loads(RETRY.read_text(encoding='utf-8')) if RETRY.exists() else []
-    picks, inspected, indexed = [(s, u) for s, u in retry][:n], 0, 0
+    # [사이트, 주소] 또는 [사이트, 주소, '이 날짜부터'] — 날짜가 오늘보다 뒤면 그날까지 남겨 둠(오늘 실행이 늦게 돌아 미리 써 버리는 것 방지)
+    retry_all = json.loads(RETRY.read_text(encoding='utf-8')) if RETRY.exists() else []
+    due = [r for r in retry_all if len(r) < 3 or r[2] <= today.isoformat()]
+    later = [r for r in retry_all if not (len(r) < 3 or r[2] <= today.isoformat())]
+    picks, inspected, indexed = [(r[0], r[1]) for r in due][:n], 0, 0
     again = {u for _, u in picks}
     for _, q in queues:
         q[:] = [u for u in q if u not in again]
@@ -179,7 +182,7 @@ def main():
     (out / f'색인요청-{today.isoformat()}.md').write_text(text, encoding='utf-8')
     STATE.write_text(json.dumps(dict(sorted(state.items())), ensure_ascii=False, indent=0), encoding='utf-8')
     if RETRY.exists():
-        rest_retry = retry[n:]
+        rest_retry = due[n:] + later
         if rest_retry:
             RETRY.write_text(json.dumps(rest_retry, ensure_ascii=False, indent=0), encoding='utf-8')
         else:
