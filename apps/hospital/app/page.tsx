@@ -21,8 +21,8 @@ export default function Home(){
   return <div className="page hp-home">
     <section className="hp-hero"><h1>지금 진료하는 병원 어디?</h1>
       <p><b>지금 진료 중</b>인 병원을 과목별로 가까운 순으로</p></section>
-    <FavList hint="병원 상세에서 ☆ 즐겨찾기를 누르면 여기서 바로 지금 진료 중인지 볼 수 있어요."/>
     <NearNow/>
+    <FavList hint="병원 상세에서 ☆ 즐겨찾기를 누르면 여기서 바로 지금 진료 중인지 볼 수 있어요."/>
     <section><h2>이럴 땐 여기로</h2><div className="hp-situ">{SITU.map(([icon,t,d,href])=><a key={href} href={href}><span aria-hidden="true">{icon}</span><span><b>{t}</b><small>{d}</small></span></a>)}</div></section>
     {/* 전국 수치(검색엔진·AI 답변용): 첫 화면을 가볍게 하려고 히어로에서 3초 답 아래로 내림(10/29 사용자) */}
     <p className="muted small gj-facts">전국 병·의원 <b>{n(status.count)}곳</b>의 요일별 진료 시간으로 <b>지금 진료 중</b>인 곳을 과목별로 가까운 순으로 보여 드려요. 야간 {n(cond.night)}곳 · 일요일 {n(cond.sun)}곳 · 공휴일 {n(cond.hol)}곳 · 응급실 {n(erCount)}곳.</p>
