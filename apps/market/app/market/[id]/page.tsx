@@ -6,7 +6,7 @@ import {Connect,genericFor,linksNear} from '@guidejung/ui/network';
 import {MarketCard} from '../../_components/Cards';
 import {StoreTable,type Row} from '../../_components/StoreTable';
 import {JangInfo} from '../../_components/JangInfo';
-import {baseLabel,CATS,eun,exact,fairOf,jangDaysText,jangLabel,isMarket,located,mapUrl,market,naverUrl,marketPath,markets,n,nearMarkets,pct,SITE,sidoFull,sidoSlug,status,storesOf,topCats,type Market} from '../../../lib/data';
+import {baseLabel,CATS,km,eun,exact,fairOf,jangDaysText,jangLabel,isMarket,located,mapUrl,market,naverUrl,marketPath,markets,n,nearMarkets,pct,SITE,sidoFull,sidoSlug,status,storesOf,topCats,type Market} from '../../../lib/data';
 
 export const dynamicParams=false;
 export function generateStaticParams(){return markets.map(m=>({id:m.id}));}
@@ -41,6 +41,9 @@ export default async function MarketPage({params}:P){
     <div className="mk-actions">{<a href={mapUrl({name:m.name,lat:pin?m.lat:null,lon:pin?m.lon:null,addr:m.addr??`${sidoFull(m.sido)} ${m.name}`})} target="_blank" rel="noopener">🧭 시장 길찾기</a>}
       {s?.tel&&<a className="sub" href={`tel:${s.tel.replace(/[^0-9]/g,'')}`}>📞 시장 전화</a>}
       <a className="naver" href={naverUrl(m.name,where(m).split(' ').slice(-1)[0])} target="_blank" rel="noopener">🟢 네이버 지도에서 보기</a></div>
+    {/* 11/12 '이어서 보기': 가게 목록이 길어(약 3,700px) 아래 '가까운 다른 시장'까지 거의 안 내려감 → 첫 화면에 한 줄 */}
+    {(near.length>0||m.region)&&<nav className="gj-next" aria-label="이어서 보기"><span>근처 시장</span>{near.slice(0,3).map(x=><a key={x.m.id} href={marketPath(x.m.id)}>{x.m.name}<small>{km(x.km)} · 가맹점 {n(x.m.n)}곳</small></a>)}
+      {m.region&&<Link className="all" href={`/region/${m.region}`}>{m.region_name} 사용처 전체 →</Link>}</nav>}
     <p className="mk-lead">{lead}</p>
     {fr&&<JangInfo f={fr} name={m.name}/>}
     <section><h2>가맹점 목록 <span className="muted">{n(m.n)}곳</span></h2><StoreTable rows={rows} latest={status.latest_year} ad={6}/></section>

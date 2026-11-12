@@ -147,6 +147,13 @@ const LD_DAY:Record<string,string>={'1':'Monday','2':'Tuesday','3':'Wednesday','
 const ldType=(div:string|null)=>/치과/.test(div??'')?'Dentist':/병원/.test(div??'')&&!/한방/.test(div??'')?'Hospital':'MedicalClinic';
 const cardHtml=(c:Card)=>{const s=statusOf(c);return `<a class="hp-card ${s.state}" href="${hospitalPath(c.id)}"><span class="hp-dot" aria-hidden="true"></span><span class="hp-card-body"><b>${esc(c.name)}</b><small>${c.km!=null?`${esc(km(c.km))} · `:''}${esc(s.label)}</small><small class="muted">${esc([c.div,...c.depts.slice(0,3).map(deptLabel)].filter(Boolean).join(' · '))}</small></span></a>`;};
 
+// 11/12 '이어서 보기': 상세 첫 화면에서 다음 병원으로(아래 '근처 같은 과목' 칸은 스크롤 35~45%라 거의 안 보였음). 지금 진료 중인 곳 먼저.
+function nextHtml(h:Hospital,nearby:Card[],depts:string[]){
+  const dept=(h as HospitalX).dept?deptLabel((h as HospitalX).dept!):depts[0]??'병원';
+  const pick=[...nearby].sort((a,b)=>(statusOf(a).state==='closed'?1:0)-(statusOf(b).state==='closed'?1:0)).slice(0,3);
+  if(!pick.length)return '';
+  return `<nav class="gj-next" aria-label="이어서 보기"><span>근처 ${esc(dept)}</span>${pick.map(c=>{const s=statusOf(c);return `<a href="${hospitalPath(c.id)}">${esc(c.name)}<small>${c.km!=null?`${esc(km(c.km))} · `:''}${esc(s.label)}</small></a>`;}).join('')}<a class="all" href="/region/${esc(h.region)}">${esc(h.region_name)} 병원 전체 →</a></nav>`;
+}
 function detailHtml(h:Hospital,nearby:Card[],bed:Bed|null,ins:ReturnType<typeof insight>){
   const now=kstNow(),s=statusOf(h,now),todayKey=now.holiday?'8':now.day;
   const depts=h.depts.map(deptLabel);
@@ -172,6 +179,7 @@ function detailHtml(h:Hospital,nearby:Card[],bed:Bed|null,ins:ReturnType<typeof 
 ${depts.length?`<div class="hp-tags">${depts.map(d=>`<span>${esc(d)}</span>`).join('')}</div>`:''}</div>${actionsHtml({id:h.id,name:h.name,sub:[h.div,h.region_name].filter(Boolean).join(' · '),url:hospitalPath(h.id)})}
 <p class="hp-answer ${s.state}"><span class="hp-dot" aria-hidden="true"></span><b>${esc(s.label)}</b>${s.today?` <span class="muted">· 오늘 ${esc(s.today)}</span>`:''}</p>
 ${h.er?`<div class="hp-er-box">🚑 <b>응급실 운영</b>${bed?.beds!=null?` · 지금 응급실 남은 병상 <strong>${bed.beds}</strong>${bed.updated?` <small class="muted">(${esc(bed.updated)} 기준)</small>`:''}`:''}${h.er_tel?` · <a href="tel:${esc(h.er_tel.replace(/[^0-9]/g,''))}">응급실 ${esc(h.er_tel)}</a>`:''}</div>`:''}
+${nextHtml(h,nearby,depts)}
 <div class="hp-actions">${h.tel?`<a href="tel:${esc(h.tel.replace(/[^0-9]/g,''))}">📞 전화하기</a>`:''}${map?`<a class="sub" href="${esc(map)}" rel="noopener" target="_blank">🧭 길찾기</a>`:''}</div>
 <section><h2>요일별 진료 시간</h2><table class="hp-hours"><tbody>${days.map(d=>{const x=h.hours[d];return `<tr${d===todayKey?' class="today"':''}><th>${DAY_LABEL[d]}${d===todayKey?' (오늘)':''}</th><td>${x?`${esc(hm(x[0]))} ~ ${esc(hm(x[1]))}`:'<span class="muted">휴진</span>'}</td></tr>`;}).join('')}</tbody></table>
 <p class="muted small">병원이 국립중앙의료원에 신고한 시간입니다. 점심시간·접수 마감·임시 휴진은 다를 수 있으니 가기 전에 전화로 확인하세요.</p></section>
