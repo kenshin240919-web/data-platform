@@ -42,7 +42,7 @@ async function blocks(kind:string,a:Area,lat:number,lon:number,put:(b:Block)=>vo
   if(kind==='suneung'||kind==='new-year'){
     const ymd=(day??'').replace(/-/g,'');
     L.weather(a).then(w=>{const d=w?.weekend.find(x=>x.date===ymd);const pop=d?Math.max(d.am.pop,d.pm.pop):0;
-      put({key:kind==='suneung'?'day':'sun',icon:'🌤️',title:`${a.n} ${kind==='suneung'?'수능날':'1월 1일'} 날씨`,items:w?(d?[{name:`${DAY[ymdDay(d.date)]}요일 ${d.am.sky} → ${d.pm.sky}`,sub:`아침 최저 ${d.min}° · 낮 최고 ${d.max}° · 비·눈 확률 ${pop}%`,href:`${U.weather}/region/${a.w}`,tone:pop>=60?'warn':'good'}]:[]):null,
+      put({key:kind==='suneung'?'day':'sun',icon:'🌤️',title:`${a.n} ${kind==='suneung'?'수능날':'1월 1일'} 날씨`,items:w?(d?[{name:`${DAY[ymdDay(d.date)]}요일 ${d.am.sky} → ${d.pm.sky}`,sub:`아침 최저 ${d.min}° · 낮 최고 ${d.max}° · 비·눈 확률 ${pop}%${kind==='suneung'&&d.min<=0?' · 🥶 아침 영하, 겉옷·핫팩을 챙기세요':''}`,href:`${U.weather}/region/${a.w}`,tone:pop>=60||(kind==='suneung'&&d.min<=0)?'warn':'good'}]:[]):null,
         more:['우리 동네 예보 보기',`${U.weather}/region/${a.w}`],empty:'아직 예보가 없어요. 10일 앞부터 예보가 나와요(기상청 중기예보).'});});
   }
   if(kind==='suneung'){

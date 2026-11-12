@@ -31,7 +31,7 @@ RETRY = ROOT / 'reports/gsc/index-retry.json'
 REDO_DAYS = 21
 MAX_INSPECT = 80
 SKIP = re.compile(r'/(about|data-policy|privacy|search|compare|alerts)(/|$)')
-FOCUS = {'hospital': 3}  # 사이트 → 하루에 먼저 뽑을 개수
+FOCUS = {'hospital': 3, 'market': 2, 'job': 2}  # 사이트 → 하루에 먼저 뽑을 개수(11/12 시장·일자리 추가 — 주간 GA에서 가장 크게 늘어난 두 사이트)
 HUB = re.compile(r'^/[a-z0-9-]+$')  # /region·/doc·/24h·/rank 같은 한 단계 모음 페이지
 
 
