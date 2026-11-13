@@ -1,16 +1,16 @@
 name: AdSense weekly
-# 매주 월요일 애드센스 주간 보고서(7일) + 3일마다 3일 보고서(11/13 사용자)(scripts/adsense-report.py) → 비공개 저장소 ads 의 adsense/주간-YYYY-MM-DD.md.
+# 매주 월요일 애드센스 주간 보고서(7일) + 월·수·금 요일 묶음 보고서(월·화 / 수·목 / 금·토·일, 지난주 같은 요일과 비교 — 11/13 사용자)(scripts/adsense-report.py) → 비공개 저장소 ads 의 adsense/주간-YYYY-MM-DD.md.
 # 수익·클릭률은 이 공개 저장소·Actions 로그에 남기지 않는다(애드센스 약관 기밀 정보 — 보수적으로). 무료(AdSense Management API).
 # Secrets: ADSENSE_CLIENT_ID · ADSENSE_CLIENT_SECRET · ADSENSE_REFRESH_TOKEN, PRIVATE_REPORTS_TOKEN(그 비공개 저장소 Contents 쓰기만 되는 토큰).
 on:
   schedule:
     - cron: '7 20 * * 0' # 월요일 05:07 KST — GitHub 예약이 늦어 08:53 요약 전에 끝나도록 앞당김(11/2)
-    - cron: '17 20 */3 * *' # 3일마다 05:17 KST → 3일-YYYY-MM-DD.md (이 세션 예약이 09:14에 읽어 알림)
+    - cron: '17 20 * * 0,2,4' # 월·수·금 05:17 KST → 묶음-YYYY-MM-DD.md (이 세션 예약이 09:14에 읽어 알림)
   workflow_dispatch:
     inputs:
       days:
-        description: '기간(일)'
-        default: '3'
+        description: '기간(일 수, block = 요일 묶음)'
+        default: 'block'
 permissions:
   contents: read
 concurrency:
@@ -39,8 +39,8 @@ jobs:
           SCHEDULE: ${{ github.event.schedule }}
           DAYS: ${{ inputs.days }}
         run: |
-          D=7; [ "$SCHEDULE" = '17 20 */3 * *' ] && D=3; [ -n "$DAYS" ] && D=$DAYS
-          python scripts/adsense-report.py --out private/adsense --days "$D"
+          D=7; [ "$SCHEDULE" = '17 20 * * 0,2,4' ] && D=block; [ -n "$DAYS" ] && D=$DAYS
+          if [ "$D" = block ]; then python scripts/adsense-report.py --out private/adsense --block; else python scripts/adsense-report.py --out private/adsense --days "$D"; fi
       - name: Commit to private repo
         working-directory: private
         run: |

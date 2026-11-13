@@ -4,6 +4,7 @@ Secrets: ADSENSE_CLIENT_ID · ADSENSE_CLIENT_SECRET · ADSENSE_REFRESH_TOKEN(사
   --check      연결 시험: 계정·도메인 이름·행 수만 출력.
   --out DIR    지난 7일(어제까지)·그 전 7일 보고서를 DIR/주간-YYYY-MM-DD.md 로 쓴다.
   --days N     기간을 N일로(기본 7). 7이 아니면 DIR/{N}일-YYYY-MM-DD.md.
+  --block      요일 묶음(월·화 / 수·목 / 금·토·일 중 어제가 끝인 묶음)을 지난주 같은 요일과 비교 → DIR/묶음-YYYY-MM-DD.md.
 수익·클릭률 같은 숫자는 로그에 출력하지 않는다(공개 저장소의 Actions 로그는 누구나 봄). 보고서는 비공개 저장소
 ads 에만 올린다(adsense-weekly.yml) — 애드센스 약관의 기밀 정보에 클릭률 등 실적 통계가 들어간다고 알려져 있어 보수적으로.
 """
@@ -101,17 +102,28 @@ def table(heads, rows):
     return '\n'.join(out)
 
 
-def build(acc, out_dir, n=7):
+BLOCK = [0, 0, 2, 2, 4, 4, 4]  # 요일(월=0)마다 그 묶음의 첫 요일: 월·화 / 수·목 / 금·토·일
+
+
+def build(acc, out_dir, n=7, block=False):
     end = dt.datetime.now(KST).date() - dt.timedelta(days=1)
-    start = end - dt.timedelta(days=n - 1)
-    pend, pstart = start - dt.timedelta(days=1), start - dt.timedelta(days=n)
-    name, before = ('주간', '지난주') if n == 7 else (f'{n}일', f'앞 {n}일')
+    if block:  # 묶음 길이가 2·2·3일로 달라 바로 앞 묶음 대신 지난주 같은 요일과 비교
+        start = end - dt.timedelta(days=end.weekday() - BLOCK[end.weekday()])
+        pstart, pend = start - dt.timedelta(days=7), end - dt.timedelta(days=7)
+        n = (end - start).days + 1
+        days_ko = '·'.join('월화수목금토일'[(start + dt.timedelta(days=i)).weekday()] for i in range(n))
+        name, before = '묶음', '지난주 같은 요일'
+    else:
+        start = end - dt.timedelta(days=n - 1)
+        pend, pstart = start - dt.timedelta(days=1), start - dt.timedelta(days=n)
+        name, before = ('주간', '지난주') if n == 7 else (f'{n}일', f'앞 {n}일')
+        days_ko = ''
     this, tot = report(acc, start, end, ['DOMAIN_NAME'])
     prev, ptot = report(acc, pstart, pend, ['DOMAIN_NAME'])
     pmap = {r['DOMAIN_NAME']: r for r in prev}
     E = 'ESTIMATED_EARNINGS'
     total = tot.get(E) or sum(r[E] for r in this)
-    L = [f'# 애드센스 {name} 보고서 {end.isoformat()}', '',
+    L = [f'# 애드센스 {name} 보고서 {end.isoformat()}' + (f' ({days_ko})' if days_ko else ''), '',
          f'기간 {start}~{end}(한국 날짜, 어제까지 {n}일) · 비교 {pstart}~{pend} · 통화 {CUR["code"] or "?"} · 추정 수익(확정 전).',
          '비공개 저장소 전용 — 공개 저장소·채팅 밖으로 옮기지 말 것.', '']
     pv = tot.get('PAGE_VIEWS') or sum(r['PAGE_VIEWS'] for r in this)
@@ -173,7 +185,7 @@ def main():
     if '--out' not in sys.argv:
         sys.exit('--out DIR 필요(비공개 저장소 폴더)')
     n = int(sys.argv[sys.argv.index('--days') + 1]) if '--days' in sys.argv else 7
-    build(acc, sys.argv[sys.argv.index('--out') + 1], n)
+    build(acc, sys.argv[sys.argv.index('--out') + 1], n, '--block' in sys.argv)
 
 
 main()
