@@ -50,6 +50,8 @@ export default async function Detail({params}:P){
     {(i.docs||i.doclinks?.length)&&<section className="bf-sec"><h2>준비 서류</h2>{i.docs&&<p className="bf-text">{i.docs}</p>}
       {i.docs_self&&<p className="bf-text"><b>본인이 확인해 내는 서류</b>{'\n'}{i.docs_self}</p>}{i.docs_off&&<p className="bf-text"><b>담당 공무원이 확인하는 서류</b>{'\n'}{i.docs_off}</p>}
       {i.doclinks?.length?<><p className="muted small">아래 서류는 가까운 무인민원발급기·주민센터에서 뗄 수 있어요.</p><div className="bf-docs">{i.doclinks.map(s=><a key={s} href={docUrl(s)}>🖨️ {DOC_TITLES[s]??s} 떼는 곳</a>)}</div></>:null}</section>}
+    {/* 11/14: 고용·창업 분야이거나 근로·소득 혜택이면 일자리 계산기로(연말정산 철) */}
+    {(i.field==='job'||/근로|소득|장려금|임금|월급/.test(i.name))&&<section className="bf-sec"><h2>🧮 함께 계산해 보기</h2><div className="bf-docs"><a href="https://job.guidejung.com/calc/yearend">🧾 연말정산 — 내 연봉이면 세금 얼마?</a><a href="https://job.guidejung.com/calc/wage">⏱️ 시급·주휴수당·월급</a><a href="https://job.guidejung.com/calc/unemployment">💼 실업급여 하루 얼마?</a></div></section>}
     <section className="bf-sec"><h2>문의·접수</h2><dl className="bf-facts">{([['소관 기관',[i.org,i.dept].filter(Boolean).join(' ')],['접수 기관',i.recv],['문의',i.tel],['근거 법령',i.law],['자치법규',i.ordin],['행정규칙',i.rule]] as [string,string|undefined][]).filter(([,v])=>v).map(([k,v])=><div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}</dl></section>
     {sim.length>0&&<section><h2>비슷한 혜택, 다른 지역은?</h2><table className="bf-table"><thead><tr><th>혜택</th><th>지역</th><th>적힌 금액</th></tr></thead>
       <tbody>{sim.map(x=><tr key={x.id}><td><a href={benefitPath(x.id)}>{x.name}</a></td><td>{where(x)}</td><td>{x.amount?`최대 ${won(x.amount)}`:'—'}</td></tr>)}</tbody></table></section>}

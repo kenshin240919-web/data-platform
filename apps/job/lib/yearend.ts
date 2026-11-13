@@ -2,7 +2,8 @@
 // 2026년 귀속(2027년 1~2월 연말정산) 기준. 해마다 12월 전에 숫자·출처를 같이 고칠 것. 확인 2026-11-09.
 //  - 세율(소득세법 제55조) 6~45% 8단계, 근로소득공제(제47조, 한도 2,000만 원), 근로소득세액공제(제59조, 총급여별 한도 74·66·50·20만 원)
 //    — 국세청 안내·해설 자료 기준(최근 개정 없음으로 확인, 국회 개정 여부는 국세청 최종 안내로 다시 확인).
-//  - 자녀세액공제(제59조의2) 2025년 소득분부터 첫째 25만·둘째 30만·셋째 이상 1명당 40만 원(8세 이상 자녀).
+//  - 자녀세액공제(제59조의2) 2025년 소득분부터 첫째 25만·둘째 30만·셋째 이상 1명당 40만 원. 대상 나이는 아동수당 확대에 맞춰
+//    2025년 8세 이상 → 2026년 9세 이상 → 2027년 10세 … 2030년 13세 이상(2026년 소득세법 개정 부칙, 11/14 보도·법령 개정이유로 확인 — 국세청 최종 안내로 다시 확인).
 //  - 신용카드 등 소득공제(조특법 제126조의2): 문턱 총급여 25%, 신용카드 15%·체크카드·현금영수증 30%·전통시장·대중교통 40%,
 //    기본 한도 300만(총급여 7천만 원 초과 250만) + 2026년부터 자녀(손자녀 포함) 1명당 50만 원(최대 100만, 7천만 원 초과 25만·최대 50만),
 //    전통시장·대중교통 추가 한도 300만(7천만 원 초과 200만) — 2025.12.2 국회 의결 보도 기준.
@@ -12,7 +13,9 @@
 //  - 표준세액공제 13만 원: 특별소득·특별세액·월세 세액공제를 신청하지 않을 때 → 두 방식 중 세금이 적은 쪽을 보여 줌.
 // 의료비·교육비·보험료·기부금·주택자금·청약 등은 넣지 않은 어림값(화면에 안내).
 export const YE_YEAR=2026;
-export const YE_CHECKED='2026-11-09';
+export const YE_CHECKED='2026-11-14';
+/** 자녀세액공제 대상 나이(만, 이상) — 귀속 연도별. */
+export const KIDS_AGE=({2025:8,2026:9,2027:10,2028:11,2029:12} as Record<number,number>)[YE_YEAR]??13;
 const BRACKETS:[number,number,number][]=[[14e6,0.06,0],[50e6,0.15,1.26e6],[88e6,0.24,5.76e6],[150e6,0.35,15.44e6],[300e6,0.38,19.94e6],[500e6,0.40,25.94e6],[1e9,0.42,35.94e6],[Infinity,0.45,65.94e6]];
 export const taxOf=(base:number)=>{if(base<=0)return 0;const [,r,d]=BRACKETS.find(([top])=>base<=top)!;return Math.max(0,base*r-d);};
 export function earnedDeduction(g:number){
@@ -36,18 +39,18 @@ export function cardDeduction(g:number,credit:number,debit:number,special:number
   const add=Math.min(g<=70e6?3e6:2e6,Math.min(over,extra));
   return {deduction:Math.round(basic+add),threshold:Math.round(g*0.25),used:credit+debit+special};
 }
-export type YeIn={gross:number;insurance:number;pension:number;people:number;elder:number;kids8:number;credit:number;debit:number;special:number;pensionSave:number;rent:number;married:boolean;paid:number|null};
+export type YeIn={gross:number;insurance:number;pension:number;people:number;elder:number;kids:number;credit:number;debit:number;special:number;pensionSave:number;rent:number;married:boolean;paid:number|null};
 export function yearEnd(i:YeIn){
   const g=Math.max(0,i.gross);
   const earned=Math.round(earnedDeduction(g));
   const income=g-earned;
   const personal=Math.max(1,i.people)*1.5e6+i.elder*1e6;
-  const card=cardDeduction(g,i.credit,i.debit,i.special,i.kids8);
+  const card=cardDeduction(g,i.credit,i.debit,i.special,i.kids);
   const common=personal+i.pension+card.deduction;
   const run=(special:boolean)=>{
     const base=Math.max(0,income-common-(special?i.insurance:0));
     const calc=Math.round(taxOf(base));
-    const parts={earned:Math.round(earnedCredit(calc,g)),child:childCredit(i.kids8),pensionSave:Math.round(Math.min(9e6,i.pensionSave)*(g<=55e6?0.15:0.12)),
+    const parts={earned:Math.round(earnedCredit(calc,g)),child:childCredit(i.kids),pensionSave:Math.round(Math.min(9e6,i.pensionSave)*(g<=55e6?0.15:0.12)),
       rent:special&&g<=80e6?Math.round(Math.min(10e6,i.rent)*(g<=55e6?0.17:0.15)):0,married:i.married?500000:0,standard:special?0:130000};
     const credits=Object.values(parts).reduce((a,b)=>a+b,0);
     const tax=Math.max(0,calc-credits);

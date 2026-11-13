@@ -1,8 +1,11 @@
 'use client';
 // 계산기 4종(시급·주휴·월급 / 퇴직금 / 실업급여 / 4대보험). 입력은 브라우저 안에서만 계산(서버로 보내지 않음).
 import {useState} from 'react';
-import {insurance,MIN_WAGE,severance,unemployment,wage,won} from '../../lib/calc';
-import {yearEnd} from '../../lib/yearend';
+import {insurance,MIN_WAGE,severance,unemployment,wage,won,YEAR} from '../../lib/calc';
+import {KIDS_AGE,yearEnd} from '../../lib/yearend';
+// GA calc_use(계산기 이름): 페이지마다 계산기를 처음 만졌을 때 한 번(11/14 — 계산기가 실제로 쓰이는지 측정).
+const used=new Set<string>();
+const mark=(name:string)=>()=>{if(used.has(name))return;used.add(name);try{(window as {gtag?:(...a:unknown[])=>void}).gtag?.('event','calc_use',{calc:name});}catch{}};
 const num=(s:string)=>{const v=Number(s.replace(/[^0-9.]/g,''));return Number.isFinite(v)?v:0;};
 function Field({label,value,set,unit,hint}:{label:string;value:string;set:(v:string)=>void;unit?:string;hint?:string}){
   return <label className="jb-field"><span>{label}</span><span><input inputMode="numeric" value={value} onChange={e=>set(e.target.value)}/>{unit&&<small>{unit}</small>}</span>{hint&&<small className="muted">{hint}</small>}</label>;
@@ -13,16 +16,16 @@ function Rows({rows}:{rows:[string,string,boolean?][]}){
 export function WageCalc(){
   const [h,setH]=useState(String(MIN_WAGE));const [w,setW]=useState('40');
   const r=wage(num(h),Math.min(68,num(w)));
-  return <div className="jb-calc">
+  return <div className="jb-calc" onInput={mark('wage')}>
     <Field label="시급" value={h} set={setH} unit="원"/><Field label="1주 일하는 시간" value={w} set={setW} unit="시간" hint="주휴수당은 1주 15시간 이상일 때"/>
     <Rows rows={[['주휴시간',`${r.holidayHours.toFixed(1)}시간`],['주휴수당(1주)',won(r.holidayPay),true],['주급(주휴 포함)',won(r.week)],['월급(주휴 포함, 월 '+r.monthHours+'시간)',won(r.month),true],['연봉 어림',won(r.year)]]}/>
-    {r.belowMin&&num(h)>0&&<p className="jb-warn">⚠️ 2026년 최저임금 시간급 {MIN_WAGE.toLocaleString('ko-KR')}원보다 낮아요.</p>}
+    {r.belowMin&&num(h)>0&&<p className="jb-warn">⚠️ {YEAR}년 최저임금 시간급 {MIN_WAGE.toLocaleString('ko-KR')}원보다 낮아요.</p>}
   </div>;
 }
 export function SeveranceCalc(){
   const [p,setP]=useState('9000000');const [d,setD]=useState('92');const [y,setY]=useState('3');const [m,setM]=useState('0');
   const service=Math.round(num(y)*365+num(m)*30.4);const r=severance(num(p),num(d),service);
-  return <div className="jb-calc">
+  return <div className="jb-calc" onInput={mark('severance')}>
     <Field label="퇴직 전 3개월 임금 총액" value={p} set={setP} unit="원" hint="세금 떼기 전 금액. 상여금·연차수당은 정해진 비율만큼 더해요"/>
     <Field label="그 3개월의 날수" value={d} set={setD} unit="일" hint="보통 89~92일"/>
     <Field label="재직 기간" value={y} set={setY} unit="년"/><Field label="" value={m} set={setM} unit="개월"/>
@@ -32,7 +35,7 @@ export function SeveranceCalc(){
 export function UnemploymentCalc(){
   const [a,setA]=useState('100000');const [hrs,setHrs]=useState('8');const [y,setY]=useState('3');const [o,setO]=useState(false);
   const r=unemployment(num(a),num(hrs),num(y),o);
-  return <div className="jb-calc">
+  return <div className="jb-calc" onInput={mark('unemployment')}>
     <Field label="이직 전 1일 평균임금" value={a} set={setA} unit="원" hint="퇴직 전 3개월 임금 총액 ÷ 그 3개월 날수"/>
     <Field label="1일 소정근로시간" value={hrs} set={setHrs} unit="시간"/>
     <Field label="고용보험 가입 기간" value={y} set={setY} unit="년"/>
@@ -43,7 +46,7 @@ export function UnemploymentCalc(){
 export function InsuranceCalc(){
   const [m,setM]=useState(String(Math.round(209*MIN_WAGE)));
   const r=insurance(num(m));
-  return <div className="jb-calc">
+  return <div className="jb-calc" onInput={mark('insurance')}>
     <Field label="월급(세전, 비과세 수당 뺀 금액)" value={m} set={setM} unit="원"/>
     <Rows rows={[['국민연금 4.75%',won(r.pension)],['건강보험 3.595%',won(r.health)],['장기요양(건강보험료의 13.14%)',won(r.ltc)],['고용보험 0.9%',won(r.employ)],['4대보험 합계',won(r.total),true],['4대보험을 뺀 금액',won(r.after),true]]}/>
     <p className="muted small">소득세·지방소득세는 넣지 않았어요(근로소득 간이세액표·부양가족 수에 따라 달라져요).</p>
@@ -55,13 +58,13 @@ export function YearEndCalc(){
   const [cr,setCr]=useState('8000000');const [db,setDb]=useState('4000000');const [sp,setSp]=useState('500000');
   const [ps,setPs]=useState('0');const [rent,setRent]=useState('0');const [mar,setMar]=useState(false);const [paid,setPaid]=useState('');
   const gross=num(g);const ins=insurance(gross/12);
-  const r=yearEnd({gross,insurance:(ins.health+ins.ltc+ins.employ)*12,pension:ins.pension*12,people:num(people),elder:num(elder),kids8:num(kids),
+  const r=yearEnd({gross,insurance:(ins.health+ins.ltc+ins.employ)*12,pension:ins.pension*12,people:num(people),elder:num(elder),kids:num(kids),
     credit:num(cr),debit:num(db),special:num(sp),pensionSave:num(ps),rent:num(rent),married:mar,paid:paid.trim()?num(paid):null});
-  return <div className="jb-calc">
+  return <div className="jb-calc" onInput={mark('yearend')}>
     <Field label="총급여(연봉, 비과세 빼고)" value={g} set={setG} unit="원"/>
     <Field label="기본공제 인원(본인 포함)" value={people} set={setPeople} unit="명" hint="배우자·부모·자녀 등 연 소득 100만 원 이하 부양가족"/>
     <Field label="그중 만 70세 이상" value={elder} set={setElder} unit="명"/>
-    <Field label="그중 만 8세 이상 자녀" value={kids} set={setKids} unit="명"/>
+    <Field label={`그중 만 ${KIDS_AGE}세 이상 자녀`} value={kids} set={setKids} unit="명"/>
     <Field label="신용카드 사용액(1년)" value={cr} set={setCr} unit="원"/>
     <Field label="체크카드·현금영수증" value={db} set={setDb} unit="원"/>
     <Field label="전통시장·대중교통" value={sp} set={setSp} unit="원"/>

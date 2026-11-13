@@ -31,7 +31,7 @@ RETRY = ROOT / 'reports/gsc/index-retry.json'
 REDO_DAYS = 21
 MAX_INSPECT = 80
 SKIP = re.compile(r'/(about|data-policy|privacy|search|compare|alerts)(/|$)')
-FOCUS = {'hospital': 3, 'market': 2, 'job': 2, 'life': 2}  # 사이트 → 하루에 먼저 뽑을 개수(11/12 시장·일자리 추가 — 주간 GA에서 가장 크게 늘어난 두 사이트)
+FOCUS = {'hospital': 3, 'market': 2, 'job': 3, 'life': 2}  # 사이트 → 하루에 먼저 뽑을 개수(11/12 시장·일자리 추가 — 주간 GA에서 가장 크게 늘어난 두 사이트)
 HUB = re.compile(r'^/[a-z0-9-]+$')  # /region·/doc·/24h·/rank 같은 한 단계 모음 페이지
 
 # 내근처 연결 카드(network.tsx)에는 없지만 같은 도메인 속성에서 사이트맵 제출·색인 요청을 받을 사이트(11/13 사용자: 생활정보가이드)
@@ -97,6 +97,15 @@ def score(url, host, pop, trip, docs, mk):
     m = re.match(r'^/market/([0-9a-f]+)$', path)
     if m:
         return 1000 + mk.get(m[1], 0)
+    # 일자리(11/14 — 연말정산 철): 연말정산 계산기 → 연봉별(많이 찾는 3~6천만 원부터) → 상황별·최저임금 → 그다음 지역×종류.
+    if host.startswith('job.'):
+        if path == '/calc/yearend':
+            return 90000
+        m = re.match(r'^/calc/yearend/(\d+)$', path)
+        if m:
+            return 88000 - abs(int(m[1]) - 4500)
+        if path.startswith('/calc/yearend/') or path.startswith('/calc/minimum-wage/'):
+            return 85000
     if path.startswith('/p/'):  # life 글(사이트맵이 최신 글 먼저)
         return 70000
     if HUB.match(path):

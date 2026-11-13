@@ -6,8 +6,16 @@
 //  - 소정급여일수: 고용보험법 별표 1(2019.10.1 시행).
 //  - 4대보험 근로자 부담(2026): 국민연금 4.75%(보험료율 9.5%의 절반), 건강보험 3.595%(7.19%의 절반),
 //    장기요양 = 건강보험료 × 13.14%, 고용보험 0.9%. 정리 자료 기준 — 공단 모의계산으로 확인 안내. 확인 2026-11-03.
-export const YEAR=2026;
-export const MIN_WAGE=10320;
+//  - 2027년 최저임금 시간급 10,700원(380원·3.7% 인상): 2026.8.5 고용노동부 고시, 월 209시간 2,236,300원. 확인 2026-11-14.
+/** 연도별 최저임금 — 1월 1일이 지난 뒤 빌드하면 자동으로 그해 값(일자리 사이트는 매일 수집 뒤 다시 빌드). 새 고시가 나오면 여기에 한 줄. */
+export const MIN_WAGES:Record<number,{hourly:number;notice:string}>={2026:{hourly:10320,notice:'고용노동부 고시 제2025-47호'},2027:{hourly:10700,notice:'2026년 8월 5일 고용노동부 고시'}};
+const KNOWN=Object.keys(MIN_WAGES).map(Number);
+const KST_YEAR=new Date(Date.now()+9*3600e3).getUTCFullYear();
+export const YEAR=Math.min(Math.max(KST_YEAR,Math.min(...KNOWN)),Math.max(...KNOWN));
+export const MIN_WAGE=MIN_WAGES[YEAR].hourly;
+/** 4대보험 요율·구직급여 상한은 아직 2026년 값만 확인 — 새해 값이 나오면 함께 바꿀 것. */
+export const RATE_YEAR=2026;
+export const UI_YEAR=2026;
 export const UI_MAX=68100;
 export const RATES={pension:0.0475,health:0.03595,ltc:0.1314,employ:0.009};
 export const CHECKED='2026-11-03';
@@ -33,7 +41,8 @@ export function uiDays(years:number,older:boolean){
 /** 구직급여 1일 금액 = 이직 전 1일 평균임금 × 60%, 하한(최저임금 80% × 1일 소정근로시간)·상한 68,100원. */
 export function unemployment(avgDaily:number,dayHours:number,years:number,older:boolean){
   const floor=Math.round(MIN_WAGE*0.8*Math.min(8,Math.max(1,dayHours)));
-  const raw=avgDaily*0.6;const daily=Math.round(Math.min(UI_MAX,Math.max(floor,raw)));
+  // 하한이 상한보다 크면(최저임금이 오른 해에 상한 발표 전) 하한을 그대로 씀.
+  const raw=avgDaily*0.6;const daily=Math.round(Math.max(floor,Math.min(UI_MAX,raw)));
   const days=uiDays(years,older);
   return {raw:Math.round(raw),floor,daily,days,total:daily*days,capped:raw>UI_MAX,floored:raw<floor};
 }

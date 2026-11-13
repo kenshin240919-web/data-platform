@@ -1,30 +1,14 @@
 import type {Metadata} from 'next';
-import Link from 'next/link';
 import {notFound} from 'next/navigation';
-import {Faq,breadcrumbLd,JsonLd} from '@guidejung/ui/seo';
-import {Ad} from '../../_components/Ad';
-import {SITE} from '../../../lib/fmt';
-import {Body,CALCS,faqOf,ORDER,SOURCE,YE_SOURCE,type Slug} from '../info';
-import {InsuranceCalc,SeveranceCalc,UnemploymentCalc,WageCalc,YearEndCalc} from '../Calc';
+import {CALCS,ORDER,type Slug} from '../info';
+import {CalcView} from '../view';
 type P={params:Promise<{slug:string}>};
 export const dynamicParams=false;
-export function generateStaticParams(){return ORDER.map(slug=>({slug}));}
+// 연말정산은 하위 페이지(연봉별·상황별)가 있어 /calc/yearend/page.tsx가 따로 그림.
+export function generateStaticParams(){return ORDER.filter(s=>s!=='yearend').map(slug=>({slug}));}
 export async function generateMetadata({params}:P):Promise<Metadata>{const s=(await params).slug as Slug;const c=CALCS[s];if(!c)return {};
   return {title:c.title,description:c.desc,alternates:{canonical:`/calc/${s}`}};}
-const TOOL={wage:WageCalc,severance:SeveranceCalc,unemployment:UnemploymentCalc,insurance:InsuranceCalc,yearend:YearEndCalc};
 export default async function CalcPage({params}:P){
-  const s=(await params).slug as Slug;const c=CALCS[s];if(!c)notFound();const Tool=TOOL[s];
-  return <div className="page prose">
-    <nav className="crumbs"><Link href="/">홈</Link> › <Link href="/calc">계산기</Link> › {c.short}</nav>
-    <h1>{c.icon} {c.h1}</h1>
-    <p className="jb-answer">{c.desc}</p>
-    <Tool/>
-    <Body slug={s}/>
-    <Ad/>
-    <section><h2>다른 계산기</h2><div className="jb-jump">{ORDER.filter(x=>x!==s).map(x=><Link key={x} href={`/calc/${x}`}>{CALCS[x].icon} {CALCS[x].short}</Link>)}</div></section>
-    {(s==='unemployment'||s==='severance')&&<p className="jb-hp"><Link href="/center">🏛️ 우리 동네 관할 고용센터 찾기</Link><a href="https://benefit.guidejung.com/topic">🎁 실직·구직 때 받을 수 있는 지원</a></p>}
-    {s==='yearend'?YE_SOURCE:SOURCE}
-    <Faq items={faqOf(s)}/>
-    <JsonLd data={breadcrumbLd([['내근처 일자리',SITE+'/'],['계산기',SITE+'/calc'],[c.short,`${SITE}/calc/${s}`]])}/>
-  </div>;
+  const s=(await params).slug as Slug;if(!CALCS[s]||s==='yearend')notFound();
+  return <CalcView s={s}/>;
 }

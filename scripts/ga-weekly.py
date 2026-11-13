@@ -141,7 +141,7 @@ for site in ORDER:
         'landing': top(pid, 'landingPage', 'sessions'),
         'days': top(pid, 'date', 'screenPageViews', 7),
         'events': dict(top(pid, 'eventName', 'eventCount', 10, {'dimensionFilter': {'filter': {
-            'fieldName': 'eventName', 'inListFilter': {'values': ['share', 'favorite', 'install_hint', 'install_click', 'install_done', 'alert_click', 'push_subscribe']}}}})),
+            'fieldName': 'eventName', 'inListFilter': {'values': ['share', 'favorite', 'install_hint', 'install_click', 'install_done', 'alert_click', 'push_subscribe', 'calc_use']}}}})),
     }
 
 L = [f'# 내근처 GA 주간 보고서 ({start} ~ {end})', '',
@@ -164,15 +164,15 @@ for site in sorted(data, key=lambda s: -avg(data[s]['this'])):
     L.append(f"| {site} | {n(a)} | {n(avg(p))} | {best} | {'✅ 달성' if a >= GOAL else n(GOAL - a) + '회 더'} |")
 L.append('')
 L += ['## 한눈에 보기', '',
-      '| 사이트 | 사용자 | 증감 | 신규 | 세션 | 조회 | 세션당 조회 | 1인 참여 시간 | 참여율 | 공유 | 즐겨찾기 | 설치 안내 | 설치 누름 | 설치 | 알림 누름 | 알림 등록 시도 |',
-      '|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|']
+      '| 사이트 | 사용자 | 증감 | 신규 | 세션 | 조회 | 세션당 조회 | 1인 참여 시간 | 참여율 | 공유 | 즐겨찾기 | 설치 안내 | 설치 누름 | 설치 | 알림 누름 | 알림 등록 시도 | 계산기 사용 |',
+      '|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|']
 for site in sorted(data, key=lambda s: -data[s]['this']['activeUsers']):
     t, p, e = data[site]['this'], data[site]['prev'], data[site]['events']
     spp = t['screenPageViews'] / t['sessions'] if t['sessions'] else 0
     L.append(f"| {site} | {n(t['activeUsers'])} | {pct(t['activeUsers'], p['activeUsers'])} | {n(t['newUsers'])} | "
              f"{n(t['sessions'])} | {n(t['screenPageViews'])} | {spp:.1f} | {dur(per_user(t))} | "
              f"{t['engagementRate'] * 100:.0f}% | {n(e.get('share', 0))} | {n(e.get('favorite', 0))} | "
-             f"{n(e.get('install_hint', 0))} | {n(e.get('install_click', 0))} | {n(e.get('install_done', 0))} | {n(e.get('alert_click', 0))} | {n(e.get('push_subscribe', 0))} |")
+             f"{n(e.get('install_hint', 0))} | {n(e.get('install_click', 0))} | {n(e.get('install_done', 0))} | {n(e.get('alert_click', 0))} | {n(e.get('push_subscribe', 0))} | {n(e.get('calc_use', 0))} |")
 L.append('')
 
 for site in ORDER:

@@ -23,6 +23,8 @@ export default async function DocPage({params}:P){
     <nav className="crumbs"><Link href="/">홈</Link> › <Link href="/doc">서류별</Link> › {d.title}</nav>
     <h1>🧾 {d.title} 떼는 곳</h1>
     <p className="cv-answer">{eun(d.title)} 전국 무인민원발급기 <b>{n(d.count)}대</b>에서 뗄 수 있어요(주말·공휴일 운영 {n(weekend)}대). {d.tip} <span className="muted">({updated()} 기준)</span></p>
+    {/* 11/14: 소득·세금 서류는 연말정산 계산기로(연말정산 철) */}
+    {(d.slug==='income'||d.slug==='national-tax')&&<p className="cv-answer">🧾 연말정산을 앞두고 있다면 <a href="https://job.guidejung.com/calc/yearend"><b>내 연봉이면 세금 얼마? 연말정산 계산기</b></a> · <a href="https://job.guidejung.com/calc/yearend/quit">중도 퇴사자 5월 신고</a></p>}
     <NearCivil doc={d.slug} docTitle={d.title}/>
     <Ad/>
     <PrintNear compact/>
