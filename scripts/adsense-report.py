@@ -3,6 +3,7 @@
 Secrets: ADSENSE_CLIENT_ID · ADSENSE_CLIENT_SECRET · ADSENSE_REFRESH_TOKEN(사용자 OAuth — 애드센스 API는 서비스 계정을 받지 않음).
   --check      연결 시험: 계정·도메인 이름·행 수만 출력.
   --out DIR    지난 7일(어제까지)·그 전 7일 보고서를 DIR/주간-YYYY-MM-DD.md 로 쓴다.
+  --days N     기간을 N일로(기본 7). 7이 아니면 DIR/{N}일-YYYY-MM-DD.md.
 수익·클릭률 같은 숫자는 로그에 출력하지 않는다(공개 저장소의 Actions 로그는 누구나 봄). 보고서는 비공개 저장소
 ads 에만 올린다(adsense-weekly.yml) — 애드센스 약관의 기밀 정보에 클릭률 등 실적 통계가 들어간다고 알려져 있어 보수적으로.
 """
@@ -100,17 +101,18 @@ def table(heads, rows):
     return '\n'.join(out)
 
 
-def build(acc, out_dir):
+def build(acc, out_dir, n=7):
     end = dt.datetime.now(KST).date() - dt.timedelta(days=1)
-    start = end - dt.timedelta(days=6)
-    pend, pstart = start - dt.timedelta(days=1), start - dt.timedelta(days=7)
+    start = end - dt.timedelta(days=n - 1)
+    pend, pstart = start - dt.timedelta(days=1), start - dt.timedelta(days=n)
+    name, before = ('주간', '지난주') if n == 7 else (f'{n}일', f'앞 {n}일')
     this, tot = report(acc, start, end, ['DOMAIN_NAME'])
     prev, ptot = report(acc, pstart, pend, ['DOMAIN_NAME'])
     pmap = {r['DOMAIN_NAME']: r for r in prev}
     E = 'ESTIMATED_EARNINGS'
     total = tot.get(E) or sum(r[E] for r in this)
-    L = [f'# 애드센스 주간 보고서 {end.isoformat()}', '',
-         f'기간 {start}~{end}(한국 날짜, 어제까지 7일) · 비교 {pstart}~{pend} · 통화 {CUR["code"] or "?"} · 추정 수익(확정 전).',
+    L = [f'# 애드센스 {name} 보고서 {end.isoformat()}', '',
+         f'기간 {start}~{end}(한국 날짜, 어제까지 {n}일) · 비교 {pstart}~{pend} · 통화 {CUR["code"] or "?"} · 추정 수익(확정 전).',
          '비공개 저장소 전용 — 공개 저장소·채팅 밖으로 옮기지 말 것.', '']
     pv = tot.get('PAGE_VIEWS') or sum(r['PAGE_VIEWS'] for r in this)
     L += ['## 한 줄 요약', '',
@@ -127,7 +129,7 @@ def build(acc, out_dir):
                      delta(r[E], p.get(E, 0)), f'{round(r["PAGE_VIEWS"]):,}', money(r['PAGE_VIEWS_RPM']),
                      f'{round(r["CLICKS"]):,}', pct(r['IMPRESSIONS_CTR'])])
     L += [f'## 사이트별 (내근처 합계 {money(ours_e)} · 전체의 {pct(ours_e / total) if total else "—"})', '',
-          table(['도메인', '수익', '비중', '지난주 대비', '페이지 조회', '페이지 RPM', '클릭', '노출 클릭률'], rows), '']
+          table(['도메인', '수익', '비중', f'{before} 대비', '페이지 조회', '페이지 RPM', '클릭', '노출 클릭률'], rows), '']
     # 조회는 많은데 RPM이 낮은 곳 = 광고 배치·콘텐츠 개선 후보, RPM이 높은 곳 = 트래픽을 키울 곳.
     ours = [r for r in this if site(r['DOMAIN_NAME']) and r['PAGE_VIEWS'] >= 30]
     if ours:
@@ -144,7 +146,7 @@ def build(acc, out_dir):
     days, _ = report(acc, start, end, ['DATE'], [E, 'PAGE_VIEWS'])
     L += ['## 날짜별', '', table(['날짜', '수익', '페이지 조회'],
                                  [[r['DATE'], money(r[E]), f'{round(r["PAGE_VIEWS"]):,}'] for r in sorted(days, key=lambda r: r['DATE'])]), '']
-    p = pathlib.Path(out_dir) / f'주간-{end.isoformat()}.md'
+    p = pathlib.Path(out_dir) / f'{name}-{end.isoformat()}.md'
     p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text('\n'.join(L), encoding='utf-8')
     print(f'보고서 저장: {p.name} (도메인 {len(this)}개)')
@@ -170,7 +172,8 @@ def main():
         return
     if '--out' not in sys.argv:
         sys.exit('--out DIR 필요(비공개 저장소 폴더)')
-    build(acc, sys.argv[sys.argv.index('--out') + 1])
+    n = int(sys.argv[sys.argv.index('--days') + 1]) if '--days' in sys.argv else 7
+    build(acc, sys.argv[sys.argv.index('--out') + 1], n)
 
 
 main()
