@@ -13,7 +13,7 @@ SITES = {
     'G-WN326BYC7E': 'trip', 'G-MFS9C8WXBV': 'weather', 'G-1S5MH65EE3': 'traffic',
     'G-2DF9TG7EP5': 'charge', 'G-2GK6W3WQ5C': 'academy', 'G-FLG82C9D1P': 'school',
     'G-6LD4WJJCTH': 'pharmacy', 'G-NB6822FH1B': 'hospital', 'G-45BQ6EFDMZ': 'oil',
-    'G-NXZWMSBESF': 'parking', 'G-KKTGJHYGKE': 'service', 'G-E02X7KDB7H': 'near', 'G-M9FGX8WRZJ': 'rest', 'G-QWM4LNN23V': 'pet', 'G-NME313D4B7': 'civil', 'G-L2J6MMPR8B': 'market', 'G-8SJBVG4TJ5': 'benefit', 'G-VEN2MP6Q50': 'job', 'G-FC3F88WGY4': 'cvs', 'G-0H4XBWE1T3': 'movie', 'G-H47KL7L0CJ': 'stock',
+    'G-NXZWMSBESF': 'parking', 'G-KKTGJHYGKE': 'service', 'G-E02X7KDB7H': 'near', 'G-M9FGX8WRZJ': 'rest', 'G-QWM4LNN23V': 'pet', 'G-NME313D4B7': 'civil', 'G-L2J6MMPR8B': 'market', 'G-8SJBVG4TJ5': 'benefit', 'G-VEN2MP6Q50': 'job', 'G-FC3F88WGY4': 'cvs', 'G-0H4XBWE1T3': 'movie', 'G-H47KL7L0CJ': 'stock', 'G-5QJSBNJ6EB': 'life',
 }
 
 raw = os.environ.get('GA_SERVICE_ACCOUNT_JSON', '')
