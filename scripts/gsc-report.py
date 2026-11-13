@@ -27,11 +27,14 @@ UA = {'User-Agent': 'Mozilla/5.0 (compatible; GuideJungGSC/1.0; +https://near.gu
 CONTROL = 'https://guidejung.com/'
 VERDICT = {'PASS': '✅ 색인됨', 'NEUTRAL': '⏳ 아직', 'FAIL': '❌ 문제', 'PARTIAL': '⚠️ 일부'}
 
+# 내근처 연결 카드(network.tsx)에는 없지만 같은 도메인 속성에서 사이트맵 제출·색인 요청을 받을 사이트(11/13 사용자: 생활정보가이드)
+EXTRA = [('life', 'life.guidejung.com')]
+
 
 def hosts():
     net = (ROOT / 'packages/ui/src/network.tsx').read_text(encoding='utf-8')
     # 아직 배포 전인 사이트(hidden:true)는 빼고
-    return [(k, h) for k, h, rest in re.findall(r"^\s+(\w+):\{url:'https://(\w+\.guidejung\.com)'(.*)$", net, re.M) if 'hidden:true' not in rest]
+    return [(k, h) for k, h, rest in re.findall(r"^\s+(\w+):\{url:'https://(\w+\.guidejung\.com)'(.*)$", net, re.M) if 'hidden:true' not in rest] + EXTRA
 
 
 def sample(host, n=4):

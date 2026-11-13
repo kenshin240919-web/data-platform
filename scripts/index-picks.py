@@ -31,13 +31,16 @@ RETRY = ROOT / 'reports/gsc/index-retry.json'
 REDO_DAYS = 21
 MAX_INSPECT = 80
 SKIP = re.compile(r'/(about|data-policy|privacy|search|compare|alerts)(/|$)')
-FOCUS = {'hospital': 3, 'market': 2, 'job': 2}  # 사이트 → 하루에 먼저 뽑을 개수(11/12 시장·일자리 추가 — 주간 GA에서 가장 크게 늘어난 두 사이트)
+FOCUS = {'hospital': 3, 'market': 2, 'job': 2, 'life': 2}  # 사이트 → 하루에 먼저 뽑을 개수(11/12 시장·일자리 추가 — 주간 GA에서 가장 크게 늘어난 두 사이트)
 HUB = re.compile(r'^/[a-z0-9-]+$')  # /region·/doc·/24h·/rank 같은 한 단계 모음 페이지
+
+# 내근처 연결 카드(network.tsx)에는 없지만 같은 도메인 속성에서 사이트맵 제출·색인 요청을 받을 사이트(11/13 사용자: 생활정보가이드)
+EXTRA = [('life', 'life.guidejung.com')]
 
 
 def hosts():
     net = (ROOT / 'packages/ui/src/network.tsx').read_text(encoding='utf-8')
-    return [(k, h) for k, h, rest in re.findall(r"^\s+(\w+):\{url:'https://(\w+\.guidejung\.com)'(.*)$", net, re.M) if 'hidden:true' not in rest]
+    return [(k, h) for k, h, rest in re.findall(r"^\s+(\w+):\{url:'https://(\w+\.guidejung\.com)'(.*)$", net, re.M) if 'hidden:true' not in rest] + EXTRA
 
 
 def page_urls(host):
@@ -94,6 +97,8 @@ def score(url, host, pop, trip, docs, mk):
     m = re.match(r'^/market/([0-9a-f]+)$', path)
     if m:
         return 1000 + mk.get(m[1], 0)
+    if path.startswith('/p/'):  # life 글(사이트맵이 최신 글 먼저)
+        return 70000
     if HUB.match(path):
         return 60000
     m = re.match(r'^/(?:region|sido)/([^/]+)(/.*)?$', path)
