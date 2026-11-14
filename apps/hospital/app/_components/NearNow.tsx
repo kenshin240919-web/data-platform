@@ -5,9 +5,11 @@ import {LocateCard,PosNote,useMyPosition,fixKmNow,padKm,padLimit,within} from '@
 import {closeToday,DEPTS,DEPT_ICON,hmMin,hospitalPath,km,MAIN_DEPTS,statusOf,type Card} from '../../lib/fmt';
 import {StatusList,useNow} from './StatusList';
 type Er=Card&{beds:number|null;updated:string|null};
-export function NearNow(){
+export function NearNow({initialDept=''}:{initialDept?:string}={}){
   const {pos,status,request}=useMyPosition();const now=useNow();
-  const [dept,setDept]=useState('');const [items,setItems]=useState<Card[]|null>(null);const [radius,setRadius]=useState(0);const [er,setEr]=useState<Er[]|null>(null);const [area,setArea]=useState<{code:string;name:string}|null>(null);
+  const [dept,setDept]=useState(initialDept);const [items,setItems]=useState<Card[]|null>(null);const [radius,setRadius]=useState(0);const [er,setEr]=useState<Er[]|null>(null);const [area,setArea]=useState<{code:string;name:string}|null>(null);const [pages,setPages]=useState<Record<string,string[]>|null>(null);
+  useEffect(()=>{if(area&&!pages)fetch('/area-pages.json').then(x=>x.json()).then(setPages).catch(()=>setPages({}));},[area,pages]);
+  const has=(k:string)=>!!(area&&pages?.[area.code]?.includes(k));
   useEffect(()=>{if(!pos)return;let live=true;setItems(null);
     const load=(k:number):Promise<void>=>fetch(`/api/near?lat=${pos.lat.toFixed(4)}&lon=${pos.lon.toFixed(4)}&km=${padKm(k)}&limit=${padLimit(100)}${dept?`&dept=${dept}`:''}`).then(x=>x.json()).then(fixKmNow).then(within(k)).then((d:{items:Card[];area?:{code:string;name:string}|null}):Promise<void>|void=>{if(!live)return;if(d.area)setArea(d.area);
       const open=d.items.filter(p=>statusOf(p).state!=='closed').length;if(!open&&k<10)return load(k*2);setItems(d.items);setRadius(k);});
@@ -32,7 +34,10 @@ export function NearNow(){
       {late[0]&&late[0].c>now.min+60&&<p className="hp-late">🌙 오늘 가장 늦게까지 <a href={hospitalPath(late[0].p.id)}><b>{late[0].p.name}</b></a> <b className="hp-late-t">{hmMin(late[0].c)}까지</b>{late[0].p.km!=null&&<> · {km(late[0].p.km)}</>}{after8>1&&<span className="muted"> · 저녁 8시 넘어서까지 {after8.toLocaleString('ko-KR')}곳</span>}</p>}
       <StatusList items={items} initial={first?'open':'all'} sortOpen={false} limit={10} ad={1}/>
       {!askTop&&ask}
-      {area&&<p className="hp-area"><a href={`/region/${area.code}`}>📍 <b>{area.name}</b> 병원 전체 보기 <small>야간·일요일·공휴일·과목별</small> →</a></p>}
+      {/* 11/14: 내 동네 지역 페이지로 바로 — 과목을 골랐으면 그 과목, 아니면 소아과·야간·일요일(GA hp_chip) */}
+      {area&&<div className="hp-area"><a href={`/region/${area.code}`} data-ev="hp_chip_area">📍 <b>{area.name.split(' ').slice(-1)[0]}</b> 병원 전체</a>
+        {(dept?[[dept,DEPTS[dept]]]:[['pediatrics','소아과']]).filter(([k])=>has(k)).map(([k,l])=><a key={k} href={`/region/${area.code}/${k}`} data-ev={`hp_chip_${k}`}>{DEPT_ICON[k]} {l}</a>)}
+        {has('night')&&<a href={`/region/${area.code}/night`} data-ev="hp_chip_night">🌙 야간 진료</a>}{has('sunday')&&<a href={`/region/${area.code}/sunday`} data-ev="hp_chip_sunday">📅 일요일 진료</a>}</div>}
     </>}
     {er&&er.length>0&&<div className="hp-er"><h2>🚑 가까운 응급실</h2><div className="hp-er-list">{er.slice(0,4).map(e=><a key={e.id} href={hospitalPath(e.id)} className="hp-er-card"><b>{e.name}</b><span>{e.km!=null&&km(e.km)}{e.beds!=null&&<> · 응급실 남은 병상 <strong>{e.beds}</strong></>}</span>{e.updated&&<small className="muted">{e.updated} 기준</small>}</a>)}</div><p><a className="hp-more-link" href="/er">응급실 더 보기 →</a></p></div>}
   </section>;

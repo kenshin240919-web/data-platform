@@ -4,7 +4,7 @@ import {notFound} from 'next/navigation';
 import {Faq,breadcrumbLd,JsonLd} from '@guidejung/ui/seo';
 import {Connect,linksNear} from '@guidejung/ui/network';
 import {LiveList} from '../../_components/LiveList';
-import {CONDITIONS,COND_KEY,DEPTS,DEPT_ICON,MIN_DEPT,n,region,regions,SITE,updated,zoneOf} from '../../../lib/data';
+import {closeHm,CONDITIONS,COND_KEY,deptSearch,DEPT_ICON,hospitalPath,MIN_DEPT,n,region,regions,SITE,updated,zoneOf} from '../../../lib/data';
 
 export const dynamicParams=false;
 export function generateStaticParams(){return regions.map(r=>({code:r.id}));}
@@ -19,9 +19,10 @@ export default async function RegionPage({params}:P){
   return <div className="page">
     <nav className="crumbs"><Link href="/">홈</Link> › <Link href="/region">지역별 병원</Link> › {r.name}</nav>
     <h1>{r.name} 병원</h1>
-    <p className="hp-answer"><b>{r.name}</b> 병·의원 <b>{n(r.count)}곳</b> 중 야간 진료 {n(r.cond.night)}곳, 일요일 {n(r.cond.sun)}곳, 공휴일 {n(r.cond.hol)}곳{r.er.length?<>, 응급실 {n(r.er.length)}곳</>:''}이에요. <span className="muted">({updated()} 기준)</span></p>
-    <div className="hp-dept-grid">{ds.map(([k,d])=><Link key={k} href={`/region/${r.id}/${k}`}><span aria-hidden="true">{DEPT_ICON[k]}</span><b>{DEPTS[k]}</b><small>{n(d.count)}곳{d.sun?` · 일요일 ${n(d.sun)}`:''}</small></Link>)}</div>
-    <div className="hp-jump">{Object.entries(COND_KEY).filter(([,k])=>r.cond[k]).map(([slug,k])=><Link key={slug} href={`/region/${r.id}/${slug}`}>{zoneOf(r)} {CONDITIONS[slug as keyof typeof CONDITIONS].title} <small>{n(r.cond[k])}</small></Link>)}</div>
+    <p className="hp-answer"><b>{r.name}</b> 병·의원 <b>{n(r.count)}곳</b> 중 야간 진료 {n(r.cond.night)}곳, 일요일 {n(r.cond.sun)}곳, 공휴일 {n(r.cond.hol)}곳{r.er.length?<>, 응급실 {n(r.er.length)}곳</>:''}이에요.{r.late&&<> 평일 가장 늦게까지는 <a href={hospitalPath(r.late.id)}><b>{r.late.name}</b></a> {closeHm(r.late.close)}까지.</>} <span className="muted">({updated()} 기준)</span></p>
+    {/* 11/14: 빠른 뒤로가기가 많아 찾는 것(야간·일요일·소아과)을 과목 표보다 먼저 */}
+    <div className="hp-jump">{r.depts.pediatrics&&r.depts.pediatrics.count>=MIN_DEPT&&<Link href={`/region/${r.id}/pediatrics`}>👶 {zoneOf(r)} 소아과 <small>{n(r.depts.pediatrics.count)}</small></Link>}{Object.entries(COND_KEY).filter(([,k])=>r.cond[k]).map(([slug,k])=><Link key={slug} href={`/region/${r.id}/${slug}`}>{zoneOf(r)} {CONDITIONS[slug as keyof typeof CONDITIONS].title} <small>{n(r.cond[k])}</small></Link>)}</div>
+    <div className="hp-dept-grid">{ds.map(([k,d])=><Link key={k} href={`/region/${r.id}/${k}`}><span aria-hidden="true">{DEPT_ICON[k]}</span><b>{deptSearch(k)}</b><small>{n(d.count)}곳{d.sun?` · 일요일 ${n(d.sun)}`:''}</small></Link>)}</div>
     <LiveList title={`${r.name} 병원 목록`} query={{region:r.id}} initial={r.top} ad={3}/>
     {r.er.length>0&&<section><h2>🚑 {r.name} 응급실</h2><ul className="hp-links">{r.er.map(c=><li key={c.id}><a href={`/hospital/${c.id}`}>{c.name}</a> <span className="muted">· {c.address}</span></li>)}</ul></section>}
     <Faq items={[

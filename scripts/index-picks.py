@@ -106,6 +106,14 @@ def score(url, host, pop, trip, docs, mk):
             return 88000 - abs(int(m[1]) - 4500)
         if path.startswith('/calc/yearend/') or path.startswith('/calc/minimum-wage/'):
             return 85000
+    # 병원(11/14): 첫 화면 → 밤·주말 소아과·설 연휴 → 사람 많은 시군구의 소아과·야간·일요일 페이지(네이버에서 많이 찾는 말) → 시군구.
+    if host.startswith('hospital.'):
+        if path in ('/kids', '/seol'):
+            return 95000
+        m = re.match(r'^/region/(\d+)(?:/([a-z]+))?$', path)
+        if m:
+            n = pop.get(m[1]) or pop.get(m[1][:4] + '0', 0)
+            return 65000 + n * {'pediatrics': 3, 'night': 2, 'sunday': 2, None: 1.5}.get(m[2], 0.5)
     if path.startswith('/p/'):  # life 글(사이트맵이 최신 글 먼저)
         return 70000
     if HUB.match(path):

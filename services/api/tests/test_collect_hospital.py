@@ -48,3 +48,14 @@ class CollectHospitalTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class LateOf(unittest.TestCase):
+    def test_late_of(self):
+        """지역·과목 3초 답 '가장 늦게까지': 평일 마감이 가장 늦은 곳, 24시간·저녁 7시 이전 마감은 제외(11/14)."""
+        a = {'id': 'a', 'name': 'A', 'rank': 1, 'hours': {'1': ['0900', '2130'], '6': ['0900', '2300']}}
+        b = {'id': 'b', 'name': 'B', 'rank': 2, 'hours': {'1': ['0000', '2400']}}
+        c = {'id': 'c', 'name': 'C', 'rank': 3, 'hours': {'2': ['0900', '1800']}}
+        self.assertEqual(ch.late_of([a, b, c]), {'id': 'a', 'name': 'A', 'close': 2130})
+        self.assertIsNone(ch.late_of([c]))
+        self.assertIsNone(ch.late_of([]))

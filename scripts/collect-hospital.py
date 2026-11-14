@@ -194,6 +194,18 @@ def card(h):
     return {k: h[k] for k in ('id', 'name', 'div', 'address', 'tel', 'lat', 'lon', 'hours', 'depts', 'er')}
 
 
+def wk_close(h):
+    """평일(월~금) 가장 늦은 마감 시각(다음 날 새벽이면 +2400). 하루 23시간 넘게 여는 날(24시간)은 빼고 셈."""
+    ends = [span_end(t) for d, t in h['hours'].items() if d in '12345' and span_end(t) - int(t[0]) < 2300]
+    return max(ends, default=0)
+
+
+def late_of(hs):
+    """'가장 늦게까지' 한 곳(평일 저녁 7시 넘어 닫는 곳 중) — 지역·과목 페이지 3초 답(11/14)."""
+    b = max(hs, key=lambda h: (wk_close(h), h['rank']), default=None)
+    return {'id': b['id'], 'name': b['name'], 'close': wk_close(b)} if b and wk_close(b) > 1900 else None
+
+
 def summary(items, status):
     by = defaultdict(list)
     for h in items:
@@ -207,13 +219,13 @@ def summary(items, status):
             sub = [h for h in hs if k in h['depts']]
             if sub:
                 depts[k] = {'count': len(sub), 'night': sum(h['night'] for h in sub), 'sun': sum(h['sun'] for h in sub), 'hol': sum(h['hol'] for h in sub),
-                            'top': [card(h) for h in sub[:8]]}
+                            'late': late_of(sub), 'top': [card(h) for h in sub[:8]]}
         regions.append({'id': rid, 'name': hs[0]['region_name'], 'sido': hs[0]['sido'], 'count': len(hs),
                         'lat': round(sum(h['lat'] for h in pts) / len(pts), 5) if pts else None, 'lon': round(sum(h['lon'] for h in pts) / len(pts), 5) if pts else None,
                         'divs': dict(Counter(h['div'] for h in hs).most_common()), 'er': [card(h) for h in hs if h['er']][:10],
                         'cond': {c: sum(h[c] for h in hs) for c in ('night', 'sat', 'sun', 'hol')},
                         'cond_top': {c: [card(h) for h in hs if h[c]][:8] for c in ('night', 'sun', 'hol')},
-                        'depts': depts, 'top': [card(h) for h in hs[:12]]})
+                        'late': late_of(hs), 'depts': depts, 'top': [card(h) for h in hs[:12]]})
     nation = {k: sum(1 for h in items if k in h['depts']) for k in DEPTS}
     return {'status': status, 'depts': {k: v[0] for k, v in DEPTS.items()}, 'nation': nation,
             'cond': {c: sum(h[c] for h in items) for c in ('night', 'sat', 'sun', 'hol')}, 'er': sum(h['er'] for h in items),

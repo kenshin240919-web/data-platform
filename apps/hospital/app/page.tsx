@@ -8,13 +8,13 @@ import {FavList} from '@guidejung/ui/favlist';
 
 export const metadata:Metadata={alternates:{canonical:'/'}};
 // 첫 화면 상황 입구(11/3 — 네이버 검색으로 첫 화면에 들어온 분이 바로 누를 곳). 진단·추천 문구 없이 '어디서 찾는지'만.
-const SITU:[string,string,string,string][]=[
-  ['🧒','밤에 아이가 아플 때','저녁 8시 넘어서까지 하는 소아청소년과','/search?dept=pediatrics&cond=night'],
-  ['🚑','응급실 남은 병상','가까운 응급실 실시간 병상','/er'],
-  ['📅','일요일에 여는 병원','일요일 진료 시간이 있는 곳','/search?cond=sunday'],
-  ['🦷','주말 치과','일요일에 진료하는 치과','/search?dept=dental&cond=sunday'],
-  ['🎌','공휴일 진료','공휴일 진료 시간이 있는 곳','/search?cond=holiday'],
-  ['💊','진료 뒤 약국','지금 문 연 약국 (내근처 약국)','https://pharmacy.guidejung.com/'],
+const SITU:[string,string,string,string,string][]=[
+  ['🧒','밤·주말 소아과','지금 진료 중·야간·일요일 소아청소년과','/kids','kids'],
+  ['🚑','응급실 남은 병상','가까운 응급실 실시간 병상','/er','er'],
+  ['📅','일요일에 여는 병원','일요일 진료 시간이 있는 곳','/search?cond=sunday','sunday'],
+  ['🦷','주말 치과','일요일에 진료하는 치과','/search?dept=dental&cond=sunday','dental'],
+  ['🎌','공휴일 진료','공휴일 진료 시간이 있는 곳','/search?cond=holiday','holiday'],
+  ['💊','진료 뒤 약국','지금 문 연 약국 (내근처 약국)','https://pharmacy.guidejung.com/','pharmacy'],
 ];
 export default function Home(){
   const kids=[...regions].sort((a,b)=>(b.depts.pediatrics?.sun??0)-(a.depts.pediatrics?.sun??0)).slice(0,8);
@@ -23,7 +23,7 @@ export default function Home(){
       <p><b>지금 진료 중</b>인 병원을 과목별로 가까운 순으로</p></section>
     <NearNow/>
     <FavList hint="병원 상세에서 ☆ 즐겨찾기를 누르면 여기서 바로 지금 진료 중인지 볼 수 있어요."/>
-    <section><h2>이럴 땐 여기로</h2><div className="hp-situ">{SITU.map(([icon,t,d,href])=><a key={href} href={href}><span aria-hidden="true">{icon}</span><span><b>{t}</b><small>{d}</small></span></a>)}</div></section>
+    <section><h2>이럴 땐 여기로</h2><div className="hp-situ">{SITU.map(([icon,t,d,href,key])=><a key={href} href={href} data-ev={`hp_situ_${key}`}><span aria-hidden="true">{icon}</span><span><b>{t}</b><small>{d}</small></span></a>)}</div></section>
     {/* 전국 수치(검색엔진·AI 답변용): 첫 화면을 가볍게 하려고 히어로에서 3초 답 아래로 내림(10/29 사용자) */}
     <p className="muted small gj-facts">전국 병·의원 <b>{n(status.count)}곳</b>의 요일별 진료 시간으로 <b>지금 진료 중</b>인 곳을 과목별로 가까운 순으로 보여 드려요. 야간 {n(cond.night)}곳 · 일요일 {n(cond.sun)}곳 · 공휴일 {n(cond.hol)}곳 · 응급실 {n(erCount)}곳.</p>
     <section><h2>과목별 병원 (전국)</h2><div className="hp-dept-grid">{MAIN_DEPTS.map(k=><Link key={k} href={`/search?dept=${k}`}><span aria-hidden="true">{DEPT_ICON[k]}</span><b>{DEPTS[k]}</b><small>{n(nation[k]??0)}곳</small></Link>)}</div>

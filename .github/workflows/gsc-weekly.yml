@@ -6,6 +6,11 @@ on:
   schedule:
     - cron: '3 23 */3 * *' # 사흘마다 08:03 KST(11/3 사용자: 매주 → 3일마다, 매달 1·4·7…일 UTC 기준이라 달이 바뀔 땐 하루 이틀 차이)
   workflow_dispatch:
+    inputs:
+      resubmit:
+        description: '상태와 관계없이 sitemap·rss를 다시 제출할 사이트(쉼표, 예: hospital)'
+        required: false
+        default: ''
   push:
     branches: [main]
     paths: ['scripts/gsc-report.py']
@@ -29,6 +34,7 @@ jobs:
       - name: Report
         env:
           GA_SERVICE_ACCOUNT_JSON: ${{ secrets.GA_SERVICE_ACCOUNT_JSON }}
+          GSC_RESUBMIT: ${{ inputs.resubmit }}
         run: |
           mkdir -p reports/gsc
           set -o pipefail

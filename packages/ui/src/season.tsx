@@ -9,6 +9,10 @@ const NEAR='https://near.guidejung.com';
 export const SEASON_BANNERS:Banner[]=[
   {id:'foliage-2026',from:'2026-10-27',to:'2026-11-12',sites:['trip','weather','traffic','parking','near'],text:'🍁 단풍 절정 — 내장산 11월 4일·한라산 11월 6일, 내 주변 단풍 명소',href:`${NEAR}/season/foliage`},
   {id:'suneung-2027',from:'2026-10-25',to:'2026-11-19',sites:['school','academy','weather','pharmacy','hospital','near'],text:'📝 11월 19일 수능날 — 당일 교통 안내·시험장 날씨·문 연 약국',href:`${NEAR}/season/suneung`},
+  // 설 연휴(11/14 — 병원 /seol은 주소 그대로, 1월에 명절 비상진료기관 명단으로 바꿈): 연휴 3주 전부터 연말정산보다 앞에.
+  {id:'seol-2027',from:'2027-01-16',to:'2027-02-09',sites:['hospital','pharmacy','near','weather','traffic','school'],text:'🧧 설 연휴(2월 6일~9일) 문 여는 병원 — 지역별 진료하는 곳',href:'https://hospital.guidejung.com/seol'},
+  // 독감철 밤·주말 소아과(11/14): 수능 띠가 끝난 뒤 학교·학원·약국·동물병원 아닌 아이 관련 사이트에.
+  {id:'kids-night-2026',from:'2026-11-20',to:'2027-02-28',sites:['school','academy','pharmacy'],text:'🧒 독감철 밤·주말 소아과 — 내 주변 지금 진료 중인 소아청소년과',href:'https://hospital.guidejung.com/kids'},
   // 연말정산(11/14 — 일자리 계산기는 1,000회당 수익이 가장 높은 축, 검색은 12~1월 정점): 한 사이트에 띠는 하나라 붕어빵·겨울 점검보다 앞에.
   {id:'yearend-2026',from:'2026-11-15',to:'2027-01-31',sites:['market','hospital','traffic','trip','weather','parking','near','benefit'],text:'🧾 연말정산 미리 계산 — 내 연봉이면 세금 얼마? 13월의 월급 늘리는 법',href:'https://job.guidejung.com/calc/yearend'},
   {id:'bungeo-2026',from:'2026-11-08',to:'2027-02-28',sites:['weather','near'],text:'🐟 붕어빵 철 — 내 주변 붕어빵·군고구마 파는 편의점',href:'https://cvs.guidejung.com/bungeoppang'},

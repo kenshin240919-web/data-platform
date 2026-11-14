@@ -143,6 +143,9 @@ for site in ORDER:
         'events': dict(top(pid, 'eventName', 'eventCount', 10, {'dimensionFilter': {'filter': {
             'fieldName': 'eventName', 'inListFilter': {'values': ['share', 'favorite', 'install_hint', 'install_click', 'install_done', 'alert_click', 'push_subscribe', 'calc_use']}}}})),
     }
+    if site == 'hospital':  # 11/14: 첫 화면 칩(hp_chip_*)·'이럴 땐 여기로'(hp_situ_*) 칸별 클릭
+        data[site]['boxes'] = top(pid, 'eventName', 'eventCount', 20, {'dimensionFilter': {'filter': {
+            'fieldName': 'eventName', 'stringFilter': {'matchType': 'BEGINS_WITH', 'value': 'hp_'}}}})
 
 L = [f'# 내근처 GA 주간 보고서 ({start} ~ {end})', '',
      f'자동 생성 {today} · `scripts/ga-weekly.py` · 기간: 지난 7일(어제까지), 비교: 그 전 7일. 증감은 지난주 대비.', '']
@@ -189,6 +192,8 @@ for site in ORDER:
     for title, rows, unit in (('유입 경로', d['channels'], '세션'), ('유입 출처', d['sources'], '세션'),
                               ('첫 페이지(검색 유입 입구)', d['landing'], '세션'), ('많이 본 페이지', d['pages'], '조회')):
         L.append(f'- **{title}**: ' + (' · '.join(f'`{k}` {n(v)}' for k, v in rows) if rows else '없음'))
+    if 'boxes' in d:
+        L.append('- **첫 화면 칸 클릭**(hp_chip_ 내 동네 칩 · hp_situ_ 이럴 땐 여기로): ' + (' · '.join(f'`{k}` {n(v)}' for k, v in d['boxes']) if d['boxes'] else '없음'))
     L.append('')
 
 

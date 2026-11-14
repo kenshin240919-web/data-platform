@@ -56,6 +56,8 @@ def sample(host, n=4):
 
 def main():
     submit = '--no-submit' not in sys.argv
+    # 수동 실행 입력 resubmit(예: hospital): 그 사이트 sitemap.xml·rss.xml은 상태와 관계없이 다시 제출(11/14 — 병원 페이지 보강 뒤)
+    again = {h.strip() for h in os.environ.get('GSC_RESUBMIT', '').split(',') if h.strip()}
     info = json.loads(os.environ['GA_SERVICE_ACCOUNT_JSON'])
     cred = service_account.Credentials.from_service_account_info(info, scopes=['https://www.googleapis.com/auth/webmasters'])
     cred.refresh(Request())
@@ -77,7 +79,7 @@ def main():
         for feed in (f'https://{host}/sitemap.xml', f'https://{host}/rss.xml'):
             x = have.get(feed)
             broken = x and int(x.get('errors') or 0) > 0 and not x.get('lastDownloaded')
-            if x and not broken:
+            if x and not broken and key not in again and host not in again:
                 continue
             if not submit:
                 done.append((feed, '제출 필요(이번엔 시험만)'))

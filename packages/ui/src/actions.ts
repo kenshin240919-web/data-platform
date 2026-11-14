@@ -14,6 +14,7 @@ function S(v){try{localStorage.setItem(K,JSON.stringify(v.slice(0,20)))}catch(e)
 function mark(){var ids={};L().forEach(function(f){ids[f.id]=1});document.querySelectorAll('.gj-fav').forEach(function(b){if(ids[b.getAttribute('data-id')])b.setAttribute('data-on','1');else b.removeAttribute('data-on')})}
 function ga(n,p){try{window.gtag&&window.gtag('event',n,p)}catch(e){}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mark);else mark();
+document.addEventListener('click',function(e){var t=e.target,v=t&&t.closest&&t.closest('[data-ev]');if(v){try{window.gtag&&window.gtag('event',v.getAttribute('data-ev'),{box:v.getAttribute('data-box')||'',site:location.hostname.split('.')[0]});}catch(x){}}});
 document.addEventListener('click',function(e){var t=e.target,b=t&&t.closest&&t.closest('.gj-share,.gj-fav');if(!b)return;e.preventDefault();
 if(b.classList.contains('gj-fav')){var id=b.getAttribute('data-id'),v=L(),i=v.findIndex(function(f){return f.id===id});
 if(i>=0){v.splice(i,1);ga('favorite',{action:'remove',item_id:id})}else{v.unshift({id:id,name:b.getAttribute('data-name'),sub:b.getAttribute('data-sub')||'',url:b.getAttribute('data-url'),at:Date.now()});ga('favorite',{action:'add',item_id:id});try{window.dispatchEvent(new CustomEvent('gj-moment',{detail:'fav'}))}catch(x){}}
