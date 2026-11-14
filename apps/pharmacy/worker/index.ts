@@ -97,6 +97,12 @@ function insight(p:PharmacyX){
 
 const AD_FILL='<script>try{document.querySelectorAll("ins.adsbygoogle").forEach(function(){(window.adsbygoogle=window.adsbygoogle||[]).push({})})}catch(e){}</script>';
 const LD_DAY:Record<string,string>={'1':'Monday','2':'Tuesday','3':'Wednesday','4':'Thursday','5':'Friday','6':'Saturday','7':'Sunday'};
+// 11/14 '이어서 보기'(병원·시장 11/12와 같은 방식): 상세 첫 화면에서 다음 약국으로 — 아래 '근처 다른 약국' 칸은 스크롤이 거기까지 잘 안 감. 지금 문 연 곳 먼저.
+function nextHtml(p:Pharmacy,nearby:Card[]){
+  const pick=[...nearby].sort((a,b)=>(statusOf(a).state==='closed'?1:0)-(statusOf(b).state==='closed'?1:0)).slice(0,3);
+  if(!pick.length)return '';
+  return `<nav class="gj-next" aria-label="이어서 보기"><span>근처 약국</span>${pick.map(c=>{const s=statusOf(c);return `<a href="${pharmacyPath(c.id)}">${esc(c.name)}<small>${c.km!=null?`${esc(km(c.km))} · `:''}${esc(s.label)}</small></a>`;}).join('')}<a class="all" href="/region/${esc(p.region)}">${esc(p.region_name)} 약국 전체 →</a></nav>`;
+}
 const cardHtml=(c:Card)=>{const s=statusOf(c);return `<a class="ph-card ${s.state}" href="${pharmacyPath(c.id)}"><span class="ph-dot" aria-hidden="true"></span><span class="ph-card-body"><b>${esc(c.name)}</b><small>${c.km!=null?`${esc(km(c.km))} · `:''}${esc(s.label)}</small></span></a>`;};
 
 function detailHtml(p:PharmacyX,nearby:Card[],ins:ReturnType<typeof insight>){
@@ -122,7 +128,7 @@ function detailHtml(p:PharmacyX,nearby:Card[],ins:ReturnType<typeof insight>){
 <div class="ph-head"><h1>${esc(p.name)}</h1><p>${esc([p.region_name,p.address].filter(Boolean).join(' · '))}</p></div>${actionsHtml({id:p.id,name:p.name,sub:p.region_name,url:pharmacyPath(p.id)})}
 <p class="ph-answer ${s.state}"><span class="ph-dot" aria-hidden="true"></span><b>${esc(s.label)}</b>${s.today?` <span class="muted">· 오늘 ${esc(s.today)}</span>`:''}</p>
 <div class="ph-actions">${p.tel?`<a href="tel:${esc(p.tel.replace(/[^0-9]/g,''))}">📞 전화하기</a>`:''}${map?`<a class="sub" href="${esc(map)}" rel="noopener" target="_blank">🧭 길찾기</a>`:''}</div>
-${ins.top}<section><h2>요일별 운영 시간</h2><table class="ph-hours"><tbody>${days.map(d=>{const h=p.hours[d];return `<tr${d===todayKey?' class="today"':''}><th>${DAY_LABEL[d]}${d===todayKey?' (오늘)':''}</th><td>${h?`${esc(hm(h[0]))} ~ ${esc(hm(h[1]))}`:'<span class="muted">휴무</span>'}</td></tr>`;}).join('')}</tbody></table>
+${nextHtml(p,nearby)}${ins.top}<section><h2>요일별 운영 시간</h2><table class="ph-hours"><tbody>${days.map(d=>{const h=p.hours[d];return `<tr${d===todayKey?' class="today"':''}><th>${DAY_LABEL[d]}${d===todayKey?' (오늘)':''}</th><td>${h?`${esc(hm(h[0]))} ~ ${esc(hm(h[1]))}`:'<span class="muted">휴무</span>'}</td></tr>`;}).join('')}</tbody></table>
 <p class="muted small">약국이 국립중앙의료원에 신고한 시간입니다. 명절·임시 휴무는 다를 수 있으니 가기 전에 전화로 확인하세요.</p></section>
 ${ins.bottom}${nearby.length?`<section><h2>근처 다른 약국 <span class="muted">${nearby.some(c=>statusOf(c).state!=='closed')?'지금 문 연 곳 · 가까운 순':'가까운 순'}</span></h2><div class="ph-cards">${nearby.map(cardHtml).join('')}</div><p><a class="ph-more-link" href="/region/${esc(p.region)}">${esc(p.region_name)} 약국 모두 보기 →</a></p></section>`:''}
 <section><h2>약국 정보</h2><dl class="ph-facts">${([['주소',p.address],['전화',p.tel],['우편번호',p.zip],['지역',p.region_name]] as [string,string|null][]).filter(([,v])=>v).map(([k,v])=>`<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl></section>
