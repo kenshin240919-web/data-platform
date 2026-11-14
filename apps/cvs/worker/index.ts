@@ -53,7 +53,9 @@ function connectHtml(p:Store){
   return `<section class="gj-connect" aria-label="함께 보면 좋은 정보"><h2>🔗 함께 보면 좋은 정보</h2><div>${items.map(([i,t,d,h])=>`<a href="${esc(h)}"><span class="gj-connect-icon" aria-hidden="true">${i}</span><span><b>${esc(t)}</b><small>${esc(d)}</small></span><span class="gj-connect-go" aria-hidden="true">→</span></a>`).join('')}</div></section>`;
 }
 const AD_FILL='<script>try{document.querySelectorAll("ins.adsbygoogle").forEach(function(){(window.adsbygoogle=window.adsbygoogle||[]).push({})})}catch(e){}</script>';
-const cardHtml=(c:Near)=>`<div class="cv-card"><a class="cv-card-main"${c.lat!=null&&c.lon!=null?` data-gj-pt="${c.lat},${c.lon}" data-gj-name="${esc(c.name)}"`:''} href="${storePath(c.id)}"><span class="cv-icon" aria-hidden="true">🏪</span><span class="cv-card-body"><b>${esc(c.name)}</b><small><span class="cv-km">${esc(km(c.km))}</span><span class="cv-tag">${esc(BRANDS[c.brand].label)}</span></small><small class="muted">${esc(c.addr??c.jibun??'')}</small></span></a>${c.tel?`<span class="cv-acts"><a href="${esc(telHref(c.tel))}" aria-label="전화">📞</a></span>`:''}</div>`;
+/** 편의점끼리 거리 — 30m 안은 같은 건물(병원·역사 안 편의점이 많아 '0m'로 보였음, 11/14) */
+const gap=(v:number)=>v<0.03?'같은 건물':km(v);
+const cardHtml=(c:Near)=>`<div class="cv-card"><a class="cv-card-main"${c.lat!=null&&c.lon!=null?` data-gj-pt="${c.lat},${c.lon}" data-gj-name="${esc(c.name)}"`:''} href="${storePath(c.id)}"><span class="cv-icon" aria-hidden="true">🏪</span><span class="cv-card-body"><b>${esc(c.name)}</b><small><span class="cv-km">${esc(gap(c.km))}</span><span class="cv-tag">${esc(BRANDS[c.brand].label)}</span></small><small class="muted">${esc(c.addr??c.jibun??'')}</small></span></a>${c.tel?`<span class="cv-acts"><a href="${esc(telHref(c.tel))}" aria-label="전화">📞</a></span>`:''}</div>`;
 /** 약국 지금 상태는 방문 때 내근처 약국 /api/fav로(상태 글자만 채움, 실패하면 빈칸). */
 const PH_STATE=`<script>(function(){var els=document.querySelectorAll('[data-ph]');if(!els.length)return;var ids=[].map.call(els,function(e){return e.getAttribute('data-ph')}).join(',');
 fetch('${PHARMACY}/api/fav?ids='+encodeURIComponent(ids)).then(function(r){return r.json()}).then(function(d){(d.items||[]).forEach(function(x){[].forEach.call(document.querySelectorAll('[data-ph="'+x.id+'"]'),function(e){e.textContent=x.label;e.className='cv-state '+x.state;});});}).catch(function(){});})();</script>`;
@@ -62,7 +64,7 @@ fetch('${PHARMACY}/api/fav?ids='+encodeURIComponent(ids)).then(function(r){retur
 function nextHtml(p:Store,others:Near[]){
   const list=others.slice(0,3),label='근처 상비약 편의점';
   if(!list.length)return '';
-  return `<nav class="gj-next" aria-label="이어서 보기"><span>${esc(label)}</span>${list.map(c=>`<a href="${storePath(c.id)}">${esc(c.name)}<small>${esc(km(c.km))}${''}</small></a>`).join('')}<a class="all" href="/region/${esc(p.region)}">${esc(p.region_name)} 전체 →</a></nav>`;
+  return `<nav class="gj-next" aria-label="이어서 보기"><span>${esc(label)}</span>${list.map(c=>`<a href="${storePath(c.id)}">${esc(c.name)}<small>${esc(gap(c.km))}</small></a>`).join('')}<a class="all" href="/region/${esc(p.region)}">${esc(p.region_name)} 전체 →</a></nav>`;
 }
 function detailHtml(p:Store,others:Near[]){
   const addr=p.addr??p.jibun,B=BRANDS[p.brand],y=years(p.since);

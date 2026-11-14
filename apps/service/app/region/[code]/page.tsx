@@ -6,13 +6,15 @@ import {Faq,breadcrumbLd,JsonLd} from '@guidejung/ui/seo';
 import {Connect,linksNear} from '@guidejung/ui/network';
 import {CenterList} from '../../_components/CenterList';
 import {centerPath,COND_MIN,KIND_ORDER,KINDS,n,region,regions,SITE,slim,updated} from '../../../lib/data';
+/** 0곳은 '없음'이 아니라 원본(지자체 등록 자료)에 빠진 경우가 많음 — 예: 행정안전부 세차장 자료에 청주시가 통째로 없음(11/14 확인) */
+const cnt=(r:{kinds:Record<string,number>},k:string)=>r.kinds[k]?`${n(r.kinds[k])}곳`:'공공데이터에 등록 정보 없음';
 
 export const dynamicParams=false;
 export function generateStaticParams(){return regions.map(r=>({code:r.id}));}
 type P={params:Promise<{code:string}>};
 export async function generateMetadata({params}:P):Promise<Metadata>{
   const r=region((await params).code);if(!r)return {};
-  return {title:`${r.name} 자동차 정비소 ${n(r.kinds.repair)}곳 · 검사소·세차장`,description:`${r.name} 자동차 정비소 ${n(r.kinds.repair)}곳(${Object.entries(r.subs).map(([k,v])=>`${k} ${n(v)}`).join(', ')}), 검사소 ${n(r.kinds.inspect)}곳, 세차장 ${n(r.kinds.wash)}곳, 배출가스 정비 ${n(r.kinds.emission)}곳.`,alternates:{canonical:`/region/${r.id}`}};
+  return {title:`${r.name} 자동차 정비소 ${n(r.kinds.repair)}곳 · 검사소·세차장`,description:`${r.name} 자동차 정비소 ${n(r.kinds.repair)}곳(${Object.entries(r.subs).map(([k,v])=>`${k} ${n(v)}`).join(', ')}), 검사소 ${cnt(r,'inspect')}, 세차장 ${cnt(r,'wash')}, 배출가스 정비 ${cnt(r,'emission')}.`,alternates:{canonical:`/region/${r.id}`}};
 }
 export default async function RegionPage({params}:P){
   const r=region((await params).code);if(!r)notFound();
@@ -20,7 +22,7 @@ export default async function RegionPage({params}:P){
   return <div className="page">
     <nav className="crumbs"><Link href="/">홈</Link> › <Link href="/region">지역별</Link> › {r.name}</nav>
     <h1>{r.name} 자동차 정비소·검사소</h1>
-    <p className="sv-answer"><b>{r.name}</b>에 등록된 자동차 정비소는 <b>{n(r.kinds.repair)}곳</b>이에요{Object.keys(r.subs).length?` (${Object.entries(r.subs).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`${k} ${n(v)}`).join(' · ')})`:''}. 검사소 {n(r.kinds.inspect)}곳 · 세차장 {n(r.kinds.wash)}곳 · 배출가스 정비 {n(r.kinds.emission)}곳. <span className="muted">({updated()} 기준)</span></p>
+    <p className="sv-answer"><b>{r.name}</b>에 등록된 자동차 정비소는 <b>{n(r.kinds.repair)}곳</b>이에요{Object.keys(r.subs).length?` (${Object.entries(r.subs).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`${k} ${n(v)}`).join(' · ')})`:''}. 검사소 {cnt(r,'inspect')} · 세차장 {cnt(r,'wash')} · 배출가스 정비 {cnt(r,'emission')}. <span className="muted">({updated()} 기준)</span></p>
     <div className="sv-jump">{KIND_ORDER.filter(k=>r.kinds[k]>=COND_MIN).map(k=><Link key={k} href={`/region/${r.id}/${k}`}>{KINDS[k].icon} {r.zone} {KINDS[k].label} <small>{n(r.kinds[k])}</small></Link>)}</div>
     <section><h2>{r.name} 목록</h2><CenterList items={r.items.map(slim)}/>
       <noscript><ul>{r.items.slice(0,300).map(p=><li key={p.id}><a href={centerPath(p.id)}>{p.name}</a> · {KINDS[p.kind].label}{p.sub?` · ${p.sub}`:''}</li>)}</ul></noscript></section>
