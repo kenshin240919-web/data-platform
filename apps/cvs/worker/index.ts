@@ -58,6 +58,12 @@ const cardHtml=(c:Near)=>`<div class="cv-card"><a class="cv-card-main"${c.lat!=n
 const PH_STATE=`<script>(function(){var els=document.querySelectorAll('[data-ph]');if(!els.length)return;var ids=[].map.call(els,function(e){return e.getAttribute('data-ph')}).join(',');
 fetch('${PHARMACY}/api/fav?ids='+encodeURIComponent(ids)).then(function(r){return r.json()}).then(function(d){(d.items||[]).forEach(function(x){[].forEach.call(document.querySelectorAll('[data-ph="'+x.id+'"]'),function(e){e.textContent=x.label;e.className='cv-state '+x.state;});});}).catch(function(){});})();</script>`;
 
+// 11/14 '이어서 보기'(병원·시장·약국·일자리와 같은 방식): 상세 첫 화면에서 근처 같은 종류로 — 아래 근처 칸은 스크롤이 거기까지 잘 안 감.
+function nextHtml(p:Store,others:Near[]){
+  const list=others.slice(0,3),label='근처 상비약 편의점';
+  if(!list.length)return '';
+  return `<nav class="gj-next" aria-label="이어서 보기"><span>${esc(label)}</span>${list.map(c=>`<a href="${storePath(c.id)}">${esc(c.name)}<small>${esc(km(c.km))}${''}</small></a>`).join('')}<a class="all" href="/region/${esc(p.region)}">${esc(p.region_name)} 전체 →</a></nav>`;
+}
 function detailHtml(p:Store,others:Near[]){
   const addr=p.addr??p.jibun,B=BRANDS[p.brand],y=years(p.since);
   const ph=p.ph,late=p.ph_late,er=p.er;
@@ -87,6 +93,7 @@ function detailHtml(p:Store,others:Near[]){
 <div class="cv-head"><h1>🏪 ${esc(p.name)}</h1><p>${esc([p.region_name,B.title,'상비약 판매 등록'].join(' · '))}</p></div>${actionsHtml({id:p.id,name:p.name,sub:[B.label,p.region_name].join(' · '),url:storePath(p.id)})}
 <p class="cv-answer"><b>안전상비의약품 판매자로 등록된 곳이에요.</b> 등록 기준이 24시간 연중 무휴 점포라서 약국이 닫은 밤에도 해열진통제·소화제 같은 상비약을 살 수 있는 곳이에요.${addr?` <span class="muted">· ${esc(addr)}</span>`:''}</p>
 <div class="cv-actions">${p.tel?`<a href="${esc(telHref(p.tel))}">📞 전화하기</a>`:''}<a class="${p.tel?'sub':''}" href="${esc(mapUrl(p))}" rel="noopener" target="_blank">🧭 길찾기</a></div>
+${nextHtml(p,others)}
 <p class="cv-note">실제 영업 시간·판매 품목·재고는 공공데이터에 없어요. 급하면 전화로 확인하세요. 약은 사용상 주의사항을 꼭 읽고, 증상이 심하면 약국·병원에 문의하세요.</p>
 <section class="cv-near-box"><h2>💊 이 근처 약국·응급실</h2><ul>${phItems}</ul></section>
 ${others.length?`<section><h2>근처 다른 상비약 편의점</h2><div class="cv-cards">${others.map(cardHtml).join('')}</div></section>`:''}

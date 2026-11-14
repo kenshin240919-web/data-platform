@@ -53,6 +53,12 @@ const cardHtml=(c:Lot&{km:number})=>{const w=feeFor(c,60);return `<a class="pk-c
 const TIMES=[30,60,120,180,240,480];
 const DAY_LD={wk:['Monday','Tuesday','Wednesday','Thursday','Friday'],sat:['Saturday'],hol:['Sunday','PublicHolidays']} as const;
 
+// 11/14 '이어서 보기'(병원·시장·약국·일자리와 같은 방식): 상세 첫 화면에서 근처 같은 종류로 — 아래 근처 칸은 스크롤이 거기까지 잘 안 감.
+function nextHtml(p:Lot,nearby:(Lot&{km:number})[]){
+  const list=nearby.slice(0,3),label='근처 주차장';
+  if(!list.length)return '';
+  return `<nav class="gj-next" aria-label="이어서 보기"><span>${esc(label)}</span>${list.map(c=>`<a href="${lotPath(c.id)}">${esc(c.name)}<small>${esc(km(c.km))}${(c.charge==='무료'?' · 무료':'')}</small></a>`).join('')}<a class="all" href="/region/${esc(p.region)}">${esc(p.region_name)} 전체 →</a></nav>`;
+}
 function detailHtml(p:Lot,nearby:(Lot&{km:number})[]){
   const now=kstNow(),o=openNow(p,now),addr=p.addr??p.jibun;
   const h1=feeFor(p,60),h2=feeFor(p,120);
@@ -78,6 +84,7 @@ function detailHtml(p:Lot,nearby:(Lot&{km:number})[]){
 <div class="pk-head"><h1>${esc(p.name)}</h1><p>${esc([p.region_name,p.se&&`${p.se} 주차장`,addr].filter(Boolean).join(' · '))}</p></div>${actionsHtml({id:p.id,name:p.name,sub:p.region_name,url:lotPath(p.id)})}
 <p class="pk-answer ${o.open?'open':'closed'}"><span class="pk-dot" aria-hidden="true"></span><b>${p.charge==='무료'?'무료 주차장':h1!=null?`1시간 약 ${esc(won(h1))}`:esc(feeLine(p))}</b> <span class="muted">· ${esc(KIND_LABEL[now.kind])} ${esc(o.label)}${p.spaces?` · ${n(p.spaces)}면`:''}</span></p>
 <div class="pk-actions"><a href="${esc(mapUrl(p))}" rel="noopener" target="_blank">🧭 길찾기</a>${p.tel?`<a class="sub" href="tel:${esc(p.tel.replace(/[^0-9]/g,''))}">📞 관리기관 전화</a>`:''}</div>
+${nextHtml(p,nearby)}
 <section><h2>주차 요금</h2>${p.charge==='무료'?'<p><b class="pk-free">무료</b> 주차장이에요.</p>':`<table class="pk-feetable"><tbody>
 ${fee?.b?`<tr><th>기본</th><td>${esc(`${fee.b[0]}분 ${n(fee.b[1])}원`)}</td></tr>`:''}${fee?.a?`<tr><th>추가</th><td>${esc(`${fee.a[0]}분마다 ${n(fee.a[1])}원`)}</td></tr>`:''}${fee?.d?`<tr><th>1일 주차권</th><td>${n(fee.d)}원${fee.dh?` (${fee.dh}시간)`:''}</td></tr>`:''}${fee?.m?`<tr><th>월 정기권</th><td>${n(fee.m)}원</td></tr>`:''}
 ${TIMES.map(t=>{const w=feeFor(p,t);return w!=null?`<tr><th>${t<60?`${t}분`:`${t/60}시간`} 세우면</th><td><b>약 ${esc(won(w))}</b></td></tr>`:'';}).join('')}

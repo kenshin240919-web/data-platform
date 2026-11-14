@@ -64,6 +64,13 @@ const ABOUT:Record<Kind,string>={
   skin:'공중위생관리법의 피부미용업으로 신고한 곳이에요. 의료기기·의약품을 쓰는 시술은 할 수 없어요.',
 };
 
+// 11/14 '이어서 보기'(병원·시장·약국·일자리와 같은 방식): 상세 첫 화면에서 근처 같은 종류로 — 아래 근처 칸은 스크롤이 거기까지 잘 안 감.
+function nextHtml(p:Place,groups:[string,Near[]][]){
+  const g=groups.find(([t,l])=>t.startsWith('근처 다른')&&l.length)??groups.find(([,l])=>l.length);
+  const list=(g?.[1]??[]).slice(0,3),label=(g?.[0]??'근처').replace('근처 다른 ','근처 ');
+  if(!list.length)return '';
+  return `<nav class="gj-next" aria-label="이어서 보기"><span>${esc(label)}</span>${list.map(c=>`<a href="${shopPath(c.id)}">${esc(c.name)}<small>${esc(km(c.km))}${''}</small></a>`).join('')}<a class="all" href="/region/${esc(p.region)}">${esc(p.region_name)} 전체 →</a></nav>`;
+}
 function detailHtml(p:Place,groups:[string,Near[]][]){
   const addr=p.addr??p.jibun,K=KINDS[p.kind],y=years(p.since);
   const what=[K.title,p.sub&&p.sub!==K.title?p.sub:null].filter(Boolean).join(' · ');
@@ -86,6 +93,7 @@ function detailHtml(p:Place,groups:[string,Near[]][]){
 <div class="rs-head"><h1>${K.icon} ${esc(p.name)}</h1><p>${esc([p.region_name,what].filter(Boolean).join(' · '))}</p></div>${actionsHtml({id:p.id,name:p.name,sub:[K.label,p.region_name].join(' · '),url:shopPath(p.id)})}
 <p class="rs-answer"><b>${esc(ABOUT[p.kind])}</b>${addr?` <span class="muted">· ${esc(addr)}</span>`:''}${p.since?` <span class="muted">· ${esc(sinceLine(p.since)??'')}</span>`:''}</p>
 <div class="rs-actions">${p.tel?`<a href="${esc(telHref(p.tel))}">📞 전화하기</a>`:''}<a class="${p.tel?'sub':''}" href="${esc(mapUrl(p))}" rel="noopener" target="_blank">🧭 길찾기</a><a class="naver" href="${esc(naverUrl(p))}" rel="noopener" target="_blank">🟢 네이버 지도에서 가격·예약 보기</a></div>
+${nextHtml(p,groups)}
 <p class="rs-note">가격·예약·영업 시간은 공공데이터에 없어요. 네이버 지도나 전화로 확인하세요.</p>
 ${p.kind==='sauna'||p.kind==='skin'?blogHtml(`${p.name} ${p.region_name.split(' ').slice(-1)[0]}`,p.name.replace(/\s*[([].*$/,'').trim(),'📝 다녀온 사람들 후기 · 네이버 블로그'):''}
 ${groups.map(([title,list])=>list.length?`<section><h2>${esc(title)}</h2><div class="rs-cards">${list.map(cardHtml).join('')}</div></section>`:'').join('')}
