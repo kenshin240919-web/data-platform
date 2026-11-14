@@ -127,6 +127,13 @@ function insight(a:Academy,st:Stats,nation:Record<string,FeeStats>){
 }
 
 const AD_FILL='<script>try{document.querySelectorAll("ins.adsbygoogle").forEach(function(){(window.adsbygoogle=window.adsbygoogle||[]).push({})})}catch(e){}</script>';
+// 11/14 '이어서 보기'(다른 사이트와 같은 방식): 상세 첫 화면에서 근처 학원으로 — 수강료 공개한 곳 먼저(아래 '근처 같은 과목'과 같은 순서).
+const kmText=(v:number)=>v<1?`${Math.round(v*1000)}m`:`${v.toFixed(1)}km`;
+function nextHtml(a:Academy,near:Card[]){
+  const list=near.slice(0,3);
+  if(!list.length)return '';
+  return `<nav class="gj-next" aria-label="이어서 보기"><span>근처 학원</span>${list.map(c=>`<a href="${academyPath(c.id)}">${esc(c.name)}<small>${c.km!=null?esc(kmText(c.km)):''}${c.fee_min!=null?' · 수강료 공개':''}</small></a>`).join('')}<a class="all" href="/region/${esc(a.region_id)}">${esc(a.region_name)} 학원 전체 →</a></nav>`;
+}
 function detailHtml(a:Academy,near:Card[],ins:ReturnType<typeof insight>){
   const subj=a.subjects.map(subjectLabel),grades=a.grades.map(g=>GRADES[g]);
   const fees=[...a.fees].sort((x,y)=>x.won-y.won);
@@ -159,6 +166,7 @@ function detailHtml(a:Academy,near:Card[],ins:ReturnType<typeof insight>){
 <div class="ac-tags">${[...subj,...grades].map(t=>`<span>${esc(t)}</span>`).join('')}</div></div>${actionsHtml()}
 <p class="ac-answer">${fee?`교육청에 공개된 수강료는 <b>${esc(fee)}</b>${okFees.length>1?`(과정 ${n(okFees.length)}개)`:''}이에요.`:'교육청에 공개된 수강료 금액이 없어요. 학원에 직접 문의해 주세요.'}</p>
 <div class="ac-actions"><button type="button" class="ac-pick-big" id="ac-pick" data-id="${esc(a.id)}" data-name="${esc(a.name)}">+ 비교에 담기</button>${map?`<a href="${esc(map)}" rel="noopener" target="_blank">🧭 길찾기</a>`:''}${a.tel?`<a class="sub" href="tel:${esc(a.tel.replace(/[^0-9]/g,''))}">📞 전화</a>`:''}${subjectLinks}</div>
+${nextHtml(a,near)}
 ${ins.top}
 ${fees.length?`<section><h2>과정별 수강료</h2><ul class="ac-fees">${fees.map(f=>`<li><span>${esc(f.name)}</span><b>${esc(won(f.won))}</b></li>`).join('')}</ul><p class="muted small">교육청에 신고·공개된 인당 수강료(기간 표기 없음, 교재비 등 제외될 수 있음). 실제 수강료는 학원에 확인하세요.</p></section>`:''}
 ${blogHtml(`${a.name} ${a.region_name.split(' ').slice(-1)[0]}`,a.name.replace(/\s*[([].*$/,'').trim(),'📝 학부모·수강생 블로그 후기 · 네이버')}

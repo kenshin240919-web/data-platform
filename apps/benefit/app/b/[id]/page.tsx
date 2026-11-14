@@ -41,6 +41,8 @@ export default async function Detail({params}:P){
       {conds.length>0&&<><br/>👤 {conds.join(' · ')}</>}</p>
     <div className="bf-actions">{i.apply&&<a href={i.apply} target="_blank" rel="noopener">✍️ 온라인 신청하러 가기</a>}{i.url&&<a className={i.apply?'sub':''} href={i.url} target="_blank" rel="noopener">정부24에서 자세히 보기</a>}
       {tel&&<a className="sub" href={`tel:${tel.replace(/-/g,'')}`}>📞 {tel}</a>}</div>
+    {/* 11/14 '이어서 보기': 첫 화면에서 같은 지역·같은 분야 다른 혜택으로 */}
+    {same.length>0&&<nav className="gj-next" aria-label="이어서 보기"><span>{r?r.name:'같은 지역'} {FIELDS[i.field].label}</span>{same.slice(0,3).map(x=><Link key={x.id} href={benefitPath(x.id)}>{x.name}<small>{x.amount?won(x.amount):scopeLabel(x)}</small></Link>)}{r&&<Link className="all" href={`/region/${r.code}`}>{r.name} 혜택 전체 →</Link>}</nav>}
     <Sec title="누가 받나요?" text={i.target}/>
     <Sec title="선정 기준" text={i.crit}/>
     <Sec title="무엇을 받나요?" text={i.content}/>

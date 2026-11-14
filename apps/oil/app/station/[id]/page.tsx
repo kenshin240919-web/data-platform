@@ -5,7 +5,7 @@ import {AdSlot} from '@guidejung/ui/ads';
 import {Faq,breadcrumbLd,JsonLd} from '@guidejung/ui/seo';
 import {Connect,linksNear} from '@guidejung/ui/network';
 import {StationList} from '../../_components/StationList';
-import {brandName,diff,eun,fresh,md,mapUrl,nation,nearby,PROD_LABEL,rankIn,regionOf,SITE,slim,station,stations,updated,won,type Prod} from '../../../lib/data';
+import {brandName,diff,eun,km,fresh,md,mapUrl,nation,nearby,PROD_LABEL,rankIn,regionOf,SITE,slim,station,stations,updated,won,type Prod} from '../../../lib/data';
 import {Actions} from '@guidejung/ui/favlist';
 
 export const dynamicParams=false;
@@ -29,6 +29,8 @@ export default async function StationPage({params}:P){
       {p==='B027'&&ra&&g?<small className={g>ra?'up':'down'}>{r?.name} 평균 {diff(g-ra)}</small>:p==='D047'&&nation.D047?.price&&s.prices.D047?<small className={s.prices.D047>nation.D047.price?'up':'down'}>전국 평균 {diff(s.prices.D047-nation.D047.price)}</small>:null}</div>)}
       {rank&&<div><span>{r?.name} 휘발유 최저가 순위</span><b>{rank}위</b><small>{r?.items.length}곳 중</small></div>}</div>
     <div className="oi-actions"><a href={mapUrl(s)} target="_blank" rel="noopener">🧭 길찾기</a>{r&&<Link className="sub" href={`/region/${r.code}`}>{r.label} 최저가 목록</Link>}</div>
+    {/* 11/14 '이어서 보기'(다른 사이트와 같은 방식): 첫 화면에서 근처 같은 종류로 */}
+    {near.length>0&&<nav className="gj-next" aria-label="이어서 보기"><span>근처 주유소</span>{near.slice(0,3).map(x=><Link key={x.id} href={`/station/${x.id}`}>{x.name}<small>{km(x.km)}{x.prices.B027!=null?` · 휘발유 ${won(x.prices.B027)}`:''}</small></Link>)}{r&&<Link className="all" href={`/region/${r.code}`}>{r.label} 전체 →</Link>}</nav>}
     <p className="muted small">{fresh(s)?<>가격은 {updated()}에 오피넷에서 받은 값입니다.</>:<>오늘 최저가 목록에는 없어 <b>{md(s.seen)}에 확인한 가격</b>입니다.</>} 주유 전 현장 가격을 확인하세요.</p>
     <AdSlot/>
     {near.length>0&&<section><h2>근처 다른 싼 주유소</h2><StationList items={near.map(slim)} avg={na} avgLabel="전국 평균" rank={false}/></section>}

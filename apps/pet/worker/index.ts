@@ -85,6 +85,13 @@ function shelterHtml(p:Place){
   const list=shelterAnimals(p.id);
   return `<section><h2>🐾 지금 보호 중인 아이들 <span class="muted">${list.length}마리</span></h2>${list.length?`<div class="pt-animals">${list.slice(0,24).map(a=>animalCard(a)).join('')}</div>${list.length>24?`<p class="muted small">그 밖에 ${list.length-24}마리 — 보호소에 문의하세요.</p>`:''}`:'<p class="muted">지금 공고 중인 아이가 없어요.</p>'}<p class="muted small">${esc(adata().status.updated_at.slice(0,10))} 기준 · 그사이 입양되거나 보호자를 찾았을 수 있어요.</p></section>`;
 }
+// 11/14 '이어서 보기'(병원·시장·약국·일자리와 같은 방식): 상세 첫 화면에서 근처 같은 종류로 — 아래 근처 칸은 스크롤이 거기까지 잘 안 감.
+function nextHtml(p:Place,groups:[string,Near[]][]){
+  const g=groups.find(([t,l])=>t.startsWith('근처 다른')&&l.length)??groups.find(([,l])=>l.length);
+  const list=(g?.[1]??[]).slice(0,3),label=(g?.[0]??'근처').replace('근처 다른 ','근처 ');
+  if(!list.length)return '';
+  return `<nav class="gj-next" aria-label="이어서 보기"><span>${esc(label)}</span>${list.map(c=>`<a href="${placePath(c.id)}">${esc(c.name)}<small>${esc(km(c.km))}${''}</small></a>`).join('')}<a class="all" href="/region/${esc(p.region)}">${esc(p.region_name)} 전체 →</a></nav>`;
+}
 function detailHtml(p:Place,groups:[string,Near[]][]){
   const addr=p.addr??p.jibun,K=KINDS[p.kind],y=years(p.since),st=stateOf(p),h24=is24(p);
   const what=[K.title,p.sub&&p.sub!==K.title?p.sub:null].filter(Boolean).join(' · ');
@@ -122,6 +129,7 @@ function detailHtml(p:Place,groups:[string,Near[]][]){
 <div class="pt-head"><h1>${K.icon} ${esc(p.name)}</h1><p>${esc([p.region_name,what].filter(Boolean).join(' · '))}</p></div>${actionsHtml({id:p.id,name:p.name,sub:[p.sub??K.label,p.region_name].join(' · '),url:placePath(p.id)})}
 ${answer}
 <div class="pt-actions">${p.tel?`<a href="${esc(telHref(p.tel))}">📞 전화하기</a>`:''}<a class="${p.tel?'sub':''}" href="${esc(mapUrl(p))}" rel="noopener" target="_blank">🧭 길찾기</a><a class="naver" href="${esc(naverUrl(p))}" rel="noopener" target="_blank">${naverLabel}</a>${p.ph?`<a class="sub" href="${PHARMACY_SITE}/pharmacy/${esc(p.ph)}">💊 약국 요일별 시간표</a>`:''}</div>
+${nextHtml(p,groups)}
 <p class="pt-note">${esc(note)}</p>
 ${p.kind==='shelter'?shelterHtml(p):''}
 ${groups.map(([title,list])=>list.length?`<section><h2>${esc(title)}</h2><div class="pt-cards">${list.map(cardHtml).join('')}</div></section>`:'').join('')}

@@ -127,6 +127,13 @@ const cardHtml=(c:Near)=>`<div class="cv-card"><a class="cv-card-main"${c.lat!=n
 // 실시간 대기(민원실 상세): 인라인 스크립트가 /api/wait를 불러 채움(Next 스크립트 없음).
 const WAIT_JS=(id:string)=>`<script>(function(){var e=document.getElementById('cv-wait');fetch('/api/wait?id=${id}').then(function(r){return r.json()}).then(function(d){if(d.error){e.innerHTML='<p class="muted">지금은 대기 현황을 불러오지 못했어요. 잠시 뒤 다시 열어 주세요.</p>';return}if(!d.tasks||!d.tasks.length){e.innerHTML='<p class="muted">지금은 대기 현황이 없어요(업무 시간 외이거나 점검 중).</p>';return}var t=d.at?String(d.at).replace(/^(\\d{4})(\\d{2})(\\d{2})(\\d{2})(\\d{2}).*/,'$4:$5'):'';e.innerHTML='<p class="cv-answer">지금 대기 <b>'+d.total+'명</b>'+(t?' <span class="muted">('+t+' 기준)</span>':'')+'</p><ul class="cv-wait">'+d.tasks.map(function(x){return '<li><span>'+x.name.replace(/[<>&]/g,'')+'</span><b>'+x.waiting+'명</b></li>'}).join('')+'</ul>'}).catch(function(){e.innerHTML='<p class="muted">대기 현황을 불러오지 못했어요.</p>'})})();</script>`;
 
+// 11/14 '이어서 보기'(다른 사이트와 같은 방식): 상세 첫 화면에서 근처 같은 종류로.
+function nextHtml(p:Place,groups:[string,Near[]][]){
+  const g=groups.find(([t,l])=>t.startsWith('근처 다른')&&l.length)??groups.find(([,l])=>l.length);
+  const list=(g?.[1]??[]).slice(0,3),label=(g?.[0]??'근처').replace('근처 다른 ','근처 ');
+  if(!list.length)return '';
+  return `<nav class="gj-next" aria-label="이어서 보기"><span>${esc(label)}</span>${list.map(c=>`<a href="${placePath(c.id)}">${esc(c.name)}<small>${esc(c.km<0.03?'같은 건물':km(c.km))}</small></a>`).join('')}<a class="all" href="/region/${esc(p.region)}">${esc(p.region_name)} 전체 →</a></nav>`;
+}
 function detailHtml(p:Place,groups:[string,Near[]][]){
   const addr=p.addr??p.jibun,K=KINDS[p.kind],D=data().docs;
   const docs=(p.docs??[]).map(i=>D[i]).filter(Boolean);
@@ -151,6 +158,7 @@ function detailHtml(p:Place,groups:[string,Near[]][]){
 <div class="cv-head"><h1>${K.icon} ${esc(p.name)}</h1><p>${esc([p.region_name,K.title].join(' · '))}</p></div>${actionsHtml({id:p.id,name:p.name,sub:[K.label,p.region_name].join(' · '),url:placePath(p.id)})}
 <p class="cv-answer">${stateHtml(p)} <b>${esc(hours)}</b>${addr?` <span class="muted">· ${esc(addr)}${p.spot?` (${esc(p.spot)})`:''}</span>`:''}</p>
 <div class="cv-actions">${p.tel?`<a href="${esc(telHref(p.tel))}">📞 전화하기</a>`:''}<a class="${p.tel?'sub':''}" href="${esc(mapUrl(p))}" rel="noopener" target="_blank">🧭 길찾기</a><a class="naver" href="${esc(naverUrl(p))}" rel="noopener" target="_blank">🟢 네이버 지도에서 보기</a>${p.url?`<a class="sub" href="${esc(p.url)}" rel="noopener" target="_blank">🏛️ 안내 누리집</a>`:''}</div>
+${nextHtml(p,groups)}
 ${p.kind==='cso'?`<section><h2>⏱️ 지금 대기 현황</h2><div id="cv-wait"><p class="muted">불러오는 중…</p></div></section>${WAIT_JS(p.id)}`:''}
 ${p.kind==='kiosk'?`<section><h2>🧾 뗄 수 있는 서류 ${docs.length?`${n2(docs.length)}종`:''}</h2>${p.reg||p.fam?`<p>${[p.reg&&'✅ 등기사항증명서(부동산 등기부)',p.fam&&'✅ 가족관계증명서'].filter(Boolean).join(' · ')}</p>`:''}${byMenu.length?byMenu.map(([m,l])=>`<details${byMenu.length<4?' open':''}><summary><b>${esc(m)}</b> <span class="muted">${l.length}종</span></summary><ul class="cv-plain">${l.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></details>`).join(''):'<p class="muted">서류 목록을 아직 받지 못했어요.</p>'}<p class="cv-note">수수료는 서류·지자체마다 달라요. 주민등록등본 등 많은 서류는 정부24에서 온라인으로도 뗄 수 있어요.</p></section>`:''}
 ${groups.map(([title,list])=>list.length?`<section><h2>${esc(title)}</h2><div class="cv-cards">${list.map(cardHtml).join('')}</div></section>`:'').join('')}
