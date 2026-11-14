@@ -7,7 +7,7 @@ import {Actions} from '@guidejung/ui/favlist';
 import {Showtimes} from '../../_components/Live';
 import {TheaterCard} from '../../_components/TheaterList';
 import {Ad} from '../../_components/Ad';
-import {CHAINS,distKm,LIVE_CHAINS,meters,n,PARKING,region,SITE,slim,telHref,theater,theaterPath,theaters,updated,years} from '../../../lib/data';
+import {CHAINS,distKm,km,LIVE_CHAINS,meters,n,PARKING,region,SITE,slim,telHref,theater,theaterPath,theaters,updated,years} from '../../../lib/data';
 
 export const dynamicParams=false;
 export function generateStaticParams(){return theaters.map(t=>({id:t.id}));}
@@ -34,6 +34,8 @@ export default async function TheaterPage({params}:P){
     <h1>{t.name}</h1>
     <p className="muted">{t.region_name} · {kind(t)} · 상영관 {t.screens}개</p>
     <Actions fav={{id:`movie:${t.id}`,name:t.name,sub:t.region_name,url:SITE+theaterPath(t.id)}} go={t.lat!=null?{name:t.name,lat:t.lat,lon:t.lon!}:undefined}/>
+    {/* 11/14 '이어서 보기'(다른 사이트와 같은 방식): 첫 화면에서 근처 같은 종류로 */}
+    {others.length>0&&<nav className="gj-next" aria-label="이어서 보기"><span>근처 영화관</span>{others.slice(0,3).map(o=><Link key={o.id} href={theaterPath(o.id)}>{o.name}<small>{km(o.km)}</small></Link>)}<Link className="all" href={`/region/${t.region}`}>{t.region_name} 전체 →</Link></nav>}
     <section><h2>🎬 오늘 남은 상영</h2>
       {live?<Showtimes id={t.id} name={t.name} chainLabel={CHAINS[t.chain].label}/>
         :<p className="mv-answer">{t.drive?'자동차극장은':'이 극장은'} 실시간 상영 시간을 받을 수 없어요. {t.tel?<>전화(<a href={telHref(t.tel)}>{t.tel}</a>)나 </>:''}<a href={`https://search.naver.com/search.naver?query=${encodeURIComponent(t.name+' 상영시간표')}`} target="_blank" rel="noopener">네이버에서 ‘{t.name} 상영시간표’</a>로 확인해 주세요.</p>}
