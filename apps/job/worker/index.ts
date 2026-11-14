@@ -75,6 +75,13 @@ function connectHtml(p:Place){
 const AD_FILL='<script>try{document.querySelectorAll("ins.adsbygoogle").forEach(function(){(window.adsbygoogle=window.adsbygoogle||[]).push({})})}catch(e){}</script>';
 const cardHtml=(c:Near)=>`<div class="jb-card"><a class="jb-card-main"${c.lat!=null&&c.lon!=null?` data-gj-pt="${c.lat},${c.lon}" data-gj-name="${esc(c.name)}"`:''} href="${placePath(c.id)}"><span class="jb-kind" aria-hidden="true">${KINDS[c.kind].icon}</span><span class="jb-card-body"><b>${esc(c.name)}</b><small><span class="jb-km">${esc(km(c.km))}</span><span class="jb-tag">${esc(KINDS[c.kind].label)}</span>${tagsOf(c).map(t=>`<span class="jb-tag">${esc(t)}</span>`).join('')}</small><small class="muted">${esc(c.addr??c.jibun??'')}</small></span></a>${c.tel?`<span class="jb-acts"><a href="${esc(telHref(c.tel))}" aria-label="전화">📞</a></span>`:''}</div>`;
 const n2=(v:number)=>v.toLocaleString('ko-KR');
+// 11/14 '이어서 보기'(병원·시장 11/12와 같은 방식): 상세 첫 화면에서 근처 같은 종류로 — 아래 '근처 다른 ○○' 칸은 스크롤이 거기까지 잘 안 감.
+function nextHtml(p:Place,groups:[string,Near[]][]){
+  const pick=(groups[0]?.[1]??[]).slice(0,3);
+  if(!pick.length)return '';
+  const K=KINDS[p.kind],exam=p.kind==='exam';
+  return `<nav class="gj-next" aria-label="이어서 보기"><span>근처 ${esc(exam?'시험장':K.label)}</span>${pick.map(c=>`<a href="${placePath(c.id)}">${esc(c.name)}<small>${esc(km(c.km))}${tagsOf(c)[0]?` · ${esc(tagsOf(c)[0])}`:''}</small></a>`).join('')}<a class="all" href="/region/${esc(p.region)}${exam?'/exam':''}">${esc(p.region_name)} ${exam?'시험장':'일자리 기관'} 전체 →</a></nav>`;
+}
 
 /** 종류마다 상세 위쪽 안내(사실만, 공식 링크) */
 function kindNote(p:Place){
@@ -114,6 +121,7 @@ function detailHtml(p:Place,groups:[string,Near[]][],juris:ReturnType<typeof are
 <div class="jb-head"><h1>${K.icon} ${esc(p.name)}</h1><p>${esc([p.region_name,K.title,...tags].join(' · '))}</p></div>${actionsHtml({id:p.id,name:p.name,sub:[K.label,p.region_name].join(' · '),url:placePath(p.id)})}
 <p class="jb-answer"><b>${esc(K.title)}</b>${addr?` · ${esc(addr)}`:''}${p.tel?` · ${esc(p.tel)}`:''}</p>
 <div class="jb-actions">${p.tel?`<a href="${esc(telHref(p.tel))}">📞 전화하기</a>`:''}<a class="${p.tel?'sub':''}" href="${esc(mapUrl(p))}" rel="noopener" target="_blank">🧭 길찾기</a>${p.kind==='center'&&p.hp?`<a class="sub" href="${esc(p.hp)}" rel="noopener" target="_blank">🏠 센터 홈페이지 ↗</a>`:''}<a class="naver" href="${esc(naverUrl(p))}" rel="noopener" target="_blank">🟢 네이버 지도에서 보기</a></div>
+${nextHtml(p,groups)}
 ${p.kind==='exam'?'':jur?`<a class="jb-juris" href="${placePath(jur.id)}"><span aria-hidden="true">🏛️</span><span><small>${esc(p.region_name)} ${juris!.exact?'관할 고용센터':'에서 가까운 고용센터'}</small><b>${esc(jur.name)}</b><small>${esc(jur.addr??'')}</small></span><em>실업급여·구직 신청 →</em></a>${homeLinksHtml(jur,p.region)}`:homeLinksHtml(null,p.region)}
 ${kindNote(p)}
 ${groups.map(([title,list])=>list.length?`<section><h2>${esc(title)}</h2><div class="jb-cards">${list.map(cardHtml).join('')}</div></section>`:'').join('')}
