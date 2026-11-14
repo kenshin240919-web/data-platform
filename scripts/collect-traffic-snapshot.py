@@ -124,8 +124,12 @@ def main():
         vds = {r['vdsId']: r['conzoneId'] for r in live if r.get('vdsId')}
         routes = {}
         for r in live:
+            # 11/10~: 방향 코드가 ' '(빈칸)인 줄이 섞여 옴(KeyError로 5일 연속 실패) — E·S가 아닌 줄은 건너뜀
+            d = (r.get('updownTypeCode') or '').strip()
+            if d not in ('E', 'S') or not r.get('conzoneId') or not r.get('routeNo'):
+                continue
             rt = routes.setdefault(r['routeNo'], {'no': r['routeNo'], 'name': r['routeName'], 'E': {}, 'S': {}})
-            rt[r['updownTypeCode']][r['conzoneId']] = r['conzoneName']
+            rt[d][r['conzoneId']] = r['conzoneName']
         route_list = []
         for rt in sorted(routes.values(), key=lambda x: x['no']):
             e = sorted(rt['E'].items()); s = sorted(rt['S'].items())
@@ -136,7 +140,12 @@ def main():
             route_list.append({'no': rt['no'], 'name': rt['name'], 'start': start, 'end': end,
                                'E': [[k, v] for k, v in e], 'S': [[k, v] for k, v in s]})
     if len(route_list) < 30:
-        sys.exit(f'only {len(route_list)} routes; not writing')
+        # 원본 구조가 망가진 날은 지난 노선·검지기 표를 그대로 쓰고 휴게소·음식·기름값만 새로 받음
+        old = dest_dir / 'snapshot.json'
+        if not old.exists():
+            sys.exit(f'only {len(route_list)} routes; not writing')
+        print(f'only {len(route_list)} routes from the live feed; keeping previous routes')
+        route_list = json.loads(old.read_text(encoding='utf-8'))['routes']; vds = None
     # 11/9: 실시간 원본의 routeName이 모두 비어 옴(69개 노선 이름 None → 모든 사이트 빌드의 고속도로 연결 카드가 깨짐).
     # 이름이 빈 노선은 지난 스냅샷의 이름으로 채우고, 그래도 없으면 노선 번호로.
     old_names = {}
