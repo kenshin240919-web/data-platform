@@ -132,7 +132,7 @@ function nextHtml(p:Place,groups:[string,Near[]][]){
   const g=groups.find(([t,l])=>t.startsWith('근처 다른')&&l.length)??groups.find(([,l])=>l.length);
   const list=(g?.[1]??[]).slice(0,3),label=(g?.[0]??'근처').replace('근처 다른 ','근처 ');
   if(!list.length)return '';
-  return `<nav class="gj-next" aria-label="이어서 보기"><span>${esc(label)}</span>${list.map(c=>`<a href="${placePath(c.id)}">${esc(c.name)}<small>${esc(km(c.km))}</small></a>`).join('')}<a class="all" href="/region/${esc(p.region)}">${esc(p.region_name)} 전체 →</a></nav>`;
+  return `<nav class="gj-next" aria-label="이어서 보기"><span>${esc(label)}</span>${list.map(c=>`<a href="${placePath(c.id)}">${esc(c.name)}<small>${esc(c.km<0.03?'같은 건물':km(c.km))}</small></a>`).join('')}<a class="all" href="/region/${esc(p.region)}">${esc(p.region_name)} 전체 →</a></nav>`;
 }
 function detailHtml(p:Place,groups:[string,Near[]][]){
   const addr=p.addr??p.jibun,K=KINDS[p.kind],D=data().docs;
