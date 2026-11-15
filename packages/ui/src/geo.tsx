@@ -238,6 +238,12 @@ function LocateHelp({status,onRetry}:{status:'denied'|'failed';onRetry:()=>void}
 /** 이유를 먼저 보여 주고, 누르면 그때 브라우저 위치 권한을 묻는 카드. 못 쓰면(거부·실패) 큰 안내 상자. */
 export function LocateCard({title,desc,status,onClick,approxLabel}:{title:string;desc:string;status:Status;onClick:()=>void;approxLabel?:string}){
   const cellOnly=state.pos?.src==='cell';const [open,setOpen]=useState(false),can=useCanPick();
+  // 11/15: 대략 위치(접속 위치·칸)로 이미 결과를 보여 줄 수 있으면 큰 카드 대신 한 줄 — 휴대폰 첫 화면을 결과에 내줌(세션당 조회).
+  if(state.pos&&!state.pos.precise&&(status==='idle'||status==='locating'||status==='ok'))return <><div className="gj-locate-slim">
+    <span>📍 {cellOnly?'대략적인 내 위치':`접속 위치${approxLabel?`(${approxLabel} 부근)`:''}`} 기준</span>
+    <button type="button" onClick={onClick} disabled={status==='locating'}>{status==='locating'?'내 위치 찾는 중…':'정확한 내 위치로 →'}</button>
+    {can&&!open&&<button type="button" onClick={()=>setOpen(true)}>동네 고르기</button>}
+  </div>{open&&<PickBox onClose={()=>setOpen(false)}/>}</>;
   return <><div className="gj-locate">
     <button type="button" onClick={onClick} disabled={status==='locating'}>
       <span className="gj-locate-icon" aria-hidden="true">📍</span>
