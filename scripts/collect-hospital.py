@@ -19,6 +19,8 @@ _spec.loader.exec_module(P)
 A, KST, log, http_json, hhmm, office_of = P.A, P.KST, P.log, P.http_json, P.hhmm, P.office_of
 OUT = ROOT / 'runtime/hospital'
 SUMMARY = ROOT / 'apps/hospital/data/summary.json'
+# 병원이 직접 알려 준 진료 시간 정정 {hpid: {"hours": {"8": ["0930","1400"]}, ...}} — 원본 값 위에 요일만 덮어씀(빈 목록이면 그 요일 지움).
+HOURS_FIX = json.loads((ROOT / 'apps/hospital/data/hours-fix.json').read_text(encoding='utf-8'))
 API = 'https://apis.data.go.kr/B552657/HsptlAsembySearchService/getHsptlMdcncListInfoInqire'
 ROWS = 5000
 # 사이트 진료과목(주소 slug) ← 국립중앙의료원 진료과목 코드. 한의원·치과는 기관 종류로도 붙임.
@@ -77,7 +79,10 @@ def build(rows, depts_of, regions):
             s, c = hhmm(r.get(f'dutyTime{d}s')), hhmm(r.get(f'dutyTime{d}c'))
             if s and c and s != c:
                 hours[str(d)] = [s, c]
-        depts = sorted(depts_of.get(hid, set()))
+        for d, v in HOURS_FIX.get(hid, {}).get('hours', {}).items():
+            if v: hours[d] = v
+            else: hours.pop(d, None)
+        depts =sorted(depts_of.get(hid, set()))
         if div in ('한의원', '한방병원') and 'korean' not in depts:
             depts.append('korean')
         if div in ('치과의원', '치과병원') and 'dental' not in depts:
