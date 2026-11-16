@@ -1,0 +1,27 @@
+name: CF CPU by worker
+# Workers CPU를 Worker(사이트)별로 모아 reports/cf/cpu-YYYY-MM-DD.md에 커밋 — 수동만(11/16 사용자: CPU 많이 쓰는 곳 찾기).
+on:
+  workflow_dispatch:
+    inputs:
+      days:
+        description: 며칠치(최대 30)
+        default: '30'
+permissions:
+  contents: write
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          DAYS: ${{ inputs.days }}
+        run: python scripts/cf-cpu.py
+      - run: |
+          git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/cf && (git diff --cached --quiet || (git commit -m "Workers CPU 사이트별 보고서" && git pull --rebase -q && git push))
