@@ -24,7 +24,9 @@ def call(url, body=None):
 
 Q = """query($z:String!,$a:Time!,$b:Time!,$h:String!){viewer{zones(filter:{zoneTag:$z}){
  paths: httpRequestsAdaptiveGroups(limit:10000,filter:{datetime_geq:$a,datetime_lt:$b,clientRequestHTTPHost:$h},orderBy:[count_DESC]){count dimensions{clientRequestPath}}
- agents: httpRequestsAdaptiveGroups(limit:200,filter:{datetime_geq:$a,datetime_lt:$b,clientRequestHTTPHost:$h},orderBy:[count_DESC]){count dimensions{userAgent}}}}}"""
+ agents: httpRequestsAdaptiveGroups(limit:200,filter:{datetime_geq:$a,datetime_lt:$b,clientRequestHTTPHost:$h},orderBy:[count_DESC]){count dimensions{userAgent}}
+ blank: httpRequestsAdaptiveGroups(limit:15,filter:{datetime_geq:$a,datetime_lt:$b,clientRequestHTTPHost:$h,userAgent:""},orderBy:[count_DESC]){count dimensions{clientASNDescription clientCountryName}}
+ blankpath: httpRequestsAdaptiveGroups(limit:8,filter:{datetime_geq:$a,datetime_lt:$b,clientRequestHTTPHost:$h,userAgent:""},orderBy:[count_DESC]){count dimensions{clientRequestPath}}}}}"""
 
 BOTS = [('Googlebot', r'Googlebot|Google-InspectionTool|AdsBot-Google|Mediapartners-Google|Storebot-Google'),
         ('Bingbot', r'bingbot|BingPreview'), ('네이버(Yeti)', r'Yeti|Naver'), ('다음(Daumoa)', r'Daum'),
@@ -69,12 +71,15 @@ def main():
         for row in zz['agents']:
             bots[bot_of(row['dimensions']['userAgent'])] += row['count']
         top_agents = sorted(zz['agents'], key=lambda x: -x['count'])[:8]
-        lines += [f'## {h} — 요청 {total:,}건', '', '| 주소 묶음 | 요청 | 비중 |', '|---|--:|--:|']
+        real = sum(r_['count'] for r_ in zz['agents'])
+        lines += [f'## {h} — 요청 약 {max(real, total):,}건 (주소 표는 상위 1만 개 주소만 셈)', '', '| 주소 묶음 | 요청 | 비중 |', '|---|--:|--:|']
         lines += [f'| `{k}` | {v:,} | {v / total * 100 if total else 0:.1f}% |' for k, v in seg.most_common(12)]
         bt = sum(bots.values())
         lines += ['', '| 누가(User-Agent 묶음, 상위 200종 기준) | 요청 | 비중 |', '|---|--:|--:|']
         lines += [f'| {k} | {v:,} | {v / bt * 100 if bt else 0:.1f}% |' for k, v in bots.most_common()]
         lines += ['', '상위 User-Agent 8개:', *[f'- {a["count"]:,} · `{(a["dimensions"]["userAgent"] or "")[:140]}`' for a in top_agents], '']
+        lines += ['이름(User-Agent) 없는 요청 — 어느 망(ASN)·나라:', *[f'- {b["count"]:,} · {b["dimensions"]["clientASNDescription"]} · {b["dimensions"]["clientCountryName"]}' for b in zz.get('blank') or []], '']
+        lines += ['이름 없는 요청 — 많이 부른 주소:', *[f'- {b["count"]:,} · `{(b["dimensions"]["clientRequestPath"] or "")[:100]}`' for b in zz.get('blankpath') or []], '']
     text = '\n'.join(lines) + '\n'
     print(text)
     OUT.mkdir(parents=True, exist_ok=True)
