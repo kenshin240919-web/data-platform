@@ -26,7 +26,8 @@ UA = 'Mozilla/5.0 (compatible; GuideJungIndexNow/1.0; +https://near.guidejung.co
 
 def hosts():
     net = (ROOT / 'packages/ui/src/network.tsx').read_text(encoding='utf-8')
-    return sorted(set(re.findall(r"url:'https://(\w+\.guidejung\.com)'", net)))
+    # + 생활정보가이드(내근처 연결 카드에는 없음, 11/16 사용자 — static/{KEY}.txt 있음)
+    return sorted(set(re.findall(r"url:'https://(\w+\.guidejung\.com)'", net)) | {'life.guidejung.com'})
 
 
 def get(url, timeout=60):
