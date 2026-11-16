@@ -4,6 +4,24 @@ Allow: /
 Disallow: /api/
 Disallow: /store/
 
+# Bots that bring no visitors (SEO tools, data/AI collectors) — 11/16: their crawling was most of our Workers CPU
+User-Agent: SemrushBot
+User-Agent: AhrefsBot
+User-Agent: MJ12bot
+User-Agent: DotBot
+User-Agent: BLEXBot
+User-Agent: DataForSeoBot
+User-Agent: SERankingBacklinksBot
+User-Agent: Barkrowler
+User-Agent: ExaSearchBot
+User-Agent: ExaSearchBot-Images
+User-Agent: ElevenlabsCrawler
+User-Agent: Reflectionbot
+User-Agent: Amazonbot
+User-Agent: meta-externalagent
+User-Agent: Bytespider
+Disallow: /
+
 # AI answer engines and search crawlers are welcome (same rules as everyone).
 User-Agent: GPTBot
 User-Agent: OAI-SearchBot
