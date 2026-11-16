@@ -39,3 +39,6 @@ Disallow: /api/
 
 # Site summary for AI: https://stock.guidejung.com/llms.txt
 Sitemap: https://stock.guidejung.com/sitemap.xml
+
+# Daum webmaster ownership PIN: must stay as the last line.
+#DaumWebMasterTool:af35b87e1ff7b21dbdc4bba12e397af581433881c0b286dd7fd32e1d9aec229f:CNSJIIGOISrSV2aL3hPlgQ==
