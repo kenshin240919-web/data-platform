@@ -1,0 +1,30 @@
+name: CF paths by site
+# 사이트별 요청 주소·로봇 묶음 → reports/cf/paths-YYYY-MM-DD.md — 수동만(11/16 사용자: CPU 많이 쓰는 원인 찾기).
+on:
+  workflow_dispatch:
+    inputs:
+      hours:
+        description: 몇 시간치(최대 24 권장)
+        default: '24'
+      hosts:
+        description: 하위 도메인(쉼표)
+        default: 'market,service,pharmacy,rest,trip,pet'
+permissions:
+  contents: write
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          HOURS: ${{ inputs.hours }}
+          HOSTS: ${{ inputs.hosts }}
+        run: python scripts/cf-paths.py
+      - run: |
+          git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/cf && (git diff --cached --quiet || (git commit -m "사이트별 요청 주소·로봇 보고서" && git pull --rebase -q && git push))
