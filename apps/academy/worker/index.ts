@@ -1,6 +1,7 @@
 // Cloudflare Worker for academy.guidejung.com (내근처 학원). Static pages: ./out (Next.js export).
 // D1 guidejung-academy (scripts/build-academy-d1.mjs): /api/search, 학원 상세 /academy/{id} (server-rendered into the
 // static template /academy/shell so header·footer·scripts match), /sitemap.xml + /sitemap-academies-{n}.xml.
+import {AD_FILL} from '../../../packages/ui/src/adsense';
 import {FEE_MAX,FEE_MIN,academyPath,esc,eun,feeRange,GRADES,man,n,SITE,SUBJECTS,subjectLabel,won,ymd,type Card,type FeeStats} from '../lib/fmt';
 
 import weatherRegions from '../../weather/data/regions.json';
@@ -126,7 +127,6 @@ function insight(a:Academy,st:Stats,nation:Record<string,FeeStats>){
   return {top:`<section><h2>한눈에 보기</h2><p>${lines.map(esc).join(' ')}</p></section>${table}`,bottom:schools+around,faq,desc};
 }
 
-const AD_FILL='<script>try{document.querySelectorAll("ins.adsbygoogle").forEach(function(){(window.adsbygoogle=window.adsbygoogle||[]).push({})})}catch(e){}</script>';
 // 11/14 '이어서 보기'(다른 사이트와 같은 방식): 상세 첫 화면에서 근처 학원으로 — 수강료 공개한 곳 먼저(아래 '근처 같은 과목'과 같은 순서).
 const kmText=(v:number)=>v<1?`${Math.round(v*1000)}m`:`${v.toFixed(1)}km`;
 function nextHtml(a:Academy,near:Card[]){

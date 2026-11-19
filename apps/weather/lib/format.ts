@@ -93,3 +93,9 @@ export function vsYesterday(w:WeatherResponse){
   const feel=t>=30?'무더워요':t>=25?'더워요':t>=18?'따뜻해요':t>=10?'포근해요':'덜 추워요';
   return {kind:'warm' as const,icon:t>=25?'🥵':'🌤️',head:`어제보다 ${abs}° 높아요`,feel,tip:abs>=3&&t>=25?'옷을 가볍게 입으세요':abs>=3&&t<10?'그래도 아직 쌀쌀해요':'',sub};
 }
+
+/** 주말 날씨(/weekend) 한 줄: 시도 대표 지역의 오늘 이후 토·일 예보. 빌드 때(page.tsx)와 브라우저(WeekendBoard)에서 같이 씀. */
+export type Spot={code:string;label:string;sido:string;trip:{id:string;count:number}|null};
+export type WeekendRow={spot:Spot;days:Day[];rain:number};
+export const weekendRow=(spot:Spot,w:WeatherResponse,today:string):WeekendRow|null=>{const days=w.daily.filter(d=>d.date>=today&&dayLabel(d.date,today).weekend).slice(0,2);
+  return days.length?{spot,days,rain:Math.max(...days.map(d=>Math.max(d.am.pop??0,d.pm.pop??0)))}:null;};

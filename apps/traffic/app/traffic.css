@@ -73,3 +73,5 @@
 .tf-mini{border-spacing:0 4px}.tf-mini td{font-size:13px;padding:6px}.tf-mini td:first-child{width:auto}.tf-mini td:last-child{width:auto;text-align:left}.tf-mini .tf-pill{padding:5px 8px}.tf-mini .tf-pill b{font-size:15px}.tf-mini .tf-v i{display:none}
 .tf-near-cams{display:flex;flex-wrap:wrap;gap:6px}.tf-near-cams .tf-cam-btn{font-size:13px;padding:8px 11px}.tf-near-cams small{opacity:.75;margin-left:3px}
 @media(max-width:700px){.tf-near-roads{grid-template-columns:1fr}}
+/* 11/19: CCTV 있는 구간 줄·카드는 어디를 눌러도 CCTV(죽은 클릭 줄이기) */
+.tf [data-tap]{cursor:pointer}.tf tr[data-tap]:hover td{background:#f4f8ff}.tf .tf-seg-card[data-tap]:hover{border-color:var(--blue)}

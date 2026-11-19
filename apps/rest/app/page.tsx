@@ -16,7 +16,7 @@ export default function Home(){
   return <div className="page rs-home">
     <section className="rs-hero"><h1>오늘 어디서 쉬지?</h1>
       <p>찜질방·사우나·목욕탕을 <b>가까운 순</b>으로</p></section>
-    <FavList hint="업소 상세에서 ☆ 즐겨찾기를 누르면 여기서 바로 볼 수 있어요."/>
+    <FavList/>
     <NearRest/>
     {/* 전국 수치(검색엔진·AI 답변용): 첫 화면을 가볍게 하려고 히어로에서 3초 답 아래로 내림(10/29 사용자) */}
     <p className="muted small gj-facts">지자체에 신고된 찜질방·사우나·목욕탕 <b>{n(k.sauna)}곳</b> · 1인 목욕·세신 {n(k.private)}곳 · 안마원 {n(k.anma)}곳 · 피부관리실 {n(k.skin)}곳을 가까운 순으로 찾아 드려요.</p>

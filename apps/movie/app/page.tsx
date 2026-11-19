@@ -16,7 +16,7 @@ export default function Home(){
   return <div className="page mv-home">
     <section className="mv-hero"><h1>지금 뭐 볼 수 있어?</h1>
       <p>내 주변 극장을 가까운 순으로, <b>곧 시작하는 영화</b>와 남은 좌석까지</p></section>
-    <FavList hint="극장 페이지에서 ☆ 즐겨찾기를 누르면 여기서 바로 볼 수 있어요."/>
+    <FavList/>
     <NearMovie/>
     <p className="muted small gj-facts">전국 영화관 <b>{n(status.count)}곳</b>·상영관 {n(status.screens)}개(CGV {n(c.cgv)} · 롯데시네마 {n(c.lotte)} · 메가박스 {n(c.mega)} · 씨네Q {n(c.cineq)} · 작은·독립 {n(c.indie)}, 자동차극장 {n(status.drive)})를 가까운 순으로 찾아 드려요.</p>
     <div className="mv-jump">{CHAIN_ORDER.map(k=><Link key={k} href={`/chain/${k}`}>{CHAINS[k].label} <small>{n(c[k])}</small></Link>)}<Link href="/drive">🚗 자동차극장</Link><Link href="/boxoffice">🏆 박스오피스</Link><Link href="/region">🗺️ 지역별</Link></div>

@@ -2,6 +2,7 @@
 // D1 guidejung-hospital (scripts/build-hospital-d1.mjs): /api/near, /api/search, 병원 상세 /hospital/{hpid} (server-rendered
 // into /hospital/shell), /sitemap.xml + /sitemap-hospitals-{n}.xml. /api/er adds 응급실 실시간 가용병상 from 국립중앙의료원
 // (Secret DATA_GO_KR_KEY), cached per 시도 for 5 minutes in KV guidejung-cache (keys hospital:*).
+import {AD_FILL} from '../../../packages/ui/src/adsense';
 import weatherRegions from '../../weather/data/regions.json';
 import {CONDITIONS,DAY_LABEL,deptLabel,esc,eun,hm,hospitalPath,km,kstNow,n,SITE,statusOf,weekLine,type Card,type Hospital} from '../lib/fmt';
 import {actionsHtml} from '../../../packages/ui/src/actions';
@@ -142,7 +143,6 @@ function insight(h:HospitalX,stats:Record<string,DeptStats>){
     bottom:table+(go.length?`<section><h2>진료 뒤 가까운 곳</h2><ul class="hp-go" style="padding-left:4px;list-style:none;line-height:2">${go.join('')}</ul></section>`:''),faq,desc};
 }
 
-const AD_FILL='<script>try{document.querySelectorAll("ins.adsbygoogle").forEach(function(){(window.adsbygoogle=window.adsbygoogle||[]).push({})})}catch(e){}</script>';
 const LD_DAY:Record<string,string>={'1':'Monday','2':'Tuesday','3':'Wednesday','4':'Thursday','5':'Friday','6':'Saturday','7':'Sunday'};
 const ldType=(div:string|null)=>/치과/.test(div??'')?'Dentist':/병원/.test(div??'')&&!/한방/.test(div??'')?'Hospital':'MedicalClinic';
 const cardHtml=(c:Card)=>{const s=statusOf(c);return `<a class="hp-card ${s.state}" href="${hospitalPath(c.id)}"><span class="hp-dot" aria-hidden="true"></span><span class="hp-card-body"><b>${esc(c.name)}</b><small>${c.km!=null?`${esc(km(c.km))} · `:''}${esc(s.label)}</small><small class="muted">${esc([c.div,...c.depts.slice(0,3).map(deptLabel)].filter(Boolean).join(' · '))}</small></span></a>`;};
@@ -175,8 +175,8 @@ function detailHtml(h:Hospital,nearby:Card[],bed:Bed|null,ins:ReturnType<typeof 
   const map=h.lat!=null?`https://map.kakao.com/link/to/${encodeURIComponent(h.name)},${h.lat},${h.lon}`:h.address?`https://map.kakao.com/?q=${encodeURIComponent(h.address)}`:null;
   const days=['1','2','3','4','5','6','7','8'];
   return `<nav class="crumbs"><a href="/">홈</a> › <a href="/region">지역별 병원</a> › <a href="/region/${esc(h.region)}">${esc(h.region_name)}</a> › ${esc(h.name)}</nav>
-<div class="hp-head"><h1>${esc(h.name)}</h1><p>${esc([h.div,h.region_name,h.address].filter(Boolean).join(' · '))}</p>
-${depts.length?`<div class="hp-tags">${depts.map(d=>`<span>${esc(d)}</span>`).join('')}</div>`:''}</div>${actionsHtml({id:h.id,name:h.name,sub:[h.div,h.region_name].filter(Boolean).join(' · '),url:hospitalPath(h.id)})}
+<div class="hp-head"><h1>${esc(h.name)}</h1><p>${esc([h.div,h.region_name].filter(Boolean).join(' · '))}${h.address?` · ${map?`<a href="${esc(map)}" rel="noopener" target="_blank">${esc(h.address)}</a>`:esc(h.address)}`:''}</p>
+${depts.length?`<div class="hp-tags">${h.depts.map((k,i)=>`<a href="/search?dept=${encodeURIComponent(k)}">${esc(depts[i])}</a>`).join('')}</div>`:''}</div>${actionsHtml({id:h.id,name:h.name,sub:[h.div,h.region_name].filter(Boolean).join(' · '),url:hospitalPath(h.id)})}
 <p class="hp-answer ${s.state}"><span class="hp-dot" aria-hidden="true"></span><b>${esc(s.label)}</b>${s.today?` <span class="muted">· 오늘 ${esc(s.today)}</span>`:''}</p>
 ${h.er?`<div class="hp-er-box">🚑 <b>응급실 운영</b>${bed?.beds!=null?` · 지금 응급실 남은 병상 <strong>${bed.beds}</strong>${bed.updated?` <small class="muted">(${esc(bed.updated)} 기준)</small>`:''}`:''}${h.er_tel?` · <a href="tel:${esc(h.er_tel.replace(/[^0-9]/g,''))}">응급실 ${esc(h.er_tel)}</a>`:''}</div>`:''}
 ${nextHtml(h,nearby,depts)}
@@ -187,7 +187,7 @@ ${ins.top}
 ${h.info||h.note?`<section><h2>병원 안내</h2>${h.info?`<p>${esc(h.info)}</p>`:''}${h.note?`<p class="muted">${esc(h.note)}</p>`:''}</section>`:''}
 ${ins.bottom}
 ${nearby.length?`<section><h2>근처 ${esc((h as HospitalX).dept?deptLabel((h as HospitalX).dept!):depts[0]??'병원')}<span class="muted">${nearby.some(c=>statusOf(c).state!=='closed')?'지금 진료 중 · 가까운 순':'가까운 순'}</span></h2><div class="hp-cards">${nearby.map(cardHtml).join('')}</div><p><a class="hp-more-link" href="/region/${esc(h.region)}">${esc(h.region_name)} 병원 모두 보기 →</a></p></section>`:''}
-<section><h2>병원 정보</h2><dl class="hp-facts">${([['종류',h.div],['주소',h.address],['전화',h.tel],['응급실 전화',h.er?h.er_tel:null],['우편번호',h.zip]] as [string,string|null][]).filter(([,v])=>v).map(([k,v])=>`<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl></section>
+<section><h2>병원 정보</h2><dl class="hp-facts">${([['종류',h.div],['주소',h.address],['전화',h.tel],['응급실 전화',h.er?h.er_tel:null],['우편번호',h.zip]] as [string,string|null][]).filter((x):x is [string,string]=>!!x[1]).map(([k,v])=>`<div><dt>${esc(k)}</dt><dd>${/전화/.test(k)?`<a href="tel:${esc(v.replace(/[^0-9+]/g,''))}">${esc(v)}</a>`:k==='주소'&&map?`<a href="${esc(map)}" rel="noopener" target="_blank">${esc(v)}</a>`:esc(v)}</dd></div>`).join('')}</dl></section>
 ${connectHtml(h)}
 <section class="gj-faq" aria-label="자주 묻는 질문"><h2>자주 묻는 질문</h2><dl>${faq.map(([q,x])=>`<div><dt>${esc(q)}</dt><dd>${esc(x)}</dd></div>`).join('')}</dl></section>
 <p class="muted small">출처: 국립중앙의료원 전국 병·의원 찾기 서비스(공공데이터포털). 의료 상담·진단을 하지 않습니다. 위급하면 119에 전화하세요.</p>

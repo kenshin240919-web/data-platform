@@ -4,6 +4,7 @@
 // Routes: /api/near, /api/search, /api/fav, /api/where, /api/status, /api/animals, 상세 /place/{id} (server-rendered into /place/shell),
 // 보호 중인 동물 /animal/{id} (noindex — 공고가 끝나면 사라짐), 사진 /photo/{id} (원본 http 주소를 받아 https로, 하루 캐시),
 // /sitemap.xml (index) → /sitemap-pages.xml (Next) + /sitemap-places-{n}.xml (here, 40,000 each).
+import {AD_FILL} from '../../../packages/ui/src/adsense';
 import raw from '../data/places.json';
 import animalsRaw from '../data/animals.json';
 import weatherRegions from '../../weather/data/regions.json';
@@ -67,7 +68,6 @@ function connectHtml(p:Place){
   ];
   return `<section class="gj-connect" aria-label="함께 보면 좋은 정보"><h2>🔗 함께 보면 좋은 정보</h2><div>${items.map(([i,t,d,h])=>`<a href="${esc(h)}"><span class="gj-connect-icon" aria-hidden="true">${i}</span><span><b>${esc(t)}</b><small>${esc(d)}</small></span><span class="gj-connect-go" aria-hidden="true">→</span></a>`).join('')}</div></section>`;
 }
-const AD_FILL='<script>try{document.querySelectorAll("ins.adsbygoogle").forEach(function(){(window.adsbygoogle=window.adsbygoogle||[]).push({})})}catch(e){}</script>';
 const cardHtml=(c:Near)=>{const st=stateOf(c);return `<div class="pt-card${st?' '+st.state:''}"><a class="pt-card-main"${c.lat!=null&&c.lon!=null?` data-gj-pt="${c.lat},${c.lon}" data-gj-name="${esc(c.name)}"`:''} href="${placePath(c.id)}"><span class="pt-kind" aria-hidden="true">${KINDS[c.kind].icon}</span><span class="pt-card-body"><b>${esc(c.name)}</b><small><span class="pt-km">${esc(km(c.km))}</span>${c.sub?`<span class="pt-tag${is24(c)?' h24':''}">${esc(c.sub)}</span>`:''}${st?`<span class="pt-state"><i class="pt-dot"></i>${esc(st.label)}</span>`:esc(sinceLine(c.since)??'')}</small><small class="muted">${esc(c.addr??c.jibun??'')}</small></span></a>${c.tel?`<span class="pt-acts"><a href="${esc(telHref(c.tel))}" aria-label="전화">📞</a></span>`:''}</div>`;};
 const animalCard=(a:Animal&{km?:number},lost=false)=>{const d=lost?null:daysLeft(a.until),label=lost?(a.lost?`${a.lost.slice(5).replace('-','/')} 실종`:''):ddayLabel(a.until)??'';
   const inner=`<span class="pt-photo">${a.photo?`<img src="${photoPath(a.id)}" alt="${esc(`${lost?'실종':'보호 중인'} ${a.kind??a.up??'동물'}`)}" loading="lazy" decoding="async" onerror="this.remove()">`:'<span aria-hidden="true">🐾</span>'}${label?`<em class="${d!=null&&d>=0&&d<=3?'soon':lost?'lost':''}">${esc(label)}</em>`:''}</span><span class="pt-animal-body"><b>${esc(animalTitle(a)||'정보 확인 중')}</b><small>${a.km!=null?`<span class="pt-km">${esc(km(a.km))}</span>`:''}${esc(lost?a.where??'':a.region_name+(a.color?` · ${a.color}`:''))}</small>${a.mark?`<small class="muted">${esc(a.mark)}</small>`:''}</span>`;

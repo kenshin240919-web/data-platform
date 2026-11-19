@@ -2,6 +2,7 @@
 // The pharmacy list ships with the Worker (data/pharmacies.json, scripts/collect-pharmacy.py, about 25,000 — no database),
 // imported as text (wrangler.jsonc rules) and parsed on first use. '지금 영업 중' is computed from the hours per request.
 // Routes: /api/near, /api/search, /api/where, /api/status, 약국 상세 /pharmacy/{hpid} (server-rendered into /pharmacy/shell).
+import {AD_FILL} from '../../../packages/ui/src/adsense';
 import raw from '../data/pharmacies.json';
 import weatherRegions from '../../weather/data/regions.json';
 import {DAY_LABEL,esc,eun,hm,km,kstNow,late,n,pharmacyPath,SITE,statusOf,sunday,holidayOpen,weekLine,type Card,type Pharmacy} from '../lib/fmt';
@@ -95,7 +96,6 @@ function insight(p:PharmacyX){
     bottom:table+(go.length?`<section><h2>🌙 이 약국이 닫은 뒤 갈 곳</h2><ul style="padding-left:4px;list-style:none;line-height:2">${go.join('')}</ul></section>`:''),faq,desc};
 }
 
-const AD_FILL='<script>try{document.querySelectorAll("ins.adsbygoogle").forEach(function(){(window.adsbygoogle=window.adsbygoogle||[]).push({})})}catch(e){}</script>';
 const LD_DAY:Record<string,string>={'1':'Monday','2':'Tuesday','3':'Wednesday','4':'Thursday','5':'Friday','6':'Saturday','7':'Sunday'};
 // 11/14 '이어서 보기'(병원·시장 11/12와 같은 방식): 상세 첫 화면에서 다음 약국으로 — 아래 '근처 다른 약국' 칸은 스크롤이 거기까지 잘 안 감. 지금 문 연 곳 먼저.
 function nextHtml(p:Pharmacy,nearby:Card[]){

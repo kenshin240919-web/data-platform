@@ -5,13 +5,15 @@ import {Gs25Near} from '../_components/Gs25Near';
 import {Ad} from '../_components/Ad';
 import {GsLinks} from '../_components/GsLinks';
 import {COND_MIN,n,nation,regions,SITE} from '../../lib/data';
-export const metadata:Metadata={title:'붕어빵 파는 편의점 · 내 주변 GS25 붕어빵·군고구마',description:'내 위치에서 1.5km 안 붕어빵·군고구마 파는 GS25를 가까운 순으로. GS25 앱에 매장이 등록한 서비스 정보를 방문할 때 바로 확인해 보여 드리고, 전화번호·거리도 함께 알려 드려요.',alternates:{canonical:'/bungeoppang'}};
+// 11/19: 겨울 검색 입구 — 제목·설명에 '붕어빵 파는 편의점'과 GS25 많은 동네 이름(검색어 '○○구 붕어빵').
+const TOP_AREAS=regions.filter(r=>r.brands.gs25>=COND_MIN).sort((a,b)=>b.brands.gs25-a.brands.gs25).slice(0,4).map(r=>r.name);
+export const metadata:Metadata={title:'붕어빵 파는 편의점 위치 · 내 주변 GS25 붕어빵·군고구마 파는 곳',description:`붕어빵 파는 편의점, 지금 내 위치에서 1.5km 안 GS25를 가까운 순으로. ${TOP_AREAS.join('·')} 등 어느 동네든 붕어빵·군고구마 파는 GS25 매장과 전화번호·거리를 바로 확인하세요.`,alternates:{canonical:'/bungeoppang'}};
 const PICKS=[{key:'fish',label:'붕어빵',props:['붕어빵']},{key:'yam',label:'군고구마',props:['군고구마']},{key:'both',label:'붕어빵·군고구마',props:['붕어빵','군고구마']}];
 export default function Bungeoppang(){
   const top=regions.filter(r=>r.brands.gs25>=COND_MIN).sort((a,b)=>b.brands.gs25-a.brands.gs25).slice(0,12);
   return <div className="page">
     <nav className="crumbs"><Link href="/">홈</Link> › 붕어빵 파는 편의점</nav>
-    <h1>🐟 내 주변 붕어빵 파는 편의점</h1>
+    <h1>🐟 붕어빵 파는 편의점, 내 주변 어디?</h1>
     <p className="muted">GS25 앱에 ‘붕어빵’·‘군고구마’ 서비스를 등록한 매장을 내 위치에서 가까운 순으로 보여 드려요.</p>
     <Gs25Near title="붕어빵 파는 편의점" picks={PICKS}/>
     <Ad/>

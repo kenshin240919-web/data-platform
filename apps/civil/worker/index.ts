@@ -6,6 +6,7 @@
 //   /api/print?lat=&lon=   무인 프린트점·프린트카페: 카카오 로컬(반경) + NAVER API HUB 지역 검색을 방문 때마다 실시간(저장 안 함, no-store)
 // 상세 /place/{id} (server-rendered into /place/shell), /sitemap.xml (index) → /sitemap-pages.xml (Next) + /sitemap-places-1.xml.
 // 위치: 브라우저는 약 2km 칸 중심만 보낸다(packages/ui/src/geo.tsx) — 여기 오는 lat/lon은 칸 중심.
+import {AD_FILL} from '../../../packages/ui/src/adsense';
 import raw from '../data/places.json';
 import weatherRegions from '../../weather/data/regions.json';
 import {ADS,DOCS,distKm,esc,eun,hoursLine,KIND_ORDER,KINDS,km,mapUrl,naverUrl,placePath,SITE,slim,stateOf,telHref,type Kind,type Place} from '../lib/fmt';
@@ -121,7 +122,6 @@ function connectHtml(p:Place){
   ];
   return `<section class="gj-connect" aria-label="함께 보면 좋은 정보"><h2>🔗 함께 보면 좋은 정보</h2><div>${items.map(([i,t,d,h])=>`<a href="${esc(h)}"><span class="gj-connect-icon" aria-hidden="true">${i}</span><span><b>${esc(t)}</b><small>${esc(d)}</small></span><span class="gj-connect-go" aria-hidden="true">→</span></a>`).join('')}</div></section>`;
 }
-const AD_FILL='<script>try{document.querySelectorAll("ins.adsbygoogle").forEach(function(){(window.adsbygoogle=window.adsbygoogle||[]).push({})})}catch(e){}</script>';
 const stateHtml=(p:Place)=>{const s=stateOf(p);return `<span class="cv-state ${s.state}">${esc(s.label)}${s.guess?' (보통)':''}</span>`;};
 const cardHtml=(c:Near)=>`<div class="cv-card"><a class="cv-card-main"${c.lat!=null&&c.lon!=null?` data-gj-pt="${c.lat},${c.lon}" data-gj-name="${esc(c.name)}"`:''} href="${placePath(c.id)}"><span class="cv-kind" aria-hidden="true">${KINDS[c.kind].icon}</span><span class="cv-card-body"><b>${esc(c.name)}</b><small><span class="cv-km">${esc(km(c.km))}</span>${stateHtml(c)}</small><small class="muted">${esc(c.addr??c.jibun??'')}</small></span></a>${c.tel?`<span class="cv-acts"><a href="${esc(telHref(c.tel))}" aria-label="전화">📞</a></span>`:''}</div>`;
 // 실시간 대기(민원실 상세): 인라인 스크립트가 /api/wait를 불러 채움(Next 스크립트 없음).

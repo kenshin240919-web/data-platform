@@ -31,7 +31,8 @@ RETRY = ROOT / 'reports/gsc/index-retry.json'
 REDO_DAYS = 21
 MAX_INSPECT = 80
 SKIP = re.compile(r'/(about|data-policy|privacy|search|compare|alerts)(/|$)')
-FOCUS = {'hospital': 3, 'market': 2, 'job': 3, 'life': 2}  # 사이트 → 하루에 먼저 뽑을 개수(11/12 시장·일자리 추가 — 주간 GA에서 가장 크게 늘어난 두 사이트)
+FOCUS = {'hospital': 3, 'market': 2, 'job': 2, 'life': 2, 'benefit': 1}  # 11/19 혜택 1개 추가(정적 1만 2천여 쪽인데 구글 수집 0 — 일자리 3→2).
+# 사이트 → 하루에 먼저 뽑을 개수(11/12 시장·일자리 추가 — 주간 GA에서 가장 크게 늘어난 두 사이트)
 HUB = re.compile(r'^/[a-z0-9-]+$')  # /region·/doc·/24h·/rank 같은 한 단계 모음 페이지
 
 # 내근처 연결 카드(network.tsx)에는 없지만 같은 도메인 속성에서 사이트맵 제출·색인 요청을 받을 사이트(11/13 사용자: 생활정보가이드)

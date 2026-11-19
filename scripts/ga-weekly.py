@@ -143,6 +143,16 @@ for site in ORDER:
         'events': dict(top(pid, 'eventName', 'eventCount', 10, {'dimensionFilter': {'filter': {
             'fieldName': 'eventName', 'inListFilter': {'values': ['share', 'favorite', 'install_hint', 'install_click', 'install_done', 'alert_click', 'push_subscribe', 'calc_use']}}}})),
     }
+    # 11/19: '(direct)' 유입이 사람인지(봇·미리보기·앱 안 브라우저) 가리려고 직접 유입 세션의 브라우저·기기·참여율
+    data[site]['direct'] = [((d[0], d[1]), m) for d, m in report(pid, {
+        'dateRanges': [THIS], 'dimensions': [{'name': 'browser'}, {'name': 'deviceCategory'}],
+        'metrics': [{'name': 'sessions'}, {'name': 'engagementRate'}], 'orderBys': [{'metric': {'metricName': 'sessions'}, 'desc': True}], 'limit': 4,
+        'dimensionFilter': {'filter': {'fieldName': 'sessionSource', 'stringFilter': {'value': '(direct)'}}}})]
+    # 11/19: 방문자 브라우저 오류 문장(ga-script.tsx ERR_JS가 link_text·link_url에 담아 보냄)
+    data[site]['errors'] = [((d[0], d[1], d[2]), m[0]) for d, m in report(pid, {
+        'dateRanges': [THIS], 'dimensions': [{'name': 'linkText'}, {'name': 'linkUrl'}, {'name': 'pagePath'}],
+        'metrics': [{'name': 'eventCount'}], 'orderBys': [{'metric': {'metricName': 'eventCount'}, 'desc': True}], 'limit': 5,
+        'dimensionFilter': {'filter': {'fieldName': 'eventName', 'stringFilter': {'value': 'js_error'}}}})]
     if site == 'hospital':  # 11/14: 첫 화면 칩(hp_chip_*)·'이럴 땐 여기로'(hp_situ_*) 칸별 클릭
         data[site]['boxes'] = top(pid, 'eventName', 'eventCount', 20, {'dimensionFilter': {'filter': {
             'fieldName': 'eventName', 'stringFilter': {'matchType': 'BEGINS_WITH', 'value': 'hp_'}}}})
@@ -192,6 +202,10 @@ for site in ORDER:
     for title, rows, unit in (('유입 경로', d['channels'], '세션'), ('유입 출처', d['sources'], '세션'),
                               ('첫 페이지(검색 유입 입구)', d['landing'], '세션'), ('많이 본 페이지', d['pages'], '조회')):
         L.append(f'- **{title}**: ' + (' · '.join(f'`{k}` {n(v)}' for k, v in rows) if rows else '없음'))
+    if d.get('direct'):
+        L.append('- **직접 유입 브라우저**(세션·참여율): ' + ' · '.join(f'`{b} {dev}` {n(m[0])}({m[1] * 100:.0f}%)' for (b, dev), m in d['direct']))
+    if d.get('errors'):
+        L.append('- **스크립트 오류(js_error)**: ' + ' · '.join(f'`{m}` ({f}, {pg}) {n(v)}회' for (m, f, pg), v in d['errors']))
     if 'boxes' in d:
         L.append('- **첫 화면 칸 클릭**(hp_chip_ 내 동네 칩 · hp_situ_ 이럴 땐 여기로): ' + (' · '.join(f'`{k}` {n(v)}' for k, v in d['boxes']) if d['boxes'] else '없음'))
     L.append('')

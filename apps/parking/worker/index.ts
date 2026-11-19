@@ -2,6 +2,7 @@
 // The lot list ships with the Worker (data/parkings.json, scripts/collect-parking.py, about 18,000 — no database),
 // imported as text (wrangler.jsonc rules) and parsed on first use. Fees for '몇 시간' are computed in lib/fmt.ts.
 // Routes: /api/near, /api/search, /api/where, /api/status, 주차장 상세 /parking/{관리번호} (server-rendered into /parking/shell).
+import {AD_FILL} from '../../../packages/ui/src/adsense';
 import raw from '../data/parkings.json';
 import weatherRegions from '../../weather/data/regions.json';
 import {allDay,distKm,esc,eun,feeFor,feeLine,hoursLine,km,kstNow,KIND_LABEL,lotPath,mapUrl,n,openNow,SITE,slim,won,type Lot} from '../lib/fmt';
@@ -48,7 +49,6 @@ function connectHtml(p:Lot){
   ];
   return `<section class="gj-connect" aria-label="함께 보면 좋은 정보"><h2>🔗 함께 보면 좋은 정보</h2><div>${items.map(([i,t,d,h])=>`<a href="${esc(h)}"><span class="gj-connect-icon" aria-hidden="true">${i}</span><span><b>${esc(t)}</b><small>${esc(d)}</small></span><span class="gj-connect-go" aria-hidden="true">→</span></a>`).join('')}</div></section>`;
 }
-const AD_FILL='<script>try{document.querySelectorAll("ins.adsbygoogle").forEach(function(){(window.adsbygoogle=window.adsbygoogle||[]).push({})})}catch(e){}</script>';
 const cardHtml=(c:Lot&{km:number})=>{const w=feeFor(c,60);return `<a class="pk-card" href="${lotPath(c.id)}"><span class="pk-card-body"><b>${esc(c.name)}</b><small>${esc(km(c.km))} · ${esc(c.type==='노상'?'길가':c.type??'')}${c.spaces?` · ${n(c.spaces)}면`:''}</small><small class="muted">${esc(feeLine(c))}</small></span><span class="pk-price">${w===0?'<b class="pk-free">무료</b>':w!=null?`<b class="pk-fee">${n(w)}원</b><small>1시간 예상</small>`:'<span class="pk-unknown">요금 확인</span>'}</span></a>`;};
 const TIMES=[30,60,120,180,240,480];
 const DAY_LD={wk:['Monday','Tuesday','Wednesday','Thursday','Friday'],sat:['Saturday'],hol:['Sunday','PublicHolidays']} as const;

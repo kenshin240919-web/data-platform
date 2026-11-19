@@ -4,6 +4,7 @@
 // Routes: /api/near (내 주변 시장·가맹점), /api/search, /api/place (가게 위치 — 카카오 키워드 검색을 방문 때마다, 저장 안 함),
 // /api/where, /api/status, 가게 상세 /store/{id} (server-rendered into /store/shell, noindex — 원본에 가게 주소가 없어 내용이 얇음),
 // /sitemap.xml (index → /sitemap-pages.xml from Next).
+import {AD_FILL} from '../../../packages/ui/src/adsense';
 import raw from '../data/market.json';
 import {CATS,distKm,esc,eun,located,mapUrl,marketPath,n,naverUrl,pct,SITE,slimMarket,storePath,type Cat,type Data,type Market,type StoreRow} from '../lib/fmt';
 import {actionsHtml} from '../../../packages/ui/src/actions';
@@ -67,7 +68,6 @@ let shell:Promise<string>|null=null;
 const template=(env:Env,origin:string)=>shell??=env.ASSETS.fetch(new Request(origin+'/store/shell')).then(r=>{if(!r.ok)throw new Error('shell');return r.text();})
   .then(h=>h.replace(/<script[^>]*src="\/_next\/[^"]*"[^>]*><\/script>/g,'').replace(/<script>self\.__next_f[\s\S]*?<\/script>/g,'').replace(/<link rel="preload"[^>]*as="script"[^>]*\/?>/g,''))
   .catch(e=>{shell=null;throw e;});
-const AD_FILL='<script>try{document.querySelectorAll("ins.adsbygoogle").forEach(function(){(window.adsbygoogle=window.adsbygoogle||[]).push({})})}catch(e){}</script>';
 const row=(s:StoreRow)=>`<li><a href="${storePath(s[0])}"><b>${esc(s[1])}</b><small>${CATS[s[3]].icon} ${esc(s[4]??CATS[s[3]].label)}${s[5]?'':' · 지류만'}</small></a></li>`;
 // 가게 위치는 보이기 시작할 때 /api/place로(카카오 — 저장 안 함). 찾으면 주소·전화·🧭 길찾기, 못 찾으면 시장 길찾기.
 const PLACE_JS=`<script>(function(){var b=document.getElementById('mk-place');if(!b)return;var e=function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};

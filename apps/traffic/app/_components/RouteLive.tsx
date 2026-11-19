@@ -47,10 +47,12 @@ export function RouteLive({route}:{route:Route}){
   const bad=segs.filter(s=>(z(data,s.e)?.[1]??0)>=2||(z(data,s.s)?.[1]??0)>=2)
     .sort((a,b)=>Math.min(...[z(data,a.e),z(data,a.s)].map(v=>v&&v[0]>0?v[0]:999))-Math.min(...[z(data,b.e),z(data,b.s)].map(v=>v&&v[0]>0?v[0]:999)));
   const here=useMemo(()=>{if(!pos)return null;let k=-1,bd=Infinity;segs.forEach((s,i)=>{if(!s.mid)return;const d=km(exactOf(pos).lat,exactOf(pos).lon,s.mid[0],s.mid[1]);if(d<bd){bd=d;k=i;}});return k<0?null:{k,d:bd};},[pos,segs]);
-  const card=(s:Seg)=><article key={s.i} className="tf-seg-card">
+  // 11/19: Clarity 죽은 클릭(ChatGPT로 들어온 노선 페이지) — 색깔 속도 칸·구간 줄을 눌러도 반응이 없었음 → CCTV가 있는 구간은 줄·카드 어디를 눌러도 CCTV.
+  const tap=(i:number)=>camOf[i]>=0?{onClick:()=>setPlay(camOf[i]),'data-tap':''}:{};
+  const card=(s:Seg)=><article key={s.i} className="tf-seg-card" {...tap(s.i)}>
     <h3>{s.from} → {s.to}</h3>
     <div className="tf-seg-pills"><Speed t={data} id={s.s} label={`◀ ${L}`}/><Speed t={data} id={s.e} label={`${R} ▶`}/></div>
-    {camOf[s.i]>=0&&<button type="button" className="tf-cam-btn" onClick={()=>setPlay(camOf[s.i])}>📹 {cctvName(cams[camOf[s.i]])} CCTV 보기</button>}
+    {camOf[s.i]>=0&&<button type="button" className="tf-cam-btn" onClick={e=>{e.stopPropagation();setPlay(camOf[s.i]);}}>📹 {cctvName(cams[camOf[s.i]])} CCTV 보기</button>}
   </article>;
   const near=here&&here.d<=30?segs.slice(Math.max(0,here.k-3),here.k+4):null;
   const nearBad=near?near.filter(s=>(z(data,s.e)?.[1]??0)>=2||(z(data,s.s)?.[1]??0)>=2).length:0;
@@ -78,9 +80,9 @@ export function RouteLive({route}:{route:Route}){
 
     <section className="tf-block"><h2>{from&&!all?`${where} 주변부터 보는 구간`:'전체 구간'} <span className="muted small">{segs.length}개 · {route.start} → {route.end} 순서</span></h2>
       <table className="tf-table"><thead><tr><th>구간</th><th>◀ {L}</th><th>{R} ▶</th><th>CCTV</th></tr></thead>
-        <tbody>{rows.map(s=><tr key={s.i} className={here?.k===s.i?'here':''}><td><b>{s.from}</b> → {s.to}{here?.k===s.i&&<span className="tf-here">📍 내 위치</span>}</td>
+        <tbody>{rows.map(s=><tr key={s.i} className={here?.k===s.i?'here':''} {...tap(s.i)}><td><b>{s.from}</b> → {s.to}{here?.k===s.i&&<span className="tf-here">📍 내 위치</span>}</td>
           <td><Speed t={data} id={s.s} label=""/></td><td><Speed t={data} id={s.e} label=""/></td>
-          <td>{camOf[s.i]>=0?<button type="button" className="tf-cam-icon" aria-label={`${cctvName(cams[camOf[s.i]])} CCTV 보기`} onClick={()=>setPlay(camOf[s.i])}>📹</button>:<span className="muted">-</span>}</td></tr>)}</tbody></table>
+          <td>{camOf[s.i]>=0?<button type="button" className="tf-cam-icon" aria-label={`${cctvName(cams[camOf[s.i]])} CCTV 보기`} onClick={e=>{e.stopPropagation();setPlay(camOf[s.i]);}}>📹</button>:<span className="muted">-</span>}</td></tr>)}</tbody></table>
       {segs.length>20&&<button type="button" className="tf-more" onClick={()=>setAll(!all)}>{all?(from?`${where} 주변만 보기`:'접기'):`전체 ${segs.length}개 구간 모두 보기`}</button>}
       <p className="muted small">한국도로공사 구간 소통 정보 · 📹는 그 구간에서 가장 가까운 CCTV입니다. <Link href="/incidents">사고·공사 보기 →</Link></p>
     </section>

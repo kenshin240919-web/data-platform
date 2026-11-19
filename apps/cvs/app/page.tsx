@@ -17,7 +17,7 @@ export default function Home(){
     <section className="cv-hero"><h1>밤에도 상비약 어디서?</h1>
       <p>약국이 닫으면 <b>상비약 파는 편의점</b>을 가까운 순으로</p>
       <Link className="cv-season" href="/bungeoppang">🐟 붕어빵·🍠 군고구마 파는 편의점 찾기 →</Link></section>
-    <FavList hint="매장 상세에서 ☆ 즐겨찾기를 누르면 여기서 바로 볼 수 있어요."/>
+    <FavList/>
     <NearCvs/>
     <p className="muted small gj-facts">안전상비의약품 판매자로 등록된 편의점·마트 전국 <b>{n(status.count)}곳</b>(CU {n(b.cu)} · GS25 {n(b.gs25)} · 세븐일레븐 {n(b.seven)} · 이마트24 {n(b.emart24)} · 미니스톱 {n(b.ministop)} · 기타 {n(b.other)})을 가까운 순으로 찾아 드려요.</p>
     <div className="cv-jump">{BRAND_ORDER.filter(k=>k!=='other').map(k=><Link key={k} href={`/brand/${k}`}>{BRANDS[k].label} <small>{n(b[k])}</small></Link>)}<Link href="/bungeoppang">🐟 붕어빵</Link><Link href="/half-delivery">📦 반값택배</Link><Link href="/atm">🏧 현금 출금</Link><Link href="/closing-sale">🏷️ 마감할인</Link><Link href="/region">🗺️ 지역별</Link><Link href="/medicine">📋 상비약 안내</Link></div>

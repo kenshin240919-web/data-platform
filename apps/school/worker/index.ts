@@ -4,6 +4,7 @@
 // school costs one NEIS call per month of meals, per few months of calendar and per class-week of timetable, shared worldwide.
 // Routes: /api/search, /api/today, /api/meal, /api/schedule, /api/classes, /api/timetable, /api/where, /api/status,
 // 학교 상세 /school/{학교코드} (server-rendered into the static template /school/shell so header·footer·scripts match).
+import {AD_FILL} from '../../../packages/ui/src/adsense';
 import raw from '../data/schools.json';
 import weatherRegions from '../../weather/data/regions.json';
 import {addDays,ALLERGENS,bigEvent,card,dayDiff,dday,esc,eun,eventDate,GRADES_OF,KIND_LABEL,kstDay,mdw,menuLine,monday,parseDishes,schoolPath,schoolYear,SITE,
@@ -175,7 +176,6 @@ gs.addEventListener('change',function(){fill();cs.value='';load()});cs.addEventL
 fetch('/api/classes?code='+code).then(function(r){return r.json()}).then(function(d){cls=d.grades||{};var keys=Object.keys(cls);if(!keys.length){tt.innerHTML='<p class="muted">학급 정보가 없어 시간표를 보여 드릴 수 없어요.</p>';return}
 gs.innerHTML='<option value="">학년</option>'+keys.map(function(g){return '<option value="'+g+'">'+g+'학년</option>'}).join('');var m=mine()||get('gj.tt.'+code);if(m&&m.grade&&cls[m.grade]){gs.value=m.grade;fill();if(m.cls&&cls[m.grade].indexOf(m.cls)>=0){cs.value=m.cls;load()}}}).catch(function(){})
 })();</script>`;
-const AD_FILL='<script>try{document.querySelectorAll("ins.adsbygoogle").forEach(function(){(window.adsbygoogle=window.adsbygoogle||[]).push({})})}catch(e){}</script>';
 
 function detailHtml(s:School,today:string,week:MealDay[],todayMeal:MealDay|null,nextMeal:MealDay|null,events:Event[],failed:string[]){
   const lunch=todayMeal?.meals.find(m=>m.type==='중식')??todayMeal?.meals[0];

@@ -3,6 +3,7 @@
 // emission repair; no database), imported as text (wrangler.jsonc rules) and parsed on first use.
 // Routes: /api/near, /api/search, /api/where, /api/status, 상세 /center/{id} (server-rendered into /center/shell),
 // /sitemap.xml (index) → /sitemap-pages.xml (Next) + /sitemap-centers-{n}.xml (here, 40,000 each).
+import {AD_FILL} from '../../../packages/ui/src/adsense';
 import raw from '../data/centers.json';
 import weatherRegions from '../../weather/data/regions.json';
 import {brand} from '../lib/brands';
@@ -65,7 +66,6 @@ function connectHtml(p:Center){
   ];
   return `<section class="gj-connect" aria-label="함께 보면 좋은 정보"><h2>🔗 함께 보면 좋은 정보</h2><div>${items.map(([i,t,d,h])=>`<a href="${esc(h)}"><span class="gj-connect-icon" aria-hidden="true">${i}</span><span><b>${esc(t)}</b><small>${esc(d)}</small></span><span class="gj-connect-go" aria-hidden="true">→</span></a>`).join('')}</div></section>`;
 }
-const AD_FILL='<script>try{document.querySelectorAll("ins.adsbygoogle").forEach(function(){(window.adsbygoogle=window.adsbygoogle||[]).push({})})}catch(e){}</script>';
 const cardHtml=(c:Center&{km:number})=>`<a class="sv-card" href="${centerPath(c.id)}"><span class="sv-kind" aria-hidden="true">${KINDS[c.kind].icon}</span><span class="sv-card-body"><b>${esc(c.name)}</b><small>${esc(km(c.km))}${c.sub?` · ${esc(c.sub)}`:''}</small><small class="muted">${esc(c.addr??c.jibun??'')}</small></span></a>`;
 const hhmm=(m:number)=>`${String(Math.floor(m/60)%24).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`;
 const mm=(s:string)=>+s.slice(0,2)*60+ +s.slice(3,5);

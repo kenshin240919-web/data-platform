@@ -4,6 +4,7 @@
 // Routes: /api/near(+ 관할 고용센터), /api/search, /api/fav, /api/where, /api/status,
 // 상세 /place/{id} (server-rendered into /place/shell), /sitemap.xml (index) → /sitemap-pages.xml (Next) + /sitemap-places-1.xml.
 // 위치: 브라우저는 약 2km 칸 중심만 보낸다(packages/ui/src/geo.tsx) — 여기 오는 lat/lon은 칸 중심.
+import {AD_FILL} from '../../../packages/ui/src/adsense';
 import raw from '../data/places.json';
 import weatherRegions from '../../weather/data/regions.json';
 import {ADS,distKm,esc,eun,homeLinks,KIND_ORDER,KINDS,km,LINKS,mapUrl,naverUrl,placePath,SITE,slim,SUBS,tagsOf,telHref,type Kind,type Place} from '../lib/fmt';
@@ -72,7 +73,6 @@ function connectHtml(p:Place){
   ];
   return `<section class="gj-connect" aria-label="함께 보면 좋은 정보"><h2>🔗 함께 보면 좋은 정보</h2><div>${items.map(([i,t,d,h])=>`<a href="${esc(h)}"><span class="gj-connect-icon" aria-hidden="true">${i}</span><span><b>${esc(t)}</b><small>${esc(d)}</small></span><span class="gj-connect-go" aria-hidden="true">→</span></a>`).join('')}</div></section>`;
 }
-const AD_FILL='<script>try{document.querySelectorAll("ins.adsbygoogle").forEach(function(){(window.adsbygoogle=window.adsbygoogle||[]).push({})})}catch(e){}</script>';
 const cardHtml=(c:Near)=>`<div class="jb-card"><a class="jb-card-main"${c.lat!=null&&c.lon!=null?` data-gj-pt="${c.lat},${c.lon}" data-gj-name="${esc(c.name)}"`:''} href="${placePath(c.id)}"><span class="jb-kind" aria-hidden="true">${KINDS[c.kind].icon}</span><span class="jb-card-body"><b>${esc(c.name)}</b><small><span class="jb-km">${esc(km(c.km))}</span><span class="jb-tag">${esc(KINDS[c.kind].label)}</span>${tagsOf(c).map(t=>`<span class="jb-tag">${esc(t)}</span>`).join('')}</small><small class="muted">${esc(c.addr??c.jibun??'')}</small></span></a>${c.tel?`<span class="jb-acts"><a href="${esc(telHref(c.tel))}" aria-label="전화">📞</a></span>`:''}</div>`;
 const n2=(v:number)=>v.toLocaleString('ko-KR');
 // 11/14 '이어서 보기'(병원·시장 11/12와 같은 방식): 상세 첫 화면에서 근처 같은 종류로 — 아래 '근처 다른 ○○' 칸은 스크롤이 거기까지 잘 안 감.

@@ -3,7 +3,7 @@ import {renderToString} from 'react-dom/server';
 import type {Place,Status} from '../../../packages/ui/src/types';
 import {DetailView,PARKING_NEAR,ShellView,placeDescription,type Nearby} from '../../../packages/ui/src/views';
 import {detailPath,IMAGE_FALLBACK} from '../../../packages/ui/src/kinds';
-import {ADSENSE_CLIENT} from '../../../packages/ui/src/adsense';
+import {ADSENSE_CLIENT,AD_FILL} from '../../../packages/ui/src/adsense';
 import {adsLoaderJs} from '../../../packages/ui/src/adsense-script';
 import {gaInline} from '../../../packages/ui/src/ga-script';
 
@@ -27,5 +27,5 @@ export function detailHtml({place,nearby,status,styles,today}:{place:Place;nearb
     +`<meta property="og:title" content="${esc(title)}"/><meta property="og:description" content="${DESC}"/><meta property="og:url" content="${url}"/><meta property="og:site_name" content="내근처 여행"/><meta property="og:locale" content="ko_KR"/><meta property="og:type" content="website"/><meta property="og:image" content="${esc(image)}"/>`
     +`<meta name="twitter:card" content="summary_large_image"/><meta name="twitter:image" content="${esc(image)}"/><meta name="twitter:title" content="${esc(title)}"/><meta name="twitter:description" content="${DESC}"/><link rel="icon" href="/icon.svg"/><link rel="apple-touch-icon" href="/apple-touch-icon.png"/><link rel="manifest" href="/manifest.webmanifest"/><script>${clarity}</script></head>`
     // Not hydrated (no Next.js runtime): fill the manual ad slots here.
-    +`<body>${body}<script>document.querySelectorAll('ins.adsbygoogle').forEach(function(){try{(window.adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}});</script><script>${PARKING_NEAR}</script></body></html>`;
+    +`<body>${body}${AD_FILL}<script>${PARKING_NEAR}</script></body></html>`;
 }

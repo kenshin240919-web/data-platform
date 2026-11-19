@@ -16,7 +16,7 @@ export default function Home(){
   return <div className="page jb-home">
     <section className="jb-hero"><h1>일자리 찾을 때 가는 곳</h1>
       <p><b>우리 동네 관할 고용센터</b>와 가까운 직업소개소·새일센터를 한 번에</p></section>
-    <FavList hint="상세에서 ☆ 즐겨찾기를 누르면 여기서 바로 볼 수 있어요."/>
+    <FavList/>
     <NearJob/>
     <Situations/>
     <section><h2>📝 자격증</h2><div className="jb-jump"><Link href="/schedule">📅 시험 일정 — 지금 접수 중</Link><Link href="/exam">📍 내 근처 시험장</Link></div></section>

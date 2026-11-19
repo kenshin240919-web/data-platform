@@ -18,7 +18,7 @@ export default function Home(){
   return <div className="page pt-home">
     <section className="pt-hero"><h1>우리 아이 아플 때 어디로?</h1>
       <p>동물병원·24시·동물약국을 <b>가까운 순</b>으로</p></section>
-    <FavList hint="병원 상세에서 ☆ 즐겨찾기를 누르면 우리 아이 병원을 여기서 바로 볼 수 있어요."/>
+    <FavList/>
     <NearPet/>
     {/* 전국 수치(검색엔진·AI 답변용): 첫 화면을 가볍게 하려고 히어로에서 3초 답 아래로 내림(10/29 사용자) */}
     <p className="muted small gj-facts">지자체에 신고된 동물병원 <b>{n(k.hospital)}곳</b>(24시 {n(nation.h24)}곳) · 동물약국 {n(k.pharmacy)}곳 · 동물보호센터 {n(k.shelter)}곳(보호 중 {n(animals.length)}마리) · 펫호텔·유치원 {n(k.hotel)}곳 · 애견·고양이 카페 {n(k.cafe)}곳 · 펫택시 {n(k.taxi)}곳을 가까운 순으로 찾아 드려요.</p>

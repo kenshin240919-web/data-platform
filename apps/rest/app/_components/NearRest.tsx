@@ -24,6 +24,8 @@ export function NearRest({kind}:{kind?:Kind}){
       <p className="rs-answer">{shown.length?<>📍 {pos?.precise?'내 주변':'접속 위치 주변'} {radius}km 안 {shown.map((k,i)=><span key={k}>{i>0&&' · '}{KINDS[k].label} <b>{n(res.counts[k])}곳</b></span>)}
         {first&&<>{' '}— 가장 가까운 {KINDS[main].label} <a href={shopPath(first.id)}><b>{first.name}</b></a> {first.km!=null&&km(first.km)}</>}</>
         :<>📍 {radius}km 안에 신고된 곳이 없어요. 지역 목록에서 찾아보세요.</>}</p>
+      {/* 11/19: 네이버로 첫 화면에 들어와 스크롤 31%·활동 25초 — 답 바로 아래 종류별 내 주변 페이지로 */}
+      {!kind&&shown.length>0&&<nav className="rs-jump rs-near-kinds" aria-label="종류별 내 주변">{shown.map(k=><a key={k} href={`/${k}`}>{KINDS[k].icon} {KINDS[k].label} <small>{n(res.counts[k])}</small></a>)}</nav>}
       {res.items.length>0&&<PlaceList items={res.items} limit={12} kind={kind}/>}
     </>}
   </section>;

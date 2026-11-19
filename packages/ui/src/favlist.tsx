@@ -15,13 +15,14 @@ export function Actions({fav,go}:{fav?:FavInfo;go?:{name:string;lat:number;lon:n
 
 const read=():Fav[]=>{try{return JSON.parse(localStorage.getItem('gj.fav')??'[]');}catch{return [];}};
 
-export function FavList({title='⭐ 내 즐겨찾기',hint}:{title?:string;hint?:string}){
+// 11/19: 즐겨찾기가 없을 때 띄우던 안내 한 줄은 첫 방문자의 3초 답을 아래로 밀어(약국·주유소 첫 화면) 뺌.
+export function FavList({title='⭐ 내 즐겨찾기'}:{title?:string}){
   const [favs,setFavs]=useState<Fav[]>([]);const [live,setLive]=useState<Record<string,Live>>({});
   useEffect(()=>{const f=()=>setFavs(read());f();addEventListener('gj-fav',f);addEventListener('storage',f);return ()=>{removeEventListener('gj-fav',f);removeEventListener('storage',f);};},[]);
   useEffect(()=>{if(!favs.length)return;let on=true;
     fetch('/api/fav?ids='+encodeURIComponent(favs.map(f=>f.id).join(','))).then(r=>r.ok?r.json():null).then(d=>{if(on&&d?.items)setLive(Object.fromEntries((d.items as Live[]).map(x=>[x.id,x])));}).catch(()=>{});
     return ()=>{on=false;};},[favs]);
-  if(!favs.length)return hint?<p className="gj-favs-hint">{hint}</p>:null;
+  if(!favs.length)return null;
   return <section className="gj-favs" aria-label="내 즐겨찾기"><h2>{title}</h2><div>{favs.map(f=>{const l=live[f.id];
     return <a key={f.id} href={f.url} className={`gj-fav-card ${l?.state??''}`}><b>{f.name}</b>{l?.label&&<small className="gj-fav-state">{l.label}</small>}<small>{l?.line||f.sub}</small></a>;})}</div></section>;
 }

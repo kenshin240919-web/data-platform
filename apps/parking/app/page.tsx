@@ -13,7 +13,7 @@ export default function Home(){
   return <div className="page pk-home">
     <section className="pk-hero"><h1>여기 주차 어디 해?</h1>
       <p><b>가까운 곳·싼 곳</b>부터</p></section>
-    <FavList hint="주차장 상세에서 ☆ 즐겨찾기를 누르면 여기서 바로 요금·운영 여부를 볼 수 있어요."/>
+    <FavList/>
     <NearPark/>
     {/* 전국 수치(검색엔진·AI 답변용): 첫 화면을 가볍게 하려고 히어로에서 3초 답 아래로 내림(10/29 사용자) */}
     <p className="muted small gj-facts">지자체가 등록한 전국 주차장 <b>{n(status.count)}곳</b>(대부분 공영)에서 가까운 곳과 싼 곳을 찾아 드려요. 무료 {n(nation.free)}곳{nation.hour!=null&&<> · 유료 1시간 보통 {n(nation.hour)}원</>}.</p>

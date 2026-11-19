@@ -3,6 +3,7 @@
 // 약국·응급실; no database), imported as text (wrangler.jsonc rules) and parsed on first use.
 // Routes: /api/near, /api/gs25(붕어빵 등 GS25 매장 서비스, 실시간), /api/search, /api/fav, /api/where, /api/status, 상세 /store/{id} (server-rendered into /store/shell),
 // /sitemap.xml (index) → /sitemap-pages.xml (Next) + /sitemap-stores-{n}.xml (here, SITEMAP_STAGE까지, 40,000 each).
+import {AD_FILL} from '../../../packages/ui/src/adsense';
 import raw from '../data/stores.json';
 import weatherRegions from '../../weather/data/regions.json';
 import {ADS,BRANDS,distKm,esc,eun,HOSPITAL,hm,km,mapUrl,meters,PHARMACY,phLine,SITE,SITEMAP_STAGE,slim,storePath,telHref,years,type BrandKey,type Store} from '../lib/fmt';
@@ -52,7 +53,6 @@ function connectHtml(p:Store){
   ];
   return `<section class="gj-connect" aria-label="함께 보면 좋은 정보"><h2>🔗 함께 보면 좋은 정보</h2><div>${items.map(([i,t,d,h])=>`<a href="${esc(h)}"><span class="gj-connect-icon" aria-hidden="true">${i}</span><span><b>${esc(t)}</b><small>${esc(d)}</small></span><span class="gj-connect-go" aria-hidden="true">→</span></a>`).join('')}</div></section>`;
 }
-const AD_FILL='<script>try{document.querySelectorAll("ins.adsbygoogle").forEach(function(){(window.adsbygoogle=window.adsbygoogle||[]).push({})})}catch(e){}</script>';
 /** 편의점끼리 거리 — 30m 안은 같은 건물(병원·역사 안 편의점이 많아 '0m'로 보였음, 11/14) */
 const gap=(v:number)=>v<0.03?'같은 건물':km(v);
 const cardHtml=(c:Near)=>`<div class="cv-card"><a class="cv-card-main"${c.lat!=null&&c.lon!=null?` data-gj-pt="${c.lat},${c.lon}" data-gj-name="${esc(c.name)}"`:''} href="${storePath(c.id)}"><span class="cv-icon" aria-hidden="true">🏪</span><span class="cv-card-body"><b>${esc(c.name)}</b><small><span class="cv-km">${esc(gap(c.km))}</span><span class="cv-tag">${esc(BRANDS[c.brand].label)}</span></small><small class="muted">${esc(c.addr??c.jibun??'')}</small></span></a>${c.tel?`<span class="cv-acts"><a href="${esc(telHref(c.tel))}" aria-label="전화">📞</a></span>`:''}</div>`;

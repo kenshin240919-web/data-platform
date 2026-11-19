@@ -17,7 +17,8 @@ import requests
 
 API = 'https://adsense.googleapis.com/v2'
 KST = dt.timezone(dt.timedelta(hours=9))
-METRICS = ['ESTIMATED_EARNINGS', 'PAGE_VIEWS', 'PAGE_VIEWS_RPM', 'IMPRESSIONS', 'CLICKS', 'IMPRESSIONS_CTR']
+# 11/19: 광고 요청·채워진 비율(AD_REQUESTS·AD_REQUESTS_COVERAGE) — '광고가 안 나온 것'과 '단가가 낮은 것'을 가르려고
+METRICS = ['ESTIMATED_EARNINGS', 'PAGE_VIEWS', 'PAGE_VIEWS_RPM', 'IMPRESSIONS', 'CLICKS', 'IMPRESSIONS_CTR', 'AD_REQUESTS', 'AD_REQUESTS_COVERAGE']
 # guidejung.com 쪽(워드프레스 등)은 읽기만 하고 '그 밖'으로 묶어 보여 준다.
 OURS = ('trip', 'weather', 'traffic', 'charge', 'academy', 'school', 'pharmacy', 'hospital', 'oil', 'parking',
         'service', 'near', 'rest', 'pet', 'minwon', 'market', 'benefit', 'job', 'cvs', 'movie', 'stock')
@@ -139,9 +140,13 @@ def build(acc, out_dir, n=7, block=False):
         p = pmap.get(r['DOMAIN_NAME'], {})
         rows.append([r['DOMAIN_NAME'] + ('' if s else ' (내근처 아님)'), money(r[E]), pct(r[E] / total) if total else '—',
                      delta(r[E], p.get(E, 0)), f'{round(r["PAGE_VIEWS"]):,}', money(r['PAGE_VIEWS_RPM']),
-                     f'{round(r["CLICKS"]):,}', pct(r['IMPRESSIONS_CTR'])])
+                     f'{round(r["CLICKS"]):,}', pct(r['IMPRESSIONS_CTR']), f'{round(r["AD_REQUESTS"]):,}',
+                     pct(r['AD_REQUESTS_COVERAGE']), f'{round(r["IMPRESSIONS"]):,}',
+                     f'{r["IMPRESSIONS"] / r["PAGE_VIEWS"]:.1f}' if r['PAGE_VIEWS'] else '—'])
     L += [f'## 사이트별 (내근처 합계 {money(ours_e)} · 전체의 {pct(ours_e / total) if total else "—"})', '',
-          table(['도메인', '수익', '비중', f'{before} 대비', '페이지 조회', '페이지 RPM', '클릭', '노출 클릭률'], rows), '']
+          table(['도메인', '수익', '비중', f'{before} 대비', '페이지 조회', '페이지 RPM', '클릭', '노출 클릭률',
+                 '광고 요청', '채워진 비율', '노출', '쪽당 노출'], rows),
+          '광고 요청은 많은데 채워진 비율·쪽당 노출이 낮으면 "광고가 안 나온 것", 노출은 되는데 RPM이 낮으면 "단가가 낮은 것".', '']
     # 조회는 많은데 RPM이 낮은 곳 = 광고 배치·콘텐츠 개선 후보, RPM이 높은 곳 = 트래픽을 키울 곳.
     ours = [r for r in this if site(r['DOMAIN_NAME']) and r['PAGE_VIEWS'] >= 30]
     if ours:
@@ -174,7 +179,7 @@ def main():
     if '--check' in sys.argv:
         end = dt.datetime.now(KST).date() - dt.timedelta(days=1)
         start = end - dt.timedelta(days=6)
-        rows, _ = report(acc, start, end, ['DOMAIN_NAME'], ['PAGE_VIEWS'])
+        rows, _ = report(acc, start, end, ['DOMAIN_NAME'])  # 11/19: 보고서와 같은 지표 묶음으로 시험(숫자는 출력 안 함)
         doms = sorted({r['DOMAIN_NAME'] for r in rows if r.get('DOMAIN_NAME')})
         print(f'계정 상태 {accs[0].get("state", "?")} · 기간 {start}~{end} · 도메인 {len(doms)}개')
         for d in doms:
