@@ -11,7 +11,8 @@
     "directory": "./apps/trip/out",
     "binding": "ASSETS",
     "not_found_handling": "404-page",
-    "run_worker_first": ["/api/*", "/place/*", "/festival/*", "/food/*", "/stay/*", "/course/*", "/shop/*", "/sitemap.xml", "/sitemap-*", "/rss.xml"]
+    // 11/19: 모든 페이지를 Worker가 먼저 받음(옛 크롬 UA 긁기 봇을 정적 페이지에서도 거르려고). Next 정적 파일만 바로.
+    "run_worker_first": ["/*", "!/_next/static/*"]
   },
   "d1_databases": [{ "binding": "DB", "database_name": "guidejung-trip", "database_id": "c19c21aa-eeb8-49b8-bf17-f8899c5d1e23" }],
   // Detail pages are server-rendered without the Next.js runtime.
