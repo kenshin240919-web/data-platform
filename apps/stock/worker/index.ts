@@ -4,6 +4,7 @@
 // Routes: /api/products?q= (검색어로 상품 후보), /api/stock?id=&area= (시군구 이름으로 매장별 재고), /api/where, /api/status.
 // 위치: 브라우저가 고른 시군구 이름만 받음(좌표 안 받음) — 거리 계산은 휴대폰 안에서.
 import type {Product,StockRes,Store} from '../lib/fmt';
+import {blockBot} from '../../../packages/ui/src/bot';
 
 interface Env{ASSETS:Fetcher}
 const AKA='https://mcp.aka.page/api/daiso';
@@ -21,6 +22,7 @@ const clean=(s:unknown,max:number)=>String(s??'').replace(/[\u0000-\u001f]/g,'')
 
 export default {
   async fetch(req:Request,env:Env,ctx:ExecutionContext):Promise<Response>{
+    const bot=blockBot(req);if(bot)return bot;
     const url=new URL(req.url),p=url.searchParams;
     try{
       if(url.pathname==='/api/products'){const q=clean(p.get('q'),30);if(!q)return json({error:'q'},400,0);

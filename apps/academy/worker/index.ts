@@ -7,6 +7,7 @@ import {FEE_MAX,FEE_MIN,academyPath,esc,eun,feeRange,GRADES,man,n,SITE,SUBJECTS,
 import weatherRegions from '../../weather/data/regions.json';
 import {actionsHtml} from '../../../packages/ui/src/actions';
 import {blogHtml} from '../../../packages/ui/src/live';
+import {blockBot} from '../../../packages/ui/src/bot';
 
 // 학원 상세 → 다른 내근처 사이트(클릭·체류): 가장 가까운 시군구(weather 지역표)로 날씨·충전소, 좌표로 여행 검색.
 type WR={code:string;name:string;sidoShort:string;lat:number;lon:number};
@@ -237,6 +238,7 @@ async function edge(req:Request,ctx:{waitUntil:(p:Promise<unknown>)=>void}|undef
 
 export default {
   async fetch(req:Request,env:Env,ctx:ExecutionContext):Promise<Response>{
+    const bot=blockBot(req);if(bot)return bot;
     const url=new URL(req.url);
     try{
       if(url.pathname==='/api/search')return await edge(req,ctx,()=>search(url,env));

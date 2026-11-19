@@ -4,6 +4,7 @@
 // Routes: /api/near (내 주변 최저가), /api/where, /api/status.
 import raw from '../data/oil.json';
 import {distKm,won,type Card,type Prod,type Station} from '../lib/fmt';
+import {blockBot} from '../../../packages/ui/src/bot';
 
 interface Env{ASSETS:Fetcher}
 type Data={status:{updated_at:string;date?:string;stations:number};stations:Record<string,Station>};
@@ -27,6 +28,7 @@ function near(lat:number,lon:number,radius:number,prod:Prod,limit:number){
 
 export default {
   async fetch(req:Request,env:Env):Promise<Response>{
+    const bot=blockBot(req);if(bot)return bot;
     const url=new URL(req.url),p=url.searchParams;
     try{
       if(url.pathname==='/api/fav'){const ids=[...new Set((p.get('ids')??'').split(','))].filter(x=>/^[0-9A-Za-z-]{2,40}$/.test(x)).slice(0,20);const all=data().stations,day=data().status.date;

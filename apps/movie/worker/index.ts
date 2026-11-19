@@ -7,6 +7,7 @@
 //     하루 3,000회 한도. 다른 정보와 섞지 않고 따로 보여 주고 '영화진흥위원회 통합전산망 오픈 API' 출처를 붙임(화면 쪽).
 import raw from '../data/theaters.json';
 import {CHAINS,distKm,slim,type ChainKey,type Show,type Theater} from '../lib/fmt';
+import {blockBot} from '../../../packages/ui/src/bot';
 
 interface Env{ASSETS:Fetcher;KOBIS_API_KEY?:string}
 type Data={status:{updated_at:string;count:number};items:Theater[]};
@@ -87,6 +88,7 @@ async function boxoffice(env:Env){
 
 export default {
   async fetch(req:Request,env:Env,ctx:ExecutionContext):Promise<Response>{
+    const bot=blockBot(req);if(bot)return bot;
     const url=new URL(req.url),p=url.searchParams;
     try{
       if(url.pathname==='/api/near'){const lat=num(p.get('lat')),lon=num(p.get('lon'));if(lat===null||lon===null)return json({error:'lat/lon'},400,0);

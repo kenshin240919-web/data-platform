@@ -7,6 +7,7 @@ import raw from '../data/pharmacies.json';
 import weatherRegions from '../../weather/data/regions.json';
 import {DAY_LABEL,esc,eun,hm,km,kstNow,late,n,pharmacyPath,SITE,statusOf,sunday,holidayOpen,weekLine,type Card,type Pharmacy} from '../lib/fmt';
 import {actionsHtml} from '../../../packages/ui/src/actions';
+import {blockBot} from '../../../packages/ui/src/bot';
 
 interface Env{ASSETS:Fetcher}
 type Data={status:{updated_at:string;count:number};stats?:Record<string,RegionStats>;items:PharmacyX[]};
@@ -164,6 +165,7 @@ async function detail(p:PharmacyX,url:URL,env:Env,ctx:ExecutionContext){
 
 export default {
   async fetch(req:Request,env:Env,ctx:ExecutionContext):Promise<Response>{
+    const bot=blockBot(req);if(bot)return bot;
     const url=new URL(req.url),p=url.searchParams;
     try{
       if(url.pathname==='/api/fav'){const ids=[...new Set((p.get('ids')??'').split(','))].filter(x=>/^[0-9A-Za-z-]{2,40}$/.test(x)).slice(0,20);const now=kstNow();

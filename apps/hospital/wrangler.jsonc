@@ -11,7 +11,7 @@
     "directory": "./out",
     "binding": "ASSETS",
     "not_found_handling": "404-page",
-    "run_worker_first": ["/api/*", "/hospital/*", "/sitemap.xml", "/sitemap-hospitals-*"]
+    "run_worker_first": ["/*", "!/_next/static/*"]
   },
   "d1_databases": [{ "binding": "DB", "database_name": "guidejung-hospital", "database_id": "527391ea-258a-45e4-92f5-1e20a77a7230" }],
   "kv_namespaces": [{ "binding": "CACHE", "id": "78659f07655e4ab99683b85951a377e3" }],

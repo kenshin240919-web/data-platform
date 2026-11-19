@@ -8,6 +8,7 @@ import raw from '../data/stores.json';
 import weatherRegions from '../../weather/data/regions.json';
 import {ADS,BRANDS,distKm,esc,eun,HOSPITAL,hm,km,mapUrl,meters,PHARMACY,phLine,SITE,SITEMAP_STAGE,slim,storePath,telHref,years,type BrandKey,type Store} from '../lib/fmt';
 import {actionsHtml} from '../../../packages/ui/src/actions';
+import {blockBot} from '../../../packages/ui/src/bot';
 
 interface Env{ASSETS:Fetcher}
 type Data={status:{updated_at:string;count:number};items:Store[]};
@@ -169,6 +170,7 @@ async function gs25(lat:number,lon:number,ctx:ExecutionContext){
 
 export default {
   async fetch(req:Request,env:Env,ctx:ExecutionContext):Promise<Response>{
+    const bot=blockBot(req);if(bot)return bot;
     const url=new URL(req.url),p=url.searchParams;
     try{
       if(url.pathname==='/api/fav'){const ids=[...new Set((p.get('ids')??'').split(','))].filter(x=>/^[0-9A-Za-z-]{2,40}$/.test(x)).slice(0,20);

@@ -7,6 +7,7 @@
 import {AD_FILL} from '../../../packages/ui/src/adsense';
 import raw from '../data/schools.json';
 import weatherRegions from '../../weather/data/regions.json';
+import {blockBot} from '../../../packages/ui/src/bot';
 import {addDays,ALLERGENS,bigEvent,card,dayDiff,dday,esc,eun,eventDate,GRADES_OF,KIND_LABEL,kstDay,mdw,menuLine,monday,parseDishes,schoolPath,schoolYear,SITE,
   TIMETABLE_API,weekday,ymd,type Card,type Event,type Meal,type MealDay,type School,type Today} from '../lib/fmt';
 
@@ -262,6 +263,7 @@ async function detail(s:School,url:URL,env:Env,ctx:ExecutionContext){
 
 export default {
   async fetch(req:Request,env:Env,ctx:ExecutionContext):Promise<Response>{
+    const bot=blockBot(req);if(bot)return bot;
     const url=new URL(req.url),p=url.searchParams;
     try{
       if(url.pathname==='/api/search')return search(url);

@@ -6,6 +6,7 @@
 import regionsData from '../data/regions.json';
 import type {Region,WeatherResponse} from '../lib/types';
 import {midBase,nowcastBase,parseMid,parseNowcast,parseShort,shortBase,kst,ymd} from './kma';
+import {blockBot} from '../../../packages/ui/src/bot';
 
 type KV={get:(k:string,o:{type:'json';cacheTtl?:number})=>Promise<any>;put:(k:string,v:string,o?:{expirationTtl?:number})=>Promise<void>};
 type Ctx={waitUntil:(p:Promise<unknown>)=>void};
@@ -218,6 +219,7 @@ export default {
   async scheduled(ev:{scheduledTime:number},env:Env,ctx:Ctx){
     ctx.waitUntil(scheduled(env,ev.scheduledTime).catch(e=>env.CACHE?.put('weather:cron',JSON.stringify({at:ev.scheduledTime,failed:Date.now(),err:String((e as Error)?.message??e).slice(0,200)}))));},
   async fetch(req:Request,env:Env,ctx?:Ctx):Promise<Response>{
+    const bot=blockBot(req);if(bot)return bot;
     const url=new URL(req.url);
     if(url.pathname==='/api/weather'){
       const r=byCode.get(url.searchParams.get('code')??'');

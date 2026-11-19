@@ -6,6 +6,7 @@ import {AD_FILL} from '../../../packages/ui/src/adsense';
 import weatherRegions from '../../weather/data/regions.json';
 import {CONDITIONS,DAY_LABEL,deptLabel,esc,eun,hm,hospitalPath,km,kstNow,n,SITE,statusOf,weekLine,type Card,type Hospital} from '../lib/fmt';
 import {actionsHtml} from '../../../packages/ui/src/actions';
+import {blockBot} from '../../../packages/ui/src/bot';
 
 interface Env{ASSETS:Fetcher;DB:D1Database;CACHE:KVNamespace;DATA_GO_KR_KEY?:string}
 const json=(d:unknown,status=200,maxAge=60)=>new Response(JSON.stringify(d),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':`public, max-age=${maxAge}`,'access-control-allow-origin':'*'}});
@@ -252,6 +253,7 @@ async function edge(req:Request,ctx:{waitUntil:(p:Promise<unknown>)=>void}|undef
 
 export default {
   async fetch(req:Request,env:Env,ctx:ExecutionContext):Promise<Response>{
+    const bot=blockBot(req);if(bot)return bot;
     const url=new URL(req.url),p=url.searchParams;
     try{
       if(url.pathname==='/api/fav'){const ids=[...new Set((p.get('ids')??'').split(','))].filter(x=>/^[0-9A-Za-z-]{2,40}$/.test(x)).slice(0,20);const now=kstNow();

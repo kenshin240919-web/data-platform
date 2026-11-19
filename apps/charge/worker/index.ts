@@ -6,6 +6,7 @@
 // 덮어씌우므로 목록은 1시간에 한 번만 새로 받아도 충전 가능 여부는 약 5분 이내로 맞다.
 import {regions} from '../lib/regions';
 import type {Charger,Station,StationsResponse} from '../lib/types';
+import {blockBot} from '../../../packages/ui/src/bot';
 
 type Ctx={waitUntil:(p:Promise<unknown>)=>void};
 type KV={get:(k:string,o:{type:'json';cacheTtl?:number})=>Promise<any>;put:(k:string,v:string,o?:{expirationTtl?:number})=>Promise<void>};
@@ -142,6 +143,7 @@ const json=(body:unknown,status=200,maxAge=300)=>new Response(JSON.stringify(bod
 export default {
   async scheduled(ev:{scheduledTime:number},env:Env,ctx:Ctx){ctx.waitUntil(scheduled(env,ev.scheduledTime));},
   async fetch(req:Request,env:Env,ctx?:Ctx):Promise<Response>{
+    const bot=blockBot(req);if(bot)return bot;
     const url=new URL(req.url);
     if(url.pathname==='/api/stations'){
       const code=url.searchParams.get('code')??'';

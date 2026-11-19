@@ -9,6 +9,7 @@ import weatherRegions from '../../weather/data/regions.json';
 import {ADS,distKm,esc,eun,ro,KIND_ORDER,KINDS,km,mapUrl,naverUrl,shopPath,sinceLine,SITE,slim,telHref,years,type Kind,type Place} from '../lib/fmt';
 import {actionsHtml} from '../../../packages/ui/src/actions';
 import {blogHtml} from '../../../packages/ui/src/live';
+import {blockBot} from '../../../packages/ui/src/bot';
 
 interface Env{ASSETS:Fetcher}
 type Data={status:{updated_at:string;count:number};items:Place[]};
@@ -139,6 +140,7 @@ function sitemap(path:string){
 
 export default {
   async fetch(req:Request,env:Env,ctx:ExecutionContext):Promise<Response>{
+    const bot=blockBot(req);if(bot)return bot;
     const url=new URL(req.url),p=url.searchParams;
     try{
       if(url.pathname==='/api/fav'){const ids=[...new Set((p.get('ids')??'').split(','))].filter(x=>/^[0-9A-Za-z-]{2,40}$/.test(x)).slice(0,20);

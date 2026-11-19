@@ -8,6 +8,7 @@
 import {lastPush,subId,send,vapidKeys,type Rec,type Sub} from './push';
 import {TOPICS,benefitMsg,pharmacyMsg,sendTopic,weatherMsg,type AlertEnv,type Topic} from './alerts';
 import {kstNow} from '../../pharmacy/lib/fmt';
+import {blockBot} from '../../../packages/ui/src/bot';
 interface Env extends AlertEnv{ASSETS:Fetcher;NAVER_HUB_CLIENT_ID?:string;NAVER_HUB_CLIENT_SECRET?:string;KAKAO_REST_KEY?:string}
 // 브라우저 푸시 서버만(다른 주소로 요청을 보내게 하는 악용 방지).
 const PUSH_HOST=/^https:\/\/(fcm\.googleapis\.com|updates\.push\.services\.mozilla\.com|web\.push\.apple\.com|[a-z0-9-]+\.notify\.windows\.com|[a-z0-9.-]+\.push\.apple\.com)\//;
@@ -46,6 +47,7 @@ async function around(env:Env,lat:number,lon:number,cat:string,r:number){
 
 export default {
   async fetch(req:Request,env:Env):Promise<Response>{
+    const bot=blockBot(req);if(bot)return bot;
     const url=new URL(req.url);
     const o=req.headers.get('origin')??'',origin=ORIGIN.test(o)?o:'';
     if(url.pathname==='/api/where'){const cf=(req as unknown as {cf?:{latitude?:string;longitude?:string;country?:string;city?:string}}).cf??{};const lat=Number(cf.latitude),lon=Number(cf.longitude);

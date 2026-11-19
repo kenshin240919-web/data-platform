@@ -4,6 +4,7 @@
 // KV(전 세계 공용): 5분마다 Cron이 미리 받아 KV에 넣어 두므로, 어느 도시의 첫 방문자도 API를 기다리지 않는다.
 import type {Cctv,CctvResponse,Incident,IncidentsResponse,TrafficResponse} from '../lib/types';
 import vds from '../data/vds.json';
+import {blockBot} from '../../../packages/ui/src/bot';
 
 type Ctx={waitUntil:(p:Promise<unknown>)=>void};
 type KV={get:(k:string,o:{type:'json';cacheTtl?:number})=>Promise<any>;put:(k:string,v:string)=>Promise<void>};
@@ -142,6 +143,7 @@ async function scheduled(env:Env,now:number){
 export default {
   async scheduled(ev:{scheduledTime:number},env:Env,ctx:Ctx){ctx.waitUntil(scheduled(env,ev.scheduledTime));},
   async fetch(req:Request,env:Env,ctx?:Ctx):Promise<Response>{
+    const bot=blockBot(req);if(bot)return bot;
     const url=new URL(req.url);
     const job=url.pathname==='/api/traffic'?JOBS.traffic:url.pathname==='/api/incidents'?JOBS.incidents:url.pathname==='/api/cctv'?JOBS.cctv:null;
     if(job){

@@ -8,6 +8,7 @@ import {detailPath} from '../../../packages/ui/src/kinds';
 import {meta,place,search,status,type D1} from './db';
 import {detailHtml} from './render';
 import {rssXml} from '../../../packages/ui/src/rss';
+import {blockBot} from '../../../packages/ui/src/bot';
 
 type Ctx={waitUntil:(p:Promise<unknown>)=>void};
 type Env={DB?:D1;ASSETS:{fetch:(r:Request|string)=>Promise<Response>}};
@@ -96,14 +97,9 @@ async function edge(req:Request,ctx:{waitUntil:(p:Promise<unknown>)=>void}|undef
   return res;
 }
 
-// 11/19: 하루 약 12만 건을 긁던 봇 — Windows 10 데스크톱 크롬 UA를 옛 버전(103·105·106·107·110·116 등)으로 돌려 씀(GA 직접 유입 5,384세션·참여율 0%).
-// Windows 10에서 크롬은 스스로 업데이트되므로 120 밑 버전의 사람은 거의 없음(Windows 7·8의 마지막 109는 'NT 6.x'라 걸리지 않음). Edge·웨일 등은 꼬리 글자가 달라 걸리지 않음.
-const OLD_CHROME=/^Mozilla\/5\.0 \(Windows NT 10\.0; Win64; x64\) AppleWebKit\/537\.36 \(KHTML, like Gecko\) Chrome\/(\d+)\.[\d.]+ Safari\/537\.\d+$/;
-export const oldChrome=(ua:string)=>{const m=OLD_CHROME.exec(ua);return !!m&&+m[1]<120;};
-
 export default {
   async fetch(req:Request,env:Env,ctx?:Ctx):Promise<Response>{
-    if(oldChrome(req.headers.get('user-agent')??''))return new Response('Forbidden',{status:403,headers:{'cache-control':'no-store'}});
+    const bot=blockBot(req);if(bot)return bot;
     const url=new URL(req.url);
     // Detail ids have no dots; other files under /place/ (Next.js list-page data such as __next._tree.txt) are static.
     const m=url.pathname.match(/^\/(place|festival|food|stay|course|shop)\/([^/.]+)(?:\.html)?$/);

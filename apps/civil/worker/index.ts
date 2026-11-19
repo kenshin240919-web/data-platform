@@ -12,6 +12,7 @@ import weatherRegions from '../../weather/data/regions.json';
 import {ADS,DOCS,distKm,esc,eun,hoursLine,KIND_ORDER,KINDS,km,mapUrl,naverUrl,placePath,SITE,slim,stateOf,telHref,type Kind,type Place} from '../lib/fmt';
 import {actionsHtml} from '../../../packages/ui/src/actions';
 import {aroundHtml} from '../../../packages/ui/src/live';
+import {blockBot} from '../../../packages/ui/src/bot';
 
 interface Env{ASSETS:Fetcher;DATA_GO_KR_KEY?:string;KAKAO_REST_KEY?:string;NAVER_HUB_CLIENT_ID?:string;NAVER_HUB_CLIENT_SECRET?:string}
 type Data={status:{updated_at:string;count:number};docs:[string,string][];items:Place[]};
@@ -205,6 +206,7 @@ function sitemap(path:string){
 
 export default {
   async fetch(req:Request,env:Env,ctx:ExecutionContext):Promise<Response>{
+    const bot=blockBot(req);if(bot)return bot;
     const url=new URL(req.url),p=url.searchParams;
     try{
       if(url.pathname==='/api/fav'){const ids=[...new Set((p.get('ids')??'').split(','))].filter(x=>/^[0-9A-Za-z-]{2,40}$/.test(x)).slice(0,20);

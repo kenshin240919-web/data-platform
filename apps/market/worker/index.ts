@@ -8,6 +8,7 @@ import {AD_FILL} from '../../../packages/ui/src/adsense';
 import raw from '../data/market.json';
 import {CATS,distKm,esc,eun,located,mapUrl,marketPath,n,naverUrl,pct,SITE,slimMarket,storePath,type Cat,type Data,type Market,type StoreRow} from '../lib/fmt';
 import {actionsHtml} from '../../../packages/ui/src/actions';
+import {blockBot} from '../../../packages/ui/src/bot';
 
 interface Env{ASSETS:Fetcher;KAKAO_REST_KEY?:string}
 let parsed:Data|null=null,byId:Map<string,StoreRow>|null=null,byMarket:Map<number,StoreRow[]>|null=null;
@@ -121,6 +122,7 @@ const notFound=async(env:Env,url:URL)=>{const nf=await env.ASSETS.fetch(new Requ
 
 export default {
   async fetch(req:Request,env:Env,ctx:ExecutionContext):Promise<Response>{
+    const bot=blockBot(req);if(bot)return bot;
     const url=new URL(req.url),p=url.searchParams;
     try{
       if(url.pathname==='/api/near'){const lat=num(p.get('lat')),lon=num(p.get('lon'));if(lat===null||lon===null)return json({error:'lat/lon'},400,0);

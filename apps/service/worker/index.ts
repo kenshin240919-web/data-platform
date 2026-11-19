@@ -9,6 +9,7 @@ import weatherRegions from '../../weather/data/regions.json';
 import {brand} from '../lib/brands';
 import {centerPath,distKm,esc,eun,hoursLine,KIND_LABEL,KINDS,km,kstNow,mapUrl,n,openNow,REPAIR_INFO,SITE,slim,years,type Center,type Kind,type KindStats} from '../lib/fmt';
 import {actionsHtml} from '../../../packages/ui/src/actions';
+import {blockBot} from '../../../packages/ui/src/bot';
 
 interface Env{ASSETS:Fetcher;KAKAO_REST_KEY?:string}
 type Data={status:{updated_at:string;count:number};stats?:Record<string,Partial<Record<Kind,KindStats>>>;items:Center[]};
@@ -194,6 +195,7 @@ function sitemap(path:string){
 
 export default {
   async fetch(req:Request,env:Env,ctx:ExecutionContext):Promise<Response>{
+    const bot=blockBot(req);if(bot)return bot;
     const url=new URL(req.url),p=url.searchParams;
     try{
       if(url.pathname==='/api/near'){const lat=num(p.get('lat')),lon=num(p.get('lon'));if(lat===null||lon===null)return json({error:'lat/lon'},400,0);

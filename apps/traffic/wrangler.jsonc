@@ -10,7 +10,7 @@
     "directory": "./out",
     "binding": "ASSETS",
     "not_found_handling": "404-page",
-    "run_worker_first": ["/api/*"]
+    "run_worker_first": ["/*", "!/_next/static/*"]
   },
   // 5분마다 실시간 소통·돌발(1시간마다 CCTV)을 미리 받아 KV guidejung-cache(전 세계 공용)에 저장 → 첫 방문자도 바로 보임.
   "triggers": { "crons": ["*/5 * * * *"] },

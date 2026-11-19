@@ -8,6 +8,7 @@ import weatherRegions from '../../weather/data/regions.json';
 import {allDay,distKm,esc,eun,feeFor,feeLine,hoursLine,km,kstNow,KIND_LABEL,lotPath,mapUrl,n,openNow,SITE,slim,won,type Lot} from '../lib/fmt';
 import {actionsHtml} from '../../../packages/ui/src/actions';
 import {aroundHtml} from '../../../packages/ui/src/live';
+import {blockBot} from '../../../packages/ui/src/bot';
 
 interface Env{ASSETS:Fetcher}
 type Data={status:{updated_at:string;count:number};items:Lot[]};
@@ -128,6 +129,7 @@ async function detail(p:Lot,url:URL,env:Env,ctx:ExecutionContext){
 
 export default {
   async fetch(req:Request,env:Env,ctx:ExecutionContext):Promise<Response>{
+    const bot=blockBot(req);if(bot)return bot;
     const url=new URL(req.url),p=url.searchParams;
     try{
       if(url.pathname==='/api/fav'){const ids=[...new Set((p.get('ids')??'').split(','))].filter(x=>/^[0-9A-Za-z-]{2,40}$/.test(x)).slice(0,20);const now=kstNow();

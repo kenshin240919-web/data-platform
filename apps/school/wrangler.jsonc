@@ -11,7 +11,7 @@
     "directory": "./out",
     "binding": "ASSETS",
     "not_found_handling": "404-page",
-    "run_worker_first": ["/api/*", "/school/*"]
+    "run_worker_first": ["/*", "!/_next/static/*"]
   },
   "kv_namespaces": [{ "binding": "CACHE", "id": "78659f07655e4ab99683b85951a377e3" }],
   // The school list is imported as text and parsed on first use (a 6MB object literal slows the Worker start).

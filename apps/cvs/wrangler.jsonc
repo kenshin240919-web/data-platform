@@ -10,7 +10,7 @@
     "directory": "./out",
     "binding": "ASSETS",
     "not_found_handling": "404-page",
-    "run_worker_first": ["/api/*", "/store/*", "/sitemap.xml", "/sitemap-stores-*"]
+    "run_worker_first": ["/*", "!/_next/static/*"]
   },
   // The list is imported as text and parsed on first use (a large object literal slows the Worker start).
   "rules": [{ "type": "Text", "globs": ["**/data/stores.json"], "fallthrough": true }],
