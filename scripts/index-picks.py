@@ -128,8 +128,13 @@ def score(url, host, pop, trip, docs, mk):
 
 
 def inspect(url, token):
-    r = requests.post(INSPECT, headers={'Authorization': f'Bearer {token}'}, timeout=60,
-                      json={'inspectionUrl': url, 'siteUrl': PROP, 'languageCode': 'ko-KR'})
+    # 11/20: 검사 API가 한 번 응답이 없어(ReadTimeout) 실행 전체가 실패 → 한 건 실패는 '모름'으로 넘김
+    try:
+        r = requests.post(INSPECT, headers={'Authorization': f'Bearer {token}'}, timeout=60,
+                          json={'inspectionUrl': url, 'siteUrl': PROP, 'languageCode': 'ko-KR'})
+    except requests.RequestException as e:
+        print(f'URL 검사 실패(건너뜀): {url} · {type(e).__name__}')
+        return None
     if not r.ok:
         return None
     return r.json().get('inspectionResult', {}).get('indexStatusResult', {}).get('verdict')
