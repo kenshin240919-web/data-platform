@@ -1,0 +1,42 @@
+name: GA daily
+# 수동: 사이트별 하루 조회 수와 두 기간 유입 출처 비교(scripts/ga-daily.py) → reports/ga/일별-YYYY-MM-DD.md main 커밋.
+on:
+  workflow_dispatch:
+    inputs:
+      a_start: {description: 'A 시작 YYYY-MM-DD', required: false}
+      a_end: {description: 'A 끝', required: false}
+      b_start: {description: 'B 시작', required: false}
+      b_end: {description: 'B 끝', required: false}
+      sites: {description: '사이트(쉼표, 비우면 전체)', required: false}
+permissions:
+  contents: write
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -q google-auth requests
+      - name: Report
+        env:
+          GA_SERVICE_ACCOUNT_JSON: ${{ secrets.GA_SERVICE_ACCOUNT_JSON }}
+          A_START: ${{ inputs.a_start }}
+          A_END: ${{ inputs.a_end }}
+          B_START: ${{ inputs.b_start }}
+          B_END: ${{ inputs.b_end }}
+          SITES_ONLY: ${{ inputs.sites }}
+        run: python scripts/ga-daily.py
+      - name: Commit report
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add reports/ga
+          if git diff --cached --quiet; then echo 'no change'; exit 0; fi
+          git commit -m 'GA 일별 비교'
+          for i in 1 2 3; do git pull --rebase origin main && git push origin HEAD:main && exit 0; sleep 10; done
+          exit 1
