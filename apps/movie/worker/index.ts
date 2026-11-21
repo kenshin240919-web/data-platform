@@ -55,15 +55,21 @@ async function cached(key:string,ttl:number,ctx:ExecutionContext,make:()=>Promis
   if(v!=null)ctx.waitUntil(cache.put(req,new Response(JSON.stringify(v),{headers:{'cache-control':`public, max-age=${ttl}`}})));
   return v;
 }
+/** 극장 이름 비교용: 체인 이름·괄호·공백·끝의 '관'·'점' 뺌('롯데시네마 건대입구관' → '건대입구') */
+const nameKey=(s:string)=>s.replace(/\(.*?\)/g,'').replace(/CGV|롯데시네마|메가박스|씨네Q/gi,'').replace(/\s+/g,'').replace(/(관|점)$/,'').toLowerCase();
 async function showtimes(t:Theater,ctx:ExecutionContext){
   const p=PATHS[t.chain];
   if(!p||t.lat==null)return {live:false,shows:[]};
   // 중계 쪽 극장 코드: 우리 극장 좌표에서 가장 가까운 같은 체인 극장(500m 안). 하루 캐시(코드표를 모아 두지는 않음).
-  const code=await cached(`code/v1/${t.id}`,86400,ctx,async()=>{
-    const d=await relay(`${p.list}?lat=${t.lat}&lng=${t.lon}&limit=3`);
+  // 11/22: 거리만 보면 중계에 없는 극장(예: 메가박스 씨티)이 270m 옆 다른 극장(메가박스 강남) 시간표를 받았음 →
+  // 이름이 맞는 곳(1.5km 안) 먼저, 이름이 안 맞으면 같은 건물급(150m 안)만.
+  const code=await cached(`code/v2/${t.id}`,86400,ctx,async()=>{
+    const d=await relay(`${p.list}?lat=${t.lat}&lng=${t.lon}&limit=5`);
     const list=(d?.theaters??[]) as Record<string,unknown>[];
-    const best=list.map(x=>({c:String(x[p.code]??''),k:typeof x.latitude==='number'?distKm(t.lat!,t.lon!,x.latitude as number,x.longitude as number):99,name:String(x.theaterName??'')}))
-      .filter(x=>x.c&&x.k<0.5).sort((a,b)=>a.k-b.k)[0];
+    const key=nameKey(t.name);
+    const all=list.map(x=>({c:String(x[p.code]??''),k:typeof x.latitude==='number'?distKm(t.lat!,t.lon!,x.latitude as number,x.longitude as number):99,name:String(x.theaterName??'')}))
+      .filter(x=>x.c).map(x=>{const o=nameKey(x.name);return {...x,same:!!o&&!!key&&(o.includes(key)||key.includes(o))};});
+    const best=all.filter(x=>x.same&&x.k<1.5).sort((a,b)=>a.k-b.k)[0]??all.filter(x=>x.k<0.15).sort((a,b)=>a.k-b.k)[0];
     return best?{c:best.c,name:best.name}:d?{c:''}:null; // 못 찾음은 하루 기억, 중계 실패는 기억 안 함
   }) as {c:string;name?:string}|null;
   if(!code)return {live:true,error:'relay'};
