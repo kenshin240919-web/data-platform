@@ -26,6 +26,7 @@ export default async function RegionPage({params}:P){
     <p className="oi-answer">오늘 <b>{r.label}</b>에서 휘발유가 가장 싼 곳은 <a href={`/station/${f.id}`}><b>{f.name} {won(f.prices.B027)}</b></a>{gap>0&&<> — 지역 평균보다 리터당 {won(gap)} 싸요(60L 가득 {won(tank(gap))} 절약)</>}. <span className="muted">({updated()} 기준)</span></p>
     <div className="oi-avg"><div><span>{r.name} 평균 휘발유</span><b>{won(a)}</b>{a&&na&&<small className={a>na?'up':'down'}>전국 평균 {diff(a-na)}</small>}</div>
       <div><span>{r.name} 평균 경유</span><b>{won(r.avg.D047?.price)}</b></div><div><span>최저가 휘발유</span><b>{won(f.prices.B027)}</b></div></div>
+    <AdSlot/>
     <section><h2>{r.label} 휘발유 싼 순 {r.items.length}곳</h2><StationList items={r.items.map(slim)} avg={a}/></section>
     <AdSlot/>
     {others.length>0&&<section><h2>{r.sido_name} 다른 지역 평균 휘발유</h2><div className="oi-sidos">{others.map(x=><Link key={x.code} href={`/region/${x.code}`}><b>{x.name}</b><span>{won(x.avg.B027!.price)}</span></Link>)}</div></section>}

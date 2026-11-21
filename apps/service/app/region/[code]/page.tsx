@@ -24,6 +24,7 @@ export default async function RegionPage({params}:P){
     <h1>{r.name} 자동차 정비소·검사소</h1>
     <p className="sv-answer"><b>{r.name}</b>에 등록된 자동차 정비소는 <b>{n(r.kinds.repair)}곳</b>이에요{Object.keys(r.subs).length?` (${Object.entries(r.subs).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`${k} ${n(v)}`).join(' · ')})`:''}. 검사소 {cnt(r,'inspect')} · 세차장 {cnt(r,'wash')} · 배출가스 정비 {cnt(r,'emission')}. <span className="muted">({updated()} 기준)</span></p>
     <div className="sv-jump">{KIND_ORDER.filter(k=>r.kinds[k]>=COND_MIN).map(k=><Link key={k} href={`/region/${r.id}/${k}`}>{KINDS[k].icon} {r.zone} {KINDS[k].label} <small>{n(r.kinds[k])}</small></Link>)}</div>
+    <AdSlot/>
     <section><h2>{r.name} 목록</h2><CenterList items={r.items.map(slim)}/>
       <noscript><ul>{r.items.slice(0,300).map(p=><li key={p.id}><a href={centerPath(p.id)}>{p.name}</a> · {KINDS[p.kind].label}{p.sub?` · ${p.sub}`:''}</li>)}</ul></noscript></section>
     <AdSlot/>

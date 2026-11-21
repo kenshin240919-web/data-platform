@@ -37,6 +37,7 @@ export default function Home(){
     <section><h2>평균 휘발유가 싼 시군구 TOP 8</h2>
       <ol className="oi-rank">{cheapR.slice(0,8).map(r=><li key={r.code}><Link href={`/region/${r.code}`}><b>{r.label}</b><span>{won(r.avg.B027!.price)}</span></Link></li>)}</ol></section>
     <section><h2>경유 가장 싼 곳</h2><StationList items={topD.map(slim)} prod="D047" avg={d} avgLabel="전국 평균"/><p><Link href="/diesel" className="oi-more-link">시도별 경유 최저가 보기 →</Link></p></section>
+    <AdSlot/>
     <Faq items={[
       ['오늘 전국 평균 휘발유 가격은 얼마인가요?',`${updated()} 기준 전국 평균 휘발유는 리터당 ${won(g)}, 경유는 ${won(d)}입니다(한국석유공사 오피넷).`],
       ['오늘 가장 싼 휘발유 주유소는 어디인가요?',top[0]?`${updated()} 기준 ${top[0].name}(${top[0].address??''})이 리터당 ${won(top[0].prices.B027)}으로 가장 쌉니다.`:'오늘 자료가 아직 없습니다.'],

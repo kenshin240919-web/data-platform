@@ -1,7 +1,7 @@
 // Cloudflare Worker for academy.guidejung.com (내근처 학원). Static pages: ./out (Next.js export).
 // D1 guidejung-academy (scripts/build-academy-d1.mjs): /api/search, 학원 상세 /academy/{id} (server-rendered into the
 // static template /academy/shell so header·footer·scripts match), /sitemap.xml + /sitemap-academies-{n}.xml.
-import {AD_FILL} from '../../../packages/ui/src/adsense';
+import {AD_FILL,withMidAd} from '../../../packages/ui/src/adsense';
 import {FEE_MAX,FEE_MIN,academyPath,esc,eun,feeRange,GRADES,man,n,SITE,SUBJECTS,subjectLabel,won,ymd,type Card,type FeeStats} from '../lib/fmt';
 
 import weatherRegions from '../../weather/data/regions.json';
@@ -207,7 +207,7 @@ async function detail(id:string,url:URL,env:Env,ctx:ExecutionContext){
     .replace(/<link rel="canonical" href="[^"]*"\/?>/,'')
     .replace(/<meta property="og:[^"]*" content="[^"]*"\/?>/g,'').replace(/<meta name="twitter:[^"]*" content="[^"]*"\/?>/g,'')
     .replace('</head>',`<link rel="canonical" href="${canonical}"/><meta property="og:title" content="${esc(title)}"/><meta property="og:description" content="${esc(desc)}"/><meta property="og:url" content="${canonical}"/><meta property="og:image" content="${SITE}/og.png?v=2"/><meta property="og:site_name" content="내근처 학원"/><meta property="og:locale" content="ko_KR"/><meta name="twitter:card" content="summary_large_image"/></head>`)
-    .replace(/<div id="academy-detail">ACADEMY_DETAIL<\/div>/,detailHtml(a,near,ins))
+    .replace(/<div id="academy-detail">ACADEMY_DETAIL<\/div>/,withMidAd(detailHtml(a,near,ins)))
     .replace('</body>',AD_FILL+COMPARE_JS+'</body>');
   const res=new Response(html,{headers:{'content-type':'text/html; charset=utf-8','cache-control':'public, max-age=600'}});
   ctx.waitUntil(caches.default.put(key,res.clone()));

@@ -4,7 +4,7 @@
 // school costs one NEIS call per month of meals, per few months of calendar and per class-week of timetable, shared worldwide.
 // Routes: /api/search, /api/today, /api/meal, /api/schedule, /api/classes, /api/timetable, /api/where, /api/status,
 // 학교 상세 /school/{학교코드} (server-rendered into the static template /school/shell so header·footer·scripts match).
-import {AD_FILL} from '../../../packages/ui/src/adsense';
+import {AD_FILL,withMidAd} from '../../../packages/ui/src/adsense';
 import raw from '../data/schools.json';
 import weatherRegions from '../../weather/data/regions.json';
 import {blockBot} from '../../../packages/ui/src/bot';
@@ -254,7 +254,7 @@ async function detail(s:School,url:URL,env:Env,ctx:ExecutionContext){
     .replace(/<link rel="canonical" href="[^"]*"\/?>/,'')
     .replace(/<meta property="og:[^"]*" content="[^"]*"\/?>/g,'').replace(/<meta name="twitter:[^"]*" content="[^"]*"\/?>/g,'')
     .replace('</head>',`<link rel="canonical" href="${canonical}"/><meta property="og:title" content="${esc(title)}"/><meta property="og:description" content="${esc(desc)}"/><meta property="og:url" content="${canonical}"/><meta property="og:image" content="${SITE}/og.png?v=2"/><meta property="og:site_name" content="내 학교"/><meta property="og:locale" content="ko_KR"/><meta name="twitter:card" content="summary_large_image"/></head>`)
-    .replace(/<div id="school-detail">SCHOOL_DETAIL<\/div>/,detailHtml(s,today,ms.filter(d=>d.date>=w.from&&d.date<=w.to),todayMeal,nextMeal,ev,failed))
+    .replace(/<div id="school-detail">SCHOOL_DETAIL<\/div>/,withMidAd(detailHtml(s,today,ms.filter(d=>d.date>=w.from&&d.date<=w.to),todayMeal,nextMeal,ev,failed)))
     .replace('</body>',AD_FILL+PAGE_JS+'</body>');
   const res=new Response(html,{headers:{'content-type':'text/html; charset=utf-8','cache-control':'public, max-age=600'}});
   if(!failed.length)ctx.waitUntil(caches.default.put(key,res.clone()));

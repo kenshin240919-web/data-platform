@@ -34,6 +34,7 @@ export default async function RegionPage({params}:P){
     <AdSlot/>
     <LiveList title={`${r.name} 학원 목록`} initial={r.top} query={{region:r.id}}/>
     {r.new.length>0&&<section><h2>최근 문을 연 학원</h2><ul className="ac-links">{r.new.map(c=><li key={c.id}><a href={`/academy/${c.id}`}>{c.name}</a>{c.established&&<span className="muted"> · {c.established.slice(0,4)}.{c.established.slice(4,6)} 개설</span>}</li>)}</ul></section>}
+    <AdSlot/>
     <Faq items={[
       [`${r.name}에 학원은 몇 곳인가요?`,`${updated()} 기준 ${r.name}에는 학원 ${n(r.academies)}곳과 교습소 ${n(r.count-r.academies)}곳, 모두 ${n(r.count)}곳이 개원 중입니다.`],
       [`${r.name}에서 가장 많은 학원은 어떤 과목인가요?`,subs.length?`${subs.slice(0,3).map(([k,s])=>`${SUBJECTS[k]} ${n(s.count)}곳`).join(', ')} 순입니다.`:''],

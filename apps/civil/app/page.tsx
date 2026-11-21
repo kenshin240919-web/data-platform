@@ -28,6 +28,7 @@ export default function Home(){
     <HowTo/>
     <section><h2>무인민원발급기 많은 지역</h2><ol className="cv-rank">{top.map(r=><li key={r.id}><Link href={`/region/${r.id}/kiosk`}><b>{r.name}</b><span>{n(r.kinds.kiosk)}대</span></Link></li>)}</ol></section>
     <section><h2>시도별</h2><div className="cv-sidos">{sidos.map(s=><Link key={s.name} href={`/region#${s.name}`}><b>{s.name}</b><span>{n(s.count)}곳</span></Link>)}</div></section>
+    <Ad/>
     <Faq items={[
       ['내 주변 무인민원발급기는 어떻게 찾나요?','‘내 위치 주변 무인민원발급기 보기’를 누르면 가까운 발급기를 지금 운영 중인 곳부터 보여 드립니다. 위치를 허용하지 않으면 접속 지역 기준으로 보여 드립니다.'],
       ['주말에도 서류를 뗄 수 있나요?',`네. 주말·공휴일 운영 시간이 등록된 무인민원발급기가 전국 ${n(weekendKiosks.length)}대 있습니다(${updated()} 기준). 주말 발급기 페이지에서 확인하세요.`],

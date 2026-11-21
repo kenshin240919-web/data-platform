@@ -11,9 +11,11 @@ export const dynamicParams=false;
 export function generateStaticParams(){return regions.map(r=>({code:r.id}));}
 type P={params:Promise<{code:string}>};
 const parts=(r:NonNullable<ReturnType<typeof region>>)=>CHAIN_ORDER.filter(k=>r.chains[k]).map(k=>`${CHAINS[k].label} ${n(r.chains[k])}`);
+// 11/21: 다음 검색 입구('강남 CGV 상영시간표'처럼 체인 이름+지역으로 찾음) — 지역에 있는 큰 체인 이름을 제목에.
+const chainsOf=(r:NonNullable<ReturnType<typeof region>>)=>{const t=parts(r).join(" ");const c=["CGV","롯데시네마","메가박스"].filter(x=>t.includes(x));return c.length?c.join("·")+" ":"";};
 export async function generateMetadata({params}:P):Promise<Metadata>{
   const r=region((await params).code);if(!r)return {};
-  return {title:`${r.name} 영화관 ${n(r.count)}곳 · 오늘 상영 시간표`,description:`${r.name} 영화관 ${n(r.count)}곳(${parts(r).join(', ')}), 상영관 ${n(r.screens)}개. 극장마다 오늘 남은 상영 시간과 좌석, 주소·주차장을 확인하세요.`,alternates:{canonical:`/region/${r.id}`}};
+  return {title:`${r.name} 영화관 ${n(r.count)}곳 · ${chainsOf(r)}오늘 상영시간표`,description:`${r.name} 영화관 ${n(r.count)}곳(${parts(r).join(', ')}), 상영관 ${n(r.screens)}개. 극장마다 오늘 남은 상영 시간과 좌석, 주소·주차장을 확인하세요.`,alternates:{canonical:`/region/${r.id}`}};
 }
 export default async function RegionPage({params}:P){
   const r=region((await params).code);if(!r)notFound();

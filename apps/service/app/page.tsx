@@ -25,6 +25,7 @@ export default function Home(){
     <Checklist/>
     <section><h2>정비소 많은 지역</h2><ol className="sv-rank">{top.map(r=><li key={r.id}><Link href={`/region/${r.id}/repair`}><b>{r.name}</b><span>{n(r.kinds.repair)}곳</span></Link></li>)}</ol></section>
     <section><h2>시도별</h2><div className="sv-sidos">{sidos.map(s=><Link key={s.name} href={`/region#${s.name}`}><b>{s.name}</b><span>{n(s.count)}곳</span></Link>)}</div></section>
+    <AdSlot/>
     <Faq items={[
       ['내 주변 정비소는 어떻게 찾나요?','‘내 위치 주변 정비소·검사소 보기’를 누르면 가까운 정비소와 검사소·세차장을 거리순으로 보여 드립니다. 위치를 허용하지 않으면 접속 지역 기준으로 보여 드립니다.'],
       ['1급·2급·3급 정비소는 무엇이 다른가요?','자동차관리법의 정비업 종류로, 흔히 1급은 모든 차를 종합 정비하는 종합정비업, 2급은 승용·소형차를 종합 정비하는 소형자동차종합정비업, 3급은 정해진 장치만 정비하는 전문정비업을 말합니다.'],

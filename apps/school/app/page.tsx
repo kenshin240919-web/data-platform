@@ -21,6 +21,7 @@ export default function Home(){
     <section><h2>학교 많은 지역 TOP 12</h2><ol className="sc-rank">{popular.map(r=><li key={r.id}><Link href={`/region/${r.id}`}><b>{r.name}</b><span>{n(r.count)}곳</span></Link></li>)}</ol>
       <p><Link href="/region" className="sc-more-link">전체 지역 보기 →</Link></p></section>
     <section><h2>시도별 학교</h2><div className="sc-sidos">{sidos.map(s=><Link key={s.name} href={`/region#${s.name}`}><b>{s.name}</b><span>{n(s.count)}곳</span></Link>)}</div></section>
+    <AdSlot/>
     <Faq items={[
       ['우리 학교 오늘 급식은 어떻게 보나요?','학교 이름으로 찾거나 내 주변 학교에서 고른 뒤 ‘내 학교로 저장’을 누르면, 다음부터 이 사이트를 열자마자 오늘 급식이 보입니다.'],
       ['급식 메뉴 옆 숫자는 무엇인가요?','알레르기 유발 식품 번호입니다(1 난류, 2 우유, 5 대두, 6 밀, 10 돼지고기 등). 이 사이트는 번호를 이름으로 풀어 보여 주고, 내 아이 알레르기를 고르면 해당 메뉴를 빨갛게 표시합니다.'],

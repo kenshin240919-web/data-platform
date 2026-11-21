@@ -3,7 +3,7 @@
 // emission repair; no database), imported as text (wrangler.jsonc rules) and parsed on first use.
 // Routes: /api/near, /api/search, /api/where, /api/status, 상세 /center/{id} (server-rendered into /center/shell),
 // /sitemap.xml (index) → /sitemap-pages.xml (Next) + /sitemap-centers-{n}.xml (here, 40,000 each).
-import {AD_FILL} from '../../../packages/ui/src/adsense';
+import {AD_FILL,withMidAd} from '../../../packages/ui/src/adsense';
 import raw from '../data/centers.json';
 import weatherRegions from '../../weather/data/regions.json';
 import {brand} from '../lib/brands';
@@ -177,7 +177,7 @@ async function detail(p:Center,url:URL,env:Env,ctx:ExecutionContext){
     .replace(/<link rel="canonical" href="[^"]*"\/?>/,'')
     .replace(/<meta property="og:[^"]*" content="[^"]*"\/?>/g,'').replace(/<meta name="twitter:[^"]*" content="[^"]*"\/?>/g,'')
     .replace('</head>',`<link rel="canonical" href="${canonical}"/><meta property="og:title" content="${esc(title)}"/><meta property="og:description" content="${esc(desc)}"/><meta property="og:url" content="${canonical}"/><meta property="og:image" content="${SITE}/og.png?v=2"/><meta property="og:site_name" content="내근처 서비스센터"/><meta property="og:locale" content="ko_KR"/><meta name="twitter:card" content="summary_large_image"/></head>`)
-    .replace(/<div id="center-detail">CENTER_DETAIL<\/div>/,detailHtml(p,groups,I))
+    .replace(/<div id="center-detail">CENTER_DETAIL<\/div>/,withMidAd(detailHtml(p,groups,I)))
     .replace('</body>',AD_FILL+'</body>');
   const res=new Response(html,{headers:{'content-type':'text/html; charset=utf-8','cache-control':'public, max-age=600'}});
   ctx.waitUntil(caches.default.put(key,res.clone()));

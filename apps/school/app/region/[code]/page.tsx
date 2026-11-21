@@ -26,6 +26,7 @@ export default async function RegionPage({params}:P){
     {groups.map(([k,l],i)=><section key={k} id={k}><h2>{KIND_ICON[k]} {r.name} {KIND_LABEL[k]} <span className="muted">{n(l.length)}곳</span></h2>
       <ul className="sc-school-list">{l.map(s=><li key={s.code}><a href={schoolPath(s.code)}><b>{s.name}</b><small>{[s.found,s.coedu!=='남여공학'?s.coedu:null,s.address?.split(' ').slice(2,4).join(' ')].filter(Boolean).join(' · ')}</small></a></li>)}</ul>
       {i===0&&<AdSlot/>}</section>)}
+    <AdSlot/>
     <Faq items={[
       [`${r.name}에 학교는 몇 곳인가요?`,`${updated()} 기준 ${r.name}에는 ${kindsLine(r.kinds)}, 모두 ${n(r.count)}곳이 있습니다.`],
       [`${r.name} 학교 급식 메뉴는 어디서 보나요?`,`학교 이름을 누르면 나이스에 올라온 오늘 급식과 이번 주 급식(알레르기 표시)을 볼 수 있습니다${big.length?`. 예: ${big.map(s=>s.name).join(', ')}`:''}.`],

@@ -38,6 +38,7 @@ export default function Home(){
       <p className="muted small">교육청에 공개된 과정별 수강료 {n(feeRows.reduce((a,k)=>a+nation[k].fees!.n,0))}건 기준. 기간(월·주) 표기가 없는 금액이 많아 실제와 다를 수 있어요.</p></section>
     {latest.length>0&&<section><h2>🆕 새로 문 연 학원</h2><ul className="ac-links">{latest.slice(0,6).map(a=><li key={a.id}><a href={`/academy/${a.id}`}>{a.name}</a> <span className="muted">· {a.region_name} · {a.established.slice(0,4)}.{a.established.slice(4,6)}.{a.established.slice(6,8)} 개설</span></li>)}</ul><p><Link href="/new" className="ac-more-link">새로 문 연 학원 모두 보기 →</Link></p></section>}
     <section><h2>시도별 학원</h2><div className="ac-sidos">{sidos.map(s=><Link key={s.name} href={`/region#${s.name}`}><b>{s.name}</b><span>{n(s.count)}곳</span></Link>)}</div></section>
+    <AdSlot/>
     <Faq items={[
       ['전국에 학원·교습소는 몇 곳인가요?',`나이스 교육정보 개방 포털 기준 ${updated()} 현재 개원 중인 학원·교습소는 ${n(status.count)}곳이고, 그중 ${n(status.with_fees)}곳이 과정별 수강료 금액을 공개하고 있습니다.`],
       ['수학 학원 수강료는 보통 얼마인가요?',math?`교육청에 공개된 수학 과정 수강료 ${n(math.n)}건의 중앙값은 ${man(math.median)}입니다(최저 ${man(math.min)}, 최고 ${man(math.max)}). 학년·횟수에 따라 달라집니다.`:''],

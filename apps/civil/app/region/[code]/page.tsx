@@ -23,6 +23,7 @@ export default async function RegionPage({params}:P){
     <h1>{r.name} 민원·서류</h1>
     <p className="cv-answer"><b>{r.name}</b>: {KIND_ORDER.filter(k=>r.kinds[k]).map((k,i)=><span key={k}>{i>0&&' · '}{KINDS[k].label} <b>{n(r.kinds[k])}{unit(k)}</b></span>)}. <span className="muted">({updated()} 기준)</span></p>
     <div className="cv-jump">{KIND_ORDER.filter(k=>r.kinds[k]>=COND_MIN).map(k=><Link key={k} href={`/region/${r.id}/${k}`}>{KINDS[k].icon} {r.zone} {KINDS[k].label} <small>{n(r.kinds[k])}</small></Link>)}</div>
+    <Ad/>
     <section><h2>{r.name} 목록</h2><PlaceList items={list.map(slim)}/>
       <noscript><ul>{list.slice(0,300).map(p=><li key={p.id}><a href={placePath(p.id)}>{p.name}</a> · {KINDS[p.kind].label}</li>)}</ul></noscript></section>
     <Ad/>

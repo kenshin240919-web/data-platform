@@ -6,7 +6,7 @@
 //   /api/print?lat=&lon=   무인 프린트점·프린트카페: 카카오 로컬(반경) + NAVER API HUB 지역 검색을 방문 때마다 실시간(저장 안 함, no-store)
 // 상세 /place/{id} (server-rendered into /place/shell), /sitemap.xml (index) → /sitemap-pages.xml (Next) + /sitemap-places-1.xml.
 // 위치: 브라우저는 약 2km 칸 중심만 보낸다(packages/ui/src/geo.tsx) — 여기 오는 lat/lon은 칸 중심.
-import {AD_FILL} from '../../../packages/ui/src/adsense';
+import {AD_FILL,withMidAd} from '../../../packages/ui/src/adsense';
 import raw from '../data/places.json';
 import weatherRegions from '../../weather/data/regions.json';
 import {ADS,DOCS,distKm,esc,eun,hoursLine,KIND_ORDER,KINDS,km,mapUrl,naverUrl,placePath,SITE,slim,stateOf,telHref,type Kind,type Place} from '../lib/fmt';
@@ -190,7 +190,7 @@ async function detail(p:Place,url:URL,env:Env,ctx:ExecutionContext){
     .replace(/<link rel="canonical" href="[^"]*"\/?>/,'')
     .replace(/<meta property="og:[^"]*" content="[^"]*"\/?>/g,'').replace(/<meta name="twitter:[^"]*" content="[^"]*"\/?>/g,'')
     .replace('</head>',`<link rel="canonical" href="${canonical}"/><meta property="og:title" content="${esc(title)}"/><meta property="og:description" content="${esc(desc)}"/><meta property="og:url" content="${canonical}"/><meta property="og:image" content="${SITE}/og.png?v=2"/><meta property="og:site_name" content="내근처 서류"/><meta property="og:locale" content="ko_KR"/><meta name="twitter:card" content="summary_large_image"/></head>`)
-    .replace(/<div id="place-detail">PLACE_DETAIL<\/div>/,detailHtml(p,groups));
+    .replace(/<div id="place-detail">PLACE_DETAIL<\/div>/,ADS?withMidAd(detailHtml(p,groups)):detailHtml(p,groups));
   if(ADS)html=html.replace('</body>',AD_FILL+'</body>');
   const res=new Response(html,{headers:{'content-type':'text/html; charset=utf-8','cache-control':'public, max-age=600'}});
   ctx.waitUntil(caches.default.put(key,res.clone()));
