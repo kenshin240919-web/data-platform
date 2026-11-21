@@ -8,6 +8,7 @@ on:
     branches: [main]
     paths:
       - 'apps/movie/**'
+      - 'scripts/collect-kobis.py'
       - 'apps/weather/data/**'
       - 'apps/traffic/data/**'
       - 'packages/**'
@@ -41,9 +42,34 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
+      # 11/22 KOBIS 저장·게시 사전 승낙 → 박스오피스·영화 정보를 빌드 때 받아 정적 페이지로(apps/movie/data/kobis.json, 저장소에 안 올림).
+      # 지난 결과는 cache에 — API가 실패한 날에도 영화 페이지가 사라지지 않게.
+      - uses: actions/cache/restore@v4
+        with:
+          path: runtime/movie/kobis.json
+          key: kobis-${{ github.run_id }}
+          restore-keys: kobis-
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: KOBIS 박스오피스·영화 정보
+        env:
+          KOBIS_API_KEY: ${{ secrets.KOBIS_API_KEY }}
+        run: python scripts/collect-kobis.py || cp runtime/movie/kobis.json apps/movie/data/kobis.json || echo 'KOBIS 결과 없음 — 영화 페이지 없이 빌드'
+      - uses: actions/cache/save@v4
+        if: hashFiles('runtime/movie/kobis.json') != ''
+        with:
+          path: runtime/movie/kobis.json
+          key: kobis-${{ github.run_id }}
+      - uses: actions/upload-artifact@v4
+        if: github.event_name == 'workflow_dispatch'
+        with:
+          name: kobis
+          path: apps/movie/data/kobis.json
+          retention-days: 3
       - name: Build and deploy
         run: npx wrangler deploy -c apps/movie/wrangler.jsonc
-      - name: Worker secret (KOBIS 오픈API — 박스오피스, 방문 때만 조회)
+      - name: Worker secret (KOBIS 오픈API)
         env:
           KOBIS_API_KEY: ${{ secrets.KOBIS_API_KEY }}
         run: printf '%s' "$KOBIS_API_KEY" | npx wrangler secret put KOBIS_API_KEY -c apps/movie/wrangler.jsonc

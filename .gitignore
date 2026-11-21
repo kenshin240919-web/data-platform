@@ -46,3 +46,6 @@ apps/job/out/
 apps/cvs/out/
 apps/movie/out/
 apps/stock/out/
+
+# KOBIS 결과(배포할 때마다 movie-deploy.yml이 받음, 저장소에 올리지 않음)
+apps/movie/data/kobis.json
