@@ -3,7 +3,7 @@
 // Routes: /api/near, /api/search, /api/where, /api/status,
 //   /api/showtimes?id= — 오늘 남은 상영·남은 좌석: 공개 중계 mcp.aka.page(CGV·롯데시네마·메가박스 앱 정보, 비공식)를 방문 때 불러
 //     5분 데이터센터 캐시만(저장·수집 안 함). 우리 극장 좌표로 중계의 가까운 극장(500m 안)을 찾아 그 극장 코드로 시간표.
-//   /api/boxoffice — KOBIS 일별 박스오피스: 약관 제6조 ②(실시간만, 저장·복제 금지) → 캐시 없이(no-store) 방문 때마다 1회 호출,
+//   /api/boxoffice — KOBIS 일별 박스오피스(11/22 저장·게시 승낙 뒤 화면은 정적 박스오피스가 기본, 정적 데이터가 없을 때만 부름),
 //     하루 3,000회 한도. 다른 정보와 섞지 않고 따로 보여 주고 '영화진흥위원회 통합전산망 오픈 API' 출처를 붙임(화면 쪽).
 import raw from '../data/theaters.json';
 import {CHAINS,distKm,slim,type ChainKey,type Show,type Theater} from '../lib/fmt';

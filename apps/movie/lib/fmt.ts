@@ -6,8 +6,8 @@ export const PARKING='https://parking.guidejung.com';
 export const TRIP='https://trip.guidejung.com';
 /** 광고 스위치: false로 바꿔 main에 push하면 이 사이트만 광고가 빠짐. */
 export const ADS=true;
-/** KOBIS 저장·게시 사전 승낙(11/9 문의 중). 승낙 전에는 false — 영화 정보·박스오피스는 방문 때만 보여 주고 저장·정적 페이지 없음(약관 제6조 ②). */
-export const KOBIS_STORE=false;
+/** KOBIS 저장·게시 사전 승낙(11/22 받음) → 박스오피스·영화 정보 정적 페이지(lib/kobis.ts). 출처 표시·다른 정보와 섞지 않기는 그대로. */
+export const KOBIS_STORE=true;
 
 export type ChainKey='cgv'|'lotte'|'mega'|'cineq'|'indie';
 type Ref={id:string;name:string;m:number};

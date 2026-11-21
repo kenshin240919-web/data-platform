@@ -75,3 +75,9 @@
 .mv-rank-box li b{font-size:20px;color:var(--mv);text-align:center}.mv-rank-box li span{font-weight:700}.mv-rank-box li small{color:var(--muted);text-align:right;font-size:12px}
 .mv-new{font-style:normal;font-size:11px;font-weight:800;color:#fff;background:#dc2626;border-radius:6px;padding:1px 5px;margin-left:6px}
 @media (prefers-color-scheme:dark){.mv-times li b,.mv-rank-box li b,.mv-seat{color:#fdba74}.mv-seat.sold{background:#1f2328;color:#c1c3c6}}
+/* 11/22 박스오피스·영화 페이지(KOBIS) */
+.mv-wide{max-width:none}.mv-wide th{width:auto}.mv-wide td:last-child,.mv-wide th:last-child{text-align:right;white-space:nowrap}
+.mv-weeks{list-style:none;padding:0;margin:10px 0;display:flex;flex-wrap:wrap;gap:6px}.mv-weeks li{border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:13px}.mv-weeks b{color:var(--mv)}
+.mv-films{grid-template-columns:repeat(2,minmax(0,1fr))}.mv-films li{display:flex;flex-direction:column;gap:2px}.mv-films li>small{padding:0 14px 4px 42px;font-size:12px}
+.mv-box h2 small{font-size:13px;font-weight:400;margin-left:6px}
+@media (max-width:700px){.mv-films{grid-template-columns:1fr}}
