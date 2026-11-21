@@ -17,3 +17,7 @@ export type StockRes={product:{id:string;name:string}|null;online:number|null;to
 /** 한국 시각 'HH:MM' */
 export const kstHm=(d=new Date())=>{const k=new Date(d.getTime()+9*3600e3);return `${String(k.getUTCHours()).padStart(2,'0')}:${String(k.getUTCMinutes()).padStart(2,'0')}`;};
 export const openNow=(s:Store,now=kstHm())=>!s.open||!s.close?null:s.close>s.open?now>=s.open&&now<s.close:now>=s.open||now<s.close;
+/** 올리브영(11/22): 검색어로 찾은 위쪽 상품 3개 × 내 주변 매장 재고(중계 응답을 줄인 것 — 저장하지 않음). */
+export type OyStore={code:string;name:string;addr:string;lat:number;lon:number;qty:number|null;status:'in'|'out'|'none'|'unknown';label:string;open:boolean|null;pickup:boolean};
+export type OyProduct={id:string;name:string;price:number|null;orig:number|null;rate:number|null;checked:boolean;inStock:number;stores:OyStore[]};
+export type OyRes={q:string;total:number;products:OyProduct[]};
