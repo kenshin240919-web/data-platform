@@ -11,6 +11,7 @@ export function GET(){
     `- 품목별 가맹점: ${CAT_ORDER.filter(c=>nation.cats[c]).map(c=>`${CATS[c].label} ${n(nation.cats[c])}`).join(' · ')}`,
     `- 시도별 가맹점: ${sidos.map(s=>`${s.full} ${n(s.n)}`).join(' · ')}`,
     '',`## 가맹점이 많은 시장·상점가 30곳`,...top.map(m=>`- [${m.name}](${SITE}${marketPath(m.id)}): ${m.region_name??m.sido}, 가맹점 ${n(m.n)}곳(디지털 ${n(m.d)})`),
-    '',`## 가맹점이 많은 시군구 15곳`,...topRegions.map(r=>`- [${r.name}](${SITE}/region/${r.id}): 가맹점 ${n(r.n)}곳, 시장·상점가 ${n(r.markets.length)}곳`),''];
+    '',`## 가맹점이 많은 시군구 15곳`,...topRegions.map(r=>`- [${r.name}](${SITE}/region/${r.id}): 가맹점 ${n(r.n)}곳, 시장·상점가 ${n(r.markets.length)}곳`),
+    '',`## 전체 목록`,`- [시장·상점가 ${n(markets.length)}곳·시군구 전체](${SITE}/llms-full.txt): 시도별 시장마다 가맹점 수·디지털 비율·장날`,''];
   return new Response(lines.join('\n'),{headers:{'Content-Type':'text/plain; charset=utf-8'}});
 }
