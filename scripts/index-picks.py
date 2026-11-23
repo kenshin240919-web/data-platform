@@ -31,7 +31,9 @@ RETRY = ROOT / 'reports/gsc/index-retry.json'
 REDO_DAYS = 21
 MAX_INSPECT = 80
 SKIP = re.compile(r'/(about|data-policy|privacy|search|compare|alerts)(/|$)')
-FOCUS = {'hospital': 3, 'market': 2, 'job': 2, 'life': 2, 'benefit': 1}  # 11/19 혜택 1개 추가(정적 1만 2천여 쪽인데 구글 수집 0 — 일자리 3→2).
+FOCUS = {'job': 3, 'hospital': 2, 'movie': 2, 'market': 1, 'life': 1, 'benefit': 1}
+# 11/23 애드센스 주간(사용자 승인): 일자리 RPM 1위·12월 연말정산 철 → 3, 영화관 RPM 2위·영화 페이지 새로 → 2, 병원 3→2·시장 2→1·생활 2→1.
+# 11/19 혜택 1개 추가(정적 1만 2천여 쪽인데 구글 수집 0).
 # 사이트 → 하루에 먼저 뽑을 개수(11/12 시장·일자리 추가 — 주간 GA에서 가장 크게 늘어난 두 사이트)
 HUB = re.compile(r'^/[a-z0-9-]+$')  # /region·/doc·/24h·/rank 같은 한 단계 모음 페이지
 
@@ -107,6 +109,17 @@ def score(url, host, pop, trip, docs, mk):
             return 88000 - abs(int(m[1]) - 4500)
         if path.startswith('/calc/yearend/') or path.startswith('/calc/minimum-wage/'):
             return 85000
+    # 영화관(11/23): 박스오피스 → 영화 목록 → 주간·주말 → 영화별(코드가 클수록 최근 개봉작).
+    if host.startswith('movie.'):
+        if path == '/boxoffice':
+            return 92000
+        if path == '/film':
+            return 91000
+        if path.startswith('/boxoffice/'):
+            return 89000
+        m = re.match(r'^/film/(\d+)$', path)
+        if m:
+            return 80000 + int(m[1]) / 1e5
     # 병원(11/14): 첫 화면 → 밤·주말 소아과·설 연휴 → 사람 많은 시군구의 소아과·야간·일요일 페이지(네이버에서 많이 찾는 말) → 시군구.
     if host.startswith('hospital.'):
         if path in ('/kids', '/seol'):
