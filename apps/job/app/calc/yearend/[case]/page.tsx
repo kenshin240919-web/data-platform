@@ -33,6 +33,9 @@ export async function generateMetadata({params}:P):Promise<Metadata>{
 }
 const T=({head,rows}:{head:string[];rows:(string|number)[][]})=><table className="jb-table"><thead><tr>{head.map(h=><th key={h}>{h}</th>)}</tr></thead><tbody>{rows.map((r,i)=><tr key={i}>{r.map((c,j)=><td key={j}>{c}</td>)}</tr>)}</tbody></table>;
 
+// 11/23 이어서 보기(사용자 승인 — 스크롤이 35~45%뿐이라 다음에 볼 곳을 첫 답 바로 아래에)
+const Next=({items}:{items:[string,string,string?][]})=><nav className="gj-next" aria-label="이어서 보기"><span>이어서 보기</span>{items.map(([h,t,sm])=><Link key={h} href={h}>{t}{sm?<small>{sm}</small>:null}</Link>)}<Link className="all" href="/calc/yearend">🧮 내 숫자로 계산 →</Link></nav>;
+
 function PayPage({p}:{p:number}){
   const g=p*1e4;const {base,rows}=scenarios(g);const m=payMeta(p);
   const best=[...rows].sort((a,b)=>a.diff-b.diff)[0];
@@ -46,6 +49,8 @@ function PayPage({p}:{p:number}){
   return <>
     <h1>🧾 연봉 {p.toLocaleString('ko-KR')}만 원 연말정산</h1>
     <p className="jb-answer">{YE_YEAR}년 귀속 · 혼자·카드 총급여의 30% 사용 기준 <b>내야 할 세금 약 {wonR(base.total)}</b>(소득세 {wonR(base.tax)} + 지방소득세 {wonR(base.local)}) · 실효세율 {pct(base.total,g)}</p>
+    <Next items={[...[p-500,p+500].filter(x=>PAYS.includes(x)).map(x=>[`/calc/yearend/${x}`,`연봉 ${x.toLocaleString('ko-KR')}만 원`,`세금 약 ${wonR(scenarios(x*1e4).base.total)}`] as [string,string,string]),
+      ['/calc/yearend/tips',`${CASES.tips.icon} ${CASES.tips.short}`],...(g<=8e7?[['/calc/yearend/rent',`${CASES.rent.icon} ${CASES.rent.short}`] as [string,string]]:[])]}/>
     <p>{m.desc}</p>
     <p className="jb-hp"><Link href="/calc/yearend">🧮 내 숫자로 바로 계산하기</Link></p>
     <section><h2>이렇게 하면 세금이 얼마나 바뀔까</h2>
@@ -107,6 +112,7 @@ function CasePage({k}:{k:Case}){
   return <>
     <h1>{c.icon} {c.h1}</h1>
     <p className="jb-answer">{m.desc}</p>
+    <Next items={[...CASE_ORDER.filter(x=>x!==k).slice(0,3).map(x=>[`/calc/yearend/${x}`,`${CASES[x].icon} ${CASES[x].short}`] as [string,string]),['/calc/yearend/4500','연봉 4,500만 원',`세금 약 ${wonR(scenarios(4.5e7).base.total)}`]]}/>
     <p className="jb-hp"><Link href="/calc/yearend">🧮 내 숫자로 바로 계산하기</Link></p>
     {body}
     <Ad/>
