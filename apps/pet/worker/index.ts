@@ -4,7 +4,7 @@
 // Routes: /api/near, /api/search, /api/fav, /api/where, /api/status, /api/animals, 상세 /place/{id} (server-rendered into /place/shell),
 // 보호 중인 동물 /animal/{id} (noindex — 공고가 끝나면 사라짐), 사진 /photo/{id} (원본 http 주소를 받아 https로, 하루 캐시),
 // /sitemap.xml (index) → /sitemap-pages.xml (Next) + /sitemap-places-{n}.xml (here, 40,000 each).
-import {AD_FILL} from '../../../packages/ui/src/adsense';
+import {AD_FILL,withMidAd} from '../../../packages/ui/src/adsense';
 import raw from '../data/places.json';
 import animalsRaw from '../data/animals.json';
 import weatherRegions from '../../weather/data/regions.json';
@@ -145,7 +145,7 @@ ${ldTag(ld)}${ldTag(crumbs)}${ldTag(faqLd)}`;
 async function detail(p:Place,url:URL,env:Env,ctx:ExecutionContext){
   // 동물약국은 지금 상태가 바뀌므로 5분 단위로 캐시 키를 바꿈(약국 사이트와 같음).
   const slot=p.kind==='pharmacy'||p.kind==='hospital'?Math.floor(Date.now()/300e3):0;
-  const key=new Request(`${url.origin}/place/${p.id}?v=${encodeURIComponent(data().status.updated_at)}&s=${slot}&t=1`);
+  const key=new Request(`${url.origin}/place/${p.id}?v=${encodeURIComponent(data().status.updated_at)}&s=${slot}&t=2`);
   const hit=await caches.default.match(key);if(hit)return hit;
   const at=(k:Kind,r:number,lim:number,o:{sub?:string;open?:boolean}={})=>p.lat!=null?near(p.lat,p.lon!,r,{limit:lim,kinds:[k],skip:p.id,...o}).items:[];
   const K=KINDS[p.kind];
@@ -162,7 +162,7 @@ async function detail(p:Place,url:URL,env:Env,ctx:ExecutionContext){
     .replace(/<link rel="canonical" href="[^"]*"\/?>/,'')
     .replace(/<meta property="og:[^"]*" content="[^"]*"\/?>/g,'').replace(/<meta name="twitter:[^"]*" content="[^"]*"\/?>/g,'')
     .replace('</head>',`<link rel="canonical" href="${canonical}"/><meta property="og:title" content="${esc(title)}"/><meta property="og:description" content="${esc(desc)}"/><meta property="og:url" content="${canonical}"/><meta property="og:image" content="${SITE}/og.png?v=2"/><meta property="og:site_name" content="내근처 동물병원"/><meta property="og:locale" content="ko_KR"/><meta name="twitter:card" content="summary_large_image"/></head>`)
-    .replace(/<div id="place-detail">PLACE_DETAIL<\/div>/,detailHtml(p,groups))
+    .replace(/<div id="place-detail">PLACE_DETAIL<\/div>/,withMidAd(detailHtml(p,groups),2))
     .replace('</body>',AD_FILL+'</body>');
   const res=new Response(html,{headers:{'content-type':'text/html; charset=utf-8','cache-control':`public, max-age=${slot?300:3600}`}});
   ctx.waitUntil(caches.default.put(key,res.clone()));

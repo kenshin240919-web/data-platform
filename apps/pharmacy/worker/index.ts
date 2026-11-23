@@ -2,7 +2,7 @@
 // The pharmacy list ships with the Worker (data/pharmacies.json, scripts/collect-pharmacy.py, about 25,000 — no database),
 // imported as text (wrangler.jsonc rules) and parsed on first use. '지금 영업 중' is computed from the hours per request.
 // Routes: /api/near, /api/search, /api/where, /api/status, 약국 상세 /pharmacy/{hpid} (server-rendered into /pharmacy/shell).
-import {AD_FILL} from '../../../packages/ui/src/adsense';
+import {AD_FILL,withMidAd} from '../../../packages/ui/src/adsense';
 import raw from '../data/pharmacies.json';
 import weatherRegions from '../../weather/data/regions.json';
 import {DAY_LABEL,esc,eun,hm,km,kstNow,late,n,pharmacyPath,SITE,statusOf,sunday,holidayOpen,weekLine,type Card,type Pharmacy} from '../lib/fmt';
@@ -141,7 +141,7 @@ ${ldTag(ld)}${ldTag(crumbs)}${ldTag(faqLd)}`;
 
 async function detail(p:PharmacyX,url:URL,env:Env,ctx:ExecutionContext){
   // 영업 상태가 시각에 따라 바뀌므로 5분 단위로 새로 만듦.
-  const key=new Request(`${url.origin}/pharmacy/${p.id}?b=${Math.floor(Date.now()/300e3)}&v=${encodeURIComponent(data().status.updated_at)}&t=2`);
+  const key=new Request(`${url.origin}/pharmacy/${p.id}?b=${Math.floor(Date.now()/300e3)}&v=${encodeURIComponent(data().status.updated_at)}&t=3`);
   const hit=await caches.default.match(key);if(hit)return hit;
   // 근처 약국은 지금 문 연 곳 먼저(밤·휴일에 바로 갈 곳), 없으면 가까운 순.
   const openNear=p.lat!=null?near(p.lat,p.lon!,5,'open',6,p.id).items:[];
@@ -156,7 +156,7 @@ async function detail(p:PharmacyX,url:URL,env:Env,ctx:ExecutionContext){
     .replace(/<link rel="canonical" href="[^"]*"\/?>/,'')
     .replace(/<meta property="og:[^"]*" content="[^"]*"\/?>/g,'').replace(/<meta name="twitter:[^"]*" content="[^"]*"\/?>/g,'')
     .replace('</head>',`<link rel="canonical" href="${canonical}"/><meta property="og:title" content="${esc(title)}"/><meta property="og:description" content="${esc(desc)}"/><meta property="og:url" content="${canonical}"/><meta property="og:image" content="${SITE}/og.png?v=2"/><meta property="og:site_name" content="내근처 약국"/><meta property="og:locale" content="ko_KR"/><meta name="twitter:card" content="summary_large_image"/></head>`)
-    .replace(/<div id="pharmacy-detail">PHARMACY_DETAIL<\/div>/,detailHtml(p,nearby,ins))
+    .replace(/<div id="pharmacy-detail">PHARMACY_DETAIL<\/div>/,withMidAd(detailHtml(p,nearby,ins)))
     .replace('</body>',AD_FILL+'</body>');
   const res=new Response(html,{headers:{'content-type':'text/html; charset=utf-8','cache-control':'public, max-age=300'}});
   ctx.waitUntil(caches.default.put(key,res.clone()));
