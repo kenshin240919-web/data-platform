@@ -74,12 +74,15 @@ def main():
 
     have = sitemaps()
     sites = hosts()
+    week_ago = (datetime.now(KST) - timedelta(days=7)).date().isoformat()
     done = []
     for key, host in sites:
         for feed in (f'https://{host}/sitemap.xml', f'https://{host}/rss.xml'):
             x = have.get(feed)
             broken = x and int(x.get('errors') or 0) > 0 and not x.get('lastDownloaded')
-            if x and not broken and key not in again and host not in again:
+            # 11/23 사용자: 구글이 7일 넘게 다시 읽지 않았고 제출도 7일 넘었으면 다시 제출(새 글을 알리려고)
+            stale = x and all((x.get(k) or '0000')[:10] < week_ago for k in ('lastDownloaded', 'lastSubmitted'))
+            if x and not broken and not stale and key not in again and host not in again:
                 continue
             if not submit:
                 done.append((feed, '제출 필요(이번엔 시험만)'))
