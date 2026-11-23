@@ -3,7 +3,7 @@
 컴퓨터(Claude Code)와 핸드폰(Claude 앱 Code 탭)에서 번갈아 작업하는 프로젝트입니다. 작업을 시작할 때 이 파일과 `README.md`를 먼저 읽으세요.
 
 ## 프로젝트 한 줄 요약
-`trip.guidejung.com` 여행 검색 서비스. 한국관광공사 TourAPI 공식 데이터를 수집·검수해 **정적 사이트**로 Cloudflare Workers에 배포합니다. 기존 guidejung.com(WordPress·DB·서버·DNS)은 절대 건드리지 않습니다. **예외(11/5 사용자 '너가 해'): 워드프레스 페이지 `near-sites`(내근처 서비스 모음) 1개만** — `scripts/wp/near-page.py`(REST API, Secrets `WP_USER`·`WP_APP_PASSWORD`)·`wp-near-page.yml`(수동, check/publish). 그 밖의 글·테마·메뉴·플러그인·DNS는 그대로 손대지 않음.
+`trip.guidejung.com` 여행 검색 서비스. 한국관광공사 TourAPI 공식 데이터를 수집·검수해 **정적 사이트**로 Cloudflare Workers에 배포합니다. 기존 guidejung.com(WordPress·DB·서버·DNS)은 절대 건드리지 않습니다. **예외(11/5 사용자 '너가 해'): 워드프레스 페이지 `near-sites`(내근처 서비스 모음) 1개만** — `scripts/wp/near-page.py`(REST API) — **guidejung.com은 PC Local 워드프레스(localhost:10004)의 정적 복사본이라 Actions `wp-near-page.yml`로는 안 됨(11/23 확인)**: PC에서 `WP_SITE`·`WP_USER`·`WP_APP_PASSWORD`를 `move\autopost\config.json` guidejung 값으로 넣어 실행 → `move\autopost\deploy.py`의 `deploy('guidejung', [], paths=['/near-sites/'])`로 반영. 11/23 카드 23개(영화관·재고·편의점 추가) 게시·라이브 확인. 그 밖의 글·테마·메뉴·플러그인·DNS는 그대로 손대지 않음.
 
 ## 사용자 작업 원칙
 - **최우선 설계 원칙(모든 사이트 공통)**: "가장 중요한 것은 사람들의 클릭을 유발해야 하고, 사이트에 접속하면 계속 체류하게 만들어야 한다." 화면·기능·설계 결정의 1순위 기준. 새 사이트 설계서는 "클릭·체류 설계" 장을 맨 앞에 둔다. 상세: `reports/서비스-공통원칙-클릭체류.md`. 클릭은 콘텐츠로 유도하고, 광고 클릭 유도 문구·배치는 애드센스 정책 위반이라 금지.
