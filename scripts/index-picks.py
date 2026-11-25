@@ -157,6 +157,13 @@ def main():
     n = int(sys.argv[sys.argv.index('--n') + 1]) if '--n' in sys.argv else 10
     dry = '--dry' in sys.argv
     today = datetime.now(KST).date()
+    # 11/25 사용자 승인: 예약 실행이 GitHub 지연으로 오전 10시쯤 돌아, 아침에 손으로 만들어 전달한 오늘 목록을
+    # 새 목록으로 덮어써 왔음(전달 못 한 목록이 날마다 생김) → 예약 실행은 오늘 목록이 이미 있으면 아무것도 하지 않음.
+    today_md = ROOT / 'reports/gsc/색인요청-오늘.md'
+    if os.environ.get('GITHUB_EVENT_NAME') == 'schedule' and today_md.exists() \
+            and f'({today.isoformat()})' in today_md.read_text(encoding='utf-8').split('\n', 1)[0]:
+        print(f'오늘({today.isoformat()}) 목록이 이미 있어 건너뜀')
+        return
     state = json.loads(STATE.read_text(encoding='utf-8')) if STATE.exists() else {}
     token = None
     if os.environ.get('GA_SERVICE_ACCOUNT_JSON'):
