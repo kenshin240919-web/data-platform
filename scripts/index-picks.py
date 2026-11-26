@@ -102,6 +102,11 @@ def score(url, host, pop, trip, docs, mk):
         return 1000 + mk.get(m[1], 0)
     # 일자리(11/14 — 연말정산 철): 연말정산 계산기 → 연봉별(많이 찾는 3~6천만 원부터) → 상황별·최저임금 → 그다음 지역×종류.
     if host.startswith('job.'):
+        # 11/26: 노인일자리 신청 시즌 → 고용센터(지금 1위 입구) → 연말정산.
+        if path.startswith('/season/senior-'):
+            return 99500
+        if path == '/center':
+            return 99000
         if path == '/calc/yearend':
             return 90000
         m = re.match(r'^/calc/yearend/(\d+)$', path)

@@ -11,6 +11,7 @@ import {ADS,distKm,esc,eun,homeLinks,KIND_ORDER,KINDS,km,LINKS,mapUrl,naverUrl,p
 import {actionsHtml} from '../../../packages/ui/src/actions';
 import {aroundHtml} from '../../../packages/ui/src/live';
 import {blockBot} from '../../../packages/ui/src/bot';
+import {allRounds,board,kstToday,mdw,roundName} from '../lib/scheduleData';
 
 interface Env{ASSETS:Fetcher}
 type Data={status:{updated_at:string;count:number};items:Place[]};
@@ -96,6 +97,21 @@ ${p.juris?.length?`<h3>관할 지역 ${p.juris.length}곳</h3><div class="jb-jum
   return `<section><h2>🎓 대학일자리플러스센터</h2><p>대학 안에서 진로·취업 상담을 하는 고용노동부 지원 센터예요. 이용 대상은 센터마다 달라 미리 확인하세요.</p></section>`;
 }
 
+// 11/26 고용센터를 검색 입구로: 맨 위 3초 답(주소·전화·관할)과 '여기 온 사람이 많이 찾는 것' 칩(GA jb_center_chip — 칸 이름은 data-box).
+function centerAnswer(p:Place,addr:string|null|undefined){
+  const j=(p.juris??[]).map(c=>regionName(c)).filter(Boolean) as string[];
+  return `<dl class="jb-quick"><div><dt>주소</dt><dd>${esc(addr??'')}</dd></div>${p.tel?`<div><dt>전화</dt><dd><a href="${esc(telHref(p.tel))}">${esc(p.tel)}</a></dd></div>`:''}<div><dt>운영 시간</dt><dd>센터마다 달라요 — ${p.hp?`<a href="${esc(p.hp)}" rel="noopener" target="_blank">센터 홈페이지</a> 공지`:'방문 전 전화'}로 확인</dd></div>${j.length?`<div><dt>관할</dt><dd>${esc(j.slice(0,8).join(', '))}${j.length>8?` 외 ${j.length-8}곳`:''}</dd></div>`:''}</dl>`;
+}
+function centerChips(p:Place){
+  const agency=data().items.filter(x=>x.region===p.region&&x.kind==='agency').length>=3?`/region/${p.region}/agency`:'/agency';
+  const c:[string,string,string][]=[['quit','/guide#quit','😮‍💨 실업급여 신청 순서'],['ui-calc','/calc/unemployment','💰 구직급여 계산기'],['severance','/calc/severance','🧾 퇴직금 계산기'],
+    ['agency',agency,'🔨 가까운 직업소개소'],['employment-doc','https://minwon.guidejung.com/doc/employment','🖨️ 고용보험 자격이력 떼는 곳']];
+  return `<nav class="jb-chips" aria-label="여기 온 사람이 많이 찾는 것"><span>여기 온 사람이 많이 찾는 것</span>${c.map(([b,h,t])=>`<a href="${esc(h)}" data-ev="jb_center_chip" data-box="${b}">${esc(t)}</a>`).join('')}</nav>`;
+}
+function nextExamHtml(){
+  const b=board(allRounds,kstToday()),x=b.open[0]??b.next;
+  return x?`<p class="jb-answer">📅 ${b.open[0]?'지금 접수 중':'다음 접수'}: <b>${esc(roundName(x.round))} ${esc(x.stage)}</b> ${esc(mdw(x.s))}~${esc(mdw(x.e))} <a href="/schedule">시험 일정 →</a> <small class="muted">이 시험장을 쓰는지는 원서 접수 때 확인</small></p>`:'';
+}
 const homeLinksHtml=(center:{name:string;hp?:string|null}|null|undefined,region:string|null|undefined)=>`<div class="jb-hp">${homeLinks(center,region).map(([t,u])=>`<a href="${esc(u)}" rel="noopener" target="_blank">🏠 ${esc(t)} ↗</a>`).join('')}<a class="sub" href="${LINKS.w24find}" rel="noopener" target="_blank">🔎 고용24 기관찾기 ↗</a></div>`;
 function detailHtml(p:Place,groups:[string,Near[]][],juris:ReturnType<typeof areaOf>|null){
   const addr=p.addr??p.jibun,K=KINDS[p.kind];
@@ -120,9 +136,9 @@ function detailHtml(p:Place,groups:[string,Near[]][],juris:ReturnType<typeof are
     ['운영 형태',p.corp],['등록 연도',p.since],['소속',p.kind==='center'||p.kind==='campus'||p.kind==='exam'?p.org:null],['시험장 구분',p.kind==='exam'?p.gb:null],['지역',p.region_name]];
   return `<nav class="crumbs"><a href="/">홈</a> › <a href="/region">지역별</a> › <a href="/region/${esc(p.region)}">${esc(p.region_name)}</a> › ${esc(p.name)}</nav>
 <div class="jb-head"><h1>${K.icon} ${esc(p.name)}</h1><p>${esc([p.region_name,K.title,...tags].join(' · '))}</p></div>${actionsHtml({id:p.id,name:p.name,sub:[K.label,p.region_name].join(' · '),url:placePath(p.id)})}
-<p class="jb-answer"><b>${esc(K.title)}</b>${addr?` · ${esc(addr)}`:''}${p.tel?` · ${esc(p.tel)}`:''}</p>
+${p.kind==='center'?centerAnswer(p,addr):`<p class="jb-answer"><b>${esc(K.title)}</b>${addr?` · ${esc(addr)}`:''}${p.tel?` · ${esc(p.tel)}`:''}</p>`}${p.kind==='exam'?nextExamHtml():''}
 <div class="jb-actions">${p.tel?`<a href="${esc(telHref(p.tel))}">📞 전화하기</a>`:''}<a class="${p.tel?'sub':''}" href="${esc(mapUrl(p))}" rel="noopener" target="_blank">🧭 길찾기</a>${p.kind==='center'&&p.hp?`<a class="sub" href="${esc(p.hp)}" rel="noopener" target="_blank">🏠 센터 홈페이지 ↗</a>`:''}<a class="naver" href="${esc(naverUrl(p))}" rel="noopener" target="_blank">🟢 네이버 지도에서 보기</a></div>
-${nextHtml(p,groups)}
+${p.kind==='center'?centerChips(p):''}${nextHtml(p,groups)}
 ${p.kind==='exam'?'':jur?`<a class="jb-juris" href="${placePath(jur.id)}"><span aria-hidden="true">🏛️</span><span><small>${esc(p.region_name)} ${juris!.exact?'관할 고용센터':'에서 가까운 고용센터'}</small><b>${esc(jur.name)}</b><small>${esc(jur.addr??'')}</small></span><em>실업급여·구직 신청 →</em></a>${homeLinksHtml(jur,p.region)}`:homeLinksHtml(null,p.region)}
 ${kindNote(p)}
 ${groups.map(([title,list])=>list.length?`<section><h2>${esc(title)}</h2><div class="jb-cards">${list.map(cardHtml).join('')}</div></section>`:'').join('')}
@@ -137,7 +153,7 @@ ${ldTag(ld)}${ldTag(crumbs)}${ldTag(faqLd)}`;
 }
 
 async function detail(p:Place,url:URL,env:Env,ctx:ExecutionContext){
-  const key=new Request(`${url.origin}/place/${p.id}?v=${encodeURIComponent(data().status.updated_at)}&a=${ADS?1:0}`);
+  const key=new Request(`${url.origin}/place/${p.id}?v=${encodeURIComponent(data().status.updated_at)}&a=${ADS?1:0}&r=2`);
   const hit=await caches.default.match(key);if(hit)return hit;
   const at=(k:Kind,r:number,lim:number)=>p.lat!=null?near(p.lat,p.lon!,r,{limit:lim,kinds:[k],skip:p.id}).items:[];
   const K=KINDS[p.kind];
@@ -145,7 +161,7 @@ async function detail(p:Place,url:URL,env:Env,ctx:ExecutionContext){
   const groups:[string,Near[]][]=p.kind==='exam'?[['근처 다른 자격증 시험장',at('exam',15,6)]]:[[`근처 다른 ${K.label}`,at(p.kind,wide?30:3,6)],
     ...(['agency','free','women','senior'] as Kind[]).filter(k=>k!==p.kind).map(k=>[`근처 ${KINDS[k].label}`,at(k,k==='women'?20:5,3)] as [string,Near[]])];
   const juris=p.lat!=null?areaOf(p.lat,p.lon!):null;
-  const title=`${p.name} ${p.kind==='center'?'관할 지역·위치·전화':p.kind==='exam'?'자격증 시험장 위치·가는 길':`${K.label} 위치·전화`} | 내근처 일자리`;
+  const title=`${p.name} ${p.kind==='center'?`위치·전화번호 — 실업급여 신청${p.juris?.length?` (${p.juris.map(c=>regionName(c)).filter(Boolean).slice(0,2).map(x=>x!.split(' ').pop()).join('·')} 관할)`:''}`:p.kind==='exam'?'자격증 시험장 위치·가는 길':`${K.label} 위치·전화`} | 내근처 일자리`;
   const desc=`${p.region_name} ${p.name}(${K.title}): ${p.addr??p.jibun??''}${p.tel?` · ${p.tel}`:''}${p.kind==='center'&&p.juris?.length?` · 관할 ${p.juris.map(c=>regionName(c)).filter(Boolean).slice(0,6).join(', ')}`:''}`.replace(/\s+/g,' ').trim().slice(0,160);
   const canonical=SITE+placePath(p.id);
   let html=(await template(env,url.origin))

@@ -5,6 +5,7 @@ import {Faq,breadcrumbLd,JsonLd} from '@guidejung/ui/seo';
 import {PlaceList} from '../../../_components/PlaceList';
 import {Ad} from '../../../_components/Ad';
 import {Connect,linksNear} from '@guidejung/ui/network';
+import {SeniorBand} from '../../../_components/SeniorBand';
 import {centerFor,COND_MIN,distKm,eun,KIND_ORDER,KINDS,n,ordered,placePath,region,regions,SITE,slim,updated,type Kind,type Region} from '../../../../lib/data';
 // 종류별로 이어 볼 안내(상황별 안내·계산기·시험 일정) — 다음 검색으로 이 페이지에 들어온 사람이 한 번 더 누를 거리(11/12 GA: 일자리 첫 페이지가 지역×종류)
 const NEXT:Record<Kind,[string,string][]>={
@@ -33,6 +34,7 @@ export default async function KindPage({params}:P){
     <nav className="crumbs"><Link href="/">홈</Link> › <Link href="/region">지역별</Link> › <Link href={`/region/${r.id}`}>{r.name}</Link> › {KINDS[k].label}</nav>
     <h1>{r.name} {KINDS[k].title}</h1>
     <p className="jb-answer"><b>{r.name}</b> {eun(KINDS[k].title)} <b>{n(items.length)}곳</b>이에요. <span className="muted">({updated()} 기준)</span></p>
+    {k==='senior'&&<SeniorBand/>}
     <div className="jb-jump">{KIND_ORDER.filter(o=>o!==k&&r.kinds[o]>=COND_MIN).map(o=><Link key={o} href={`/region/${r.id}/${o}`}>{KINDS[o].icon} {r.zone} {KINDS[o].label} <small>{n(r.kinds[o])}</small></Link>)}<Link href={`/region/${r.id}`}>{r.zone} 전체 <small>{n(r.count)}</small></Link></div>
     {k!=='center'&&k!=='exam'&&c.list.slice(0,1).map(x=><a key={x.id} className="jb-juris" href={placePath(x.id)}><span aria-hidden="true">🏛️</span><span><small>{r.name} {c.exact?'관할 고용센터':'에서 가까운 고용센터(관할은 센터에 확인)'}</small><b>{x.name}</b><small>{x.addr}{x.tel?` · ${x.tel}`:''}</small></span><em>실업급여·구직 신청 →</em></a>)}
     <section><h2>{r.name} {KINDS[k].label} 목록</h2><PlaceList items={items.map(slim)} kind={k}/>

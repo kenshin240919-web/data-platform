@@ -6,6 +6,7 @@ import {FavList} from '@guidejung/ui/favlist';
 import {NearJob} from './_components/NearJob';
 import {Ad} from './_components/Ad';
 import {KindCards,Official,Situations} from './_components/Guide';
+import {SeniorBand} from './_components/SeniorBand';
 import {n,nation,places,regions,sidos,SITE,status,SUBS,updated,type Sub} from '../lib/data';
 
 export const metadata:Metadata={alternates:{canonical:'/'}};
@@ -16,6 +17,7 @@ export default function Home(){
   return <div className="page jb-home">
     <section className="jb-hero"><h1>일자리 찾을 때 가는 곳</h1>
       <p><b>우리 동네 관할 고용센터</b>와 가까운 직업소개소·새일센터를 한 번에</p></section>
+    <SeniorBand/>
     <FavList/>
     <NearJob/>
     <Situations/>

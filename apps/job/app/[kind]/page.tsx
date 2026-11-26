@@ -5,13 +5,15 @@ import {Faq,breadcrumbLd,JsonLd} from '@guidejung/ui/seo';
 import {NearJob} from '../_components/NearJob';
 import {Ad} from '../_components/Ad';
 import {Official} from '../_components/Guide';
+import {SeniorBand} from '../_components/SeniorBand';
+import {allRounds,board,kstToday,mdw,roundName} from '../../lib/scheduleData';
 import {centers,COND_MIN,eun,ga,KIND_ORDER,KINDS,LINKS,n,nation,places,placePath,regionName,regions,sidos,SITE,SUBS,updated,type Kind,type Sub} from '../../lib/data';
 
 export const dynamicParams=false;
 export function generateStaticParams(){return KIND_ORDER.map(kind=>({kind}));}
 type P={params:Promise<{kind:string}>};
 const META:Record<Kind,[string,string]>={
-  center:['내 관할 고용센터(고용복지플러스센터)','실업급여·국민취업지원제도는 주민등록 주소지 관할 고용센터에서. 시군구별 관할 고용복지플러스센터와 주소·대표전화.'],
+  center:['고용센터 위치·전화번호 — 내 관할 고용복지플러스센터','실업급여·국민취업지원제도는 주민등록 주소지 관할 고용센터에서 신청해요. 시군구별 관할 고용복지플러스센터의 주소·전화번호·홈페이지.'],
   agency:['내 주변 직업소개소·인력사무소','지자체에 등록된 유료직업소개소를 가까운 순으로. 인력·건설 일용직, 간병·요양, 가사·산후 도우미 소개소.'],
   free:['내 주변 무료직업소개소','지자체·공공기관·단체가 수수료 없이 운영하는 직업소개소를 가까운 순으로.'],
   women:['내 주변 여성새로일하기센터(새일센터)','경력이 끊긴 여성의 구직 상담·직업교육·인턴을 하는 새일센터 위치와 연락처.'],
@@ -28,11 +30,16 @@ export default async function KindHome({params}:P){
   const items=places.filter(p=>p.kind===k);
   const top=[...regions].filter(r=>r.kinds[k]>=COND_MIN).sort((a,b)=>b.kinds[k]-a.kinds[k]).slice(0,12);
   const all=k==='center'||k==='women'||k==='campus'||k==='exam'?sidos.map(s=>({name:s.name,items:items.filter(p=>s.regions.some(r=>r.id===p.region))})).filter(s=>s.items.length):[];
+  const b=k==='exam'?board(allRounds,kstToday()):null;const next=b?.open[0]??b?.next??null;
   const subs=k==='agency'?(Object.keys(SUBS) as Sub[]).map(s=>({s,items:items.filter(p=>p.sub===s)})).filter(x=>x.items.length):[];
   return <div className="page">
     <nav className="crumbs"><Link href="/">홈</Link> › {KINDS[k].label}</nav>
     <h1>{KINDS[k].icon} {META[k][0]}</h1>
     <p className="jb-answer">전국 {eun(KINDS[k].title)} <b>{n(items.length)}곳</b>이에요. <span className="muted">({updated()} 기준)</span></p>
+    {k==='senior'&&<SeniorBand/>}
+    {k==='agency'&&<><p className="muted small">종류별: {subs.flatMap(({s,items:l},i)=>[i?' · ':'',<a key={s} href={`#${s}`}>{SUBS[s]} {n(l.length)}곳</a>])}</p>
+      <div className="jb-chips"><span>지역 고르기</span>{sidos.map(sd=>{const c=items.filter(p=>sd.regions.some(r=>r.id===p.region)).length;return c?<Link key={sd.name} href={`/region#${encodeURIComponent(sd.name)}`} data-ev="jb_agency_sido">{sd.name} <small>{n(c)}</small></Link>:null;})}</div></>}
+    {k==='exam'&&next&&<p className="jb-answer">📅 다음 접수: <b>{roundName(next.round)} {next.stage}</b> {mdw(next.s)}~{mdw(next.e)} <Link href="/schedule">시험 일정 →</Link></p>}
     <NearJob kind={k}/>
     <div className="jb-jump">{KIND_ORDER.filter(o=>o!==k).map(o=><Link key={o} href={`/${o}`}>{KINDS[o].icon} {KINDS[o].label} <small>{n(nation.kinds[o])}</small></Link>)}</div>
     <Ad/>
