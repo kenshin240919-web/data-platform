@@ -8,7 +8,7 @@ const used=new Set<string>();
 const mark=(name:string)=>()=>{if(used.has(name))return;used.add(name);try{(window as {gtag?:(...a:unknown[])=>void}).gtag?.('event','calc_use',{calc:name});}catch{}};
 const num=(s:string)=>{const v=Number(s.replace(/[^0-9.]/g,''));return Number.isFinite(v)?v:0;};
 function Field({label,value,set,unit,hint}:{label:string;value:string;set:(v:string)=>void;unit?:string;hint?:string}){
-  return <label className="jb-field"><span>{label}</span><span><input inputMode="numeric" value={value} onChange={e=>set(e.target.value)}/>{unit&&<small>{unit}</small>}</span>{hint&&<small className="muted">{hint}</small>}</label>;
+  return <label className="jb-field"><span>{label}</span><span><input inputMode="numeric" value={value} onChange={e=>set(e.target.value)} onFocus={e=>{const t=e.currentTarget;setTimeout(()=>t.scrollIntoView({block:'center',behavior:'smooth'}),300);}}/>{unit&&<small>{unit}</small>}</span>{hint&&<small className="muted">{hint}</small>}</label>;
 }
 function Rows({rows}:{rows:[string,string,boolean?][]}){
   return <table className="jb-table jb-result"><tbody>{rows.map(([k,v,strong])=><tr key={k}><th>{k}</th><td>{strong?<b>{v}</b>:v}</td></tr>)}</tbody></table>;

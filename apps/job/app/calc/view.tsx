@@ -16,7 +16,9 @@ export function CalcView({s}:{s:Slug}){
     <Body slug={s}/>
     <Ad/>
     <section><h2>다른 계산기</h2><div className="jb-jump">{ORDER.filter(x=>x!==s).map(x=><Link key={x} href={`/calc/${x}`}>{CALCS[x].icon} {CALCS[x].short}</Link>)}</div></section>
+    {s==='unemployment'&&<p className="jb-hp"><a href="https://guidejung.com/실업급여-수급기간-총정리/">📖 실업급여 수급기간 총정리 ↗</a><a href="https://guidejung.com/실업급여-모의계산-활용법/">📖 실업급여 모의계산 활용법 ↗</a></p>}
     {(s==='unemployment'||s==='severance')&&<p className="jb-hp"><Link href="/center">🏛️ 우리 동네 관할 고용센터 찾기</Link><a href="https://benefit.guidejung.com/topic">🎁 실직·구직 때 받을 수 있는 지원</a></p>}
+    {s==='yearend'&&<p className="jb-hp"><Link href="/calc/yearend/documents">🗂️ 연말정산 서류·일정 — 간소화에 없는 서류</Link></p>}
     {s==='yearend'?YE_SOURCE:SOURCE}
     <Faq items={faqOf(s)}/>
     <JsonLd data={breadcrumbLd([['내근처 일자리',SITE+'/'],['계산기',SITE+'/calc'],[c.short,`${SITE}/calc/${s}`]])}/>

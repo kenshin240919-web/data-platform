@@ -109,6 +109,8 @@ def score(url, host, pop, trip, docs, mk):
             return 99000
         if path == '/calc/yearend':
             return 90000
+        if path == '/calc/yearend/documents':  # 11/27 트렌드 '연말정산 서류' 1월 정점
+            return 89500
         m = re.match(r'^/calc/yearend/(\d+)$', path)
         if m:
             return 88000 - abs(int(m[1]) - 4500)

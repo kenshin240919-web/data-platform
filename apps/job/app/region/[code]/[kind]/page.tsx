@@ -25,7 +25,7 @@ type P={params:Promise<{code:string;kind:string}>};
 const get=async(params:P['params'])=>{const {code,kind}=await params;const r=region(code);const k=kind as Kind;return r&&KINDS[k]?{r,k,items:ordered(r.items.filter(p=>p.kind===k))}:null;};
 export async function generateMetadata({params}:P):Promise<Metadata>{
   const x=await get(params);if(!x)return {};
-  return {title:`${x.r.name} ${KINDS[x.k].title} ${n(x.items.length)}곳`,description:`${x.r.name} ${KINDS[x.k].title} ${n(x.items.length)}곳: ${x.items.slice(0,5).map(p=>p.name).join(', ')}${x.items.length>5?' 등':''}. 주소·전화를 확인하세요.`,alternates:{canonical:`/region/${x.r.id}/${x.k}`}};
+  return {title:x.k==='senior'?`${x.r.name} 노인일자리 신청 장소(수행기관) ${n(x.items.length)}곳`:x.k==='agency'?`${x.r.name} 직업소개소·인력사무소 ${n(x.items.length)}곳 위치·전화`:`${x.r.name} ${KINDS[x.k].title} ${n(x.items.length)}곳`,description:`${x.r.name} ${KINDS[x.k].title} ${n(x.items.length)}곳: ${x.items.slice(0,5).map(p=>p.name).join(', ')}${x.items.length>5?' 등':''}. 주소·전화를 확인하세요.`,alternates:{canonical:`/region/${x.r.id}/${x.k}`}};
 }
 export default async function KindPage({params}:P){
   const x=await get(params);if(!x||x.items.length<COND_MIN)notFound();
