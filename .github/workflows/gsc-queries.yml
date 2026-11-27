@@ -1,0 +1,35 @@
+name: GSC queries
+# 수동: 사이트 하나의 Search Console 검색어(최근 28일) → 비공개 저장소 ads/gsc/검색어-{사이트}-날짜.md (숫자는 공개 저장소·로그에 남기지 않음).
+on:
+  workflow_dispatch:
+    inputs:
+      site: {description: '사이트(예: job)', default: 'job'}
+permissions:
+  contents: read
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/ads
+          token: ${{ secrets.PRIVATE_REPORTS_TOKEN }}
+          path: private
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -q requests google-auth
+      - env:
+          GA_SERVICE_ACCOUNT_JSON: ${{ secrets.GA_SERVICE_ACCOUNT_JSON }}
+        run: python scripts/gsc-queries.py "${{ inputs.site }}" --out private/gsc
+      - working-directory: private
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add gsc
+          if git diff --cached --quiet; then echo 'no change'; exit 0; fi
+          git commit -q -m 'Search Console 검색어'
+          for i in 1 2 3; do git pull -q --rebase && git push -q && echo pushed && exit 0; sleep 10; done
+          exit 1
